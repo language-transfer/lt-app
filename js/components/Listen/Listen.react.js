@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, StatusBar} from 'react-native';
 
 import ListenHeader from './ListenHeader.react';
 import ListenBody from './ListenBody.react';
@@ -7,20 +7,32 @@ import TrackPlayer, {
   STATE_NONE,
   STATE_PLAYING,
   STATE_PAUSED,
+  STATE_READY,
 } from 'react-native-track-player';
 
 import languageData from '../../../languageData';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
+let fresh = true; // have we autoplayed for this screen already?
+
 const Listen = (props) => {
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
 
   useEffect(() => {
-    changeNavigationBarColor(
-      'transparent',
+    fresh = true; // initial mount only
+  }, []);
+
+  useEffect(() => {
+    const light =
       !bottomSheetOpen &&
-        languageData[props.route.params.course].uiColors.text === 'black',
+      languageData[props.route.params.course].uiColors.text === 'black';
+
+    StatusBar.setBackgroundColor(
+      languageData[props.route.params.course].uiColors.background,
     );
+    // please excuse this ternary I honestly have no idea which is which anymore
+    StatusBar.setBarStyle((light ? 'dark' : 'light') + '-content', true);
+    changeNavigationBarColor('transparent', light);
   }, [props.route.params.course, bottomSheetOpen]);
 
   useEffect(() => {
@@ -61,6 +73,10 @@ const Listen = (props) => {
 
       TrackPlayer.addEventListener('playback-state', ({state}) => {
         setPlaybackState(state);
+        if (state === STATE_READY && fresh) {
+          TrackPlayer.play();
+          fresh = false;
+        }
       });
 
       TrackPlayer.addEventListener('remote-stop', () => {

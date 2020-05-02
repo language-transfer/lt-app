@@ -21,11 +21,6 @@ import Listen from './Listen/Listen.react';
 const Stack = createStackNavigator();
 
 const App = () => {
-  useEffect(() => {
-    StatusBar.setBackgroundColor('white');
-    StatusBar.setBarStyle('dark-content', true);
-  }, []);
-
   return (
     <NavigationContainer>
       {/* todo: initial route based on whether it's OOBE */}

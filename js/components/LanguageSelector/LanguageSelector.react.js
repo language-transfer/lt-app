@@ -11,6 +11,8 @@ const BOTTOM_NAV_HEIGHT = 48;
 const LanguageSelector = ({navigation}) => {
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      StatusBar.setBackgroundColor('white');
+      StatusBar.setBarStyle('dark-content', true);
       changeNavigationBarColor('transparent', true);
     });
 

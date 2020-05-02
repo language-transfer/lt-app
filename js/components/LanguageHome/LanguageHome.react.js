@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import SideMenu from 'react-native-side-menu';
+import {StatusBar} from 'react-native';
 
 import LanguageHomeHeader from './LanguageHomeHeader.react';
 import LanguageHomeBody from './LanguageHomeBody.react';
@@ -11,6 +12,8 @@ const LanguageHome = (props) => {
 
   useEffect(() => {
     return props.navigation.addListener('focus', () => {
+      StatusBar.setBackgroundColor('white');
+      StatusBar.setBarStyle('dark-content', true);
       changeNavigationBarColor('transparent', true);
     });
   }, [props.navigation]);
