@@ -1,24 +1,16 @@
-import React, {useEffect, useState} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  Image,
-  Button,
-  Linking,
-} from 'react-native';
+import React from 'react';
+import {StyleSheet, View, Text, StatusBar, Linking} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
-const ListenScreenBody = (props) => {
+const LanguageHomeBody = (props) => {
   return (
     <View style={styles.body}>
       <View style={styles.lessonPlayBox}>
-        <TouchableNativeFeedback onPress={props.onPress} useForeground={true}>
+        <TouchableNativeFeedback
+          useForeground={true}
+          onPress={() => props.navigation.navigate('Listen')}>
           <View style={styles.lessonPlayBoxInner}>
             <View style={styles.textPlayFlex}>
               <Text style={styles.lessonTitle}>Lesson 19</Text>
@@ -136,4 +128,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ListenScreenBody;
+export default LanguageHomeBody;

@@ -1,17 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  Image,
-} from 'react-native';
+import React from 'react';
+import {StyleSheet, View, Text, StatusBar} from 'react-native';
 
-import SideMenu from 'react-native-side-menu';
-
-import languageData from '../../../languageData';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
 const LeftDrawer = (props) => {

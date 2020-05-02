@@ -15,7 +15,8 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
 import LanguageSelector from './LanguageSelector/LanguageSelector.react';
-import ListenScreen from './ListenScreen/ListenScreen.react';
+import LanguageHome from './LanguageHome/LanguageHome.react';
+import Listen from './Listen/Listen.react';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 const Stack = createStackNavigator();
@@ -37,8 +38,15 @@ const App = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
+          name="Language Home"
+          component={LanguageHome}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="Listen"
-          component={ListenScreen}
+          component={Listen}
           options={{
             headerShown: false,
             // headerTitle: 'Spanish',

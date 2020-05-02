@@ -9,29 +9,27 @@ const BOTTOM_NAV_HEIGHT = 48;
 
 const LanguageSelector = ({navigation}) => {
   return (
-    <>
-      <View style={styles.wrapper}>
-        <ScrollView style={styles.scrollView}>
-          <Image
-            source={logo}
-            style={styles.headerImage}
-            resizeMode="contain"
-            accessibilityLabel="Language Transfer"
-          />
-          <View style={styles.courseList}>
-            {Object.keys(languageData).map((course) => (
-              <LanguageButton
-                course={course}
-                key={course}
-                onPress={() => navigation.navigate('Listen', {course})}
-              />
-            ))}
-          </View>
-        </ScrollView>
-        <View style={styles.topTranslucent}></View>
-        <View style={styles.bottomTranslucent}></View>
-      </View>
-    </>
+    <View style={styles.wrapper}>
+      <ScrollView style={styles.scrollView}>
+        <Image
+          source={logo}
+          style={styles.headerImage}
+          resizeMode="contain"
+          accessibilityLabel="Language Transfer"
+        />
+        <View style={styles.courseList}>
+          {Object.keys(languageData).map((course) => (
+            <LanguageButton
+              course={course}
+              key={course}
+              onPress={() => navigation.navigate('Language Home', {course})}
+            />
+          ))}
+        </View>
+      </ScrollView>
+      <View style={styles.topTranslucent}></View>
+      <View style={styles.bottomTranslucent}></View>
+    </View>
   );
 };
 

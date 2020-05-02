@@ -1,40 +1,30 @@
-import React, {useEffect} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  Image,
-  TouchableHighlight,
-} from 'react-native';
+import React from 'react';
+import {StyleSheet, View, Text, StatusBar} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 
 import languageData from '../../../languageData';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
-const ListenScreenHeader = (props) => {
-  // headerTitle: 'Spanish',
-  // headerStatusBarHeight: 16,
-  // headerStyle: {
-  //   elevation: 0,
-  // },
-  // headerLeft: () => <Button title="menu" onPress={() => {}} />,
-
+const ListenHeader = (props) => {
   return (
     <View style={styles.header}>
       <TouchableNativeFeedback
         style={styles.menuButton}
         onPress={() => {
-          props.onOpenMenu();
+          props.navigation.pop();
         }}
         background={TouchableNativeFeedback.Ripple(null, true)}>
-        <Icon style={styles.menuButton} name="menu" size={28} />
+        <Icon
+          style={styles.menuButton}
+          name="arrow-left"
+          type="font-awesome-5"
+          size={18}
+        />
       </TouchableNativeFeedback>
       <Text style={styles.headerText}>
-        {languageData[props.route.params.course].title}
+        {/* {languageData[props.route.params.course].title} */}
+        Spanish: Lesson 19
       </Text>
     </View>
   );
@@ -62,8 +52,8 @@ const styles = StyleSheet.create({
     fontFamily: 'sans-serif-medium',
     fontWeight: 'normal',
     fontSize: 20,
-    marginLeft: 32,
+    marginLeft: 16,
   },
 });
 
-export default ListenScreenHeader;
+export default ListenHeader;
