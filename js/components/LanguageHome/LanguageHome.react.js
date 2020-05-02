@@ -1,12 +1,19 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import SideMenu from 'react-native-side-menu';
 
 import LanguageHomeHeader from './LanguageHomeHeader.react';
 import LanguageHomeBody from './LanguageHomeBody.react';
 import LeftDrawer from './LeftDrawer.react';
+import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 const LanguageHome = (props) => {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    return props.navigation.addListener('focus', () => {
+      changeNavigationBarColor('transparent', true);
+    });
+  }, [props.navigation]);
 
   return (
     <SideMenu

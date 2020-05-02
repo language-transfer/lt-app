@@ -1,19 +1,17 @@
-import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  StatusBar,
-  Linking,
-  Dimensions,
-} from 'react-native';
+import React, {useRef} from 'react';
+import {StyleSheet, View, Text, StatusBar, Dimensions} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
+import RBSheet from 'react-native-raw-bottom-sheet';
+
+import ListenBottomSheet from './ListenBottomSheet.react';
 
 import languageData from '../../../languageData';
 
 const ListenBody = (props) => {
+  const bottomSheet = useRef();
+
   const {course, lesson} = props.route.params;
 
   const styles = StyleSheet.create({
@@ -36,7 +34,6 @@ const ListenBody = (props) => {
       color: languageData[course].uiColors.text,
     },
     lesson: {
-      // fontWeight: 'bold',
       fontSize: 32,
       color: languageData[course].uiColors.text,
     },
@@ -90,89 +87,73 @@ const ListenBody = (props) => {
   });
 
   return (
-    <View style={styles.body}>
-      <View style={styles.lessonName}>
-        <Text style={styles.courseTitle}>{languageData[course].title}</Text>
-        <Text style={styles.lesson}>Lesson {lesson}</Text>
-      </View>
-
-      <View style={styles.icons}>
-        <TouchableNativeFeedback
-          background={TouchableNativeFeedback.Ripple(null, true)}>
-          <Icon
-            name="replay-10"
-            type="material"
-            size={72}
-            color={languageData[course].uiColors.text}
-          />
-        </TouchableNativeFeedback>
-        <TouchableNativeFeedback
-          background={TouchableNativeFeedback.Ripple(null, true)}>
-          <Icon
-            name="pause"
-            type="material"
-            size={172}
-            color={languageData[course].uiColors.text}
-          />
-        </TouchableNativeFeedback>
-        <TouchableNativeFeedback
-          background={TouchableNativeFeedback.Ripple(null, true)}>
-          <Icon
-            name="forward-10"
-            type="material"
-            size={72}
-            color={languageData[course].uiColors.text}
-          />
-        </TouchableNativeFeedback>
-      </View>
-
-      <View style={styles.scrubber}>
-        <View style={styles.progressBar}>
-          <View style={styles.progressMade} />
-          <View style={styles.progressLeft} />
+    <>
+      <View style={styles.body}>
+        <View style={styles.lessonName}>
+          <Text style={styles.courseTitle}>{languageData[course].title}</Text>
+          <Text style={styles.lesson}>Lesson {lesson}</Text>
         </View>
-        <View style={styles.progressTextContainer}>
-          <Text style={styles.progressText}>2:40</Text>
-          <Text style={styles.progressText}>7:02</Text>
+
+        <View style={styles.icons}>
+          <TouchableNativeFeedback
+            background={TouchableNativeFeedback.Ripple(null, true)}>
+            <Icon
+              name="replay-10"
+              type="material"
+              size={72}
+              color={languageData[course].uiColors.text}
+            />
+          </TouchableNativeFeedback>
+          <TouchableNativeFeedback
+            background={TouchableNativeFeedback.Ripple(null, true)}>
+            <Icon
+              name="pause"
+              type="material"
+              size={172}
+              color={languageData[course].uiColors.text}
+            />
+          </TouchableNativeFeedback>
+          <TouchableNativeFeedback
+            background={TouchableNativeFeedback.Ripple(null, true)}
+            onPress={() => {
+              bottomSheet.current.open();
+            }}>
+            <Icon
+              name="settings"
+              type="material"
+              size={72}
+              color={languageData[course].uiColors.text}
+            />
+          </TouchableNativeFeedback>
+        </View>
+
+        <View style={styles.scrubber}>
+          <View style={styles.progressBar}>
+            <View style={styles.progressMade} />
+            <View style={styles.progressLeft} />
+          </View>
+          <View style={styles.progressTextContainer}>
+            <Text style={styles.progressText}>2:40</Text>
+            <Text style={styles.progressText}>7:02</Text>
+          </View>
         </View>
       </View>
-
-      <View style={styles.bottomButtons}>
-        <TouchableNativeFeedback
-          style={styles.bottomButton}
-          background={TouchableNativeFeedback.Ripple(null, true)}>
-          <Icon
-            name="delete"
-            type="material"
-            size={48}
-            color={languageData[course].uiColors.text}
-          />
-          <Text>Delete download</Text>
-        </TouchableNativeFeedback>
-        <TouchableNativeFeedback
-          style={styles.bottomButton}
-          background={TouchableNativeFeedback.Ripple(null, true)}>
-          <Icon
-            name="check"
-            type="material"
-            size={48}
-            color={languageData[course].uiColors.text}
-          />
-          <Text>Mark as finished</Text>
-        </TouchableNativeFeedback>
-        <TouchableNativeFeedback
-          style={styles.bottomButton}
-          background={TouchableNativeFeedback.Ripple(null, true)}>
-          <Icon
-            name="report-problem"
-            type="material"
-            size={48}
-            color={languageData[course].uiColors.text}
-          />
-          <Text>Report a problem</Text>
-        </TouchableNativeFeedback>
-      </View>
-    </View>
+      <RBSheet
+        ref={bottomSheet}
+        height={210}
+        duration={250}
+        customStyles={{
+          container: {
+            borderTopLeftRadius: 15,
+            borderTopRightRadius: 15,
+          },
+        }}
+        // closeOnDragDown={true}
+        onOpen={() => props.setBottomSheetOpen(true)}
+        onClose={() => props.setBottomSheetOpen(false)}>
+        <ListenBottomSheet />
+      </RBSheet>
+    </>
   );
 };
 

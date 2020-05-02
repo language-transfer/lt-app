@@ -4,10 +4,19 @@ import {StyleSheet, ScrollView, View, StatusBar, Image} from 'react-native';
 import LanguageButton from './LanguageButton.react';
 import logo from '../../../resources/LT-logo-text.png';
 import languageData from '../../../languageData';
+import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 const BOTTOM_NAV_HEIGHT = 48;
 
 const LanguageSelector = ({navigation}) => {
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      changeNavigationBarColor('transparent', true);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
   return (
     <View style={styles.wrapper}>
       <ScrollView style={styles.scrollView}>

@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 
-import React, {useEffect} from 'react';
+import React, {useEffect, useContext, useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -17,7 +17,6 @@ import {createStackNavigator} from '@react-navigation/stack';
 import LanguageSelector from './LanguageSelector/LanguageSelector.react';
 import LanguageHome from './LanguageHome/LanguageHome.react';
 import Listen from './Listen/Listen.react';
-import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 const Stack = createStackNavigator();
 
@@ -25,7 +24,6 @@ const App = () => {
   useEffect(() => {
     StatusBar.setBackgroundColor('white');
     StatusBar.setBarStyle('dark-content', true);
-    changeNavigationBarColor('transparent', true);
   }, []);
 
   return (
