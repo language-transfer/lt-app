@@ -1,29 +1,13 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  Image,
-} from 'react-native';
+import React, {useEffect} from 'react';
+import {StyleSheet, ScrollView, View, StatusBar, Image} from 'react-native';
 
 import LanguageButton from './LanguageButton.react';
-import logo from '../../resources/LT-logo-text.png';
-import languageData from '../../languageData';
+import logo from '../../../resources/LT-logo-text.png';
+import languageData from '../../../languageData';
 
 const BOTTOM_NAV_HEIGHT = 48;
 
-const App = () => {
+const LanguageSelector = ({navigation}) => {
   return (
     <>
       <View style={styles.wrapper}>
@@ -31,10 +15,16 @@ const App = () => {
           <Image
             source={logo}
             style={styles.headerImage}
-            resizeMode="contain"></Image>
+            resizeMode="contain"
+            accessibilityLabel="Language Transfer"
+          />
           <View style={styles.courseList}>
             {Object.keys(languageData).map((course) => (
-              <LanguageButton course={course} key={course} />
+              <LanguageButton
+                course={course}
+                key={course}
+                onPress={() => navigation.navigate('Listen')}
+              />
             ))}
           </View>
         </ScrollView>
@@ -49,7 +39,6 @@ const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
     height: '100%',
-    display: 'flex',
     justifyContent: 'space-between',
   },
   scrollView: {
@@ -82,4 +71,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default LanguageSelector;
