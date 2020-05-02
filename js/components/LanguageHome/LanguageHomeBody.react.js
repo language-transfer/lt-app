@@ -10,7 +10,12 @@ const LanguageHomeBody = (props) => {
       <View style={styles.lessonPlayBox}>
         <TouchableNativeFeedback
           useForeground={true}
-          onPress={() => props.navigation.navigate('Listen')}>
+          onPress={() =>
+            props.navigation.navigate('Listen', {
+              course: props.route.params.course,
+              lesson: 19,
+            })
+          }>
           <View style={styles.lessonPlayBoxInner}>
             <View style={styles.textPlayFlex}>
               <Text style={styles.lessonTitle}>Lesson 19</Text>

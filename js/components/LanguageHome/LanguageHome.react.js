@@ -17,7 +17,7 @@ const LanguageHome = (props) => {
         onOpenMenu={() => setMenuOpen(true)}
         route={props.route}
       />
-      <LanguageHomeBody navigation={props.navigation} />
+      <LanguageHomeBody navigation={props.navigation} route={props.route} />
     </SideMenu>
   );
 };
