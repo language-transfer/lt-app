@@ -8,6 +8,7 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import ListenBottomSheet from './ListenBottomSheet.react';
 
 import languageData from '../../../languageData';
+import ListenScrubber from './ListenProgressBar.react';
 
 const ListenBody = (props) => {
   const bottomSheet = useRef();
@@ -96,7 +97,8 @@ const ListenBody = (props) => {
 
         <View style={styles.icons}>
           <TouchableNativeFeedback
-            background={TouchableNativeFeedback.Ripple(null, true)}>
+            background={TouchableNativeFeedback.Ripple(null, true)}
+            onPress={props.skipBack}>
             <Icon
               name="replay-10"
               type="material"
@@ -105,9 +107,10 @@ const ListenBody = (props) => {
             />
           </TouchableNativeFeedback>
           <TouchableNativeFeedback
-            background={TouchableNativeFeedback.Ripple(null, true)}>
+            background={TouchableNativeFeedback.Ripple(null, true)}
+            onPress={props.toggle}>
             <Icon
-              name="pause"
+              name={props.playing ? 'pause' : 'play-arrow'}
               type="material"
               size={172}
               color={languageData[course].uiColors.text}
@@ -127,16 +130,7 @@ const ListenBody = (props) => {
           </TouchableNativeFeedback>
         </View>
 
-        <View style={styles.scrubber}>
-          <View style={styles.progressBar}>
-            <View style={styles.progressMade} />
-            <View style={styles.progressLeft} />
-          </View>
-          <View style={styles.progressTextContainer}>
-            <Text style={styles.progressText}>2:40</Text>
-            <Text style={styles.progressText}>7:02</Text>
-          </View>
-        </View>
+        <ListenScrubber colors={languageData[course].uiColors} />
       </View>
       <RBSheet
         ref={bottomSheet}
