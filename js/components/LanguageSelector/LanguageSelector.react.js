@@ -23,7 +23,7 @@ const LanguageSelector = ({navigation}) => {
               <LanguageButton
                 course={course}
                 key={course}
-                onPress={() => navigation.navigate('Listen')}
+                onPress={() => navigation.navigate('Listen', {course})}
               />
             ))}
           </View>

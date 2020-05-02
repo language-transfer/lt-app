@@ -12,10 +12,7 @@ import {
 
 import {Icon} from 'react-native-elements';
 
-import SideMenu from 'react-native-side-menu';
-
 import languageData from '../../../languageData';
-import {useLinkProps} from '@react-navigation/native';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
 const ListenScreenHeader = (props) => {
@@ -36,17 +33,24 @@ const ListenScreenHeader = (props) => {
         background={TouchableNativeFeedback.Ripple(null, true)}>
         <Icon style={styles.menuButton} name="menu" size={28} />
       </TouchableNativeFeedback>
-      <Text style={styles.headerText}>Spanish</Text>
+      <Text style={styles.headerText}>
+        {languageData[props.route.params.course].title}
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   header: {
-    marginTop: StatusBar.currentHeight,
-    height: 56,
+    paddingTop: StatusBar.currentHeight,
+    height: 56 + StatusBar.currentHeight,
     alignItems: 'center',
     flexDirection: 'row',
+    position: 'absolute',
+    elevation: 5,
+    backgroundColor: 'white',
+    top: 0,
+    width: '100%',
   },
   menuButton: {
     width: 56,

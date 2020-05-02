@@ -35,7 +35,6 @@ const LeftDrawer = (props) => {
 const styles = StyleSheet.create({
   leftDrawer: {
     marginTop: StatusBar.currentHeight,
-    backgroundColor: '#eee',
     height: '100%',
   },
   header: {

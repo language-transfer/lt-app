@@ -12,6 +12,7 @@ import {
 import SideMenu from 'react-native-side-menu';
 
 import ListenScreenHeader from './ListenScreenHeader.react';
+import ListenScreenBody from './ListenScreenBody.react';
 import LeftDrawer from './LeftDrawer.react';
 
 const ListenScreen = (props) => {
@@ -23,8 +24,12 @@ const ListenScreen = (props) => {
       isOpen={menuOpen}
       onChange={(open) => setMenuOpen(open)}>
       <View style={styles.wrapper}>
-        <ListenScreenHeader onOpenMenu={() => setMenuOpen(true)} />
-        <Text>hey there</Text>
+        <ListenScreenHeader
+          onOpenMenu={() => setMenuOpen(true)}
+          route={props.route}
+          style={styles.elev}
+        />
+        <ListenScreenBody />
       </View>
     </SideMenu>
   );
@@ -35,6 +40,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'white',
+  },
+  elev: {
+    elevation: 10,
   },
 });
 

@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   },
   image: {
     borderRadius: 10,
-    opacity: 0.25,
+    opacity: 0.2,
   },
   courseTitle: {
     fontSize: 28,
