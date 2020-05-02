@@ -52,12 +52,15 @@ const Listen = (props) => {
         capabilities: [
           TrackPlayer.CAPABILITY_PLAY,
           TrackPlayer.CAPABILITY_PAUSE,
+          TrackPlayer.CAPABILITY_JUMP_BACKWARD,
           TrackPlayer.CAPABILITY_STOP,
         ],
         compactCapabilities: [
           TrackPlayer.CAPABILITY_PLAY,
           TrackPlayer.CAPABILITY_PAUSE,
+          TrackPlayer.CAPABILITY_JUMP_BACKWARD,
         ],
+        jumpInterval: 10,
       });
 
       await TrackPlayer.removeUpcomingTracks();
