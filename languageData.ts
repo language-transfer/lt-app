@@ -28,7 +28,7 @@ const data = {
     meta: {
       lessons: [
         {
-          url: 'http://syntaxblitz.net/static/lt/spanish1.mp3',
+          url: 'http://syntaxblitz.net/static/lt/spanish1.wav',
           id: 'spanish1',
           duration: 334.132,
           name: 'Lesson 1',

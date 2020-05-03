@@ -5,6 +5,14 @@ import type {Course} from '../languageData';
 import languageData from '../languageData';
 import Downloader from 'react-native-background-downloader';
 
+export type DownloadProgress = {
+  requested: boolean;
+  totalBytes: number | null;
+  bytesWritten: number;
+  error: any;
+  finished: boolean;
+};
+
 const DownloadManager = {
   _subscriptions: {},
   _downloads: {},
@@ -15,25 +23,39 @@ const DownloadManager = {
   getDownloadId: (course: Course, lesson: number): string =>
     DownloadManager.getLessonData(course, lesson).id,
 
-  getDownloadSaveLocation: (id: string): string => {
-    return `${Downloader.directories.documents}/${id}.mp3`; // TODO: hardcode mp3?
+  getDownloadStagingLocation: (id: string): string => {
+    return `${Downloader.directories.documents}/${id}.wav.download`; // TODO: hardcode wav?
+  },
+
+  getDownloadSaveLocation: (course: Course, lesson: number): string => {
+    return `${Downloader.directories.documents}/${DownloadManager.getDownloadId(
+      course,
+      lesson,
+    )}.wav`; // TODO: hardcode wav?
   },
 
   startDownload: (course: Course, lesson: number) => {
     const id = DownloadManager.getDownloadId(course, lesson);
 
+    DownloadManager._downloads[id] = {
+      requested: true,
+      totalBytes: null,
+      bytesWritten: 0,
+      error: null,
+      finished: false,
+    };
+    DownloadManager._broadcast(id);
+
     Downloader.download({
       id,
       url: DownloadManager.getLessonData(course, lesson).url,
-      destination: DownloadManager.getDownloadSaveLocation(course, lesson),
+      destination: DownloadManager.getDownloadStagingLocation(
+        DownloadManager.getDownloadId(course, lesson),
+      ),
       network: Downloader.Network.WIFI_ONLY, // TODO
     })
       .begin((totalBytes) => {
-        DownloadManager._downloads[id] = {
-          totalBytes,
-          bytesWritten: 0,
-          finished: false,
-        };
+        DownloadManager._downloads[id].totalBytes = totalBytes;
         DownloadManager._broadcast(id);
       })
       .progress((_, bytesWritten, totalBytes) => {
@@ -41,12 +63,19 @@ const DownloadManager = {
         DownloadManager._downloads[id].totalBytes = totalBytes;
         DownloadManager._broadcast(id);
       })
-      .done(() => {
+      .done(async () => {
         DownloadManager._downloads[id].finished = true;
+        await fs.moveFile(
+          DownloadManager.getDownloadStagingLocation(
+            DownloadManager.getDownloadId(course, lesson),
+          ),
+          DownloadManager.getDownloadSaveLocation(course, lesson),
+        );
         DownloadManager._broadcast(id);
       })
       .error((error) => {
         DownloadManager._downloads[id].error = error;
+        console.log(error);
         DownloadManager._broadcast(id);
       });
   },
@@ -75,14 +104,12 @@ const DownloadManager = {
 
   genIsDownloaded: async (course: Course, lesson: number): Promise<boolean> => {
     return await fs.exists(
-      DownloadManager.getDownloadSaveLocation(
-        DownloadManager.getDownloadId(course, lesson),
-      ),
+      DownloadManager.getDownloadSaveLocation(course, lesson),
     );
   },
 };
 
-export const useDownloadStatus = (course, lesson) => {
+export const useDownloadStatus = (course, lesson): DownloadProgress => {
   const [downloadProgress, setDownloadProgress] = useState(null);
 
   useEffect(() => {

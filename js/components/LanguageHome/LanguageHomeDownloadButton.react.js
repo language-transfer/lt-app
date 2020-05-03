@@ -1,18 +1,31 @@
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, View, Text, StatusBar, Linking} from 'react-native';
+import React, {useEffect} from 'react';
+import {StyleSheet, View, Text} from 'react-native';
+import ProgressCircle from 'react-native-progress-circle';
 
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
-import {
-  genMostRecentListenedLessonForCourse,
-  genProgressForLesson,
-} from '../../persistence';
-
-import RNBackgroundDownloader from 'react-native-background-downloader';
-import RNFS, {exists} from 'react-native-fs';
 
 import languageData from '../../../languageData';
 import DownloadManager, {useDownloadStatus} from '../../download-manager';
+
+const renderDownloadProgress = (progress) => {
+  const percent =
+    progress.totalBytes === null
+      ? 0
+      : (progress.bytesWritten / progress.totalBytes) * 100;
+
+  return (
+    <ProgressCircle
+      percent={percent}
+      radius={17}
+      borderWidth={4}
+      color="#333"
+      shadowColor="#ddd"
+      bgColor="white">
+      <Text style={styles.progressCircleText}>{Math.floor(percent)}</Text>
+    </ProgressCircle>
+  );
+};
 
 const LanguageHomeDownloadButton = (props) => {
   const progress = useDownloadStatus(props.course, props.lesson);
@@ -23,21 +36,34 @@ const LanguageHomeDownloadButton = (props) => {
     props.setDownloadState(progress);
   }, [progress]);
 
+  const downloading = progress && !progress.error && !progress.finished;
+  const errored = progress && progress.error;
+
   return (
-    <View style={styles.lessonPlayBox}>
+    <View
+      style={{
+        ...styles.lessonPlayBox,
+        ...(downloading ? styles.disabled : {}),
+      }}>
       <TouchableNativeFeedback
         useForeground={true}
-        onPress={() =>
-          DownloadManager.startDownload(props.course, props.lesson)
-        }
-        disabled={progress !== null}>
+        onPress={() => {
+          if (!downloading)
+            DownloadManager.startDownload(props.course, props.lesson);
+        }}>
         <View style={styles.lessonPlayBoxInner}>
           <View style={styles.textPlayFlex}>
-            <Text style={styles.lessonTitle}>
-              Download{' '}
+            <Text style={styles.downloadText}>
+              Download{downloading && 'ing'}{' '}
               {languageData[props.course].meta.lessons[props.lesson].name}
             </Text>
-            <Icon name="download" type="font-awesome-5" size={32} />
+            {errored ? (
+              <Icon name="exclamation" type="font-awesome-5" size={32} />
+            ) : downloading ? (
+              renderDownloadProgress(progress)
+            ) : (
+              <Icon name="download" type="font-awesome-5" size={32} />
+            )}
           </View>
         </View>
       </TouchableNativeFeedback>
@@ -59,9 +85,10 @@ const styles = StyleSheet.create({
   textPlayFlex: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  lessonTitle: {
-    fontSize: 28,
+  downloadText: {
+    fontSize: 22,
     fontWeight: 'bold',
   },
   progressBar: {
@@ -84,6 +111,9 @@ const styles = StyleSheet.create({
   progressText: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  progressCircleText: {
+    fontSize: 12,
   },
 });
 
