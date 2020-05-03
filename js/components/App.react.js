@@ -17,14 +17,36 @@ import {createStackNavigator} from '@react-navigation/stack';
 import LanguageSelector from './LanguageSelector/LanguageSelector.react';
 import LanguageHome from './LanguageHome/LanguageHome.react';
 import Listen from './Listen/Listen.react';
+import {genMostRecentListenedCourse} from '../persistence';
+
+import languageData from '../../languageData';
 
 const Stack = createStackNavigator();
 
 const App = () => {
+  // one day, the Suspense page won't have a bunch of red warnings at the top
+  const [recentCourse, setRecentCourse] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const course = await genMostRecentListenedCourse();
+      setRecentCourse({course});
+    })();
+  }, []);
+
+  if (recentCourse === null) {
+    return null;
+  }
+
   return (
     <NavigationContainer>
-      {/* todo: initial route based on whether it's OOBE */}
-      <Stack.Navigator initialRouteName="Language Selector">
+      <Stack.Navigator
+        initialRouteName={
+          // look at this FORESIGHT to check for it in languageData
+          !recentCourse.course || !languageData[recentCourse.course]
+            ? 'Language Selector'
+            : 'Language Home'
+        }>
         <Stack.Screen
           name="Language Selector"
           component={LanguageSelector}
@@ -36,6 +58,7 @@ const App = () => {
           options={{
             headerShown: false,
           }}
+          initialParams={{course: recentCourse.course}}
         />
         <Stack.Screen
           name="Listen"

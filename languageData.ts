@@ -28,32 +28,35 @@ const data = {
     meta: {
       lessons: [
         {
-          url: 'http://syntaxblitz.net/static/lt/spanish01.mp3',
-          id: 'spanish01',
+          url: 'http://syntaxblitz.net/static/lt/spanish1.mp3',
+          id: 'spanish1',
           duration: 334.132,
           name: 'Lesson 1',
         },
         {
-          url: 'http://syntaxblitz.net/static/lt/spanish02.mp3',
-          id: 'spanish02',
+          url: 'http://syntaxblitz.net/static/lt/spanish2.mp3',
+          id: 'spanish2',
           name: 'Lesson 2',
         },
         {
-          url: 'http://syntaxblitz.net/static/lt/spanish03.mp3',
-          id: 'spanish03',
+          url: 'http://syntaxblitz.net/static/lt/spanish3.mp3',
+          id: 'spanish3',
           name: 'Lesson 3',
         },
         {
-          url: 'http://syntaxblitz.net/static/lt/spanish04.mp3',
-          id: 'spanish04',
+          url: 'http://syntaxblitz.net/static/lt/spanish4.mp3',
+          id: 'spanish4',
           name: 'Lesson 4',
         },
         {
-          url: 'http://syntaxblitz.net/static/lt/spanish05.mp3',
-          id: 'spanish05',
+          url: 'http://syntaxblitz.net/static/lt/spanish5.mp3',
+          id: 'spanish5',
           name: 'Lesson 5',
         },
       ],
+      // if we remove files in the future and users want to delete all files for a course, we need
+      // to be able to find them somehow. we'll keep this updated with the IDs of the removed files.
+      oldIds: [],
     },
     uiColors: {
       background: '#fbc02d',
@@ -647,9 +650,9 @@ const data = {
       ],
     },
     uiColors: {
-      background: '#0277bd',
+      background: '#512da8',
       text: 'white',
-      backgroundAccent: '#004c8c',
+      backgroundAccent: '#140078',
     },
   },
 };

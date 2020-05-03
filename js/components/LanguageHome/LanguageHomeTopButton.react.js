@@ -8,9 +8,6 @@ import {
   genProgressForLesson,
 } from '../../persistence';
 
-import RNBackgroundDownloader from 'react-native-background-downloader';
-import RNFS, {exists} from 'react-native-fs';
-
 import languageData from '../../../languageData';
 import LanguageHomeDownloadButton from './LanguageHomeDownloadButton.react';
 import DownloadManager from '../../download-manager';
@@ -33,8 +30,9 @@ const LanguageHomeTopButton = (props) => {
         ? 0
         : lesson;
 
-      const downloaded = await exists(
-        DownloadManager.getDownloadSaveLocation(course, nextLesson),
+      const downloaded = await DownloadManager.genIsDownloaded(
+        course,
+        nextLesson,
       );
 
       setLastListenState({

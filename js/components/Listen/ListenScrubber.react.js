@@ -15,7 +15,9 @@ const ListenScrubber = (props) => {
       const position = await TrackPlayer.getPosition();
 
       setPosition(position || 0);
-    }, 500);
+      // we also do this in a less-frequent service, but while the progress bar is in view let's go fast
+      // await genUpdateProgressForLesson(props.course, props.lesson, position);
+    }, 200);
     return () => {
       window.clearInterval(interval);
     };

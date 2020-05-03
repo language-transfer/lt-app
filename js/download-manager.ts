@@ -1,4 +1,6 @@
 import {useState, useEffect} from 'react';
+import fs from 'react-native-fs';
+
 import type {Course} from '../languageData';
 import languageData from '../languageData';
 import Downloader from 'react-native-background-downloader';
@@ -13,11 +15,8 @@ const DownloadManager = {
   getDownloadId: (course: Course, lesson: number): string =>
     DownloadManager.getLessonData(course, lesson).id,
 
-  getDownloadSaveLocation: (course: Course, lesson: number): string => {
-    return `${Downloader.directories.documents}/${DownloadManager.getDownloadId(
-      course,
-      lesson,
-    )}.mp3`; // TODO: hardcode mp3?
+  getDownloadSaveLocation: (id: string): string => {
+    return `${Downloader.directories.documents}/${id}.mp3`; // TODO: hardcode mp3?
   },
 
   startDownload: (course: Course, lesson: number) => {
@@ -72,6 +71,14 @@ const DownloadManager = {
   unsubscribeFromDownloadUpdates: (id: string, callback) => {
     const subscriptionArray = DownloadManager._subscriptions[id];
     subscriptionArray.splice(subscriptionArray.indexOf(callback), 1);
+  },
+
+  genIsDownloaded: async (course: Course, lesson: number): Promise<boolean> => {
+    return await fs.exists(
+      DownloadManager.getDownloadSaveLocation(
+        DownloadManager.getDownloadId(course, lesson),
+      ),
+    );
   },
 };
 

@@ -49,13 +49,10 @@ export default async () => {
     }),
 
     TrackPlayer.addEventListener('playback-state', async ({state}) => {
-      console.log('state update', state);
       if (state === STATE_PLAYING) {
         if (updateInterval) {
           BackgroundTimer.clearInterval(updateInterval);
         }
-
-        // #419 seems to say that window.setInterval should work here, but... it doesn't
 
         const update = async () => {
           const [position, state] = await Promise.all([
@@ -71,7 +68,6 @@ export default async () => {
           }
 
           if (position !== null) {
-            console.log('this update? B', position, state);
             await genUpdateProgressForLesson(
               currentlyPlaying.course,
               currentlyPlaying.lesson,
@@ -80,10 +76,10 @@ export default async () => {
           }
         };
 
+        // #419 seems to say that window.setInterval should work here, but... it doesn't
         updateInterval = BackgroundTimer.setInterval(update, 3000); // don't wake up the CPU too often, if we can help it
         update();
       } else {
-        console.log('CLEAR INTERVAL A', updateInterval);
         BackgroundTimer.clearInterval(updateInterval);
       }
     }),
