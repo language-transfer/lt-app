@@ -28,7 +28,7 @@ const data = {
     meta: {
       lessons: [
         {
-          url: 'http://syntaxblitz.net/static/lt/spanish1.wav',
+          url: 'http://syntaxblitz.net/static/lt/spanish1.mp3',
           id: 'spanish1',
           duration: 334.132,
           name: 'Lesson 1',
@@ -37,21 +37,25 @@ const data = {
           url: 'http://syntaxblitz.net/static/lt/spanish2.mp3',
           id: 'spanish2',
           name: 'Lesson 2',
+          duration: 7 * 60 + 58.77,
         },
         {
           url: 'http://syntaxblitz.net/static/lt/spanish3.mp3',
           id: 'spanish3',
           name: 'Lesson 3',
+          duration: 6 * 60 + 14.88,
         },
         {
           url: 'http://syntaxblitz.net/static/lt/spanish4.mp3',
           id: 'spanish4',
           name: 'Lesson 4',
+          duration: 8 * 60 + 28.89,
         },
         {
           url: 'http://syntaxblitz.net/static/lt/spanish5.mp3',
           id: 'spanish5',
           name: 'Lesson 5',
+          duration: 9 * 60 + 24.79,
         },
       ],
       // if we remove files in the future and users want to delete all files for a course, we need

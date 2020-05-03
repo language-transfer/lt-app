@@ -141,7 +141,7 @@ const ListenBody = (props) => {
       </View>
       <RBSheet
         ref={bottomSheet}
-        height={210}
+        height={236}
         duration={250}
         customStyles={{
           container: {
@@ -149,10 +149,15 @@ const ListenBody = (props) => {
             borderTopRightRadius: 15,
           },
         }}
-        // closeOnDragDown={true}
+        closeOnDragDown={true}
         onOpen={() => props.setBottomSheetOpen(true)}
         onClose={() => props.setBottomSheetOpen(false)}>
-        <ListenBottomSheet />
+        <ListenBottomSheet
+          course={course}
+          lesson={lesson}
+          navigation={props.navigation}
+          onClose={() => props.setBottomSheetOpen(false)}
+        />
       </RBSheet>
     </>
   );

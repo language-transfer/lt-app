@@ -24,14 +24,14 @@ const DownloadManager = {
     DownloadManager.getLessonData(course, lesson).id,
 
   getDownloadStagingLocation: (id: string): string => {
-    return `${Downloader.directories.documents}/${id}.wav.download`; // TODO: hardcode wav?
+    return `${Downloader.directories.documents}/${id}.mp3.download`; // TODO: hardcode mp3?
   },
 
   getDownloadSaveLocation: (course: Course, lesson: number): string => {
     return `${Downloader.directories.documents}/${DownloadManager.getDownloadId(
       course,
       lesson,
-    )}.wav`; // TODO: hardcode wav?
+    )}.mp3`; // TODO: hardcode mp3?
   },
 
   startDownload: (course: Course, lesson: number) => {
@@ -106,6 +106,10 @@ const DownloadManager = {
     return await fs.exists(
       DownloadManager.getDownloadSaveLocation(course, lesson),
     );
+  },
+
+  genDeleteDownload: async (course: Course, lesson: number): Promise<void> => {
+    await fs.unlink(DownloadManager.getDownloadSaveLocation(course, lesson));
   },
 };
 

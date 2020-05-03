@@ -25,7 +25,7 @@ const LanguageHomeTopButton = (props) => {
       const progress = await genProgressForLesson(course, lesson);
 
       let nextLesson = progress.finished
-        ? lesson + 1 // todo: wrap, or something
+        ? Math.min(lesson + 1, languageData[course].meta.lessons.length - 1)
         : lesson === null
         ? 0
         : lesson;
@@ -35,9 +35,12 @@ const LanguageHomeTopButton = (props) => {
         nextLesson,
       );
 
+      const progressForThisLesson =
+        nextLesson === lesson && progress ? progress.progress : 0;
+
       setLastListenState({
         nextLesson,
-        progress,
+        progressForThisLesson,
         downloaded,
       });
     };
@@ -56,9 +59,7 @@ const LanguageHomeTopButton = (props) => {
       lastListenState.nextLesson
     ];
 
-  const progress = lastListenState.progress
-    ? lastListenState.progress.progress || 0
-    : 0;
+  const progress = lastListenState.progressForThisLesson;
 
   const styles = StyleSheet.create({
     lessonPlayBox: {
@@ -123,11 +124,7 @@ const LanguageHomeTopButton = (props) => {
               <View style={styles.progressLeft} />
             </View>
             <View style={styles.progressText}>
-              <Text>
-                {formatDuration(
-                  (lastListenState.progress.progress || 0) * 1000,
-                )}
-              </Text>
+              <Text>{formatDuration((progress || 0) * 1000)}</Text>
               <Text>{formatDuration(lessonMeta.duration * 1000)}</Text>
             </View>
           </View>

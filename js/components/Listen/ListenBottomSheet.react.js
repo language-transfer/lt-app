@@ -1,10 +1,19 @@
 import React from 'react';
-import {StyleSheet, View, Text, StatusBar, Button} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  StatusBar,
+  Button,
+  Linking,
+  TouchableNativeFeedback,
+} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 
 import languageData from '../../../languageData';
-import {TouchableNativeFeedback} from 'react-native-gesture-handler';
+import DownloadManager from '../../download-manager';
+import {genMarkLessonFinished} from '../../persistence';
 
 const ListenBottomSheet = (props) => {
   const styles = StyleSheet.create({
@@ -26,8 +35,12 @@ const ListenBottomSheet = (props) => {
   });
 
   return (
-    <View>
-      <TouchableNativeFeedback onPress={() => {}}>
+    <>
+      <TouchableNativeFeedback
+        onPress={() => {
+          props.navigation.navigate('Language Home', {course: props.course});
+          genMarkLessonFinished(props.course, props.lesson);
+        }}>
         <View style={styles.bottomSheetRow}>
           <Text style={styles.rowText}>Mark as finished</Text>
           <View style={styles.iconContainer}>
@@ -40,7 +53,11 @@ const ListenBottomSheet = (props) => {
           </View>
         </View>
       </TouchableNativeFeedback>
-      <TouchableNativeFeedback>
+      <TouchableNativeFeedback
+        onPress={async () => {
+          props.navigation.navigate('Language Home', {course: props.course});
+          DownloadManager.genDeleteDownload(props.course, props.lesson);
+        }}>
         <View style={styles.bottomSheetRow}>
           <Text style={styles.rowText}>Delete download</Text>
           <View style={styles.iconContainer}>
@@ -53,7 +70,17 @@ const ListenBottomSheet = (props) => {
           </View>
         </View>
       </TouchableNativeFeedback>
-      <TouchableNativeFeedback>
+      <TouchableNativeFeedback
+        onPress={() => {
+          Linking.openURL(
+            'mailto:info@languagetransfer.org' +
+              `?subject=${encodeURIComponent(
+                `Feedback about ${languageData[props.course].title} ${
+                  languageData[props.course].meta.lessons[props.lesson].name
+                }`,
+              )}`,
+          );
+        }}>
         <View style={styles.bottomSheetRow}>
           <Text style={styles.rowText}>Report a problem</Text>
           <View style={styles.iconContainer}>
@@ -66,46 +93,8 @@ const ListenBottomSheet = (props) => {
           </View>
         </View>
       </TouchableNativeFeedback>
-    </View>
+    </>
   );
-
-  // return (
-  //   <View>
-  //     <TouchableNativeFeedback onPress={() => {}}>
-  //       <View style={styles.bottomSheetRow}>
-  //         <Text style={styles.rowText}>Mark as finished</Text>
-  //         <Icon
-  //           style={styles.rowIcon}
-  //           name="check"
-  //           type="font-awesome-5"
-  //           size={32}
-  //         />
-  //       </View>
-  //     </TouchableNativeFeedback>
-  //     <TouchableNativeFeedback>
-  //       <View style={styles.bottomSheetRow}>
-  //         <Text style={styles.rowText}>Delete download</Text>
-  //         <Icon
-  //           style={styles.rowIcon}
-  //           name="trash"
-  //           type="font-awesome-5"
-  //           size={32}
-  //         />
-  //       </View>
-  //     </TouchableNativeFeedback>
-  //     <TouchableNativeFeedback>
-  //       <View style={styles.bottomSheetRow}>
-  //         <Text style={styles.rowText}>Report a problem</Text>
-  //         <Icon
-  //           style={styles.rowIcon}
-  //           name="exclamation-triangle"
-  //           type="font-awesome-5"
-  //           size={32}
-  //         />
-  //       </View>
-  //     </TouchableNativeFeedback>
-  //   </View>
-  // );
 };
 
 export default ListenBottomSheet;

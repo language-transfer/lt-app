@@ -89,7 +89,6 @@ const Listen = (props) => {
           setPlaybackState(state);
           if (state === STATE_READY && fresh) {
             const progress = await genProgressForLesson(course, lesson);
-            console.log('hey hey hey', progress);
             await TrackPlayer.seekTo(progress.progress || 0);
             await TrackPlayer.play();
             fresh = false;
