@@ -8,7 +8,7 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import ListenBottomSheet from './ListenBottomSheet.react';
 
 import languageData from '../../../languageData';
-import ListenScrubber from './ListenProgressBar.react';
+import ListenScrubber from './ListenScrubber.react';
 
 const ListenBody = (props) => {
   const bottomSheet = useRef();
@@ -92,7 +92,9 @@ const ListenBody = (props) => {
       <View style={styles.body}>
         <View style={styles.lessonName}>
           <Text style={styles.courseTitle}>{languageData[course].title}</Text>
-          <Text style={styles.lesson}>Lesson {lesson}</Text>
+          <Text style={styles.lesson}>
+            {languageData[course].meta.lessons[lesson].name}
+          </Text>
         </View>
 
         <View style={styles.icons}>
@@ -130,7 +132,12 @@ const ListenBody = (props) => {
           </TouchableNativeFeedback>
         </View>
 
-        <ListenScrubber colors={languageData[course].uiColors} />
+        <ListenScrubber
+          colors={languageData[course].uiColors}
+          course={course}
+          lesson={lesson}
+          playing={props.playing}
+        />
       </View>
       <RBSheet
         ref={bottomSheet}

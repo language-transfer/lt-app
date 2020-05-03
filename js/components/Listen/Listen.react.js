@@ -12,15 +12,19 @@ import TrackPlayer, {
 
 import languageData from '../../../languageData';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
+import DownloadManager from '../../download-manager';
+import {
+  setCurrentlyPlaying,
+  audioServiceSubscriptions,
+} from '../../audio-service';
+import {genProgressForLesson} from '../../persistence';
 
 let fresh = true; // have we autoplayed for this screen already?
 
 const Listen = (props) => {
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
 
-  useEffect(() => {
-    fresh = true; // initial mount only
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     const light =
@@ -37,6 +41,7 @@ const Listen = (props) => {
 
   useEffect(() => {
     return props.navigation.addListener('blur', () => {
+      // fresh = true;
       TrackPlayer.destroy();
     });
   }, [props.nagivation]);
@@ -45,6 +50,7 @@ const Listen = (props) => {
 
   useEffect(() => {
     return props.navigation.addListener('focus', async () => {
+      fresh = true; // initial mount only
       TrackPlayer.setupPlayer();
 
       TrackPlayer.updateOptions({
@@ -66,27 +72,38 @@ const Listen = (props) => {
       await TrackPlayer.removeUpcomingTracks();
 
       // Add a track to the queue
+      const {course, lesson} = props.route.params;
       await TrackPlayer.add({
-        id: 'spanish03',
-        url: require('../../../resources/spanish03.mp3'),
-        title: 'Lesson 3: Spanish',
+        id: DownloadManager.getDownloadId(course, lesson),
+        url: DownloadManager.getDownloadSaveLocation(course, lesson),
+        title: `${languageData[course].meta.lessons[lesson].name}: ${languageData[course].title}`,
         artist: 'Language Transfer',
         // artwork: require('track.png'),
       });
 
-      TrackPlayer.addEventListener('playback-state', ({state}) => {
-        setPlaybackState(state);
-        if (state === STATE_READY && fresh) {
-          TrackPlayer.play();
-          fresh = false;
-        }
-      });
+      // global state for the audio service
+      setCurrentlyPlaying({course, lesson});
 
-      TrackPlayer.addEventListener('remote-stop', () => {
-        props.navigation.navigate('Language Home', {
-          course: props.route.params.course,
-        });
-      });
+      audioServiceSubscriptions.push(
+        TrackPlayer.addEventListener('playback-state', async ({state}) => {
+          setPlaybackState(state);
+          if (state === STATE_READY && fresh) {
+            const progress = await genProgressForLesson(course, lesson);
+            console.log('hey hey hey', progress);
+            await TrackPlayer.seekTo(progress.progress || 0);
+            await TrackPlayer.play();
+            fresh = false;
+          }
+        }),
+      );
+
+      audioServiceSubscriptions.push(
+        TrackPlayer.addEventListener('remote-stop', () => {
+          props.navigation.navigate('Language Home', {
+            course: props.route.params.course,
+          });
+        }),
+      );
     });
   }, [setPlaybackState, props.navigation, props.route.params.course]);
 

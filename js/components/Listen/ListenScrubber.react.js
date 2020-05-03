@@ -4,27 +4,26 @@ import {StyleSheet, View, Text} from 'react-native';
 import TrackPlayer from 'react-native-track-player';
 
 import formatDuration from 'format-duration';
+import languageData from '../../../languageData';
+import {genUpdateProgressForLesson} from '../../persistence';
 
 const ListenScrubber = (props) => {
-  const [{position, duration}, setState] = useState({
-    position: 0,
-    duration: 0,
-  });
+  const [position, setPosition] = useState(0);
 
   useEffect(() => {
     const interval = window.setInterval(async () => {
-      const [position, duration] = await Promise.all([
-        TrackPlayer.getPosition(),
-        TrackPlayer.getDuration(),
-      ]);
+      const position = await TrackPlayer.getPosition();
 
-      setState({position: position || 0, duration: duration || 0});
+      setPosition(position || 0);
     }, 500);
     return () => {
       window.clearInterval(interval);
     };
-  }, []);
-  position;
+  }, [props.playing]);
+
+  const duration =
+    languageData[props.course].meta.lessons[props.lesson].duration;
+
   const styles = StyleSheet.create({
     scrubber: {
       paddingHorizontal: '10%',
@@ -42,7 +41,7 @@ const ListenScrubber = (props) => {
     },
     progressLeft: {
       height: 4,
-      flex: duration === 0 ? 1 : duration - position,
+      flex: duration === null ? 1 : duration - position,
       backgroundColor: props.colors.backgroundAccent,
     },
     progressTextContainer: {
@@ -65,7 +64,9 @@ const ListenScrubber = (props) => {
           {formatDuration(position * 1000)}
         </Text>
         <Text style={styles.progressText}>
-          {duration > 0 ? formatDuration(duration * 1000) : '?:??'}
+          {/* downloaded metadata should be fine for track duration, since it can't
+            get out of sync if we don't reuse filenames (IDs) */}
+          {formatDuration(duration * 1000)}
         </Text>
       </View>
     </View>

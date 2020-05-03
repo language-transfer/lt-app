@@ -28,7 +28,8 @@ const LanguageButton = (props) => {
                 {languageData[props.course].title}
               </Text>
               <Text style={styles.courseDetails}>
-                {languageData[props.course].lessons} lessons
+                {/* TODO: figure out what to do about these numbers. probably hardcode them with icons and such, but use up-to-date meta and only hardcoded numbers as a fallback */}
+                {languageData[props.course].meta.lessons.length} lessons
               </Text>
             </View>
           </TouchableNativeFeedback>
