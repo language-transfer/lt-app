@@ -11,11 +11,18 @@ const LanguageHome = (props) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    return props.navigation.addListener('focus', () => {
-      StatusBar.setBackgroundColor('white');
-      StatusBar.setBarStyle('dark-content', true);
-      changeNavigationBarColor('transparent', true);
-    });
+    const unsubscribers = [
+      props.navigation.addListener('focus', () => {
+        StatusBar.setBackgroundColor('white');
+        StatusBar.setBarStyle('dark-content', true);
+        changeNavigationBarColor('transparent', true);
+      }),
+      props.navigation.addListener('blur', () => {
+        setMenuOpen(false);
+      }),
+    ];
+
+    return () => unsubscribers.forEach((x) => x());
   }, [props.navigation]);
 
   return (
