@@ -67,6 +67,7 @@ const Listen = (props) => {
           TrackPlayer.CAPABILITY_JUMP_BACKWARD,
         ],
         jumpInterval: 10,
+        alwaysPauseOnInterruption: true,
       });
 
       await TrackPlayer.removeUpcomingTracks();
