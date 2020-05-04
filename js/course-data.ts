@@ -197,18 +197,24 @@ const CourseData = {
     }
 
     const metaFilename = path.basename(data[course].metaUrl);
+    // console.log(1, metaFilename);
     const localPath = fs.DocumentDirectoryPath + metaFilename;
 
     try {
       const metaString = await fs.readFile(localPath);
+      // console.log(2, metaString);
       courseMeta[course] = JSON.parse(metaString);
       return;
     } catch (e) {}
 
     const json = await fetch(data[course].metaUrl).then((r) => r.json());
+    // console.log(3, json);
 
     json.downloaded = +new Date();
+    // console.log(4, json);
     courseMeta[course] = json;
+
+    // console.log(5, localPath);
 
     await fs.writeFile(localPath, JSON.stringify(json));
   },
@@ -227,10 +233,6 @@ const CourseData = {
 
   getLessonIndices(course: Course): Array<number> {
     return courseMeta[course].lessons.map((_, i) => i);
-  },
-
-  getLessonObjects(course: Course) {
-    return courseMeta[course].lessons;
   },
 
   getLessonTitle(course: Course, lesson: number) {

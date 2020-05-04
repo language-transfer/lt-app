@@ -20,52 +20,49 @@ const AllLessons = (props) => {
 
   const {course} = props.route.params;
 
-  const [lessonData, setLessonData] = useState(null);
-  const [lastDownloadUpdate, setLastDownloadUpdate] = useState(null);
-
+  const [lastUpdateTime, setLastUpdateTime] = useState(null);
   useEffect(() => {
-    const update = async () => {
-      const [progress, downloads] = await Promise.all([
-        Promise.all(
-          CourseData.getLessonIndices(course).map((lesson) =>
-            genProgressForLesson(course, lesson),
-          ),
-        ),
-        Promise.all(
-          CourseData.getLessonIndices(course).map((lesson) =>
-            DownloadManager.genIsDownloaded(course, lesson),
-          ),
-        ),
-      ]);
+    return props.navigation.addListener('focus', () =>
+      setLastUpdateTime(new Date()),
+    );
+  }, []);
 
-      setLessonData({progress, downloads});
-    };
+  // useEffect(() => {
+  //   const update = async () => {
+  //     const [progress, downloads] = await Promise.all([
+  //       Promise.all(
+  //         CourseData.getLessonIndices(course).map((lesson) =>
+  //           genProgressForLesson(course, lesson),
+  //         ),
+  //       ),
+  //       Promise.all(
+  //         CourseData.getLessonIndices(course).map((lesson) =>
+  //           DownloadManager.genIsDownloaded(course, lesson),
+  //         ),
+  //       ),
+  //     ]);
 
-    update();
+  //     setLessonData({progress, downloads});
+  //   };
 
-    props.navigation.addListener('focus', update);
-  }, [setLessonData, lastDownloadUpdate, props.navigation]);
+  //   update();
 
-  if (lessonData === null) {
-    return null; // TODO do we need a loading indicator here? or is it fast enough
-  }
+  //   props.navigation.addListener('focus', update); TODO
+  // }, [setLessonData, lastDownloadUpdate, props.navigation]);
+
+  // if (lessonData === null) {
+  //   return null; // TODO do we need a loading indicator here? or is it fast enough (yes we need a loading indicator)
+  // }
 
   return (
     <ScrollView>
-      {CourseData.getLessonObjects(course).map((lessonObj, lesson) => (
+      {CourseData.getLessonIndices(course).map((lesson) => (
         <LessonRow
           navigation={props.navigation}
           course={course}
-          lessonObj={lessonObj}
           lesson={lesson}
-          progress={lessonData.progress[lesson]}
-          downloaded={lessonData.downloads[lesson]}
+          lastUpdateTime={lastUpdateTime}
           key={lesson}
-          // just something to force a re-render. this is the first react
-          // app I've built in a long time without redux/context lol
-          updateDownloadState={() => {
-            setLastDownloadUpdate(new Date());
-          }}
         />
       ))}
     </ScrollView>

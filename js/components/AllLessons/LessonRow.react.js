@@ -15,6 +15,7 @@ import {Icon} from 'react-native-elements';
 import formatDuration from 'format-duration';
 import {genProgressForLesson} from '../../persistence';
 import DownloadManager, {useDownloadStatus} from '../../download-manager';
+import CourseData from '../../course-data';
 
 // TODO: not DRY :/. but it also looks different in different contexts
 // (though, to be fair, that should probably be remedied, since it's
@@ -56,16 +57,33 @@ const renderDownloadProgress = (downloaded, progress) => {
 const LessonRow = (props) => {
   const downloadState = useDownloadStatus(props.course, props.lesson);
 
-  useEffect(() => props.updateDownloadState(), [downloadState]);
+  const [progress, setProgress] = useState(null);
+  const [downloaded, setDownloaded] = useState(null);
 
-  const finished = props.progress && props.progress.finished;
+  useEffect(() => {
+    (async () => {
+      const [progress, downloaded] = await Promise.all([
+        genProgressForLesson(props.course, props.lesson),
+        DownloadManager.genIsDownloaded(props.course, props.lesson),
+      ]);
+
+      setProgress(progress);
+      setDownloaded(downloaded);
+    })();
+  }, [props.lastUpdateTime, downloadState]);
+
+  if (progress === null || downloaded === null) {
+    return null; // TODO: show a greyed-out version without the features
+  }
+
+  const finished = progress && progress.finished;
   const downloading =
     downloadState && !downloadState.error && !downloadState.finished;
 
   return (
     <TouchableNativeFeedback
       onPress={() => {
-        if (props.downloaded) {
+        if (downloaded) {
           props.navigation.navigate('Listen', {
             course: props.course,
             lesson: props.lesson,
@@ -83,13 +101,17 @@ const LessonRow = (props) => {
             accessibilityLabel={finished ? 'finished' : 'not finished'}
             size={24}
           />
-          <Text style={styles.lessonTitleText}>{props.lessonObj.title}</Text>
+          <Text style={styles.lessonTitleText}>
+            {CourseData.getLessonTitle(props.course, props.lesson)}
+          </Text>
           <Text style={styles.lessonDurationText}>
-            {formatDuration(props.lessonObj.duration * 1000)}
+            {formatDuration(
+              CourseData.getLessonDuration(props.course, props.lesson) * 1000,
+            )}
           </Text>
         </View>
         <View style={styles.icons}>
-          {renderDownloadProgress(props.downloaded, downloadState)}
+          {renderDownloadProgress(downloaded, downloadState)}
         </View>
       </View>
     </TouchableNativeFeedback>
