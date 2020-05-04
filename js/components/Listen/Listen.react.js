@@ -51,6 +51,7 @@ const Listen = (props) => {
   useEffect(() => {
     return props.navigation.addListener('focus', async () => {
       fresh = true; // initial mount only
+      const {course, lesson} = props.route.params;
       TrackPlayer.setupPlayer();
 
       TrackPlayer.updateOptions({
@@ -68,12 +69,15 @@ const Listen = (props) => {
         ],
         jumpInterval: 10,
         alwaysPauseOnInterruption: true,
+        color: parseInt(
+          languageData[course].uiColors.background.substring(1),
+          16,
+        ),
       });
 
       await TrackPlayer.removeUpcomingTracks();
 
       // Add a track to the queue
-      const {course, lesson} = props.route.params;
       await TrackPlayer.add({
         id: DownloadManager.getDownloadId(course, lesson),
         url: DownloadManager.getDownloadSaveLocation(course, lesson),

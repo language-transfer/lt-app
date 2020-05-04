@@ -62,7 +62,6 @@ export default async () => {
 
           if (state !== STATE_PLAYING) {
             // happens sometimes. /shrug
-            console.log('CLEAR INTERVAL B', updateInterval);
             BackgroundTimer.clearInterval(updateInterval);
             return;
           }
