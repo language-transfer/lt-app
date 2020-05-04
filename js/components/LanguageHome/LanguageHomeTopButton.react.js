@@ -116,7 +116,7 @@ const LanguageHomeTopButton = (props) => {
           }>
           <View style={styles.lessonPlayBoxInner}>
             <View style={styles.textPlayFlex}>
-              <Text style={styles.lessonTitle}>{lessonMeta.name}</Text>
+              <Text style={styles.lessonTitle}>{lessonMeta.title}</Text>
               <Icon name="play" type="font-awesome-5" />
             </View>
             <View style={styles.progressBar}>

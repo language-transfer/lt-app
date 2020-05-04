@@ -81,7 +81,7 @@ const Listen = (props) => {
       await TrackPlayer.add({
         id: DownloadManager.getDownloadId(course, lesson),
         url: DownloadManager.getDownloadSaveLocation(course, lesson),
-        title: `${languageData[course].meta.lessons[lesson].name}: ${languageData[course].title}`,
+        title: `${languageData[course].meta.lessons[lesson].title}: ${languageData[course].title}`,
         artist: 'Language Transfer',
         // artwork: require('track.png'),
       });

@@ -93,7 +93,7 @@ const ListenBody = (props) => {
         <View style={styles.lessonName}>
           <Text style={styles.courseTitle}>{languageData[course].title}</Text>
           <Text style={styles.lesson}>
-            {languageData[course].meta.lessons[lesson].name}
+            {languageData[course].meta.lessons[lesson].title}
           </Text>
         </View>
 

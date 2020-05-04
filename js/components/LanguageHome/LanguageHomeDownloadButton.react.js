@@ -55,7 +55,7 @@ const LanguageHomeDownloadButton = (props) => {
           <View style={styles.textPlayFlex}>
             <Text style={styles.downloadText}>
               Download{downloading && 'ing'}{' '}
-              {languageData[props.course].meta.lessons[props.lesson].name}
+              {languageData[props.course].meta.lessons[props.lesson].title}
             </Text>
             {errored ? (
               <Icon name="exclamation" type="font-awesome-5" size={32} />

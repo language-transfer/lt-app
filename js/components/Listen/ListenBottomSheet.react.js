@@ -37,9 +37,9 @@ const ListenBottomSheet = (props) => {
   return (
     <>
       <TouchableNativeFeedback
-        onPress={() => {
-          props.navigation.navigate('Language Home', {course: props.course});
-          genMarkLessonFinished(props.course, props.lesson);
+        onPress={async () => {
+          await genMarkLessonFinished(props.course, props.lesson);
+          props.navigation.pop();
         }}>
         <View style={styles.bottomSheetRow}>
           <Text style={styles.rowText}>Mark as finished</Text>
@@ -55,8 +55,8 @@ const ListenBottomSheet = (props) => {
       </TouchableNativeFeedback>
       <TouchableNativeFeedback
         onPress={async () => {
-          props.navigation.navigate('Language Home', {course: props.course});
-          DownloadManager.genDeleteDownload(props.course, props.lesson);
+          await DownloadManager.genDeleteDownload(props.course, props.lesson);
+          props.navigation.pop();
         }}>
         <View style={styles.bottomSheetRow}>
           <Text style={styles.rowText}>Delete download</Text>
@@ -76,7 +76,7 @@ const ListenBottomSheet = (props) => {
             'mailto:info@languagetransfer.org' +
               `?subject=${encodeURIComponent(
                 `Feedback about ${languageData[props.course].title} ${
-                  languageData[props.course].meta.lessons[props.lesson].name
+                  languageData[props.course].meta.lessons[props.lesson].title
                 }`,
               )}`,
           );

@@ -14,7 +14,13 @@ const LanguageHomeBody = (props) => {
       />
 
       <View style={styles.additionalButton}>
-        <TouchableNativeFeedback onPress={props.onPress} useForeground={true}>
+        <TouchableNativeFeedback
+          onPress={() =>
+            props.navigation.navigate('All Lessons', {
+              course: props.route.params.course,
+            })
+          }
+          useForeground={true}>
           <View style={styles.additionalButtonInner}>
             <Text style={styles.additionalButtonText}>All Lessons</Text>
             <Icon name="list-ol" type="font-awesome-5" />

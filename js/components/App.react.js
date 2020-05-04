@@ -17,6 +17,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import LanguageSelector from './LanguageSelector/LanguageSelector.react';
 import LanguageHome from './LanguageHome/LanguageHome.react';
 import Listen from './Listen/Listen.react';
+import AllLessons from './AllLessons/AllLessons.react';
 import {genMostRecentListenedCourse} from '../persistence';
 
 import languageData from '../../languageData';
@@ -71,6 +72,20 @@ const App = () => {
             //   elevation: 0,
             // },
           }}
+        />
+        <Stack.Screen
+          name="All Lessons"
+          component={AllLessons}
+          options={({route}) => ({
+            // headerShown: false,
+            headerTitle: `${
+              languageData[route.params.course].title
+            }: All Lessons`,
+            // headerStatusBarHeight: 4,
+            headerStyle: {
+              // elevation: 0,
+            },
+          })}
         />
       </Stack.Navigator>
     </NavigationContainer>
