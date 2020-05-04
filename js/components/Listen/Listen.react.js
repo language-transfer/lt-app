@@ -10,7 +10,7 @@ import TrackPlayer, {
   STATE_READY,
 } from 'react-native-track-player';
 
-import languageData from '../../../languageData';
+import CourseData from '../../course-data';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import DownloadManager from '../../download-manager';
 import {
@@ -29,10 +29,10 @@ const Listen = (props) => {
   useEffect(() => {
     const light =
       !bottomSheetOpen &&
-      languageData[props.route.params.course].uiColors.text === 'black';
+      CourseData.getCourseUIColors(props.route.params.course).text === 'black';
 
     StatusBar.setBackgroundColor(
-      languageData[props.route.params.course].uiColors.background,
+      CourseData.getCourseUIColors(props.route.params.course).background,
     );
     // please excuse this ternary I honestly have no idea which is which anymore
     StatusBar.setBarStyle((light ? 'dark' : 'light') + '-content', true);
@@ -70,7 +70,9 @@ const Listen = (props) => {
         jumpInterval: 10,
         alwaysPauseOnInterruption: true,
         color: parseInt(
-          languageData[course].uiColors.background.substring(1),
+          CourseData.getCourseUIColors(
+            props.route.params.course,
+          ).background.substring(1),
           16,
         ),
       });
@@ -79,9 +81,12 @@ const Listen = (props) => {
 
       // Add a track to the queue
       await TrackPlayer.add({
-        id: DownloadManager.getDownloadId(course, lesson),
+        id: CourseData.getLessonId(course, lesson),
         url: DownloadManager.getDownloadSaveLocation(course, lesson),
-        title: `${languageData[course].meta.lessons[lesson].title}: ${languageData[course].title}`,
+        title: `${CourseData.getLessonTitle(
+          course,
+          lesson,
+        )}: ${CourseData.getCourseTitle(course)}`,
         artist: 'Language Transfer',
         // artwork: require('track.png'),
       });
@@ -114,8 +119,8 @@ const Listen = (props) => {
   const styles = StyleSheet.create({
     background: {
       // without this, there's a small gap between header and body during animation
-      backgroundColor:
-        languageData[props.route.params.course].uiColors.background,
+      backgroundColor: CourseData.getCourseUIColors(props.route.params.course)
+        .background,
       height: '100%',
     },
   });

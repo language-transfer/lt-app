@@ -3,7 +3,7 @@ import {StyleSheet, ScrollView, View, StatusBar, Image} from 'react-native';
 
 import LanguageButton from './LanguageButton.react';
 import logo from '../../../resources/LT-logo-text.png';
-import languageData from '../../../languageData';
+import CourseData from '../../course-data';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 const BOTTOM_NAV_HEIGHT = 48;
@@ -29,7 +29,7 @@ const LanguageSelector = ({navigation}) => {
           accessibilityLabel="Language Transfer"
         />
         <View style={styles.courseList}>
-          {Object.keys(languageData).map((course) => (
+          {CourseData.getCourseList().map((course) => (
             <LanguageButton
               course={course}
               key={course}

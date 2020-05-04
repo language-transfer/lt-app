@@ -1,5 +1,5 @@
 import {AsyncStorage} from 'react-native';
-import type {Course} from '../languageData';
+import type {Course} from './course-data';
 
 // Some operations are not atomic. I don't expect it to cause problems, so I
 // haven't gone to the effort of adding a mutex. mostly because I don't like

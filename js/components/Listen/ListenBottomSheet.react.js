@@ -11,7 +11,7 @@ import {
 
 import {Icon} from 'react-native-elements';
 
-import languageData from '../../../languageData';
+import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
 import {genMarkLessonFinished} from '../../persistence';
 
@@ -75,9 +75,9 @@ const ListenBottomSheet = (props) => {
           Linking.openURL(
             'mailto:info@languagetransfer.org' +
               `?subject=${encodeURIComponent(
-                `Feedback about ${languageData[props.course].title} ${
-                  languageData[props.course].meta.lessons[props.lesson].title
-                }`,
+                `Feedback about ${CourseData.getCourseTitle(
+                  props.course,
+                )} ${CourseData.getLessonTitle(props.course, props.lesson)}`,
               )}`,
           );
         }}>

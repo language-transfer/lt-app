@@ -5,7 +5,7 @@ import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {ScrollView} from 'react-native-gesture-handler';
 import LessonRow from './LessonRow.react';
 
-import languageData from '../../../languageData';
+import CourseData from '../../course-data';
 import {genProgressForLesson} from '../../persistence';
 import DownloadManager from '../../download-manager';
 
@@ -27,12 +27,12 @@ const AllLessons = (props) => {
     const update = async () => {
       const [progress, downloads] = await Promise.all([
         Promise.all(
-          languageData[course].meta.lessons.map((_, lesson) =>
+          CourseData.getLessonIndices(course).map((lesson) =>
             genProgressForLesson(course, lesson),
           ),
         ),
         Promise.all(
-          languageData[course].meta.lessons.map((_, lesson) =>
+          CourseData.getLessonIndices(course).map((lesson) =>
             DownloadManager.genIsDownloaded(course, lesson),
           ),
         ),
@@ -52,7 +52,7 @@ const AllLessons = (props) => {
 
   return (
     <ScrollView>
-      {languageData[course].meta.lessons.map((lessonObj, lesson) => (
+      {CourseData.getLessonObjects(course).map((lessonObj, lesson) => (
         <LessonRow
           navigation={props.navigation}
           course={course}
@@ -63,7 +63,9 @@ const AllLessons = (props) => {
           key={lesson}
           // just something to force a re-render. this is the first react
           // app I've built in a long time without redux/context lol
-          updateDownloadState={() => setLastDownloadUpdate(new Date())}
+          updateDownloadState={() => {
+            setLastDownloadUpdate(new Date());
+          }}
         />
       ))}
     </ScrollView>

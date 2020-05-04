@@ -7,7 +7,7 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 
 import ListenBottomSheet from './ListenBottomSheet.react';
 
-import languageData from '../../../languageData';
+import CourseData from '../../course-data';
 import ListenScrubber from './ListenScrubber.react';
 
 const ListenBody = (props) => {
@@ -17,7 +17,7 @@ const ListenBody = (props) => {
 
   const styles = StyleSheet.create({
     body: {
-      backgroundColor: languageData[course].uiColors.background,
+      backgroundColor: CourseData.getCourseUIColors(course).background,
       height:
         // 56 + SB.height is the header. 48 is the bottom nav height
         Dimensions.get('screen').height - (56 + StatusBar.currentHeight) - 48,
@@ -32,11 +32,11 @@ const ListenBody = (props) => {
     courseTitle: {
       fontWeight: 'bold',
       fontSize: 48,
-      color: languageData[course].uiColors.text,
+      color: CourseData.getCourseUIColors(course).text,
     },
     lesson: {
       fontSize: 32,
-      color: languageData[course].uiColors.text,
+      color: CourseData.getCourseUIColors(course).text,
     },
 
     icons: {
@@ -59,19 +59,19 @@ const ListenBody = (props) => {
     progressMade: {
       height: 4,
       flex: 2 * 60 + 40,
-      backgroundColor: languageData[course].uiColors.text,
+      backgroundColor: CourseData.getCourseUIColors(course).text,
     },
     progressLeft: {
       height: 4,
       flex: 7 * 60 + 2 - (2 * 60 + 40),
-      backgroundColor: languageData[course].uiColors.backgroundAccent,
+      backgroundColor: CourseData.getCourseUIColors(course).backgroundAccent,
     },
     progressTextContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
     },
     progressText: {
-      color: languageData[course].uiColors.text,
+      color: CourseData.getCourseUIColors(course).text,
     },
 
     bottomButtons: {
@@ -91,9 +91,11 @@ const ListenBody = (props) => {
     <>
       <View style={styles.body}>
         <View style={styles.lessonName}>
-          <Text style={styles.courseTitle}>{languageData[course].title}</Text>
+          <Text style={styles.courseTitle}>
+            {CourseData.getCourseTitle(course)}
+          </Text>
           <Text style={styles.lesson}>
-            {languageData[course].meta.lessons[lesson].title}
+            {CourseData.getLessonTitle(course, lesson)}
           </Text>
         </View>
 
@@ -105,7 +107,7 @@ const ListenBody = (props) => {
               name="replay-10"
               type="material"
               size={72}
-              color={languageData[course].uiColors.text}
+              color={CourseData.getCourseUIColors(course).text}
             />
           </TouchableNativeFeedback>
           <TouchableNativeFeedback
@@ -115,7 +117,7 @@ const ListenBody = (props) => {
               name={props.playing ? 'pause' : 'play-arrow'}
               type="material"
               size={172}
-              color={languageData[course].uiColors.text}
+              color={CourseData.getCourseUIColors(course).text}
             />
           </TouchableNativeFeedback>
           <TouchableNativeFeedback
@@ -127,13 +129,13 @@ const ListenBody = (props) => {
               name="settings"
               type="material"
               size={72}
-              color={languageData[course].uiColors.text}
+              color={CourseData.getCourseUIColors(course).text}
             />
           </TouchableNativeFeedback>
         </View>
 
         <ListenScrubber
-          colors={languageData[course].uiColors}
+          colors={CourseData.getCourseUIColors(course)}
           course={course}
           lesson={lesson}
           playing={props.playing}

@@ -1,11 +1,39 @@
-import React from 'react';
-import {StyleSheet, View, Text, StatusBar, Linking} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  StatusBar,
+  Linking,
+  ActivityIndicator,
+} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 import LanguageHomeTopButton from './LanguageHomeTopButton.react';
+import CourseData from '../../course-data';
+import {readDir} from 'react-native-fs';
 
 const LanguageHomeBody = (props) => {
+  const [metadataLoaded, setMetadataLoaded] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      await CourseData.genLoadCourseMetadata(props.route.params.course);
+      setMetadataLoaded(true);
+    })();
+  }, [metadataLoaded]);
+
+  if (!CourseData.isCourseMetadataLoaded(props.route.params.course)) {
+    return (
+      <View style={styles.body}>
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.body}>
       <LanguageHomeTopButton
@@ -60,6 +88,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
     height: '100%',
     marginTop: 56 + StatusBar.currentHeight, // header is absolutely positioned so we get elevation
+  },
+  loading: {
+    marginTop: 128,
   },
 
   additionalButton: {

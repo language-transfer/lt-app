@@ -11,7 +11,6 @@ import ProgressCircle from 'react-native-progress-circle';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {ScrollView} from 'react-native-gesture-handler';
 
-import languageData from '../../../languageData';
 import {Icon} from 'react-native-elements';
 import formatDuration from 'format-duration';
 import {genProgressForLesson} from '../../persistence';

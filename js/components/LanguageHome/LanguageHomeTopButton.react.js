@@ -8,7 +8,7 @@ import {
   genProgressForLesson,
 } from '../../persistence';
 
-import languageData from '../../../languageData';
+import CourseData from '../../course-data';
 import LanguageHomeDownloadButton from './LanguageHomeDownloadButton.react';
 import DownloadManager from '../../download-manager';
 
@@ -25,7 +25,7 @@ const LanguageHomeTopButton = (props) => {
       const progress = await genProgressForLesson(course, lesson);
 
       let nextLesson = progress.finished
-        ? Math.min(lesson + 1, languageData[course].meta.lessons.length - 1)
+        ? Math.min(lesson + 1, CourseData.getLessonCount(course) - 1)
         : lesson === null
         ? 0
         : lesson;
@@ -54,12 +54,9 @@ const LanguageHomeTopButton = (props) => {
     return null;
   }
 
-  const lessonMeta =
-    languageData[props.route.params.course].meta.lessons[
-      lastListenState.nextLesson
-    ];
-
   const progress = lastListenState.progressForThisLesson;
+  const {course} = props.route.params;
+  const lesson = lastListenState.nextLesson;
 
   const styles = StyleSheet.create({
     lessonPlayBox: {
@@ -94,7 +91,7 @@ const LanguageHomeTopButton = (props) => {
     },
     progressLeft: {
       height: 4,
-      flex: lessonMeta.duration - progress,
+      flex: CourseData.getLessonDuration(course, lesson) - progress,
       backgroundColor: '#ddd',
     },
     progressText: {
@@ -116,7 +113,9 @@ const LanguageHomeTopButton = (props) => {
           }>
           <View style={styles.lessonPlayBoxInner}>
             <View style={styles.textPlayFlex}>
-              <Text style={styles.lessonTitle}>{lessonMeta.title}</Text>
+              <Text style={styles.lessonTitle}>
+                {CourseData.getLessonTitle(course, lesson)}
+              </Text>
               <Icon name="play" type="font-awesome-5" />
             </View>
             <View style={styles.progressBar}>
@@ -125,7 +124,11 @@ const LanguageHomeTopButton = (props) => {
             </View>
             <View style={styles.progressText}>
               <Text>{formatDuration((progress || 0) * 1000)}</Text>
-              <Text>{formatDuration(lessonMeta.duration * 1000)}</Text>
+              <Text>
+                {formatDuration(
+                  CourseData.getLessonDuration(course, lesson) * 1000,
+                )}
+              </Text>
             </View>
           </View>
         </TouchableNativeFeedback>

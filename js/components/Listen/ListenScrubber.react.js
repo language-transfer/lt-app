@@ -4,8 +4,7 @@ import {StyleSheet, View, Text} from 'react-native';
 import TrackPlayer from 'react-native-track-player';
 
 import formatDuration from 'format-duration';
-import languageData from '../../../languageData';
-import {genUpdateProgressForLesson} from '../../persistence';
+import CourseData from '../../course-data';
 
 const ListenScrubber = (props) => {
   const [position, setPosition] = useState(0);
@@ -23,8 +22,7 @@ const ListenScrubber = (props) => {
     };
   }, [props.playing]);
 
-  const duration =
-    languageData[props.course].meta.lessons[props.lesson].duration;
+  const duration = CourseData.getLessonDuration(props.course, props.lesson);
 
   const styles = StyleSheet.create({
     scrubber: {

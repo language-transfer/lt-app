@@ -1,8 +1,8 @@
 import {useState, useEffect} from 'react';
 import fs from 'react-native-fs';
 
-import type {Course} from '../languageData';
-import languageData from '../languageData';
+import type {Course} from './course-data';
+import CourseData from './course-data';
 import Downloader from 'react-native-background-downloader';
 
 export type DownloadProgress = {
@@ -17,25 +17,19 @@ const DownloadManager = {
   _subscriptions: {},
   _downloads: {},
 
-  getLessonData: (course: Course, lesson: number): {url: string; id: string} =>
-    languageData[course].meta.lessons[lesson],
-
-  getDownloadId: (course: Course, lesson: number): string =>
-    DownloadManager.getLessonData(course, lesson).id,
-
   getDownloadStagingLocation: (id: string): string => {
     return `${Downloader.directories.documents}/${id}.mp3.download`; // TODO: hardcode mp3?
   },
 
   getDownloadSaveLocation: (course: Course, lesson: number): string => {
-    return `${Downloader.directories.documents}/${DownloadManager.getDownloadId(
+    return `${Downloader.directories.documents}/${CourseData.getLessonId(
       course,
       lesson,
     )}.mp3`; // TODO: hardcode mp3?
   },
 
   startDownload: (course: Course, lesson: number) => {
-    const id = DownloadManager.getDownloadId(course, lesson);
+    const id = CourseData.getLessonId(course, lesson);
 
     DownloadManager._downloads[id] = {
       requested: true,
@@ -48,9 +42,9 @@ const DownloadManager = {
 
     Downloader.download({
       id,
-      url: DownloadManager.getLessonData(course, lesson).url,
+      url: CourseData.getLessonUrl(course, lesson),
       destination: DownloadManager.getDownloadStagingLocation(
-        DownloadManager.getDownloadId(course, lesson),
+        CourseData.getLessonId(course, lesson),
       ),
       network: Downloader.Network.WIFI_ONLY, // TODO
     })
@@ -67,7 +61,7 @@ const DownloadManager = {
         DownloadManager._downloads[id].finished = true;
         await fs.moveFile(
           DownloadManager.getDownloadStagingLocation(
-            DownloadManager.getDownloadId(course, lesson),
+            CourseData.getLessonId(course, lesson),
           ),
           DownloadManager.getDownloadSaveLocation(course, lesson),
         );
@@ -75,7 +69,6 @@ const DownloadManager = {
       })
       .error((error) => {
         DownloadManager._downloads[id].error = error;
-        console.log(error);
         DownloadManager._broadcast(id);
       });
   },
@@ -114,10 +107,13 @@ const DownloadManager = {
 };
 
 export const useDownloadStatus = (course, lesson): DownloadProgress => {
-  const [downloadProgress, setDownloadProgress] = useState(null);
+  const downloadId = CourseData.getLessonId(course, lesson);
+
+  const [downloadProgress, setDownloadProgress] = useState(
+    DownloadManager._downloads[downloadId] || null,
+  );
 
   useEffect(() => {
-    const downloadId = DownloadManager.getDownloadId(course, lesson);
     // not sure, but I think I need to make a new function inside useEffect
     const update = (progress) => {
       setDownloadProgress(progress);
@@ -127,7 +123,7 @@ export const useDownloadStatus = (course, lesson): DownloadProgress => {
     return () => {
       DownloadManager.unsubscribeFromDownloadUpdates(downloadId, update);
     };
-  });
+  }, [downloadProgress]);
 
   return downloadProgress;
 };

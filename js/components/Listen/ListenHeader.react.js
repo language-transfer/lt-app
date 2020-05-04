@@ -3,7 +3,7 @@ import {StyleSheet, View, Text, StatusBar} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 
-import languageData from '../../../languageData';
+import CourseData from '../../course-data';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
 const ListenHeader = (props) => {
@@ -12,8 +12,8 @@ const ListenHeader = (props) => {
       paddingTop: StatusBar.currentHeight,
       height: 56 + StatusBar.currentHeight,
       alignItems: 'center',
-      backgroundColor:
-        languageData[props.route.params.course].uiColors.background,
+      backgroundColor: CourseData.getCourseUIColors(props.route.params.course)
+        .background,
       justifyContent: 'space-between',
       flexDirection: 'row',
     },
@@ -27,7 +27,7 @@ const ListenHeader = (props) => {
       fontFamily: 'sans-serif-medium',
       fontWeight: 'normal',
       fontSize: 20,
-      color: languageData[props.route.params.course].uiColors.text,
+      color: CourseData.getCourseUIColors(props.route.params.course).text,
     },
     dummy: {
       // I wanted to use pos:abs on the button but couldn't work it out
@@ -49,13 +49,9 @@ const ListenHeader = (props) => {
             name="arrow-left"
             type="font-awesome-5"
             size={18}
-            color={languageData[props.route.params.course].uiColors.text}
+            color={CourseData.getCourseUIColors(props.route.params.course).text}
           />
         </TouchableNativeFeedback>
-        {/* <Text style={styles.headerText}>
-          {languageData[props.route.params.course].title}: Lesson{' '}
-          {props.route.params.lesson}
-        </Text> */}
         <View style={styles.dummy} />
       </View>
     </>

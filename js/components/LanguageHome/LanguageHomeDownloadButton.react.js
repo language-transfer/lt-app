@@ -5,7 +5,7 @@ import ProgressCircle from 'react-native-progress-circle';
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
-import languageData from '../../../languageData';
+import CourseData from '../../course-data';
 import DownloadManager, {useDownloadStatus} from '../../download-manager';
 
 const renderDownloadProgress = (progress) => {
@@ -55,7 +55,7 @@ const LanguageHomeDownloadButton = (props) => {
           <View style={styles.textPlayFlex}>
             <Text style={styles.downloadText}>
               Download{downloading && 'ing'}{' '}
-              {languageData[props.course].meta.lessons[props.lesson].title}
+              {CourseData.getLessonTitle(props.course, props.lesson)}
             </Text>
             {errored ? (
               <Icon name="exclamation" type="font-awesome-5" size={32} />

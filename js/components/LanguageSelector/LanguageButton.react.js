@@ -11,25 +11,27 @@ import {
   ImageBackground,
 } from 'react-native';
 
-import languageData from '../../../languageData';
+import CourseData from '../../course-data';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
 const LanguageButton = (props) => {
+  const lessonCount = CourseData.getFallbackLessonCount(props.course);
+
   return (
     <View style={styles.sectionWrapper}>
       <ImageBackground
-        source={languageData[props.course].image}
+        source={CourseData.getCourseImage(props.course)}
         style={styles.imageBackground}
         imageStyle={styles.image}>
         <View style={styles.rippleWrapper}>
           <TouchableNativeFeedback onPress={props.onPress} useForeground={true}>
             <View style={styles.sectionContainer}>
               <Text style={styles.courseTitle}>
-                {languageData[props.course].title}
+                {CourseData.getCourseTitle(props.course)}
               </Text>
               <Text style={styles.courseDetails}>
                 {/* TODO: figure out what to do about these numbers. probably hardcode them with icons and such, but use up-to-date meta and only hardcoded numbers as a fallback */}
-                {languageData[props.course].meta.lessons.length} lessons
+                {lessonCount} lessons
               </Text>
             </View>
           </TouchableNativeFeedback>

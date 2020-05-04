@@ -20,7 +20,7 @@ import Listen from './Listen/Listen.react';
 import AllLessons from './AllLessons/AllLessons.react';
 import {genMostRecentListenedCourse} from '../persistence';
 
-import languageData from '../../languageData';
+import CourseData from '../course-data';
 
 const Stack = createStackNavigator();
 
@@ -43,8 +43,8 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName={
-          // look at this FORESIGHT to check for it in languageData
-          !recentCourse.course || !languageData[recentCourse.course]
+          // look at this FORESIGHT to check for it in course data
+          !recentCourse.course || !CourseData.courseExists(recentCourse.course)
             ? 'Language Selector'
             : 'Language Home'
         }>
@@ -78,9 +78,9 @@ const App = () => {
           component={AllLessons}
           options={({route}) => ({
             // headerShown: false,
-            headerTitle: `${
-              languageData[route.params.course].title
-            }: All Lessons`,
+            headerTitle: `${CourseData.getCourseTitle(
+              route.params.course,
+            )}: All Lessons`,
             // headerStatusBarHeight: 4,
             headerStyle: {
               // elevation: 0,

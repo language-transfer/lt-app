@@ -3,7 +3,7 @@ import {StyleSheet, View, Text, StatusBar} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 
-import languageData from '../../../languageData';
+import CourseData from '../../course-data';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
 const LanguageHomeHeader = (props) => {
@@ -18,7 +18,7 @@ const LanguageHomeHeader = (props) => {
         <Icon style={styles.menuButton} name="menu" size={28} />
       </TouchableNativeFeedback>
       <Text style={styles.headerText}>
-        {languageData[props.route.params.course].title}
+        {CourseData.getCourseTitle(props.route.params.course)}
       </Text>
     </View>
   );
