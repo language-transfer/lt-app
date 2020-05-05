@@ -14,6 +14,22 @@ import DownloadManager from '../../download-manager';
 
 import formatDuration from 'format-duration';
 
+const getNextLesson = (course, lastLesson, progress) => {
+  if (lastLesson === null) {
+    return 0;
+  }
+
+  if (!progress.finished) {
+    return lastLesson;
+  }
+
+  const nextLesson = CourseData.getNextLesson(course, lastLesson);
+  if (nextLesson === null) {
+    return lastLesson;
+  }
+  return nextLesson;
+};
+
 const LanguageHomeTopButton = (props) => {
   const [lastListenState, setLastListenState] = useState(null);
   const [downloadState, setDownloadState] = useState(null);
@@ -24,11 +40,7 @@ const LanguageHomeTopButton = (props) => {
       const lesson = await genMostRecentListenedLessonForCourse(course);
       const progress = await genProgressForLesson(course, lesson);
 
-      let nextLesson = progress.finished
-        ? Math.min(lesson + 1, CourseData.getLessonCount(course) - 1)
-        : lesson === null
-        ? 0
-        : lesson;
+      let nextLesson = getNextLesson(course, lesson, progress);
 
       const downloaded = await DownloadManager.genIsDownloaded(
         course,

@@ -16,8 +16,10 @@ import DownloadManager from '../../download-manager';
 import {
   setCurrentlyPlaying,
   audioServiceSubscriptions,
+  genStopPlaying,
 } from '../../audio-service';
 import {genProgressForLesson} from '../../persistence';
+import {genEnqueueFile} from '../../audio-service';
 
 let fresh = true; // have we autoplayed for this screen already?
 
@@ -42,7 +44,7 @@ const Listen = (props) => {
   useEffect(() => {
     return props.navigation.addListener('blur', () => {
       // fresh = true;
-      TrackPlayer.destroy();
+      genStopPlaying();
     });
   }, [props.nagivation]);
 
@@ -77,22 +79,7 @@ const Listen = (props) => {
         ),
       });
 
-      await TrackPlayer.removeUpcomingTracks();
-
-      // Add a track to the queue
-      await TrackPlayer.add({
-        id: CourseData.getLessonId(course, lesson),
-        url: DownloadManager.getDownloadSaveLocation(course, lesson),
-        title: `${CourseData.getLessonTitle(
-          course,
-          lesson,
-        )}: ${CourseData.getCourseTitle(course)}`,
-        artist: 'Language Transfer',
-        // artwork: require('track.png'),
-      });
-
-      // global state for the audio service
-      setCurrentlyPlaying({course, lesson});
+      await genEnqueueFile(course, lesson);
 
       audioServiceSubscriptions.push(
         TrackPlayer.addEventListener('playback-state', async ({state}) => {

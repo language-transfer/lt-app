@@ -12,17 +12,16 @@ import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 import LanguageHomeTopButton from './LanguageHomeTopButton.react';
 import CourseData from '../../course-data';
-import {readDir} from 'react-native-fs';
 
 const LanguageHomeBody = (props) => {
-  const [metadataLoaded, setMetadataLoaded] = useState(false);
+  const [metadataLoadedForCourse, setMetadataLoadedForCourse] = useState(false);
 
   useEffect(() => {
     (async () => {
       await CourseData.genLoadCourseMetadata(props.route.params.course);
-      setMetadataLoaded(true);
+      setMetadataLoadedForCourse(props.route.params.course);
     })();
-  }, [metadataLoaded]);
+  }, [props.route.params.course, metadataLoadedForCourse]);
 
   if (!CourseData.isCourseMetadataLoaded(props.route.params.course)) {
     return (

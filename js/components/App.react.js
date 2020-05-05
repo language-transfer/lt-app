@@ -21,6 +21,7 @@ import AllLessons from './AllLessons/AllLessons.react';
 import {genMostRecentListenedCourse} from '../persistence';
 
 import CourseData from '../course-data';
+import {navigationRef} from '../navigation-ref';
 
 const Stack = createStackNavigator();
 
@@ -40,7 +41,7 @@ const App = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         initialRouteName={
           // look at this FORESIGHT to check for it in course data

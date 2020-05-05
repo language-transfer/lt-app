@@ -40,11 +40,15 @@ export const genMostRecentListenedCourse = async (
 
 export const genProgressForLesson = async (
   course: Course,
-  lesson: number,
+  lesson: number | null,
 ): Promise<{
   finished: boolean;
   progress: number | null;
 }> => {
+  if (lesson === null) {
+    return null;
+  }
+
   const progress = await AsyncStorage.getItem(`@activity/${course}/${lesson}`);
   if (progress === null) {
     return {
@@ -100,3 +104,5 @@ export const genMarkLessonFinished = async (
     AsyncStorage.setItem('@activity/most-recent-course', course),
   ]);
 };
+
+export const genSettingAutoplay = async (): Promise<boolean> => true;
