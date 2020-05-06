@@ -56,6 +56,7 @@ const ListenBottomSheet = (props) => {
       </TouchableNativeFeedback>
       <TouchableNativeFeedback
         onPress={async () => {
+          await genStopPlaying();
           await DownloadManager.genDeleteDownload(props.course, props.lesson);
           props.navigation.pop();
         }}>
