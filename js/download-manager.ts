@@ -46,12 +46,8 @@ const DownloadManager = {
   },
 
   startDownload: async (course: Course, lesson: number) => {
-    if (
-      !(await fs.exists(DownloadManager.getDownloadFolderForCourse(course)))
-    ) {
-      await fs.mkdir(DownloadManager.getDownloadFolderForCourse(course));
-    }
-
+    // directory should exist, since the metadata is in there. if not, you really
+    // need to have been creative to have screwed it up, so you deserve the app crashing
     DownloadManager.attachCallbacks(
       Downloader.download({
         id: DownloadManager.getDownloadId(course, lesson),

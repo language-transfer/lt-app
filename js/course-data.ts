@@ -11,6 +11,7 @@ import london from '../resources/eva-dang-EXdXLrZXS9Q-unsplash.jpg';
 import fs from 'react-native-fs';
 import path from 'react-native-path';
 import Downloader from 'react-native-background-downloader';
+import DownloadManager from './download-manager';
 
 export type Course =
   | 'spanish'
@@ -197,7 +198,9 @@ const CourseData = {
     }
 
     const metaFilename = path.basename(data[course].metaUrl);
-    const localPath = fs.DocumentDirectoryPath + metaFilename;
+    const localPath = `${DownloadManager.getDownloadFolderForCourse(
+      course,
+    )}/${metaFilename}`;
 
     try {
       const metaString = await fs.readFile(localPath);
@@ -210,6 +213,11 @@ const CourseData = {
     json.downloaded = +new Date();
     courseMeta[course] = json;
 
+    if (
+      !(await fs.exists(DownloadManager.getDownloadFolderForCourse(course)))
+    ) {
+      await fs.mkdir(DownloadManager.getDownloadFolderForCourse(course));
+    }
     await fs.writeFile(localPath, JSON.stringify(json));
   },
 

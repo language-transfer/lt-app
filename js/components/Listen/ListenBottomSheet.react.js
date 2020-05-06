@@ -14,6 +14,7 @@ import {Icon} from 'react-native-elements';
 import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
 import {genMarkLessonFinished} from '../../persistence';
+import {genStopPlaying} from '../../audio-service';
 
 const ListenBottomSheet = (props) => {
   const styles = StyleSheet.create({
