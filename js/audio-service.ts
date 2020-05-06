@@ -24,7 +24,9 @@ export const genEnqueueFile = async (
   // Add a track to the queue
   await TrackPlayer.add({
     id: CourseData.getLessonId(course, lesson),
-    url: DownloadManager.getDownloadSaveLocation(course, lesson),
+    url: DownloadManager.getDownloadSaveLocation(
+      DownloadManager.getDownloadId(course, lesson),
+    ),
     title: `${CourseData.getLessonTitle(
       course,
       lesson,
