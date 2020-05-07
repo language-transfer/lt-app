@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     borderRadius: 10,
     backgroundColor: 'white',
-    elevation: 1,
+    elevation: 3,
   },
   rippleWrapper: {
     overflow: 'hidden',

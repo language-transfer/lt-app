@@ -88,7 +88,7 @@ const Settings = (props) => {
               <Text style={styles.settingsTitle}>Autoplay</Text>
               <Text style={styles.settingsDescription}>
                 Automatically advance to the next lesson when each lesson
-                finishes
+                finishes.
               </Text>
             </View>
           </View>
