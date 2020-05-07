@@ -1,5 +1,12 @@
-import React, {useRef} from 'react';
-import {StyleSheet, View, Text, StatusBar, Dimensions} from 'react-native';
+import React, {useRef, useState, useEffect} from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  StatusBar,
+  Dimensions,
+  ActivityIndicator,
+} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
@@ -9,11 +16,24 @@ import ListenBottomSheet from './ListenBottomSheet.react';
 
 import CourseData from '../../course-data';
 import ListenScrubber from './ListenScrubber.react';
+import DownloadManager from '../../download-manager';
 
 const ListenBody = (props) => {
   const bottomSheet = useRef();
 
   const {course, lesson} = props.route.params;
+
+  const [downloaded, setDownloaded] = useState(null);
+  useEffect(() => {
+    (async () => {
+      const downloaded = await DownloadManager.genIsDownloaded(course, lesson);
+      setDownloaded(downloaded);
+    })();
+  }, []);
+
+  if (downloaded === null) {
+    return <ActivityIndicator size="large" />;
+  }
 
   const styles = StyleSheet.create({
     body: {
@@ -143,7 +163,7 @@ const ListenBody = (props) => {
       </View>
       <RBSheet
         ref={bottomSheet}
-        height={236}
+        height={downloaded ? 236 : 164}
         duration={250}
         customStyles={{
           container: {
@@ -158,6 +178,7 @@ const ListenBody = (props) => {
           course={course}
           lesson={lesson}
           navigation={props.navigation}
+          downloaded={downloaded}
           onClose={() => props.setBottomSheetOpen(false)}
         />
       </RBSheet>

@@ -20,17 +20,22 @@ import CourseData from '../../course-data';
 // TODO: not DRY :/. but it also looks different in different contexts
 // (though, to be fair, that should probably be remedied, since it's
 // a crap affordance)
-const renderDownloadProgress = (downloaded, progress) => {
+const renderDownloadProgress = (downloaded, progress, course, lesson) => {
   if (downloaded) {
-    return <Icon name="download" type="font-awesome-5" size={24} />;
+    // return <Icon name="download" type="font-awesome-5" size={24} />;
+    return (
+      <View style={styles.downloadedText}>
+        <Text>Downloaded</Text>
+      </View>
+    );
   }
 
   const downloading = progress && !progress.error && !progress.finished;
-  const errored = progress && progress.error;
+  // const errored = progress && progress.error;
 
-  if (errored) {
-    return <Icon name="exclamation" type="font-awesome-5" size={24} />;
-  }
+  // if (errored) {
+  //   return <Icon name="exclamation" type="font-awesome-5" size={24} />;
+  // }
 
   if (downloading) {
     const percent =
@@ -51,7 +56,14 @@ const renderDownloadProgress = (downloaded, progress) => {
     );
   }
 
-  return null;
+  return (
+    <View style={styles.downloadButton}>
+      <TouchableNativeFeedback
+        onPress={() => DownloadManager.startDownload(course, lesson)}>
+        <Text style={styles.downloadButtonText}>Download</Text>
+      </TouchableNativeFeedback>
+    </View>
+  );
 };
 
 const LessonRow = (props) => {
@@ -77,20 +89,14 @@ const LessonRow = (props) => {
   }
 
   const finished = progress && progress.finished;
-  const downloading =
-    downloadState && !downloadState.error && !downloadState.finished;
 
   return (
     <TouchableNativeFeedback
       onPress={() => {
-        if (downloaded) {
-          props.navigation.navigate('Listen', {
-            course: props.course,
-            lesson: props.lesson,
-          });
-        } else if (!downloading) {
-          DownloadManager.startDownload(props.course, props.lesson);
-        }
+        props.navigation.navigate('Listen', {
+          course: props.course,
+          lesson: props.lesson,
+        });
       }}>
       <View style={styles.row}>
         <View style={styles.text}>
@@ -111,7 +117,12 @@ const LessonRow = (props) => {
           </Text>
         </View>
         <View style={styles.icons}>
-          {renderDownloadProgress(downloaded, downloadState)}
+          {renderDownloadProgress(
+            downloaded,
+            downloadState,
+            props.course,
+            props.lesson,
+          )}
         </View>
       </View>
     </TouchableNativeFeedback>
@@ -148,6 +159,21 @@ const styles = StyleSheet.create({
   },
   progressCircleText: {
     fontSize: 12,
+  },
+
+  downloadedText: {
+    justifyContent: 'center',
+  },
+  downloadButton: {
+    backgroundColor: 'rgb(231, 243, 255)',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  downloadButtonText: {
+    color: 'rgb(56, 88, 152)',
   },
 });
 

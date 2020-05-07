@@ -4,6 +4,7 @@ import {
   genAutopause,
   genUpdateProgressForLesson,
   genSettingAutoplay,
+  genSettingAutoplayNonDownloaded,
   genMarkLessonFinished,
 } from './persistence';
 import CourseData, {Course} from './course-data';
@@ -21,12 +22,17 @@ export const genEnqueueFile = async (
 ): Promise<void> => {
   await TrackPlayer.removeUpcomingTracks();
 
+  let url = CourseData.getLessonUrl(course, lesson);
+  if (await DownloadManager.genIsDownloaded(course, lesson)) {
+    url = DownloadManager.getDownloadSaveLocation(
+      DownloadManager.getDownloadId(course, lesson),
+    );
+  }
+
   // Add a track to the queue
   await TrackPlayer.add({
     id: CourseData.getLessonId(course, lesson),
-    url: DownloadManager.getDownloadSaveLocation(
-      DownloadManager.getDownloadId(course, lesson),
-    ),
+    url,
     title: `${CourseData.getLessonTitle(
       course,
       lesson,
@@ -157,13 +163,14 @@ export default async () => {
 
       if (
         nextLesson === null || // :o you did it!
-        !(await DownloadManager.genIsDownloaded(
-          currentlyPlaying.course,
-          nextLesson,
-        )) ||
-        !(await genSettingAutoplay())
+        !(await genSettingAutoplay()) ||
+        (!(await genSettingAutoplayNonDownloaded()) &&
+          !(await DownloadManager.genIsDownloaded(
+            currentlyPlaying.course,
+            nextLesson,
+          )))
       ) {
-        // sorry sir, no can do
+        // sorry sir, no can do7
         pop();
         return;
       }

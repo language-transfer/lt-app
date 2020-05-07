@@ -27,6 +27,8 @@ const AllLessons = (props) => {
     );
   }, []);
 
+  // still considering awaiting the whole thing so we don't have to wait forever for the loading
+
   // useEffect(() => {
   //   const update = async () => {
   //     const [progress, downloads] = await Promise.all([

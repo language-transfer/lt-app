@@ -9,7 +9,6 @@ import {
 } from '../../persistence';
 
 import CourseData from '../../course-data';
-import LanguageHomeDownloadButton from './LanguageHomeDownloadButton.react';
 import DownloadManager from '../../download-manager';
 
 import formatDuration from 'format-duration';
@@ -42,18 +41,12 @@ const LanguageHomeTopButton = (props) => {
 
       let nextLesson = getNextLesson(course, lesson, progress);
 
-      const downloaded = await DownloadManager.genIsDownloaded(
-        course,
-        nextLesson,
-      );
-
       const progressForThisLesson =
         nextLesson === lesson && progress ? progress.progress : 0;
 
       setLastListenState({
         nextLesson,
         progressForThisLesson,
-        downloaded,
       });
     };
 
@@ -112,49 +105,39 @@ const LanguageHomeTopButton = (props) => {
     },
   });
 
-  if (lastListenState.downloaded) {
-    return (
-      <View style={styles.lessonPlayBox}>
-        <TouchableNativeFeedback
-          useForeground={true}
-          onPress={() =>
-            props.navigation.navigate('Listen', {
-              course: props.route.params.course,
-              lesson: lastListenState.nextLesson,
-            })
-          }>
-          <View style={styles.lessonPlayBoxInner}>
-            <View style={styles.textPlayFlex}>
-              <Text style={styles.lessonTitle}>
-                {CourseData.getLessonTitle(course, lesson)}
-              </Text>
-              <Icon name="play" type="font-awesome-5" />
-            </View>
-            <View style={styles.progressBar}>
-              <View style={styles.progressMade} />
-              <View style={styles.progressLeft} />
-            </View>
-            <View style={styles.progressText}>
-              <Text>{formatDuration((progress || 0) * 1000)}</Text>
-              <Text>
-                {formatDuration(
-                  CourseData.getLessonDuration(course, lesson) * 1000,
-                )}
-              </Text>
-            </View>
+  return (
+    <View style={styles.lessonPlayBox}>
+      <TouchableNativeFeedback
+        useForeground={true}
+        onPress={() =>
+          props.navigation.navigate('Listen', {
+            course: props.route.params.course,
+            lesson: lastListenState.nextLesson,
+          })
+        }>
+        <View style={styles.lessonPlayBoxInner}>
+          <View style={styles.textPlayFlex}>
+            <Text style={styles.lessonTitle}>
+              {CourseData.getLessonTitle(course, lesson)}
+            </Text>
+            <Icon name="play" type="font-awesome-5" />
           </View>
-        </TouchableNativeFeedback>
-      </View>
-    );
-  } else {
-    return (
-      <LanguageHomeDownloadButton
-        course={props.route.params.course}
-        lesson={lastListenState.nextLesson}
-        setDownloadState={setDownloadState} // just to get a refresh on the root component as the download progresses
-      />
-    );
-  }
+          <View style={styles.progressBar}>
+            <View style={styles.progressMade} />
+            <View style={styles.progressLeft} />
+          </View>
+          <View style={styles.progressText}>
+            <Text>{formatDuration((progress || 0) * 1000)}</Text>
+            <Text>
+              {formatDuration(
+                CourseData.getLessonDuration(course, lesson) * 1000,
+              )}
+            </Text>
+          </View>
+        </View>
+      </TouchableNativeFeedback>
+    </View>
+  );
 };
 
 export default LanguageHomeTopButton;

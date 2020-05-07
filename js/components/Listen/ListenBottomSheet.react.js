@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -7,6 +7,7 @@ import {
   Button,
   Linking,
   TouchableNativeFeedback,
+  ActivityIndicator,
 } from 'react-native';
 
 import {Icon} from 'react-native-elements';
@@ -54,24 +55,26 @@ const ListenBottomSheet = (props) => {
           </View>
         </View>
       </TouchableNativeFeedback>
-      <TouchableNativeFeedback
-        onPress={async () => {
-          await genStopPlaying();
-          await DownloadManager.genDeleteDownload(props.course, props.lesson);
-          props.navigation.pop();
-        }}>
-        <View style={styles.bottomSheetRow}>
-          <Text style={styles.rowText}>Delete download</Text>
-          <View style={styles.iconContainer}>
-            <Icon
-              style={styles.rowIcon}
-              name="trash"
-              type="font-awesome-5"
-              size={32}
-            />
+      {props.downloaded ? (
+        <TouchableNativeFeedback
+          onPress={async () => {
+            await genStopPlaying();
+            await DownloadManager.genDeleteDownload(props.course, props.lesson);
+            props.navigation.pop();
+          }}>
+          <View style={styles.bottomSheetRow}>
+            <Text style={styles.rowText}>Delete download</Text>
+            <View style={styles.iconContainer}>
+              <Icon
+                style={styles.rowIcon}
+                name="trash"
+                type="font-awesome-5"
+                size={32}
+              />
+            </View>
           </View>
-        </View>
-      </TouchableNativeFeedback>
+        </TouchableNativeFeedback>
+      ) : null}
       <TouchableNativeFeedback
         onPress={() => {
           Linking.openURL(

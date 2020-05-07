@@ -141,6 +141,7 @@ const DownloadManager = {
 
   resumeDownloads: async () => {
     const interrupted = await Downloader.checkForExistingDownloads();
+    console.log(interrupted);
     interrupted.forEach((task) => {
       DownloadManager.attachCallbacks(task);
     });

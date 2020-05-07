@@ -106,3 +106,5 @@ export const genMarkLessonFinished = async (
 };
 
 export const genSettingAutoplay = async (): Promise<boolean> => true;
+export const genSettingAutoplayNonDownloaded = async (): Promise<boolean> =>
+  true;
