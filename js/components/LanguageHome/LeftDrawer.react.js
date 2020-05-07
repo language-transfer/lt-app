@@ -11,7 +11,8 @@ const LeftDrawer = (props) => {
         onPress={() => props.navigation.navigate('Language Selector')}>
         <Text style={styles.menuButton}>All Languages</Text>
       </TouchableNativeFeedback>
-      <TouchableNativeFeedback>
+      <TouchableNativeFeedback
+        onPress={() => props.navigation.navigate('Settings')}>
         <Text style={styles.menuButton}>Settings</Text>
       </TouchableNativeFeedback>
       <TouchableNativeFeedback

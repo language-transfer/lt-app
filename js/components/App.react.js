@@ -23,6 +23,7 @@ import {genMostRecentListenedCourse} from '../persistence';
 import CourseData from '../course-data';
 import {navigationRef} from '../navigation-ref';
 import About from './About/About.react';
+import Settings from './Settings/Settings.react';
 
 const Stack = createStackNavigator();
 
@@ -94,6 +95,13 @@ const App = () => {
           component={About}
           options={{
             headerTitle: 'About',
+          }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={Settings}
+          options={{
+            headerTitle: 'Settings',
           }}
         />
       </Stack.Navigator>

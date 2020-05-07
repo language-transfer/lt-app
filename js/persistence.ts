@@ -1,5 +1,6 @@
 import {AsyncStorage} from 'react-native';
 import type {Course} from './course-data';
+import {DefaultTransition} from '@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets';
 
 // Some operations are not atomic. I don't expect it to cause problems, so I
 // haven't gone to the effort of adding a mutex. mostly because I don't like
@@ -105,6 +106,29 @@ export const genMarkLessonFinished = async (
   ]);
 };
 
-export const genSettingAutoplay = async (): Promise<boolean> => true;
-export const genSettingAutoplayNonDownloaded = async (): Promise<boolean> =>
-  true;
+const preference = (name, defaultValue, fromString) => {
+  return [
+    async (): Promise<boolean> => {
+      const preference = await AsyncStorage.getItem(`@preferences/${name}`);
+      if (preference === null) {
+        return defaultValue;
+      }
+
+      return fromString(preference);
+    },
+    async (preference: boolean): Promise<void> => {
+      await AsyncStorage.setItem(`@preferences/${name}`, '' + preference);
+    },
+  ];
+};
+
+export const [genPreferenceAutoplay, genSetPreferenceAutoplay] = preference(
+  'autoplay',
+  true,
+  (b) => b === 'true',
+);
+
+export const [
+  genPreferenceAutoplayNonDownloaded,
+  genSetPreferenceAutoplayNonDownloaded,
+] = preference('autoplay-non-downloaded', true, (b) => b === 'true');

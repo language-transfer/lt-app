@@ -3,9 +3,9 @@ import BackgroundTimer from 'react-native-background-timer';
 import {
   genAutopause,
   genUpdateProgressForLesson,
-  genSettingAutoplay,
-  genSettingAutoplayNonDownloaded,
   genMarkLessonFinished,
+  genPreferenceAutoplay,
+  genPreferenceAutoplayNonDownloaded,
 } from './persistence';
 import CourseData, {Course} from './course-data';
 import DownloadManager from './download-manager';
@@ -163,8 +163,8 @@ export default async () => {
 
       if (
         nextLesson === null || // :o you did it!
-        !(await genSettingAutoplay()) ||
-        (!(await genSettingAutoplayNonDownloaded()) &&
+        !(await genPreferenceAutoplay()) ||
+        (!(await genPreferenceAutoplayNonDownloaded()) &&
           !(await DownloadManager.genIsDownloaded(
             currentlyPlaying.course,
             nextLesson,
