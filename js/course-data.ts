@@ -1,16 +1,15 @@
-import spain from '../resources/jorge-fernandez-salas-ChSZETOal-I-unsplash.jpg';
-import egypt from '../resources/spencer-davis-UvKCy14AYRY-unsplash.jpg';
-import turkey from '../resources/fatih-yurur-kNSREmtaGOE-unsplash.jpg';
-import germany from '../resources/brandenburger-tor-tja.jpg';
-import greece from '../resources/andre-benz-tPPi0jzLP_w-unsplash.jpg';
-import italy from '../resources/faruk-kaymak-KTsg_xKnB3E-unsplash.jpg';
-import kenya from '../resources/ian-macharia-7k91OUDYAQ0-unsplash.jpg';
-import france from '../resources/chris-karidis-nnzkZNYWHaU-unsplash.jpg';
-import london from '../resources/eva-dang-EXdXLrZXS9Q-unsplash.jpg';
+import spanishCover from '../resources/spanish-cover.png';
+import arabicCover from '../resources/arabic-cover.png';
+import turkishCover from '../resources/turkish-cover.png';
+import germanCover from '../resources/german-cover.png';
+import greekCover from '../resources/greek-cover.png';
+import italianCover from '../resources/italian-cover.png';
+import swahiliCover from '../resources/swahili-cover.png';
+import frenchCover from '../resources/french-cover.png';
+import inglesCover from '../resources/ingles-cover.png';
 
 import fs from 'react-native-fs';
 import path from 'react-native-path';
-import Downloader from 'react-native-background-downloader';
 import DownloadManager from './download-manager';
 
 export type Course =
@@ -59,7 +58,7 @@ const courseMeta = {};
 
 const data = {
   spanish: {
-    image: spain,
+    image: spanishCover,
     title: 'Spanish',
     metaUrl: 'http://syntaxblitz.net/static/lt/spanish-meta.json',
     fallbackLessonCount: 90,
@@ -70,7 +69,7 @@ const data = {
     },
   },
   arabic: {
-    image: egypt,
+    image: arabicCover,
     title: 'Arabic',
     metaUrl: 'http://syntaxblitz.net/static/lt/arabic-meta.json',
     fallbackLessonCount: 38,
@@ -81,7 +80,7 @@ const data = {
     },
   },
   turkish: {
-    image: turkey,
+    image: turkishCover,
     title: 'Turkish',
     metaUrl: 'http://syntaxblitz.net/static/lt/turkish-meta.json',
     fallbackLessonCount: 44,
@@ -92,7 +91,7 @@ const data = {
     },
   },
   german: {
-    image: germany,
+    image: germanCover,
     title: 'German',
     metaUrl: 'http://syntaxblitz.net/static/lt/german-meta.json',
     fallbackLessonCount: 50,
@@ -103,7 +102,7 @@ const data = {
     },
   },
   greek: {
-    image: greece,
+    image: greekCover,
     title: 'Greek',
     metaUrl: 'http://syntaxblitz.net/static/lt/greek-meta.json',
     fallbackLessonCount: 120,
@@ -114,7 +113,7 @@ const data = {
     },
   },
   italian: {
-    image: italy,
+    image: italianCover,
     title: 'Italian',
     metaUrl: 'http://syntaxblitz.net/static/lt/italian-meta.json',
     fallbackLessonCount: 45,
@@ -125,7 +124,7 @@ const data = {
     },
   },
   swahili: {
-    image: kenya,
+    image: swahiliCover,
     title: 'Swahili',
     metaUrl: 'http://syntaxblitz.net/static/lt/swahili-meta.json',
     fallbackLessonCount: 110,
@@ -136,7 +135,7 @@ const data = {
     },
   },
   french: {
-    image: france,
+    image: frenchCover,
     title: 'French',
     metaUrl: 'http://syntaxblitz.net/static/lt/french-meta.json',
     fallbackLessonCount: 40,
@@ -147,7 +146,7 @@ const data = {
     },
   },
   ingles: {
-    image: london,
+    image: inglesCover,
     title: 'Inglés',
     metaUrl: 'http://syntaxblitz.net/static/lt/ingles-meta.json',
     fallbackLessonCount: 40,

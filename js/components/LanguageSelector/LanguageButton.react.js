@@ -49,10 +49,11 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     fontWeight: '600',
-    paddingVertical: 40,
+    paddingTop: 40,
+    paddingBottom: 10,
     width: '100%',
     height: '100%',
   },
@@ -68,7 +69,6 @@ const styles = StyleSheet.create({
   },
   image: {
     borderRadius: 10,
-    opacity: 0.2,
   },
   courseTitle: {
     fontSize: 28,

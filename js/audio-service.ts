@@ -61,7 +61,7 @@ export const genEnqueueFile = async (
       lesson,
     )}: ${CourseData.getCourseTitle(course)}`,
     artist: 'Language Transfer',
-    // artwork: require('track.png'),
+    artwork: CourseData.getImageForCourse(course),
   });
 
   currentlyPlaying = {course, lesson};
