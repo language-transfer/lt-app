@@ -14,7 +14,8 @@ const LeftDrawer = (props) => {
       <TouchableNativeFeedback>
         <Text style={styles.menuButton}>Settings</Text>
       </TouchableNativeFeedback>
-      <TouchableNativeFeedback>
+      <TouchableNativeFeedback
+        onPress={() => props.navigation.navigate('About')}>
         <Text style={styles.menuButton}>About</Text>
       </TouchableNativeFeedback>
     </View>

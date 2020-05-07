@@ -22,6 +22,7 @@ import {genMostRecentListenedCourse} from '../persistence';
 
 import CourseData from '../course-data';
 import {navigationRef} from '../navigation-ref';
+import About from './About/About.react';
 
 const Stack = createStackNavigator();
 
@@ -87,6 +88,13 @@ const App = () => {
               // elevation: 0,
             },
           })}
+        />
+        <Stack.Screen
+          name="About"
+          component={About}
+          options={{
+            headerTitle: 'About',
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
