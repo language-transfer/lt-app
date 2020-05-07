@@ -20,6 +20,29 @@ export const genEnqueueFile = async (
   course: Course,
   lesson: number,
 ): Promise<void> => {
+  TrackPlayer.setupPlayer();
+
+  TrackPlayer.updateOptions({
+    stopWithApp: false,
+    capabilities: [
+      TrackPlayer.CAPABILITY_PLAY,
+      TrackPlayer.CAPABILITY_PAUSE,
+      TrackPlayer.CAPABILITY_JUMP_BACKWARD,
+      TrackPlayer.CAPABILITY_STOP,
+    ],
+    compactCapabilities: [
+      TrackPlayer.CAPABILITY_PLAY,
+      TrackPlayer.CAPABILITY_PAUSE,
+      TrackPlayer.CAPABILITY_JUMP_BACKWARD,
+    ],
+    jumpInterval: 10,
+    alwaysPauseOnInterruption: true,
+    color: parseInt(
+      CourseData.getCourseUIColors(course).background.substring(1),
+      16,
+    ),
+  });
+
   await TrackPlayer.removeUpcomingTracks();
 
   let url = CourseData.getLessonUrl(course, lesson);
@@ -170,7 +193,7 @@ export default async () => {
             nextLesson,
           )))
       ) {
-        // sorry sir, no can do7
+        // sorry sir, no can do
         pop();
         return;
       }

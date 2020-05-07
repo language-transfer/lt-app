@@ -1,6 +1,7 @@
 import {AsyncStorage} from 'react-native';
 import type {Course} from './course-data';
 import {DefaultTransition} from '@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets';
+import DownloadManager from './download-manager';
 
 // Some operations are not atomic. I don't expect it to cause problems, so I
 // haven't gone to the effort of adding a mutex. mostly because I don't like
@@ -104,6 +105,15 @@ export const genMarkLessonFinished = async (
     ),
     AsyncStorage.setItem('@activity/most-recent-course', course),
   ]);
+
+  if (
+    (await genPreferenceAutoDeleteFinished()) &&
+    (await DownloadManager.genIsDownloaded(course, lesson))
+  ) {
+    console.log('dd', course, lesson);
+    await DownloadManager.genDeleteDownload(course, lesson);
+    console.log('dd2', course, lesson);
+  }
 };
 
 const preference = (name, defaultValue, fromString) => {
@@ -132,3 +142,8 @@ export const [
   genPreferenceAutoplayNonDownloaded,
   genSetPreferenceAutoplayNonDownloaded,
 ] = preference('autoplay-non-downloaded', true, (b) => b === 'true');
+
+export const [
+  genPreferenceAutoDeleteFinished,
+  genSetPreferenceAutoDeleteFinished,
+] = preference('auto-delete-finished', false, (b) => b === 'true');

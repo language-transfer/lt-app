@@ -26,8 +26,6 @@ let fresh = true; // have we autoplayed for this screen already?
 const Listen = (props) => {
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
 
-  useEffect(() => {}, []);
-
   useEffect(() => {
     const light =
       !bottomSheetOpen &&
@@ -54,30 +52,6 @@ const Listen = (props) => {
     return props.navigation.addListener('focus', async () => {
       fresh = true; // initial mount only
       const {course, lesson} = props.route.params;
-      TrackPlayer.setupPlayer();
-
-      TrackPlayer.updateOptions({
-        stopWithApp: false,
-        capabilities: [
-          TrackPlayer.CAPABILITY_PLAY,
-          TrackPlayer.CAPABILITY_PAUSE,
-          TrackPlayer.CAPABILITY_JUMP_BACKWARD,
-          TrackPlayer.CAPABILITY_STOP,
-        ],
-        compactCapabilities: [
-          TrackPlayer.CAPABILITY_PLAY,
-          TrackPlayer.CAPABILITY_PAUSE,
-          TrackPlayer.CAPABILITY_JUMP_BACKWARD,
-        ],
-        jumpInterval: 10,
-        alwaysPauseOnInterruption: true,
-        color: parseInt(
-          CourseData.getCourseUIColors(
-            props.route.params.course,
-          ).background.substring(1),
-          16,
-        ),
-      });
 
       await genEnqueueFile(course, lesson);
 
