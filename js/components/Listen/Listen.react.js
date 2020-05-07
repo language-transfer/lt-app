@@ -95,10 +95,7 @@ const Listen = (props) => {
 
       audioServiceSubscriptions.push(
         TrackPlayer.addEventListener('remote-stop', () => {
-          // TODO: pop here?
-          props.navigation.navigate('Language Home', {
-            course: props.route.params.course,
-          });
+          props.navigation.pop();
         }),
       );
     });
