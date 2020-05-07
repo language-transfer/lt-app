@@ -60,7 +60,7 @@ const data = {
   spanish: {
     image: spanishCover,
     title: 'Spanish',
-    metaUrl: 'http://syntaxblitz.net/static/lt/spanish-meta.json',
+    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 90,
     uiColors: {
       background: '#fbc02d',
@@ -71,7 +71,7 @@ const data = {
   arabic: {
     image: arabicCover,
     title: 'Arabic',
-    metaUrl: 'http://syntaxblitz.net/static/lt/arabic-meta.json',
+    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 38,
     uiColors: {
       background: '#424242',
@@ -82,7 +82,7 @@ const data = {
   turkish: {
     image: turkishCover,
     title: 'Turkish',
-    metaUrl: 'http://syntaxblitz.net/static/lt/turkish-meta.json',
+    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 44,
     uiColors: {
       background: '#d32f2f',
@@ -93,7 +93,7 @@ const data = {
   german: {
     image: germanCover,
     title: 'German',
-    metaUrl: 'http://syntaxblitz.net/static/lt/german-meta.json',
+    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 50,
     uiColors: {
       background: '#bf360c',
@@ -104,7 +104,7 @@ const data = {
   greek: {
     image: greekCover,
     title: 'Greek',
-    metaUrl: 'http://syntaxblitz.net/static/lt/greek-meta.json',
+    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 120,
     uiColors: {
       background: '#e3f2fd',
@@ -115,7 +115,7 @@ const data = {
   italian: {
     image: italianCover,
     title: 'Italian',
-    metaUrl: 'http://syntaxblitz.net/static/lt/italian-meta.json',
+    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 45,
     uiColors: {
       background: '#2e7d32',
@@ -126,7 +126,7 @@ const data = {
   swahili: {
     image: swahiliCover,
     title: 'Swahili',
-    metaUrl: 'http://syntaxblitz.net/static/lt/swahili-meta.json',
+    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 110,
     uiColors: {
       background: '#0097a7',
@@ -137,7 +137,7 @@ const data = {
   french: {
     image: frenchCover,
     title: 'French',
-    metaUrl: 'http://syntaxblitz.net/static/lt/french-meta.json',
+    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 40,
     uiColors: {
       background: '#1976d2',
@@ -148,7 +148,7 @@ const data = {
   ingles: {
     image: inglesCover,
     title: 'Inglés',
-    metaUrl: 'http://syntaxblitz.net/static/lt/ingles-meta.json',
+    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 40,
     uiColors: {
       background: '#512da8',
