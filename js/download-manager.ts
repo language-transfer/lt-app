@@ -8,6 +8,7 @@ import DownloadTask from 'react-native-background-downloader/lib/downloadTask';
 import {
   genProgressForLesson,
   genPreferenceDownloadQuality,
+  genPreferenceDownloadOnlyOnWifi,
 } from './persistence';
 
 export type DownloadProgress = {
@@ -50,7 +51,10 @@ const DownloadManager = {
   },
 
   startDownload: async (course: Course, lesson: number) => {
-    const quality = await genPreferenceDownloadQuality();
+    const [quality, wifiOnly] = await Promise.all([
+      genPreferenceDownloadQuality(),
+      genPreferenceDownloadOnlyOnWifi(),
+    ]);
 
     // directory should exist, since the metadata is in there. if not, you really
     // need to have been creative to have screwed it up, so you deserve the app crashing
@@ -61,7 +65,9 @@ const DownloadManager = {
         destination: DownloadManager.getDownloadStagingLocation(
           DownloadManager.getDownloadId(course, lesson),
         ),
-        network: Downloader.Network.WIFI_ONLY, // TODO
+        network: wifiOnly
+          ? Downloader.Network.WIFI_ONLY
+          : Downloader.Network.ALL,
       }),
     );
   },

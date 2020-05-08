@@ -21,6 +21,8 @@ import {
   genPreferenceDownloadQuality,
   genSetPreferenceStreamQuality,
   genSetPreferenceDownloadQuality,
+  genPreferenceDownloadOnlyOnWifi,
+  genSetPreferenceDownloadOnlyOnWifi,
 } from '../../persistence';
 import {Icon} from 'react-native-elements';
 
@@ -44,12 +46,14 @@ const Settings = (props) => {
           autoDeleteFinished,
           streamQuality,
           downloadQuality,
+          downloadOnlyOnWifi,
         ] = await Promise.all([
           genPreferenceAutoplay(),
           genPreferenceAutoplayNonDownloaded(),
           genPreferenceAutoDeleteFinished(),
           genPreferenceStreamQuality(),
           genPreferenceDownloadQuality(),
+          genPreferenceDownloadOnlyOnWifi(),
         ]);
 
         setSettings({
@@ -58,6 +62,7 @@ const Settings = (props) => {
           autoDeleteFinished,
           streamQuality,
           downloadQuality,
+          downloadOnlyOnWifi,
         });
 
         setNeedsUpdate(false);
@@ -158,12 +163,42 @@ const Settings = (props) => {
             </View>
             <View style={styles.settingsText}>
               <Text style={styles.settingsTitle}>
-                Delete finished downloads
+                Automatically delete finished downloads
               </Text>
               <Text style={styles.settingsDescription}>
                 Automatically delete downloaded lessons when you finish
                 listening to them. Checking this box will not remove any
                 existing downloads; to do that, use the Data Management screen.
+              </Text>
+            </View>
+          </View>
+        </TouchableNativeFeedback>
+
+        <TouchableNativeFeedback
+          onPress={async () => {
+            await genSetPreferenceDownloadOnlyOnWifi(
+              !settings.downloadOnlyOnWifi,
+            );
+            setNeedsUpdate(true);
+          }}>
+          <View style={styles.settingsRow}>
+            <View style={styles.settingsValueContainer}>
+              <Icon
+                style={{
+                  ...styles.settingsCheck,
+                  ...(settings.downloadOnlyOnWifi ? {} : {opacity: 0}),
+                }}
+                name="check"
+                type="font-awesome-5"
+              />
+            </View>
+            <View style={styles.settingsText}>
+              <Text style={styles.settingsTitle}>Download only on wi-fi</Text>
+              <Text style={styles.settingsDescription}>
+                You can always stream tracks directly from the server, even if
+                you're not on wi-fi. But if you have this option checked, tracks
+                will only be saved to your device while you're connected to
+                wi-fi.
               </Text>
             </View>
           </View>

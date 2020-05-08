@@ -172,3 +172,8 @@ export const [
   genPreferenceDownloadQuality,
   genSetPreferenceDownloadQuality,
 ] = preference('download-quality', 'high', (b) => b);
+
+export const [
+  genPreferenceDownloadOnlyOnWifi,
+  genSetPreferenceDownloadOnlyOnWifi,
+] = preference('download-only-on-wifi', true, (b) => b === 'true');
