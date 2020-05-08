@@ -18,6 +18,7 @@ import CourseData from '../../course-data';
 
 const LanguageHomeBody = (props) => {
   const [metadataLoadedForCourse, setMetadataLoadedForCourse] = useState(false);
+  const [showMetadataWarning, setShowMetadataWarning] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -30,11 +31,27 @@ const LanguageHomeBody = (props) => {
     return props.navigation.addListener('focus', load);
   }, [props.route.params.course, metadataLoadedForCourse]);
 
+  useEffect(() => {
+    setTimeout(() => {
+      setShowMetadataWarning(true);
+    }, 5000);
+  }, []);
+
   if (!CourseData.isCourseMetadataLoaded(props.route.params.course)) {
     return (
       <View style={styles.body}>
         <View style={styles.loading}>
           <ActivityIndicator size="large" />
+          <View
+            style={{
+              ...styles.metadataWarning,
+              opacity: showMetadataWarning ? 1 : 0,
+            }}>
+            <Text style={styles.metadataWarningText}>
+              If this screen does not load, try updating or reinstalling the
+              Lanugage Transfer app.
+            </Text>
+          </View>
         </View>
       </View>
     );
@@ -106,6 +123,12 @@ const styles = StyleSheet.create({
   loading: {
     marginTop: 128,
   },
+  metadataWarning: {
+    width: '80%',
+    alignSelf: 'center',
+    marginTop: 24,
+  },
+  metadataWarningText: {textAlign: 'center'},
 
   additionalButton: {
     marginHorizontal: 25,
