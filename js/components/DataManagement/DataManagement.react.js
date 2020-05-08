@@ -129,6 +129,7 @@ const DataManagement = (props) => {
                   `Are you sure you want to delete all your downloads for ${courseTitle}?`,
                 )
               ) {
+                DownloadManager.stopAllDownloadsForCourse(course);
                 await DownloadManager.genDeleteAllDownloadsForCourse(course);
                 alert(`Deleted all downloads for ${courseTitle}.`);
               }
@@ -153,6 +154,7 @@ const DataManagement = (props) => {
                   `Are you sure you want to delete all data related to ${courseTitle}?`,
                 )
               ) {
+                DownloadManager.stopAllDownloadsForCourse(course);
                 await Promise.all([
                   DownloadManager.genDeleteFullCourseFolder(course),
                   genDeleteProgressForCourse(course),

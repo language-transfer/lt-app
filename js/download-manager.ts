@@ -81,6 +81,7 @@ const DownloadManager = {
       bytesWritten: 0,
       error: null,
       finished: false,
+      downloadTask,
     };
     DownloadManager._broadcast(downloadId);
 
@@ -189,6 +190,20 @@ const DownloadManager = {
 
   genDeleteFullCourseFolder: async (course: Course): Promise<void> => {
     await fs.unlink(DownloadManager.getDownloadFolderForCourse(course));
+  },
+
+  stopDownload: (downloadId: string): void => {
+    DownloadManager._downloads[downloadId].downloadTask.stop();
+    DownloadManager._broadcast(downloadId);
+    delete DownloadManager._downloads[downloadId];
+  },
+
+  stopAllDownloadsForCourse: (course: Course): void => {
+    Object.keys(DownloadManager._downloads).forEach((downloadId) => {
+      if (DownloadManager.getCourseIdForDownloadId(downloadId) === course) {
+        DownloadManager.stopDownload(downloadId);
+      }
+    });
   },
 };
 
