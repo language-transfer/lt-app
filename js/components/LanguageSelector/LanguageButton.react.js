@@ -44,7 +44,7 @@ const LanguageButton = (props) => {
 const styles = StyleSheet.create({
   sectionWrapper: {
     width: 150,
-    height: 150,
+    height: 175,
     margin: 15,
   },
   sectionContainer: {
@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   imageBackground: {
-    resizeMode: 'cover',
     borderRadius: 10,
     backgroundColor: 'white',
     elevation: 3,
@@ -69,6 +68,10 @@ const styles = StyleSheet.create({
   },
   image: {
     borderRadius: 10,
+    width: 140,
+    height: 140,
+    top: 5,
+    left: 5,
   },
   courseTitle: {
     fontSize: 28,
