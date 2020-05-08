@@ -6,6 +6,7 @@ import {
   genMarkLessonFinished,
   genPreferenceAutoplay,
   genPreferenceAutoplayNonDownloaded,
+  genPreferenceStreamQuality,
 } from './persistence';
 import CourseData, {Course} from './course-data';
 import DownloadManager from './download-manager';
@@ -45,7 +46,9 @@ export const genEnqueueFile = async (
 
   await TrackPlayer.removeUpcomingTracks();
 
-  let url = CourseData.getLessonUrl(course, lesson);
+  const quality = await genPreferenceStreamQuality();
+
+  let url = CourseData.getLessonUrl(course, lesson, quality);
   if (await DownloadManager.genIsDownloaded(course, lesson)) {
     url = DownloadManager.getDownloadSaveLocation(
       DownloadManager.getDownloadId(course, lesson),

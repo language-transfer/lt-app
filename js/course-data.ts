@@ -60,7 +60,8 @@ const data = {
   spanish: {
     image: spanishCover,
     title: 'Spanish',
-    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
+    metaUrl:
+      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 90,
     uiColors: {
       background: '#fbc02d',
@@ -71,7 +72,8 @@ const data = {
   arabic: {
     image: arabicCover,
     title: 'Arabic',
-    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
+    metaUrl:
+      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 38,
     uiColors: {
       background: '#424242',
@@ -82,7 +84,8 @@ const data = {
   turkish: {
     image: turkishCover,
     title: 'Turkish',
-    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
+    metaUrl:
+      'https://language-transfer.us-east-1.linodeobjects.com/turkish-meta.json',
     fallbackLessonCount: 44,
     uiColors: {
       background: '#d32f2f',
@@ -93,7 +96,8 @@ const data = {
   german: {
     image: germanCover,
     title: 'German',
-    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
+    metaUrl:
+      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 50,
     uiColors: {
       background: '#bf360c',
@@ -104,7 +108,8 @@ const data = {
   greek: {
     image: greekCover,
     title: 'Greek',
-    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
+    metaUrl:
+      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 120,
     uiColors: {
       background: '#e3f2fd',
@@ -115,7 +120,8 @@ const data = {
   italian: {
     image: italianCover,
     title: 'Italian',
-    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
+    metaUrl:
+      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 45,
     uiColors: {
       background: '#2e7d32',
@@ -126,7 +132,8 @@ const data = {
   swahili: {
     image: swahiliCover,
     title: 'Swahili',
-    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
+    metaUrl:
+      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 110,
     uiColors: {
       background: '#0097a7',
@@ -137,7 +144,8 @@ const data = {
   french: {
     image: frenchCover,
     title: 'French',
-    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
+    metaUrl:
+      'https://language-transfer.us-east-1.linodeobjects.com/french-meta.json',
     fallbackLessonCount: 40,
     uiColors: {
       background: '#1976d2',
@@ -148,7 +156,8 @@ const data = {
   ingles: {
     image: inglesCover,
     title: 'Inglés',
-    metaUrl: 'https://lt-dev.us-east-1.linodeobjects.com/spanish-meta.json',
+    metaUrl:
+      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 40,
     uiColors: {
       background: '#512da8',
@@ -233,8 +242,13 @@ const CourseData = {
     return courseMeta[course].lessons[lesson].id;
   },
 
-  getLessonUrl(course: Course, lesson: number): string {
-    return courseMeta[course].lessons[lesson].url;
+  getLessonUrl(course: Course, lesson: number, quality: string): string {
+    const urls = courseMeta[course].lessons[lesson].urls;
+    if (quality === 'high') {
+      return urls[urls.length - 1];
+    } else {
+      return urls[0];
+    }
   },
 
   getNextLesson(course: Course, lesson: number): number | null {

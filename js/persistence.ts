@@ -162,3 +162,13 @@ export const [
   genPreferenceAutoDeleteFinished,
   genSetPreferenceAutoDeleteFinished,
 ] = preference('auto-delete-finished', false, (b) => b === 'true');
+
+export const [
+  genPreferenceStreamQuality,
+  genSetPreferenceStreamQuality,
+] = preference('stream-quality', 'low', (b) => b);
+
+export const [
+  genPreferenceDownloadQuality,
+  genSetPreferenceDownloadQuality,
+] = preference('download-quality', 'high', (b) => b);

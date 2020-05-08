@@ -17,6 +17,10 @@ import {
   genSetPreferenceAutoplayNonDownloaded,
   genSetPreferenceAutoDeleteFinished,
   genPreferenceAutoDeleteFinished,
+  genPreferenceStreamQuality,
+  genPreferenceDownloadQuality,
+  genSetPreferenceStreamQuality,
+  genSetPreferenceDownloadQuality,
 } from '../../persistence';
 import {Icon} from 'react-native-elements';
 
@@ -38,16 +42,22 @@ const Settings = (props) => {
           autoplay,
           autoplayNonDownloaded,
           autoDeleteFinished,
+          streamQuality,
+          downloadQuality,
         ] = await Promise.all([
           genPreferenceAutoplay(),
           genPreferenceAutoplayNonDownloaded(),
           genPreferenceAutoDeleteFinished(),
+          genPreferenceStreamQuality(),
+          genPreferenceDownloadQuality(),
         ]);
 
         setSettings({
           autoplay,
           autoplayNonDownloaded,
           autoDeleteFinished,
+          streamQuality,
+          downloadQuality,
         });
 
         setNeedsUpdate(false);
@@ -72,7 +82,7 @@ const Settings = (props) => {
             setNeedsUpdate(true);
           }}>
           <View style={styles.settingsRow}>
-            <View style={styles.settingsCheckContainer}>
+            <View style={styles.settingsValueContainer}>
               <Icon
                 style={{
                   ...styles.settingsCheck,
@@ -105,7 +115,7 @@ const Settings = (props) => {
               ...styles.settingsRow,
               ...(settings.autoplay ? {} : {opacity: 0.3}),
             }}>
-            <View style={styles.settingsCheckContainer}>
+            <View style={styles.settingsValueContainer}>
               <Icon
                 style={{
                   ...styles.settingsCheck,
@@ -136,7 +146,7 @@ const Settings = (props) => {
             setNeedsUpdate(true);
           }}>
           <View style={styles.settingsRow}>
-            <View style={styles.settingsCheckContainer}>
+            <View style={styles.settingsValueContainer}>
               <Icon
                 style={{
                   ...styles.settingsCheck,
@@ -158,6 +168,50 @@ const Settings = (props) => {
             </View>
           </View>
         </TouchableNativeFeedback>
+
+        <TouchableNativeFeedback
+          onPress={async () => {
+            await genSetPreferenceStreamQuality(
+              {low: 'high', high: 'low'}[settings.streamQuality], // kind of reminds me of permutations from combinatorics class. kind of. @scottsha
+            );
+            setNeedsUpdate(true);
+          }}>
+          <View style={styles.settingsRow}>
+            <View style={styles.settingsValueContainer}>
+              <Text>{settings.streamQuality}</Text>
+            </View>
+            <View style={styles.settingsText}>
+              <Text style={styles.settingsTitle}>Streaming quality</Text>
+              <Text style={styles.settingsDescription}>
+                When streaming lessons directly from the server, should we use
+                high- or low-quality audio? High quality audio uses about 1
+                megabyte per minute. Low-quality audio uses about one third of a
+                megabyte per minute.
+              </Text>
+            </View>
+          </View>
+        </TouchableNativeFeedback>
+
+        <TouchableNativeFeedback
+          onPress={async () => {
+            await genSetPreferenceDownloadQuality(
+              {low: 'high', high: 'low'}[settings.downloadQuality], // kind of reminds me of permutations from combinatorics class. kind of. @scottsha
+            );
+            setNeedsUpdate(true);
+          }}>
+          <View style={styles.settingsRow}>
+            <View style={styles.settingsValueContainer}>
+              <Text>{settings.downloadQuality}</Text>
+            </View>
+            <View style={styles.settingsText}>
+              <Text style={styles.settingsTitle}>Download quality</Text>
+              <Text style={styles.settingsDescription}>
+                When downloading lessons to your device, should we use high- or
+                low-quality audio?
+              </Text>
+            </View>
+          </View>
+        </TouchableNativeFeedback>
       </View>
     </ScrollView>
   );
@@ -174,7 +228,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
     borderBottomWidth: 1,
   },
-  settingsCheckContainer: {
+  settingsValueContainer: {
     width: '20%',
     justifyContent: 'center',
     alignItems: 'center',

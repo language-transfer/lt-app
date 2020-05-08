@@ -48,8 +48,8 @@ const LanguageHomeBody = (props) => {
               opacity: showMetadataWarning ? 1 : 0,
             }}>
             <Text style={styles.metadataWarningText}>
-              If this screen does not load, try updating or reinstalling the
-              Lanugage Transfer app.
+              If this screen does not load, check your Internet connection or
+              try updating or reinstalling the Lanugage Transfer app.
             </Text>
           </View>
         </View>

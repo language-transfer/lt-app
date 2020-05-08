@@ -5,7 +5,10 @@ import type {Course} from './course-data';
 import CourseData from './course-data';
 import Downloader from 'react-native-background-downloader';
 import DownloadTask from 'react-native-background-downloader/lib/downloadTask';
-import {genProgressForLesson} from './persistence';
+import {
+  genProgressForLesson,
+  genPreferenceDownloadQuality,
+} from './persistence';
 
 export type DownloadProgress = {
   requested: boolean;
@@ -47,12 +50,14 @@ const DownloadManager = {
   },
 
   startDownload: async (course: Course, lesson: number) => {
+    const quality = await genPreferenceDownloadQuality();
+
     // directory should exist, since the metadata is in there. if not, you really
     // need to have been creative to have screwed it up, so you deserve the app crashing
     DownloadManager.attachCallbacks(
       Downloader.download({
         id: DownloadManager.getDownloadId(course, lesson),
-        url: CourseData.getLessonUrl(course, lesson),
+        url: CourseData.getLessonUrl(course, lesson, quality),
         destination: DownloadManager.getDownloadStagingLocation(
           DownloadManager.getDownloadId(course, lesson),
         ),
