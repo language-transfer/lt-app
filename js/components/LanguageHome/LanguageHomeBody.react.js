@@ -9,7 +9,10 @@ import {
 } from 'react-native';
 
 import {Icon} from 'react-native-elements';
-import {TouchableNativeFeedback} from 'react-native-gesture-handler';
+import {
+  TouchableNativeFeedback,
+  ScrollView,
+} from 'react-native-gesture-handler';
 import LanguageHomeTopButton from './LanguageHomeTopButton.react';
 import CourseData from '../../course-data';
 
@@ -35,49 +38,51 @@ const LanguageHomeBody = (props) => {
 
   return (
     <View style={styles.body}>
-      <LanguageHomeTopButton
-        navigation={props.navigation}
-        route={props.route}
-      />
+      <ScrollView>
+        <LanguageHomeTopButton
+          navigation={props.navigation}
+          route={props.route}
+        />
 
-      <View style={styles.additionalButton}>
-        <TouchableNativeFeedback
-          onPress={() =>
-            props.navigation.navigate('All Lessons', {
-              course: props.route.params.course,
-            })
-          }
-          useForeground={true}>
-          <View style={styles.additionalButtonInner}>
-            <Text style={styles.additionalButtonText}>All Lessons</Text>
-            <Icon name="list-ol" type="font-awesome-5" />
-          </View>
-        </TouchableNativeFeedback>
-      </View>
+        <View style={styles.additionalButton}>
+          <TouchableNativeFeedback
+            onPress={() =>
+              props.navigation.navigate('All Lessons', {
+                course: props.route.params.course,
+              })
+            }
+            useForeground={true}>
+            <View style={styles.additionalButtonInner}>
+              <Text style={styles.additionalButtonText}>All Lessons</Text>
+              <Icon name="list-ol" type="font-awesome-5" />
+            </View>
+          </TouchableNativeFeedback>
+        </View>
 
-      <View style={styles.additionalButton}>
-        <TouchableNativeFeedback onPress={props.onPress} useForeground={true}>
-          <View style={styles.additionalButtonInner}>
-            <Text style={styles.additionalButtonText}>Data Management</Text>
-            <Icon name="tools" type="font-awesome-5" />
-          </View>
-        </TouchableNativeFeedback>
-      </View>
+        <View style={styles.additionalButton}>
+          <TouchableNativeFeedback onPress={props.onPress} useForeground={true}>
+            <View style={styles.additionalButtonInner}>
+              <Text style={styles.additionalButtonText}>Data Management</Text>
+              <Icon name="tools" type="font-awesome-5" />
+            </View>
+          </TouchableNativeFeedback>
+        </View>
 
-      <View style={styles.additionalButton}>
-        <TouchableNativeFeedback
-          onPress={() =>
-            Linking.openURL('https://www.patreon.com/languagetransfer')
-          }
-          useForeground={true}>
-          <View style={styles.additionalButtonInner}>
-            <Text style={styles.additionalButtonText}>
-              Support Language Transfer
-            </Text>
-            <Icon name="patreon" type="font-awesome-5" />
-          </View>
-        </TouchableNativeFeedback>
-      </View>
+        <View style={styles.additionalButton}>
+          <TouchableNativeFeedback
+            onPress={() =>
+              Linking.openURL('https://www.patreon.com/languagetransfer')
+            }
+            useForeground={true}>
+            <View style={styles.additionalButtonInner}>
+              <Text style={styles.additionalButtonText}>
+                Support Language Transfer
+              </Text>
+              <Icon name="patreon" type="font-awesome-5" />
+            </View>
+          </TouchableNativeFeedback>
+        </View>
+      </ScrollView>
     </View>
   );
 };

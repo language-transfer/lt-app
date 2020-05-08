@@ -72,6 +72,7 @@ let intentionalDestroy = false;
 export const genStopPlaying = async () => {
   intentionalDestroy = true;
   currentlyPlaying = null;
+  await TrackPlayer.pause(); // might fix bugs where sometimes the notification goes away but keeps playing
   await TrackPlayer.destroy();
 };
 
