@@ -191,21 +191,26 @@ const CourseData = {
     return !!courseMeta[course];
   },
 
-  async genLoadCourseMetadata(course: Course): Promise<void> {
-    if (CourseData.isCourseMetadataLoaded(course)) {
-      return;
-    }
-
+  async genLoadCourseMetadata(
+    course: Course,
+    forceLoadFromServer: boolean = false,
+  ): Promise<void> {
     const metaFilename = path.basename(data[course].metaUrl);
     const localPath = `${DownloadManager.getDownloadFolderForCourse(
       course,
     )}/${metaFilename}`;
 
-    try {
-      const metaString = await fs.readFile(localPath);
-      courseMeta[course] = JSON.parse(metaString);
-      return;
-    } catch (e) {}
+    if (!forceLoadFromServer) {
+      if (CourseData.isCourseMetadataLoaded(course)) {
+        return;
+      }
+
+      try {
+        const metaString = await fs.readFile(localPath);
+        courseMeta[course] = JSON.parse(metaString);
+        return;
+      } catch (e) {}
+    }
 
     const json = await fetch(data[course].metaUrl).then((r) => r.json());
 
@@ -218,6 +223,10 @@ const CourseData = {
       await fs.mkdir(DownloadManager.getDownloadFolderForCourse(course));
     }
     await fs.writeFile(localPath, JSON.stringify(json));
+  },
+
+  clearCourseMetadata(course: Course): void {
+    courseMeta[course] = undefined;
   },
 
   getLessonId(course: Course, lesson: number): string {

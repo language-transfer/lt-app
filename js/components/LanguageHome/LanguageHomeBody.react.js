@@ -20,10 +20,14 @@ const LanguageHomeBody = (props) => {
   const [metadataLoadedForCourse, setMetadataLoadedForCourse] = useState(false);
 
   useEffect(() => {
-    (async () => {
+    const load = async () => {
       await CourseData.genLoadCourseMetadata(props.route.params.course);
       setMetadataLoadedForCourse(props.route.params.course);
-    })();
+    };
+
+    load();
+
+    return props.navigation.addListener('focus', load);
   }, [props.route.params.course, metadataLoadedForCourse]);
 
   if (!CourseData.isCourseMetadataLoaded(props.route.params.course)) {
@@ -60,7 +64,13 @@ const LanguageHomeBody = (props) => {
         </View>
 
         <View style={styles.additionalButton}>
-          <TouchableNativeFeedback onPress={props.onPress} useForeground={true}>
+          <TouchableNativeFeedback
+            onPress={() =>
+              props.navigation.navigate('Data Management', {
+                course: props.route.params.course,
+              })
+            }
+            useForeground={true}>
             <View style={styles.additionalButtonInner}>
               <Text style={styles.additionalButtonText}>Data Management</Text>
               <Icon name="tools" type="font-awesome-5" />

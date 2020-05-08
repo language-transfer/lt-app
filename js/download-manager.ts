@@ -5,6 +5,7 @@ import type {Course} from './course-data';
 import CourseData from './course-data';
 import Downloader from 'react-native-background-downloader';
 import DownloadTask from 'react-native-background-downloader/lib/downloadTask';
+import {genProgressForLesson} from './persistence';
 
 export type DownloadProgress = {
   requested: boolean;
@@ -141,10 +142,42 @@ const DownloadManager = {
 
   resumeDownloads: async () => {
     const interrupted = await Downloader.checkForExistingDownloads();
-    console.log(interrupted);
     interrupted.forEach((task) => {
       DownloadManager.attachCallbacks(task);
     });
+  },
+
+  genDeleteAllDownloadsForCourse: async (course: Course): Promise<void> => {
+    await Promise.all(
+      CourseData.getLessonIndices(course).map((lesson) =>
+        (async (lesson) => {
+          if (await DownloadManager.genIsDownloaded(course, lesson)) {
+            await DownloadManager.genDeleteDownload(course, lesson);
+          }
+        })(lesson),
+      ),
+    );
+  },
+
+  genDeleteFinishedDownloadsForCourse: async (
+    course: Course,
+  ): Promise<void> => {
+    await Promise.all(
+      CourseData.getLessonIndices(course).map((lesson) =>
+        (async (lesson) => {
+          if (
+            (await genProgressForLesson(course, lesson)).finished &&
+            (await DownloadManager.genIsDownloaded(course, lesson))
+          ) {
+            await DownloadManager.genDeleteDownload(course, lesson);
+          }
+        })(lesson),
+      ),
+    );
+  },
+
+  genDeleteFullCourseFolder: async (course: Course): Promise<void> => {
+    await fs.unlink(DownloadManager.getDownloadFolderForCourse(course));
   },
 };
 

@@ -4,8 +4,6 @@ import {
   Text,
   StatusBar,
   StyleSheet,
-  Image,
-  CheckBox,
   TouchableNativeFeedback,
 } from 'react-native';
 
@@ -168,7 +166,6 @@ const Settings = (props) => {
 const styles = StyleSheet.create({
   body: {
     backgroundColor: 'white',
-    height: '100%',
   },
   settingsRow: {
     paddingVertical: 30,

@@ -1,7 +1,7 @@
 import {AsyncStorage} from 'react-native';
 import type {Course} from './course-data';
-import {DefaultTransition} from '@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets';
 import DownloadManager from './download-manager';
+import CourseData from './course-data';
 
 // Some operations are not atomic. I don't expect it to cause problems, so I
 // haven't gone to the effort of adding a mutex. mostly because I don't like
@@ -110,10 +110,25 @@ export const genMarkLessonFinished = async (
     (await genPreferenceAutoDeleteFinished()) &&
     (await DownloadManager.genIsDownloaded(course, lesson))
   ) {
-    console.log('dd', course, lesson);
     await DownloadManager.genDeleteDownload(course, lesson);
-    console.log('dd2', course, lesson);
   }
+};
+
+export const genDeleteProgressForCourse = async (
+  course: Course,
+): Promise<void> => {
+  const shouldRemoveGlobalRecentCourse =
+    (await AsyncStorage.getItem('@activity/most-recent-course')) === course;
+
+  await Promise.all([
+    AsyncStorage.removeItem(`@activity/${course}/most-recent-lesson`),
+    ...(shouldRemoveGlobalRecentCourse
+      ? [AsyncStorage.removeItem('@activity/most-recent-course')]
+      : []),
+    ...CourseData.getLessonIndices(course).map((lesson) =>
+      AsyncStorage.removeItem(`@activity/${course}/${lesson}`),
+    ),
+  ]);
 };
 
 const preference = (name, defaultValue, fromString) => {

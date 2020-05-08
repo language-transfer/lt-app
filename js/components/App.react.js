@@ -24,6 +24,7 @@ import CourseData from '../course-data';
 import {navigationRef} from '../navigation-ref';
 import About from './About/About.react';
 import Settings from './Settings/Settings.react';
+import DataManagement from './DataManagement/DataManagement.react';
 
 const Stack = createStackNavigator();
 
@@ -69,25 +70,15 @@ const App = () => {
           component={Listen}
           options={{
             headerShown: false,
-            // headerTitle: 'Spanish',
-            // headerStatusBarHeight: 16,
-            // headerStyle: {
-            //   elevation: 0,
-            // },
           }}
         />
         <Stack.Screen
           name="All Lessons"
           component={AllLessons}
           options={({route}) => ({
-            // headerShown: false,
             headerTitle: `${CourseData.getCourseTitle(
               route.params.course,
             )}: All Lessons`,
-            // headerStatusBarHeight: 4,
-            headerStyle: {
-              // elevation: 0,
-            },
           })}
         />
         <Stack.Screen
@@ -103,6 +94,15 @@ const App = () => {
           options={{
             headerTitle: 'Settings',
           }}
+        />
+        <Stack.Screen
+          name="Data Management"
+          component={DataManagement}
+          options={({route}) => ({
+            headerTitle: `${CourseData.getCourseTitle(
+              route.params.course,
+            )}: Data Management`,
+          })}
         />
       </Stack.Navigator>
     </NavigationContainer>
