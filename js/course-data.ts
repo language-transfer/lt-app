@@ -1,12 +1,12 @@
-import spanishCover from '../resources/spanish-cover.png';
-import arabicCover from '../resources/arabic-cover.png';
-import turkishCover from '../resources/turkish-cover.png';
-import germanCover from '../resources/german-cover.png';
-import greekCover from '../resources/greek-cover.png';
-import italianCover from '../resources/italian-cover.png';
-import swahiliCover from '../resources/swahili-cover.png';
-import frenchCover from '../resources/french-cover.png';
-import inglesCover from '../resources/ingles-cover.png';
+import spanishCover from '../resources/spanish-cover-stylized.png';
+import arabicCover from '../resources/arabic-cover-stylized.png';
+import turkishCover from '../resources/turkish-cover-stylized.png';
+import germanCover from '../resources/german-cover-stylized.png';
+import greekCover from '../resources/greek-cover-stylized.png';
+import italianCover from '../resources/italian-cover-stylized.png';
+import swahiliCover from '../resources/swahili-cover-stylized.png';
+import frenchCover from '../resources/french-cover-stylized.png';
+import inglesCover from '../resources/ingles-cover-stylized.png';
 
 import fs from 'react-native-fs';
 import path from 'react-native-path';
@@ -64,21 +64,23 @@ const data = {
       'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 90,
     uiColors: {
-      background: '#fbc02d',
-      text: 'black',
-      backgroundAccent: '#c49000',
+      background: '#7186d0',
+      softBackground: '#d5d9ee',
+      text: 'white',
+      backgroundAccent: '#516198',
     },
   },
   arabic: {
     image: arabicCover,
     title: 'Arabic',
     metaUrl:
-      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
+      'https://language-transfer.us-east-1.linodeobjects.com/arabic-meta.json',
     fallbackLessonCount: 38,
     uiColors: {
-      background: '#424242',
-      text: 'white',
-      backgroundAccent: '#1b1b1b',
+      background: '#c2930f',
+      softBackground: '#e9dccc',
+      text: 'black',
+      backgroundAccent: '#806006',
     },
   },
   turkish: {
@@ -88,19 +90,21 @@ const data = {
       'https://language-transfer.us-east-1.linodeobjects.com/turkish-meta.json',
     fallbackLessonCount: 44,
     uiColors: {
-      background: '#d32f2f',
+      background: '#a20b3b',
+      softBackground: '#e0ccce',
       text: 'white',
-      backgroundAccent: '#9a0007',
+      backgroundAccent: '#760629',
     },
   },
   german: {
     image: germanCover,
     title: 'German',
     metaUrl:
-      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
+      'https://language-transfer.us-east-1.linodeobjects.com/german-meta.json',
     fallbackLessonCount: 50,
     uiColors: {
-      background: '#bf360c',
+      background: '#009900',
+      softBackground: '#cbdecb',
       text: 'white',
       backgroundAccent: '#870000',
     },
@@ -109,36 +113,39 @@ const data = {
     image: greekCover,
     title: 'Greek',
     metaUrl:
-      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
+      'https://language-transfer.us-east-1.linodeobjects.com/greek-meta.json',
     fallbackLessonCount: 120,
     uiColors: {
-      background: '#e3f2fd',
-      text: 'black',
-      backgroundAccent: '#b1bfca',
+      background: '#d57d2f',
+      softBackground: '#efd7cd',
+      text: 'white',
+      backgroundAccent: '#9c5a20',
     },
   },
   italian: {
     image: italianCover,
     title: 'Italian',
     metaUrl:
-      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
+      'https://language-transfer.us-east-1.linodeobjects.com/italian-meta.json',
     fallbackLessonCount: 45,
     uiColors: {
-      background: '#2e7d32',
+      background: '#e423ae',
+      softBackground: '#f5cce3',
       text: 'white',
-      backgroundAccent: '#005005',
+      backgroundAccent: '#a7177f',
     },
   },
   swahili: {
     image: swahiliCover,
     title: 'Swahili',
     metaUrl:
-      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
+      'https://language-transfer.us-east-1.linodeobjects.com/swahili-meta.json',
     fallbackLessonCount: 110,
     uiColors: {
-      background: '#0097a7',
-      text: 'white',
-      backgroundAccent: '#006978',
+      background: '#12eddd',
+      softBackground: '#ccf8f2',
+      text: 'black',
+      backgroundAccent: '#0aaea2',
     },
   },
   french: {
@@ -148,21 +155,23 @@ const data = {
       'https://language-transfer.us-east-1.linodeobjects.com/french-meta.json',
     fallbackLessonCount: 40,
     uiColors: {
-      background: '#1976d2',
+      background: '#10bdff',
+      softBackground: '#cce8ff',
       text: 'white',
-      backgroundAccent: '#004ba0',
+      backgroundAccent: '#098abc',
     },
   },
   ingles: {
     image: inglesCover,
     title: 'Inglés',
     metaUrl:
-      'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
+      'https://language-transfer.us-east-1.linodeobjects.com/ingles-meta.json',
     fallbackLessonCount: 40,
     uiColors: {
-      background: '#512da8',
+      background: '#7186d0',
+      softBackground: '#d5daee',
       text: 'white',
-      backgroundAccent: '#140078',
+      backgroundAccent: '#516198',
     },
   },
 };

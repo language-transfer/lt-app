@@ -17,19 +17,29 @@ import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 const LanguageButton = (props) => {
   const lessonCount = CourseData.getFallbackLessonCount(props.course);
 
+  const textStyle = {
+    color: 'black', //todo
+  };
+
   return (
     <View style={styles.sectionWrapper}>
       <ImageBackground
         source={CourseData.getCourseImage(props.course)}
-        style={styles.imageBackground}
+        style={{
+          ...styles.imageBackground,
+          backgroundColor: CourseData.getCourseUIColors(props.course)
+            .softBackground,
+        }}
         imageStyle={styles.image}>
         <View style={styles.rippleWrapper}>
           <TouchableNativeFeedback onPress={props.onPress} useForeground={true}>
             <View style={styles.sectionContainer}>
-              <Text style={styles.courseTitle}>
+              <Text style={{...styles.courseTitle, ...textStyle}}>
                 {CourseData.getCourseTitle(props.course)}
               </Text>
-              <Text style={styles.courseDetails}>{lessonCount} lessons</Text>
+              <Text style={{...styles.courseDetails, ...textStyle}}>
+                {lessonCount} lessons
+              </Text>
             </View>
           </TouchableNativeFeedback>
         </View>
@@ -41,7 +51,7 @@ const LanguageButton = (props) => {
 const styles = StyleSheet.create({
   sectionWrapper: {
     width: 150,
-    height: 175,
+    height: 185,
     margin: 15,
   },
   sectionContainer: {
@@ -56,7 +66,6 @@ const styles = StyleSheet.create({
   },
   imageBackground: {
     borderRadius: 10,
-    backgroundColor: 'white',
     elevation: 3,
   },
   rippleWrapper: {

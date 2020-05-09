@@ -4,6 +4,8 @@ import {View, Text, StatusBar, StyleSheet, Image} from 'react-native';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {ScrollView} from 'react-native-gesture-handler';
 
+import DeviceInfo from 'react-native-device-info';
+
 import logo from '../../../resources/LT-logo-text.png';
 
 const About = (props) => {
@@ -35,11 +37,17 @@ const About = (props) => {
         <Text style={styles.headerText}>Language Transfer</Text>
 
         <Text style={styles.bodyText}>
-          Language Transfer is a free project by Mihalis Eleftheriou and many
-          volunteers.
+          Language Transfer audio courses capture real life learning experiences
+          in which you can participate fully, wherever you are in the world!
+          Just engage, pause, think and answer out loud, the rest will take care
+          of itself!
         </Text>
-        {/* blah blah */}
-        {/* <Text style={styles.bodyText}>
+
+        <Text style={styles.bodyText}>
+          Language Transfer is a project by Mihalis Eleftheriou. There's no LT
+          team, though many volunteers have helped along the way.
+        </Text>
+        <Text style={styles.bodyText}>
           The free model reflects a desire to play a cooperative and caring role
           in society, rather than a competitive one.
         </Text>
@@ -49,16 +57,18 @@ const About = (props) => {
           really learn.
         </Text>
         <Text style={styles.bodyText}>LT is a non-profit project.</Text>
-        <Text style={styles.bodyText}>LT has no sponsors or advertisers.</Text> */}
+        <Text style={styles.bodyText}>LT has no sponsors or advertisers.</Text>
 
         <Text style={styles.headerText}>App</Text>
 
         <Text style={styles.bodyText}>
           The Language Transfer app is free, open-source software. You can find
-          its source code on GitHub at .
+          its source code on GitHub at . The app's core maintainer is Timothy J.
+          Aveni.
         </Text>
         <Text style={styles.bodyText}>
-          This is version 0.0 of the Language Transfer app.
+          This is version {DeviceInfo.getVersion()} of the Language Transfer
+          app.
         </Text>
       </View>
     </ScrollView>
