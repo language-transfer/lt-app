@@ -9,6 +9,7 @@ import {
   Text,
   StatusBar,
   Button,
+  AppState,
 } from 'react-native';
 
 import {NavigationContainer} from '@react-navigation/native';
@@ -30,8 +31,22 @@ import {log} from '../metrics';
 const Stack = createStackNavigator();
 
 const App = () => {
-  // one day, the Suspense page won't have a bunch of red warnings at the top
+  // one day, the Suspense documentation page won't have a bunch of red warnings at the top
   const [recentCourse, setRecentCourse] = useState(null);
+
+  useEffect(() => {
+    const logAppStateChange = (newState) =>
+      log({
+        action: 'app_state_change',
+        surface: newState, // 'surface' is a little weird but prefer to new column
+      });
+
+    AppState.addEventListener('change', logAppStateChange);
+
+    return () => {
+      AppState.removeEventListener('change', logAppStateChange);
+    };
+  }, []);
 
   useEffect(() => {
     (async () => {
