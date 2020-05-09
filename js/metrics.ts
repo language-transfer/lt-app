@@ -1,6 +1,7 @@
 import DeviceInfo from 'react-native-device-info';
 
 import {genPreferenceAllowDataCollection, genMetricsToken} from './persistence';
+import CourseData from './course-data';
 
 const LOG_ENDPOINT = 'http://192.168.0.11:6774/log';
 
@@ -11,6 +12,10 @@ export const log = async (data): Promise<void> => {
   ]);
 
   if (!permitted) return;
+
+  if (data.course && CourseData.isCourseMetadataLoaded(data.course)) {
+    data.metadata_version = CourseData.getMetadataVersion(data.course);
+  }
 
   try {
     await fetch(LOG_ENDPOINT, {

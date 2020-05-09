@@ -200,6 +200,10 @@ const CourseData = {
     return !!courseMeta[course];
   },
 
+  getMetadataVersion(course: Course) {
+    return courseMeta[course].version;
+  },
+
   async genLoadCourseMetadata(
     course: Course,
     forceLoadFromServer: boolean = false,
