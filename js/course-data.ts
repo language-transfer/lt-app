@@ -1,12 +1,21 @@
 import spanishCover from '../resources/spanish-cover-stylized.png';
+import spanishCoverWithText from '../resources/spanish-cover-stylized-with-text.png';
 import arabicCover from '../resources/arabic-cover-stylized.png';
+import arabicCoverWithText from '../resources/arabic-cover-stylized-with-text.png';
 import turkishCover from '../resources/turkish-cover-stylized.png';
+import turkishCoverWithText from '../resources/turkish-cover-stylized-with-text.png';
 import germanCover from '../resources/german-cover-stylized.png';
+import germanCoverWithText from '../resources/german-cover-stylized-with-text.png';
 import greekCover from '../resources/greek-cover-stylized.png';
+import greekCoverWithText from '../resources/greek-cover-stylized-with-text.png';
 import italianCover from '../resources/italian-cover-stylized.png';
+import italianCoverWithText from '../resources/italian-cover-stylized-with-text.png';
 import swahiliCover from '../resources/swahili-cover-stylized.png';
+import swahiliCoverWithText from '../resources/swahili-cover-stylized-with-text.png';
 import frenchCover from '../resources/french-cover-stylized.png';
+import frenchCoverWithText from '../resources/french-cover-stylized-with-text.png';
 import inglesCover from '../resources/ingles-cover-stylized.png';
+import inglesCoverWithText from '../resources/ingles-cover-stylized-with-text.png';
 
 import fs from 'react-native-fs';
 import path from 'react-native-path';
@@ -59,6 +68,7 @@ const courseMeta = {};
 const data = {
   spanish: {
     image: spanishCover,
+    imageWithText: spanishCoverWithText,
     title: 'Spanish',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
@@ -72,6 +82,7 @@ const data = {
   },
   arabic: {
     image: arabicCover,
+    imageWithText: arabicCoverWithText,
     title: 'Arabic',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/arabic-meta.json',
@@ -85,6 +96,7 @@ const data = {
   },
   turkish: {
     image: turkishCover,
+    imageWithText: turkishCoverWithText,
     title: 'Turkish',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/turkish-meta.json',
@@ -98,6 +110,7 @@ const data = {
   },
   german: {
     image: germanCover,
+    imageWithText: germanCoverWithText,
     title: 'German',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/german-meta.json',
@@ -111,6 +124,7 @@ const data = {
   },
   greek: {
     image: greekCover,
+    imageWithText: greekCoverWithText,
     title: 'Greek',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/greek-meta.json',
@@ -124,6 +138,7 @@ const data = {
   },
   italian: {
     image: italianCover,
+    imageWithText: italianCoverWithText,
     title: 'Italian',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/italian-meta.json',
@@ -137,6 +152,7 @@ const data = {
   },
   swahili: {
     image: swahiliCover,
+    imageWithText: swahiliCoverWithText,
     title: 'Swahili',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/swahili-meta.json',
@@ -150,6 +166,7 @@ const data = {
   },
   french: {
     image: frenchCover,
+    imageWithText: frenchCoverWithText,
     title: 'French',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/french-meta.json',
@@ -163,6 +180,7 @@ const data = {
   },
   ingles: {
     image: inglesCover,
+    imageWithText: inglesCoverWithText,
     title: 'Inglés',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/ingles-meta.json',
@@ -185,16 +203,16 @@ const CourseData = {
     return Object.keys(data);
   },
 
-  getImageForCourse(course: Course) {
-    return data[course].image;
-  },
-
   getCourseTitle(course: Course): string {
     return data[course].title;
   },
 
   getCourseImage(course: Course) {
     return data[course].image;
+  },
+
+  getCourseImageWithText(course: Course) {
+    return data[course].imageWithText;
   },
 
   getCourseUIColors(course: Course) {
