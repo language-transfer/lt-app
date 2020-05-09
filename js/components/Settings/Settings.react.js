@@ -98,6 +98,7 @@ const Settings = (props) => {
                   ...styles.settingsCheck,
                   ...(settings.autoplay ? {} : {opacity: 0}),
                 }}
+                accessibilityLabel={settings.autoplay ? 'enabled' : 'disabled'}
                 name="check"
                 type="font-awesome-5"
               />
@@ -130,6 +131,9 @@ const Settings = (props) => {
                   ...styles.settingsCheck,
                   ...(settings.autoplayNonDownloaded ? {} : {opacity: 0}),
                 }}
+                accessibilityLabel={
+                  settings.autoplayNonDownloaded ? 'enabled' : 'disabled'
+                }
                 name="check"
                 type="font-awesome-5"
               />
@@ -160,6 +164,9 @@ const Settings = (props) => {
                   ...styles.settingsCheck,
                   ...(settings.autoDeleteFinished ? {} : {opacity: 0}),
                 }}
+                accessibilityLabel={
+                  settings.autoDeleteFinished ? 'enabled' : 'disabled'
+                }
                 name="check"
                 type="font-awesome-5"
               />
@@ -190,6 +197,9 @@ const Settings = (props) => {
                   ...styles.settingsCheck,
                   ...(settings.downloadOnlyOnWifi ? {} : {opacity: 0}),
                 }}
+                accessibilityLabel={
+                  settings.downloadOnlyOnWifi ? 'enabled' : 'disabled'
+                }
                 name="check"
                 type="font-awesome-5"
               />
@@ -262,6 +272,9 @@ const Settings = (props) => {
                   ...styles.settingsCheck,
                   ...(settings.allowDataCollection ? {} : {opacity: 0}),
                 }}
+                accessibilityLabel={
+                  settings.allowDataCollection ? 'enabled' : 'disabled'
+                }
                 name="check"
                 type="font-awesome-5"
               />

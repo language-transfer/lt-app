@@ -129,6 +129,7 @@ const ListenBody = (props) => {
             <Icon
               name="replay-10"
               type="material"
+              accessibilityLabel="skip backwards ten seconds"
               size={72}
               color={CourseData.getCourseUIColors(course).text}
             />
@@ -138,6 +139,7 @@ const ListenBody = (props) => {
             onPress={props.toggle}>
             <Icon
               name={props.playing ? 'pause' : 'play-arrow'}
+              accessibilityLabel={props.playing ? 'pause' : 'play'}
               type="material"
               size={172}
               color={CourseData.getCourseUIColors(course).text}
@@ -151,6 +153,7 @@ const ListenBody = (props) => {
             <Icon
               name="settings"
               type="material"
+              accessibilityLabel="other actions for this lesson"
               size={72}
               color={CourseData.getCourseUIColors(course).text}
             />
