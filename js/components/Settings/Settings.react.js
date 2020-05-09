@@ -23,6 +23,8 @@ import {
   genSetPreferenceDownloadQuality,
   genPreferenceDownloadOnlyOnWifi,
   genSetPreferenceDownloadOnlyOnWifi,
+  genPreferenceAllowDataCollection,
+  genSetPreferenceAllowDataCollection,
 } from '../../persistence';
 import {Icon} from 'react-native-elements';
 
@@ -47,6 +49,7 @@ const Settings = (props) => {
           streamQuality,
           downloadQuality,
           downloadOnlyOnWifi,
+          allowDataCollection,
         ] = await Promise.all([
           genPreferenceAutoplay(),
           genPreferenceAutoplayNonDownloaded(),
@@ -54,6 +57,7 @@ const Settings = (props) => {
           genPreferenceStreamQuality(),
           genPreferenceDownloadQuality(),
           genPreferenceDownloadOnlyOnWifi(),
+          genPreferenceAllowDataCollection(),
         ]);
 
         setSettings({
@@ -63,6 +67,7 @@ const Settings = (props) => {
           streamQuality,
           downloadQuality,
           downloadOnlyOnWifi,
+          allowDataCollection,
         });
 
         setNeedsUpdate(false);
@@ -106,7 +111,6 @@ const Settings = (props) => {
             </View>
           </View>
         </TouchableNativeFeedback>
-
         <TouchableNativeFeedback
           onPress={async () => {
             await genSetPreferenceAutoplayNonDownloaded(
@@ -142,7 +146,6 @@ const Settings = (props) => {
             </View>
           </View>
         </TouchableNativeFeedback>
-
         <TouchableNativeFeedback
           onPress={async () => {
             await genSetPreferenceAutoDeleteFinished(
@@ -173,7 +176,6 @@ const Settings = (props) => {
             </View>
           </View>
         </TouchableNativeFeedback>
-
         <TouchableNativeFeedback
           onPress={async () => {
             await genSetPreferenceDownloadOnlyOnWifi(
@@ -203,7 +205,6 @@ const Settings = (props) => {
             </View>
           </View>
         </TouchableNativeFeedback>
-
         <TouchableNativeFeedback
           onPress={async () => {
             await genSetPreferenceStreamQuality(
@@ -226,7 +227,6 @@ const Settings = (props) => {
             </View>
           </View>
         </TouchableNativeFeedback>
-
         <TouchableNativeFeedback
           onPress={async () => {
             await genSetPreferenceDownloadQuality(
@@ -243,6 +243,38 @@ const Settings = (props) => {
               <Text style={styles.settingsDescription}>
                 When downloading lessons to your device, should we use high- or
                 low-quality audio?
+              </Text>
+            </View>
+          </View>
+        </TouchableNativeFeedback>
+
+        <TouchableNativeFeedback
+          onPress={async () => {
+            await genSetPreferenceAllowDataCollection(
+              !settings.allowDataCollection,
+            );
+            setNeedsUpdate(true);
+          }}>
+          <View style={styles.settingsRow}>
+            <View style={styles.settingsValueContainer}>
+              <Icon
+                style={{
+                  ...styles.settingsCheck,
+                  ...(settings.allowDataCollection ? {} : {opacity: 0}),
+                }}
+                name="check"
+                type="font-awesome-5"
+              />
+            </View>
+            <View style={styles.settingsText}>
+              <Text style={styles.settingsTitle}>Allow Data Collection</Text>
+              <Text style={styles.settingsDescription}>
+                Language Transfer records anonymous information about how people
+                are using this app, which helps us understand what to prioritize
+                when we're thinking about how to make the app better. We never
+                store your name or any personal data about you. Still, if you'd
+                like us to stop collecting information about how you use
+                Language Transfer, you can turn that off here.
               </Text>
             </View>
           </View>

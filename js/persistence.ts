@@ -177,3 +177,8 @@ export const [
   genPreferenceDownloadOnlyOnWifi,
   genSetPreferenceDownloadOnlyOnWifi,
 ] = preference('download-only-on-wifi', true, (b) => b === 'true');
+
+export const [
+  genPreferenceAllowDataCollection,
+  genSetPreferenceAllowDataCollection,
+] = preference('allow-data-collection', true, (b) => b === 'true');
