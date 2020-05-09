@@ -1,5 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableNativeFeedback} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableNativeFeedback,
+  Dimensions,
+} from 'react-native';
 import ProgressCircle from 'react-native-progress-circle';
 
 import {Icon} from 'react-native-elements';
@@ -10,58 +16,95 @@ import CourseData from '../../course-data';
 
 import {log} from '../../metrics';
 
-const renderDownloadProgress = (downloaded, progress, course, lesson) => {
+const renderDownloadProgress = (downloaded, downloadState, downloading) => {
   if (downloaded) {
-    // return <Icon name="download" type="font-awesome-5" size={24} />;
     return (
-      <View style={styles.downloadedText}>
-        <Text>Downloaded</Text>
-      </View>
+      <Icon
+        name="trash"
+        type="font-awesome-5"
+        accessibilityLabel="delete download"
+        size={36}
+      />
     );
   }
 
-  const downloading = progress && !progress.error && !progress.finished;
-  // const errored = progress && progress.error;
+  const errored = downloadState && downloadState.error;
 
-  // if (errored) {
-  //   return <Icon name="exclamation" type="font-awesome-5" size={24} />;
-  // }
+  if (errored) {
+    return (
+      <Icon
+        name="exclamation"
+        type="font-awesome-5"
+        accessibilityLabel="download error"
+        size={36}
+      />
+    );
+  }
 
   if (downloading) {
     const percent =
-      progress.totalBytes === null
+      downloadState.totalBytes === null
         ? 0
-        : (progress.bytesWritten / progress.totalBytes) * 100;
+        : (downloadState.bytesWritten / downloadState.totalBytes) * 100;
 
     return (
       <ProgressCircle
         percent={percent}
-        radius={14}
-        borderWidth={3}
+        radius={24}
+        borderWidth={6}
         color="#333"
         shadowColor="#ddd"
         bgColor="white">
-        <Text style={styles.progressCircleText}>{Math.floor(percent)}</Text>
+        <Text
+          style={styles.progressCircleText}
+          accessibilityLabel={Math.floor(percent) + ' percent downloaded'}>
+          {Math.floor(percent)}
+        </Text>
       </ProgressCircle>
     );
   }
 
   return (
     <View style={styles.downloadButton}>
-      <TouchableNativeFeedback
-        onPress={() => {
-          log({
-            action: 'download_lesson',
-            surface: 'all_lessons',
-            course,
-            lesson,
-          });
-          DownloadManager.startDownload(course, lesson);
-        }}>
-        <Text style={styles.downloadButtonText}>Download</Text>
-      </TouchableNativeFeedback>
+      <Icon
+        name="download"
+        type="font-awesome-5"
+        accessibilityLabel="download"
+        size={36}
+      />
     </View>
   );
+};
+
+const handleDownload = async (
+  course,
+  lesson,
+  downloaded,
+  downloading,
+  setLastDeletionAction,
+) => {
+  if (downloading) {
+    return;
+  }
+
+  if (!downloaded) {
+    log({
+      action: 'download_lesson',
+      surface: 'all_lessons',
+      course,
+      lesson,
+    });
+    DownloadManager.startDownload(course, lesson);
+  } else {
+    log({
+      action: 'delete_download',
+      surface: 'all_lessons',
+      course,
+      lesson,
+    });
+    await DownloadManager.genDeleteDownload(course, lesson);
+    setLastDeletionAction(+new Date());
+  }
 };
 
 const LessonRow = (props) => {
@@ -69,6 +112,7 @@ const LessonRow = (props) => {
 
   const [progress, setProgress] = useState(null);
   const [downloaded, setDownloaded] = useState(null);
+  const [lastDeletionAction, setLastDeletionAction] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -80,61 +124,91 @@ const LessonRow = (props) => {
       setProgress(progress);
       setDownloaded(downloaded);
     })();
-  }, [props.lastUpdateTime, downloadState]);
+  }, [props.lastUpdateTime, downloadState, lastDeletionAction]);
 
   if (progress === null || downloaded === null) {
     return null; // TODO: show a greyed-out version without the features
   }
 
   const finished = progress && progress.finished;
+  const downloading =
+    downloadState && !downloadState.error && !downloadState.finished;
 
   return (
-    <TouchableNativeFeedback
-      onPress={() => {
-        props.navigation.navigate('Listen', {
-          course: props.course,
-          lesson: props.lesson,
-        });
-      }}>
-      <View style={styles.row}>
-        <View style={styles.text}>
-          <Icon
-            style={{...styles.finishedIcon, ...(finished ? {} : {opacity: 0})}}
-            name="check"
-            type="font-awesome-5"
-            accessibilityLabel={finished ? 'finished' : 'not finished'}
-            size={24}
-          />
-          <Text style={styles.lessonTitleText}>
-            {CourseData.getLessonTitle(props.course, props.lesson)}
-          </Text>
-          <Text style={styles.lessonDurationText}>
-            {formatDuration(
-              CourseData.getLessonDuration(props.course, props.lesson) * 1000,
-            )}
-          </Text>
+    <View style={styles.row}>
+      <TouchableNativeFeedback
+        onPress={() => {
+          props.navigation.navigate('Listen', {
+            course: props.course,
+            lesson: props.lesson,
+          });
+        }}>
+        <View style={styles.lessonRow}>
+          <View style={styles.text}>
+            <Icon
+              style={{
+                ...styles.finishedIcon,
+                ...(finished ? {} : {opacity: 0}),
+              }}
+              name="check"
+              type="font-awesome-5"
+              accessibilityLabel={finished ? 'finished' : 'not finished'}
+              size={24}
+            />
+            <Text style={styles.lessonTitleText}>
+              {CourseData.getLessonTitle(props.course, props.lesson)}
+            </Text>
+            <Text style={styles.lessonDurationText}>
+              {formatDuration(
+                CourseData.getLessonDuration(props.course, props.lesson) * 1000,
+              )}
+            </Text>
+          </View>
         </View>
-        <View style={styles.icons}>
-          {renderDownloadProgress(
-            downloaded,
-            downloadState,
+      </TouchableNativeFeedback>
+      <TouchableNativeFeedback
+        onPress={() => {
+          handleDownload(
             props.course,
             props.lesson,
-          )}
+            downloaded,
+            downloading,
+            setLastDeletionAction,
+          );
+        }}
+        disabled={downloading}>
+        <View style={styles.downloadBox}>
+          <View style={styles.icons}>
+            {renderDownloadProgress(downloaded, downloadState, downloading)}
+          </View>
         </View>
-      </View>
-    </TouchableNativeFeedback>
+      </TouchableNativeFeedback>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   row: {
+    flexDirection: 'row',
+  },
+  lessonRow: {
     padding: 28,
     backgroundColor: 'white',
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    width: Dimensions.get('screen').width - 72,
+    height: 72,
+  },
+  downloadBox: {
+    width: 72,
+    height: 72,
+    backgroundColor: 'white',
+    borderColor: '#ccc',
+    borderBottomWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   text: {
     flexDirection: 'row',
@@ -156,14 +230,14 @@ const styles = StyleSheet.create({
     marginRight: 24,
   },
   progressCircleText: {
-    fontSize: 12,
+    fontSize: 16,
   },
 
   downloadedText: {
     justifyContent: 'center',
   },
   downloadButton: {
-    backgroundColor: 'rgb(231, 243, 255)',
+    // backgroundColor: 'rgb(231, 243, 255)',
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
