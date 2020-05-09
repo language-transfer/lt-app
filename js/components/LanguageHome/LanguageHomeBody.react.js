@@ -16,26 +16,29 @@ import {
 import LanguageHomeTopButton from './LanguageHomeTopButton.react';
 import CourseData from '../../course-data';
 
+let metadataWarningTimeout = null;
+
 const LanguageHomeBody = (props) => {
   const [metadataLoadedForCourse, setMetadataLoadedForCourse] = useState(false);
   const [showMetadataWarning, setShowMetadataWarning] = useState(false);
 
   useEffect(() => {
     const load = async () => {
+      clearTimeout(metadataWarningTimeout);
+      metadataWarningTimeout = setTimeout(() => {
+        setShowMetadataWarning(true);
+      }, 5000);
+
       await CourseData.genLoadCourseMetadata(props.route.params.course);
       setMetadataLoadedForCourse(props.route.params.course);
+      clearTimeout(metadataWarningTimeout);
+      setShowMetadataWarning(false);
     };
 
     load();
 
     return props.navigation.addListener('focus', load);
   }, [props.route.params.course, metadataLoadedForCourse]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setShowMetadataWarning(true);
-    }, 5000);
-  }, []);
 
   if (!CourseData.isCourseMetadataLoaded(props.route.params.course)) {
     return (
