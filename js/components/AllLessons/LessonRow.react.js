@@ -17,9 +17,6 @@ import {genProgressForLesson} from '../../persistence';
 import DownloadManager, {useDownloadStatus} from '../../download-manager';
 import CourseData from '../../course-data';
 
-// TODO: not DRY :/. but it also looks different in different contexts
-// (though, to be fair, that should probably be remedied, since it's
-// a crap affordance)
 const renderDownloadProgress = (downloaded, progress, course, lesson) => {
   if (downloaded) {
     // return <Icon name="download" type="font-awesome-5" size={24} />;
