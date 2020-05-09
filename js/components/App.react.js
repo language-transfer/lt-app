@@ -25,6 +25,7 @@ import {navigationRef} from '../navigation-ref';
 import About from './About/About.react';
 import Settings from './Settings/Settings.react';
 import DataManagement from './DataManagement/DataManagement.react';
+import {log} from '../metrics';
 
 const Stack = createStackNavigator();
 
@@ -44,7 +45,18 @@ const App = () => {
   }
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer
+      ref={navigationRef}
+      onStateChange={(state) => {
+        const route = state.routes[state.index];
+
+        log({
+          action: 'navigate',
+          surface: route.name,
+          course: route.params?.course,
+          lesson: route.params?.lesson,
+        });
+      }}>
       <Stack.Navigator
         initialRouteName={
           // look at this FORESIGHT to check for it in course data

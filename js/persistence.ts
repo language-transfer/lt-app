@@ -3,6 +3,9 @@ import type {Course} from './course-data';
 import DownloadManager from './download-manager';
 import CourseData from './course-data';
 
+import 'react-native-get-random-values';
+import {v4 as uuid} from 'uuid';
+
 // Some operations are not atomic. I don't expect it to cause problems, so I
 // haven't gone to the effort of adding a mutex. mostly because I don't like
 // the API for the most popular library.
@@ -129,6 +132,17 @@ export const genDeleteProgressForCourse = async (
       AsyncStorage.removeItem(`@activity/${course}/${lesson}`),
     ),
   ]);
+};
+
+export const genMetricsToken = async (): Promise<string> => {
+  const storedToken = await AsyncStorage.getItem('@metrics/user-token');
+  if (storedToken) {
+    return storedToken;
+  }
+
+  const createdToken = uuid();
+  await AsyncStorage.setItem('@metrics/user-token', createdToken);
+  return createdToken;
 };
 
 const preference = (name, defaultValue, fromString) => {
