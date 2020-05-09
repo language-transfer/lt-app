@@ -16,6 +16,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
 import {genDeleteProgressForCourse} from '../../persistence';
+import {log} from '../../metrics';
 
 const DataManagement = (props) => {
   useEffect(() => {
@@ -52,6 +53,11 @@ const DataManagement = (props) => {
         <View style={styles.button}>
           <TouchableNativeFeedback
             onPress={async () => {
+              log({
+                action: 'refresh_course_metadata',
+                surface: 'data_management',
+                course,
+              });
               await CourseData.genLoadCourseMetadata(course, true);
               alert(`Refreshed course metadata for ${courseTitle}!`);
             }}
@@ -71,13 +77,29 @@ const DataManagement = (props) => {
         <View style={styles.button}>
           <TouchableNativeFeedback
             onPress={async () => {
+              log({
+                action: 'delete_course_progress',
+                surface: 'data_management',
+                course,
+              });
               if (
                 await confirm(
                   `Are you sure you want to delete your progress in ${courseTitle}?`,
                 )
               ) {
+                log({
+                  action: 'delete_course_progress_confirm',
+                  surface: 'data_management',
+                  course,
+                });
                 await genDeleteProgressForCourse(course);
                 alert(`Deleted all progress for ${courseTitle}.`);
+              } else {
+                log({
+                  action: 'delete_course_progress_explicit_dismiss',
+                  surface: 'data_management',
+                  course,
+                });
               }
             }}
             useForeground={true}>
@@ -97,15 +119,31 @@ const DataManagement = (props) => {
         <View style={styles.button}>
           <TouchableNativeFeedback
             onPress={async () => {
+              log({
+                action: 'delete_finished_course_downloads',
+                surface: 'data_management',
+                course,
+              });
               if (
                 await confirm(
                   `Are you sure you want to delete your finished downloads for ${courseTitle}?`,
                 )
               ) {
+                log({
+                  action: 'delete_finished_course_downloads_confirm',
+                  surface: 'data_management',
+                  course,
+                });
                 await DownloadManager.genDeleteFinishedDownloadsForCourse(
                   course,
                 );
                 alert(`Deleted all finished downloads for ${courseTitle}.`);
+              } else {
+                log({
+                  action: 'delete_finished_course_downloads_explicit_dismiss',
+                  surface: 'data_management',
+                  course,
+                });
               }
             }}
             useForeground={true}>
@@ -124,14 +162,30 @@ const DataManagement = (props) => {
         <View style={styles.button}>
           <TouchableNativeFeedback
             onPress={async () => {
+              log({
+                action: 'delete_course_downloads',
+                surface: 'data_management',
+                course,
+              });
               if (
                 await confirm(
                   `Are you sure you want to delete all your downloads for ${courseTitle}?`,
                 )
               ) {
+                log({
+                  action: 'delete_course_downloads_confirm',
+                  surface: 'data_management',
+                  course,
+                });
                 DownloadManager.stopAllDownloadsForCourse(course);
                 await DownloadManager.genDeleteAllDownloadsForCourse(course);
                 alert(`Deleted all downloads for ${courseTitle}.`);
+              } else {
+                log({
+                  action: 'delete_course_downloads_explicit_dismiss',
+                  surface: 'data_management',
+                  course,
+                });
               }
             }}
             useForeground={true}>
@@ -149,11 +203,21 @@ const DataManagement = (props) => {
         <View style={styles.button}>
           <TouchableNativeFeedback
             onPress={async () => {
+              log({
+                action: 'delete_all_course_data',
+                surface: 'data_management',
+                course,
+              });
               if (
                 await confirm(
                   `Are you sure you want to delete all data related to ${courseTitle}?`,
                 )
               ) {
+                log({
+                  action: 'delete_all_course_data_confirm',
+                  surface: 'data_management',
+                  course,
+                });
                 DownloadManager.stopAllDownloadsForCourse(course);
                 await Promise.all([
                   DownloadManager.genDeleteFullCourseFolder(course),
@@ -162,6 +226,12 @@ const DataManagement = (props) => {
                 await CourseData.clearCourseMetadata(course);
                 props.navigation.navigate('Language Selector');
                 alert(`Deleted all data related to ${courseTitle}.`);
+              } else {
+                log({
+                  action: 'delete_all_course_data_explicit_dismiss',
+                  surface: 'data_management',
+                  course,
+                });
               }
             }}
             useForeground={true}>

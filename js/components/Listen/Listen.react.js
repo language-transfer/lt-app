@@ -21,6 +21,8 @@ import {
 import {genProgressForLesson} from '../../persistence';
 import {genEnqueueFile} from '../../audio-service';
 
+import {log} from '../../metrics';
+
 let fresh = true; // have we autoplayed for this screen already?
 
 const Listen = (props) => {
@@ -48,10 +50,11 @@ const Listen = (props) => {
 
   const [playbackState, setPlaybackState] = useState(STATE_NONE);
 
+  const {course, lesson} = props.route.params;
+
   useEffect(() => {
     return props.navigation.addListener('focus', async () => {
       fresh = true; // initial mount only
-      const {course, lesson} = props.route.params;
 
       await genEnqueueFile(course, lesson);
 
@@ -86,16 +89,40 @@ const Listen = (props) => {
 
   const playing = playbackState === STATE_PLAYING;
 
-  const toggle = () => {
+  const toggle = async () => {
     if (!playing) {
-      TrackPlayer.play();
+      await TrackPlayer.play();
+
+      log({
+        action: 'play',
+        surface: 'listen_screen',
+        course,
+        lesson,
+        position: await TrackPlayer.getPosition(),
+      });
     } else {
       TrackPlayer.pause();
+
+      log({
+        action: 'pause',
+        surface: 'listen_screen',
+        course,
+        lesson,
+        position: await TrackPlayer.getPosition(),
+      });
     }
   };
 
   const skipBack = async () => {
     const position = await TrackPlayer.getPosition();
+    log({
+      action: 'jump_backward',
+      surface: 'listen_screen',
+      course,
+      lesson,
+      position,
+    });
+
     TrackPlayer.seekTo(Math.max(0, position - 10));
   };
 

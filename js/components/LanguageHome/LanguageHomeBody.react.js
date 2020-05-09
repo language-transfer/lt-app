@@ -15,6 +15,7 @@ import {
 } from 'react-native-gesture-handler';
 import LanguageHomeTopButton from './LanguageHomeTopButton.react';
 import CourseData from '../../course-data';
+import {log} from '../../metrics';
 
 let metadataWarningTimeout = null;
 
@@ -26,6 +27,11 @@ const LanguageHomeBody = (props) => {
     const load = async () => {
       clearTimeout(metadataWarningTimeout);
       metadataWarningTimeout = setTimeout(() => {
+        log({
+          action: 'show_metadata_warning',
+          surface: 'language_home',
+          course: props.route.params.course,
+        });
         setShowMetadataWarning(true);
       }, 5000);
 
@@ -37,7 +43,15 @@ const LanguageHomeBody = (props) => {
 
     load();
 
-    return props.navigation.addListener('focus', load);
+    const subscriptions = [
+      props.navigation.addListener('focus', load),
+      props.navigation.addListener('blur', () =>
+        // just throwing this everywhere to see what sticks
+        clearTimeout(metadataWarningTimeout),
+      ),
+    ];
+
+    return () => subscriptions.forEach((s) => s());
   }, [props.route.params.course, metadataLoadedForCourse]);
 
   if (!CourseData.isCourseMetadataLoaded(props.route.params.course)) {
@@ -100,9 +114,14 @@ const LanguageHomeBody = (props) => {
 
         <View style={styles.additionalButton}>
           <TouchableNativeFeedback
-            onPress={() =>
-              Linking.openURL('https://www.patreon.com/languagetransfer')
-            }
+            onPress={() => {
+              log({
+                action: 'open_patreon',
+                surface: 'language_home',
+                course: props.route.params.course,
+              });
+              Linking.openURL('https://www.patreon.com/languagetransfer');
+            }}
             useForeground={true}>
             <View style={styles.additionalButtonInner}>
               <Text style={styles.additionalButtonText}>

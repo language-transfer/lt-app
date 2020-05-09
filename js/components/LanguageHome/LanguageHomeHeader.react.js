@@ -5,15 +5,14 @@ import {Icon} from 'react-native-elements';
 
 import CourseData from '../../course-data';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
+import {log} from '../../metrics';
 
 const LanguageHomeHeader = (props) => {
   return (
     <View style={styles.header}>
       <TouchableNativeFeedback
         style={styles.menuButton}
-        onPress={() => {
-          props.onOpenMenu();
-        }}
+        onPress={() => props.onOpenMenu()}
         background={TouchableNativeFeedback.Ripple(null, true)}>
         <Icon style={styles.menuButton} name="menu" size={28} />
       </TouchableNativeFeedback>

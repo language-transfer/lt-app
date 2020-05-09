@@ -18,6 +18,9 @@ import CourseData from '../../course-data';
 import ListenScrubber from './ListenScrubber.react';
 import DownloadManager from '../../download-manager';
 
+import TrackPlayer from 'react-native-track-player';
+import {log} from '../../metrics';
+
 const ListenBody = (props) => {
   const bottomSheet = useRef();
 
@@ -172,8 +175,26 @@ const ListenBody = (props) => {
           },
         }}
         closeOnDragDown={true}
-        onOpen={() => props.setBottomSheetOpen(true)}
-        onClose={() => props.setBottomSheetOpen(false)}>
+        onOpen={async () => {
+          log({
+            action: 'open_bottom_sheet',
+            surface: 'listen_screen',
+            course,
+            lesson,
+            position: await TrackPlayer.getPosition(),
+          });
+          props.setBottomSheetOpen(true);
+        }}
+        onClose={async () => {
+          log({
+            action: 'close_bottom_sheet',
+            surface: 'listen_screen',
+            course,
+            lesson,
+            position: await TrackPlayer.getPosition(),
+          });
+          props.setBottomSheetOpen(false);
+        }}>
         <ListenBottomSheet
           course={course}
           lesson={lesson}

@@ -1,21 +1,14 @@
 import React, {useState, useEffect} from 'react';
-import {
-  View,
-  Text,
-  StatusBar,
-  StyleSheet,
-  TouchableNativeFeedback,
-} from 'react-native';
+import {View, Text, StyleSheet, TouchableNativeFeedback} from 'react-native';
 import ProgressCircle from 'react-native-progress-circle';
-
-import changeNavigationBarColor from 'react-native-navigation-bar-color';
-import {ScrollView} from 'react-native-gesture-handler';
 
 import {Icon} from 'react-native-elements';
 import formatDuration from 'format-duration';
 import {genProgressForLesson} from '../../persistence';
 import DownloadManager, {useDownloadStatus} from '../../download-manager';
 import CourseData from '../../course-data';
+
+import {log} from '../../metrics';
 
 const renderDownloadProgress = (downloaded, progress, course, lesson) => {
   if (downloaded) {
@@ -56,7 +49,15 @@ const renderDownloadProgress = (downloaded, progress, course, lesson) => {
   return (
     <View style={styles.downloadButton}>
       <TouchableNativeFeedback
-        onPress={() => DownloadManager.startDownload(course, lesson)}>
+        onPress={() => {
+          log({
+            action: 'download_lesson',
+            surface: 'all_lessons',
+            course,
+            lesson,
+          });
+          DownloadManager.startDownload(course, lesson);
+        }}>
         <Text style={styles.downloadButtonText}>Download</Text>
       </TouchableNativeFeedback>
     </View>

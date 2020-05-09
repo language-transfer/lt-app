@@ -17,6 +17,9 @@ import DownloadManager from '../../download-manager';
 import {genMarkLessonFinished} from '../../persistence';
 import {genStopPlaying} from '../../audio-service';
 
+import TrackPlayer from 'react-native-track-player';
+import {log} from '../../metrics';
+
 const ListenBottomSheet = (props) => {
   const styles = StyleSheet.create({
     bottomSheetRow: {
@@ -40,6 +43,14 @@ const ListenBottomSheet = (props) => {
     <>
       <TouchableNativeFeedback
         onPress={async () => {
+          log({
+            action: 'mark_finished',
+            surface: 'listen_bottom_sheet',
+            course: props.course,
+            lesson: props.lesson,
+            position: await TrackPlayer.getPosition(),
+          });
+
           await genMarkLessonFinished(props.course, props.lesson);
           props.navigation.pop();
         }}>
@@ -58,6 +69,14 @@ const ListenBottomSheet = (props) => {
       {props.downloaded ? (
         <TouchableNativeFeedback
           onPress={async () => {
+            log({
+              action: 'delete_download',
+              surface: 'listen_bottom_sheet',
+              course: props.course,
+              lesson: props.lesson,
+              position: await TrackPlayer.getPosition(),
+            });
+
             await genStopPlaying();
             await DownloadManager.genDeleteDownload(props.course, props.lesson);
             props.navigation.pop();
@@ -76,7 +95,15 @@ const ListenBottomSheet = (props) => {
         </TouchableNativeFeedback>
       ) : null}
       <TouchableNativeFeedback
-        onPress={() => {
+        onPress={async () => {
+          log({
+            action: 'report_problem',
+            surface: 'listen_bottom_sheet',
+            course: props.course,
+            lesson: props.lesson,
+            position: await TrackPlayer.getPosition(),
+          });
+
           Linking.openURL(
             'mailto:info@languagetransfer.org' +
               `?subject=${encodeURIComponent(

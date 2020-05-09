@@ -31,7 +31,6 @@ const getNextLesson = (course, lastLesson, progress) => {
 
 const LanguageHomeTopButton = (props) => {
   const [lastListenState, setLastListenState] = useState(null);
-  const [downloadState, setDownloadState] = useState(null);
 
   useEffect(() => {
     const update = async () => {
@@ -53,7 +52,7 @@ const LanguageHomeTopButton = (props) => {
     update();
 
     return props.navigation.addListener('focus', update);
-  }, [props.navigation, props.route, setLastListenState, downloadState]);
+  }, [props.navigation, props.route, setLastListenState]);
 
   if (lastListenState === null) {
     return null;

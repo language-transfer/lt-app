@@ -5,6 +5,7 @@ import CourseData from './course-data';
 
 import 'react-native-get-random-values';
 import {v4 as uuid} from 'uuid';
+import {log} from './metrics';
 
 // Some operations are not atomic. I don't expect it to cause problems, so I
 // haven't gone to the effort of adding a mutex. mostly because I don't like
@@ -155,8 +156,14 @@ const preference = (name, defaultValue, fromString) => {
 
       return fromString(preference);
     },
-    async (preference: boolean): Promise<void> => {
+    async (preference: any): Promise<void> => {
       await AsyncStorage.setItem(`@preferences/${name}`, '' + preference);
+      // log after setting the preference so we respect the 'allow data collection' preference
+      log({
+        action: 'set_preference',
+        surface: name,
+        setting_value: preference,
+      });
     },
   ];
 };

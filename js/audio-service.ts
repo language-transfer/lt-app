@@ -11,6 +11,7 @@ import {
 import CourseData, {Course} from './course-data';
 import DownloadManager from './download-manager';
 import {navigate, pop} from './navigation-ref';
+import {log} from './metrics';
 
 let currentlyPlaying = null;
 let updateInterval = null;
@@ -83,14 +84,52 @@ export default async () => {
   audioServiceSubscriptions.forEach((s) => s.remove());
 
   audioServiceSubscriptions = [
-    TrackPlayer.addEventListener('remote-play', () => TrackPlayer.play()),
+    TrackPlayer.addEventListener('remote-play', async () => {
+      await TrackPlayer.play();
+      const position = await TrackPlayer.getPosition();
+      log({
+        action: 'play',
+        surface: 'remote',
+        course: currentlyPlaying?.course,
+        lesson: currentlyPlaying?.lesson,
+        position,
+      });
+    }),
 
-    TrackPlayer.addEventListener('remote-pause', () => TrackPlayer.pause()),
+    TrackPlayer.addEventListener('remote-pause', async () => {
+      await TrackPlayer.pause();
+      const position = await TrackPlayer.getPosition();
+      log({
+        action: 'pause',
+        surface: 'remote',
+        course: currentlyPlaying?.course,
+        lesson: currentlyPlaying?.lesson,
+        position,
+      });
+    }),
 
-    TrackPlayer.addEventListener('remote-stop', () => genStopPlaying()),
+    TrackPlayer.addEventListener('remote-stop', async () => {
+      const position = await TrackPlayer.getPosition();
+      log({
+        action: 'stop',
+        surface: 'remote',
+        course: currentlyPlaying?.course,
+        lesson: currentlyPlaying?.lesson,
+        position,
+      });
+      await genStopPlaying();
+    }),
 
     TrackPlayer.addEventListener('remote-jump-backward', async ({interval}) => {
       const position = await TrackPlayer.getPosition();
+      log({
+        action: 'jump_backward',
+        surface: 'remote',
+        course: currentlyPlaying?.course,
+        lesson: currentlyPlaying?.lesson,
+        position,
+      });
+
       await TrackPlayer.seekTo(Math.max(0, position - interval));
     }),
 
@@ -168,6 +207,12 @@ export default async () => {
         // ...what?
         return;
       }
+
+      log({
+        action: 'finish_lesson',
+        course: currentlyPlaying?.course,
+        lesson: currentlyPlaying?.lesson,
+      });
 
       // guess who worked out the hard way that if you do the next two concurrently you get a race condition
 

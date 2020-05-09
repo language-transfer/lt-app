@@ -21,6 +21,7 @@ export const log = async (data): Promise<void> => {
       },
       body: JSON.stringify({
         local_time: +new Date(),
+        timezone_offset: new Date().getTimezoneOffset(),
         user_token,
         device_os: DeviceInfo.getSystemName(),
         device_os_version: DeviceInfo.getSystemVersion(),

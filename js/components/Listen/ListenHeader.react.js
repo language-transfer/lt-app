@@ -17,7 +17,7 @@ const ListenHeader = (props) => {
       justifyContent: 'space-between',
       flexDirection: 'row',
     },
-    menuButton: {
+    backButton: {
       width: 56,
       height: 56,
       justifyContent: 'center',
@@ -40,7 +40,7 @@ const ListenHeader = (props) => {
     <>
       <View style={styles.header}>
         <TouchableNativeFeedback
-          style={styles.menuButton}
+          style={styles.backButton}
           onPress={() => {
             props.navigation.pop();
           }}

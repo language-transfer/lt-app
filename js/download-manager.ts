@@ -10,6 +10,7 @@ import {
   genPreferenceDownloadQuality,
   genPreferenceDownloadOnlyOnWifi,
 } from './persistence';
+import {log} from './metrics';
 
 export type DownloadProgress = {
   requested: boolean;
@@ -51,6 +52,13 @@ const DownloadManager = {
   },
 
   startDownload: async (course: Course, lesson: number) => {
+    log({
+      action: 'start_download',
+      surface: 'download_manager',
+      course,
+      lesson,
+    });
+
     const [quality, wifiOnly] = await Promise.all([
       genPreferenceDownloadQuality(),
       genPreferenceDownloadOnlyOnWifi(),
@@ -96,6 +104,13 @@ const DownloadManager = {
         DownloadManager._broadcast(downloadId);
       })
       .done(async () => {
+        log({
+          action: 'finish_download',
+          surface: 'download_manager',
+          course: DownloadManager.getCourseIdForDownloadId(downloadId),
+          lesson: DownloadManager.getLessonIdForDownloadId(downloadId),
+        });
+
         DownloadManager._downloads[downloadId].finished = true;
         await fs.moveFile(
           DownloadManager.getDownloadStagingLocation(downloadId),
@@ -104,6 +119,13 @@ const DownloadManager = {
         DownloadManager._broadcast(downloadId);
       })
       .error((error) => {
+        log({
+          action: 'fail_download',
+          surface: 'download_manager',
+          course: DownloadManager.getCourseIdForDownloadId(downloadId),
+          lesson: DownloadManager.getLessonIdForDownloadId(downloadId),
+        });
+
         DownloadManager._downloads[downloadId].error = error;
         DownloadManager._broadcast(downloadId);
       });
@@ -155,6 +177,12 @@ const DownloadManager = {
   resumeDownloads: async () => {
     const interrupted = await Downloader.checkForExistingDownloads();
     interrupted.forEach((task) => {
+      log({
+        action: 'resume_download',
+        surface: 'download_manager',
+        course: DownloadManager.getCourseIdForDownloadId(task.id),
+        lesson: DownloadManager.getLessonIdForDownloadId(task.id),
+      });
       DownloadManager.attachCallbacks(task);
     });
   },
