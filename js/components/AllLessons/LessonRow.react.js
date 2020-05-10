@@ -16,6 +16,8 @@ import CourseData from '../../course-data';
 
 import {log} from '../../metrics';
 
+export const LESSON_ROW_HEIGHT = 72;
+
 const renderDownloadProgress = (downloaded, downloadState, downloading) => {
   if (downloaded) {
     return (
@@ -126,9 +128,7 @@ const LessonRow = (props) => {
     })();
   }, [props.lastUpdateTime, downloadState, lastDeletionAction]);
 
-  if (progress === null || downloaded === null) {
-    return null; // TODO: show a greyed-out version without the features
-  }
+  const ready = progress !== null && downloaded !== null;
 
   const finished = progress && progress.finished;
   const downloading =
@@ -144,26 +144,29 @@ const LessonRow = (props) => {
           });
         }}>
         <View style={styles.lessonRow}>
-          <View style={styles.text}>
-            <Icon
-              style={{
-                ...styles.finishedIcon,
-                ...(finished ? {} : {opacity: 0}),
-              }}
-              name="check"
-              type="font-awesome-5"
-              accessibilityLabel={finished ? 'finished' : 'not finished'}
-              size={24}
-            />
-            <Text style={styles.lessonTitleText}>
-              {CourseData.getLessonTitle(props.course, props.lesson)}
-            </Text>
-            <Text style={styles.lessonDurationText}>
-              {formatDuration(
-                CourseData.getLessonDuration(props.course, props.lesson) * 1000,
-              )}
-            </Text>
-          </View>
+          {ready ? (
+            <View style={styles.text}>
+              <Icon
+                style={{
+                  ...styles.finishedIcon,
+                  ...(finished ? {} : {opacity: 0}),
+                }}
+                name="check"
+                type="font-awesome-5"
+                accessibilityLabel={finished ? 'finished' : 'not finished'}
+                size={24}
+              />
+              <Text style={styles.lessonTitleText}>
+                {CourseData.getLessonTitle(props.course, props.lesson)}
+              </Text>
+              <Text style={styles.lessonDurationText}>
+                {formatDuration(
+                  CourseData.getLessonDuration(props.course, props.lesson) *
+                    1000,
+                )}
+              </Text>
+            </View>
+          ) : null}
         </View>
       </TouchableNativeFeedback>
       <TouchableNativeFeedback
@@ -178,9 +181,9 @@ const LessonRow = (props) => {
         }}
         disabled={downloading}>
         <View style={styles.downloadBox}>
-          <View style={styles.icons}>
-            {renderDownloadProgress(downloaded, downloadState, downloading)}
-          </View>
+          {ready
+            ? renderDownloadProgress(downloaded, downloadState, downloading)
+            : null}
         </View>
       </TouchableNativeFeedback>
     </View>
@@ -198,12 +201,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: Dimensions.get('screen').width - 72,
-    height: 72,
+    width: Dimensions.get('screen').width - LESSON_ROW_HEIGHT,
+    height: LESSON_ROW_HEIGHT,
   },
   downloadBox: {
-    width: 72,
-    height: 72,
+    width: LESSON_ROW_HEIGHT,
+    height: LESSON_ROW_HEIGHT,
     backgroundColor: 'white',
     borderColor: '#ccc',
     borderBottomWidth: 1,
@@ -223,9 +226,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  icons: {
-    flexDirection: 'row',
-  },
   finishedIcon: {
     marginRight: 24,
   },

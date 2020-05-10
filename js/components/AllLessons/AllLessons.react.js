@@ -1,13 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StatusBar} from 'react-native';
+import {StatusBar} from 'react-native';
 
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
-import {ScrollView} from 'react-native-gesture-handler';
-import LessonRow from './LessonRow.react';
+import {FlatList} from 'react-native-gesture-handler';
+import LessonRow, {LESSON_ROW_HEIGHT} from './LessonRow.react';
 
 import CourseData from '../../course-data';
-import {genProgressForLesson} from '../../persistence';
-import DownloadManager from '../../download-manager';
 
 const AllLessons = (props) => {
   useEffect(() => {
@@ -27,47 +25,24 @@ const AllLessons = (props) => {
     );
   }, []);
 
-  // still considering awaiting the whole thing so we don't have to wait forever for the loading
-
-  // useEffect(() => {
-  //   const update = async () => {
-  //     const [progress, downloads] = await Promise.all([
-  //       Promise.all(
-  //         CourseData.getLessonIndices(course).map((lesson) =>
-  //           genProgressForLesson(course, lesson),
-  //         ),
-  //       ),
-  //       Promise.all(
-  //         CourseData.getLessonIndices(course).map((lesson) =>
-  //           DownloadManager.genIsDownloaded(course, lesson),
-  //         ),
-  //       ),
-  //     ]);
-
-  //     setLessonData({progress, downloads});
-  //   };
-
-  //   update();
-
-  //   props.navigation.addListener('focus', update); TODO
-  // }, [setLessonData, lastDownloadUpdate, props.navigation]);
-
-  // if (lessonData === null) {
-  //   return null; // TODO do we need a loading indicator here? or is it fast enough (yes we need a loading indicator)
-  // }
-
   return (
-    <ScrollView>
-      {CourseData.getLessonIndices(course).map((lesson) => (
+    <FlatList
+      data={CourseData.getLessonIndices(course)}
+      renderItem={({item}) => (
         <LessonRow
           navigation={props.navigation}
           course={course}
-          lesson={lesson}
-          lastUpdateTime={lastUpdateTime}
-          key={lesson}
+          lesson={item}
         />
-      ))}
-    </ScrollView>
+      )}
+      keyExtractor={(lesson) => lesson}
+      extraData={course + lastUpdateTime}
+      getItemLayout={(_, index) => ({
+        length: LESSON_ROW_HEIGHT,
+        offset: LESSON_ROW_HEIGHT * index,
+        index,
+      })}
+    />
   );
 };
 
