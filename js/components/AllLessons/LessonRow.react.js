@@ -59,7 +59,9 @@ const renderDownloadProgress = (downloaded, downloadState, downloading) => {
         bgColor="white">
         <Text
           style={styles.progressCircleText}
-          accessibilityLabel={Math.floor(percent) + ' percent downloaded'}>
+          accessibilityLabel={
+            Math.floor(percent) + ' percent downloaded. tap to cancel.'
+          }>
           {Math.floor(percent)}
         </Text>
       </ProgressCircle>
