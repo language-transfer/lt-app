@@ -1,5 +1,14 @@
-import React, {useEffect} from 'react';
-import {StyleSheet, ScrollView, View, StatusBar, Image} from 'react-native';
+import React, {useEffect, useState, useRef} from 'react';
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  StatusBar,
+  Image,
+  ImageBackground,
+  Dimensions,
+  Animated,
+} from 'react-native';
 
 import LanguageButton from './LanguageButton.react';
 import logo from '../../../resources/LT-logo-text.png';
@@ -19,65 +28,97 @@ const LanguageSelector = ({navigation}) => {
     return unsubscribe;
   }, [navigation]);
 
+  const scrollAnim = useRef(new Animated.Value(0)).current;
+  const imageHeight = 0.4 * Dimensions.get('screen').height;
+  const cardsMarginTop = imageHeight + 80 + 40;
+
+  const styles = StyleSheet.create({
+    wrapper: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'space-between',
+      backgroundColor: 'white',
+    },
+    wrapper2: {
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      top: 0,
+    },
+    headerImage: {
+      alignSelf: 'center',
+      position: 'absolute',
+      marginTop: 80,
+    },
+    courseList: {
+      marginTop: cardsMarginTop,
+      marginBottom: BOTTOM_NAV_HEIGHT,
+      display: 'flex',
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+    },
+    topTranslucent: {
+      height: StatusBar.currentHeight,
+      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    },
+    bottomTranslucent: {
+      height: BOTTOM_NAV_HEIGHT,
+      backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    },
+  });
+
   return (
     <View style={styles.wrapper}>
-      <ScrollView style={styles.scrollView}>
-        <Image
+      <View style={styles.wrapper2}>
+        <Animated.Image
           source={logo}
-          style={styles.headerImage}
+          style={[
+            styles.headerImage,
+            {
+              opacity: scrollAnim.interpolate({
+                inputRange: [0, cardsMarginTop / 1.5],
+                outputRange: [1, 0],
+              }),
+              height: scrollAnim.interpolate({
+                inputRange: [0, cardsMarginTop / 1.5],
+                outputRange: [imageHeight, 0.9 * imageHeight],
+              }),
+            },
+          ]}
           resizeMode="contain"
           accessibilityLabel="Language Transfer"
         />
-        <View style={styles.courseList}>
-          {CourseData.getCourseList().map((course) => (
-            <LanguageButton
-              course={course}
-              key={course}
-              onPress={() => navigation.navigate('Language Home', {course})}
-            />
-          ))}
-        </View>
-      </ScrollView>
+
+        <Animated.ScrollView
+          style={styles.scrollView}
+          onScroll={Animated.event(
+            [
+              {
+                nativeEvent: {
+                  contentOffset: {
+                    y: scrollAnim,
+                  },
+                },
+              },
+            ],
+            {useNativeDriver: false},
+          )}>
+          <View style={styles.courseList}>
+            {CourseData.getCourseList().map((course) => (
+              <LanguageButton
+                course={course}
+                key={course}
+                onPress={() => navigation.navigate('Language Home', {course})}
+              />
+            ))}
+          </View>
+        </Animated.ScrollView>
+      </View>
       <View style={styles.topTranslucent}></View>
       <View style={styles.bottomTranslucent}></View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  wrapper: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'space-between',
-  },
-  scrollView: {
-    backgroundColor: 'white',
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    top: 0,
-  },
-  headerImage: {
-    alignSelf: 'center',
-    marginTop: 80,
-    width: '80%',
-    maxHeight: '40%',
-  },
-  courseList: {
-    marginTop: 50,
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-  },
-  topTranslucent: {
-    height: StatusBar.currentHeight,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-  },
-  bottomTranslucent: {
-    height: BOTTOM_NAV_HEIGHT,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-  },
-});
 
 export default LanguageSelector;
