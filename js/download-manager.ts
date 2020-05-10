@@ -3,6 +3,7 @@ import fs from 'react-native-fs';
 
 import type {Course} from './course-data';
 import CourseData from './course-data';
+import DeviceInfo from 'react-native-device-info';
 import Downloader from 'react-native-background-downloader';
 import DownloadTask from 'react-native-background-downloader/lib/downloadTask';
 import {
@@ -97,6 +98,16 @@ const DownloadManager = {
       .begin((totalBytes) => {
         DownloadManager._downloads[downloadId].totalBytes = totalBytes;
         DownloadManager._broadcast(downloadId);
+
+        // doesn't check in-progress downloads, but hey, it's a start
+        DeviceInfo.getFreeDiskStorage().then((freeDiskStorage) => {
+          if (totalBytes > freeDiskStorage) {
+            alert(
+              "You don't have enough storage space on your phone to download this lesson.",
+            );
+            DownloadManager.stopDownload(downloadId);
+          }
+        });
       })
       .progress((_, bytesWritten, totalBytes) => {
         DownloadManager._downloads[downloadId].bytesWritten = bytesWritten;
