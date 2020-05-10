@@ -33,10 +33,10 @@ const AllLessons = (props) => {
           navigation={props.navigation}
           course={course}
           lesson={item}
+          lastUpdateTime={lastUpdateTime}
         />
       )}
       keyExtractor={(lesson) => lesson}
-      extraData={course + lastUpdateTime}
       getItemLayout={(_, index) => ({
         length: LESSON_ROW_HEIGHT,
         offset: LESSON_ROW_HEIGHT * index,
