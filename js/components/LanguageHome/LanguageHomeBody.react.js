@@ -58,7 +58,7 @@ const LanguageHomeBody = (props) => {
     return (
       <View style={styles.body}>
         <View style={styles.loading}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size={96} />
           <View
             style={{
               ...styles.metadataWarning,

@@ -8,6 +8,7 @@ import TrackPlayer, {
   STATE_PLAYING,
   STATE_PAUSED,
   STATE_READY,
+  STATE_CONNECTING,
 } from 'react-native-track-player';
 
 import CourseData from '../../course-data';
@@ -126,6 +127,10 @@ const Listen = (props) => {
     TrackPlayer.seekTo(Math.max(0, position - 10));
   };
 
+  const ready = !(
+    playbackState === STATE_NONE || playbackState === STATE_CONNECTING
+  );
+
   return (
     <View style={styles.background}>
       <ListenHeader navigation={props.navigation} route={props.route} />
@@ -135,6 +140,7 @@ const Listen = (props) => {
         setBottomSheetOpen={setBottomSheetOpen}
         toggle={toggle}
         skipBack={skipBack}
+        ready={ready}
         playing={playing}
       />
     </View>

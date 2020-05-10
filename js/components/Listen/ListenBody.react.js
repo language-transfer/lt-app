@@ -35,7 +35,13 @@ const ListenBody = (props) => {
   }, []);
 
   if (downloaded === null) {
-    return <ActivityIndicator size="large" />;
+    return (
+      <ActivityIndicator
+        size={64}
+        style={{marginTop: 64}}
+        color={CourseData.getCourseUIColors(course).text}
+      />
+    );
   }
 
   const styles = StyleSheet.create({
@@ -134,17 +140,24 @@ const ListenBody = (props) => {
               color={CourseData.getCourseUIColors(course).text}
             />
           </TouchableNativeFeedback>
-          <TouchableNativeFeedback
-            background={TouchableNativeFeedback.Ripple(null, true)}
-            onPress={props.toggle}>
-            <Icon
-              name={props.playing ? 'pause' : 'play-arrow'}
-              accessibilityLabel={props.playing ? 'pause' : 'play'}
-              type="material"
+          {props.ready ? (
+            <TouchableNativeFeedback
+              background={TouchableNativeFeedback.Ripple(null, true)}
+              onPress={props.toggle}>
+              <Icon
+                name={props.playing ? 'pause' : 'play-arrow'}
+                accessibilityLabel={props.playing ? 'pause' : 'play'}
+                type="material"
+                size={172}
+                color={CourseData.getCourseUIColors(course).text}
+              />
+            </TouchableNativeFeedback>
+          ) : (
+            <ActivityIndicator
               size={172}
               color={CourseData.getCourseUIColors(course).text}
             />
-          </TouchableNativeFeedback>
+          )}
           <TouchableNativeFeedback
             background={TouchableNativeFeedback.Ripple(null, true)}
             onPress={() => {
