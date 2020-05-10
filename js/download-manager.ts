@@ -133,9 +133,11 @@ const DownloadManager = {
 
   _broadcast: (downloadId: string) => {
     // clone the object so it's not == old versions
-    DownloadManager._downloads[downloadId] = {
-      ...DownloadManager._downloads[downloadId],
-    };
+    if (DownloadManager._downloads[downloadId]) {
+      DownloadManager._downloads[downloadId] = {
+        ...DownloadManager._downloads[downloadId],
+      };
+    }
     const subscriptions = DownloadManager._subscriptions[downloadId] || [];
     subscriptions.forEach((callback) =>
       callback(DownloadManager._downloads[downloadId]),
@@ -222,8 +224,8 @@ const DownloadManager = {
 
   stopDownload: (downloadId: string): void => {
     DownloadManager._downloads[downloadId].downloadTask.stop();
-    DownloadManager._broadcast(downloadId);
     delete DownloadManager._downloads[downloadId];
+    DownloadManager._broadcast(downloadId);
   },
 
   stopAllDownloadsForCourse: (course: Course): void => {

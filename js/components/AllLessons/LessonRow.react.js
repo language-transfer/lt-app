@@ -78,7 +78,7 @@ const renderDownloadProgress = (downloaded, downloadState, downloading) => {
   );
 };
 
-const handleDownload = async (
+const handleDownloadClick = async (
   course,
   lesson,
   downloaded,
@@ -86,10 +86,14 @@ const handleDownload = async (
   setLastDeletionAction,
 ) => {
   if (downloading) {
-    return;
-  }
-
-  if (!downloaded) {
+    log({
+      action: 'cancel_download',
+      surface: 'all_lessons',
+      course,
+      lesson,
+    });
+    DownloadManager.stopDownload(DownloadManager.getDownloadId(course, lesson));
+  } else if (!downloaded) {
     log({
       action: 'download_lesson',
       surface: 'all_lessons',
@@ -171,15 +175,14 @@ const LessonRow = (props) => {
       </TouchableNativeFeedback>
       <TouchableNativeFeedback
         onPress={() => {
-          handleDownload(
+          handleDownloadClick(
             props.course,
             props.lesson,
             downloaded,
             downloading,
             setLastDeletionAction,
           );
-        }}
-        disabled={downloading}>
+        }}>
         <View style={styles.downloadBox}>
           {ready
             ? renderDownloadProgress(downloaded, downloadState, downloading)
