@@ -25,6 +25,7 @@ import {
   genSetPreferenceDownloadOnlyOnWifi,
   genPreferenceAllowDataCollection,
   genSetPreferenceAllowDataCollection,
+  genDeleteMetricsToken,
 } from '../../persistence';
 import {Icon} from 'react-native-elements';
 
@@ -263,6 +264,7 @@ const Settings = (props) => {
             await genSetPreferenceAllowDataCollection(
               !settings.allowDataCollection,
             );
+            await genDeleteMetricsToken();
             setNeedsUpdate(true);
           }}>
           <View style={styles.settingsRow}>

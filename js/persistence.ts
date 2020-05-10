@@ -146,6 +146,10 @@ export const genMetricsToken = async (): Promise<string> => {
   return createdToken;
 };
 
+export const genDeleteMetricsToken = async (): Promise<void> => {
+  await AsyncStorage.removeItem('@metrics/user-token');
+};
+
 const preference = (name, defaultValue, fromString) => {
   return [
     async (): Promise<boolean> => {
