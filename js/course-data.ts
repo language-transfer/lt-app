@@ -123,7 +123,7 @@ const data = {
       background: '#009900',
       softBackground: '#cbdecb',
       text: 'white',
-      backgroundAccent: '#870000',
+      backgroundAccent: '#006400',
     },
   },
   greek: {
