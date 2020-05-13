@@ -8,12 +8,15 @@ import {
   ImageBackground,
   Dimensions,
   Animated,
+  TouchableNativeFeedback,
+  Text,
 } from 'react-native';
 
 import LanguageButton from './LanguageButton.react';
 import logo from '../../../resources/LT-logo-text.png';
 import CourseData from '../../course-data';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
+import {Icon} from 'react-native-elements';
 
 const BOTTOM_NAV_HEIGHT = 48;
 
@@ -74,6 +77,28 @@ const LanguageSelector = ({navigation}) => {
       height: BOTTOM_NAV_HEIGHT,
       backgroundColor: 'rgba(255, 255, 255, 0.6)',
     },
+    aboutSection: {
+      marginHorizontal: 40,
+      marginVertical: 50,
+    },
+    aboutSectionText: {
+      fontSize: 16,
+      marginBottom: 16,
+    },
+    additionalButton: {
+      borderRadius: 10,
+      backgroundColor: 'white',
+      overflow: 'hidden',
+      elevation: 3,
+    },
+    additionalButtonInner: {
+      padding: 25,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    additionalButtonText: {
+      fontSize: 20,
+    },
   });
 
   return (
@@ -133,6 +158,24 @@ const LanguageSelector = ({navigation}) => {
                 onPress={() => navigation.navigate('Language Home', {course})}
               />
             ))}
+            <View style={styles.aboutSection}>
+              <Text style={styles.aboutSectionText}>
+                Language Transfer is the work of just one guy! Mihalis is trying
+                to build a team of course writers. Find out more:
+              </Text>
+              <View style={styles.additionalButton}>
+                <TouchableNativeFeedback
+                  onPress={() => navigation.navigate('About')}
+                  useForeground={true}>
+                  <View style={styles.additionalButtonInner}>
+                    <Text style={styles.additionalButtonText}>
+                      About Language Transfer
+                    </Text>
+                    <Icon name="info" type="font-awesome-5" />
+                  </View>
+                </TouchableNativeFeedback>
+              </View>
+            </View>
           </View>
         </Animated.ScrollView>
       </View>
