@@ -19,6 +19,7 @@ import {genStopPlaying} from '../../audio-service';
 
 import TrackPlayer from 'react-native-track-player';
 import {log} from '../../metrics';
+import formatDuration from 'format-duration';
 
 const ListenBottomSheet = (props) => {
   const styles = StyleSheet.create({
@@ -95,24 +96,27 @@ const ListenBottomSheet = (props) => {
         </TouchableNativeFeedback>
       ) : null}
       <TouchableNativeFeedback
-        onPress={async () => {
-          log({
-            action: 'report_problem',
-            surface: 'listen_bottom_sheet',
-            course: props.course,
-            lesson: props.lesson,
-            position: await TrackPlayer.getPosition(),
-          });
-
+        onPress={async () =>
           Linking.openURL(
             'mailto:info@languagetransfer.org' +
               `?subject=${encodeURIComponent(
-                `Feedback about ${CourseData.getCourseShortTitle(
+                `Feedback about ${CourseData.getCourseFullTitle(props.course)}`,
+              )}&body=${encodeURIComponent(
+                `Hi! I found a problem with the ${CourseData.getCourseFullTitle(
                   props.course,
-                )} ${CourseData.getLessonTitle(props.course, props.lesson)}`,
+                )} course within the Language Transfer app:<br>
+                <br>
+                <br>
+                ---<br>
+                <br>
+                Course: ${CourseData.getCourseFullTitle(props.course)}<br>
+                ${CourseData.getLessonTitle(props.course, props.lesson)}<br>
+                Position: ${formatDuration(
+                  (await TrackPlayer.getPosition()) * 1000,
+                )}`,
               )}`,
-          );
-        }}>
+          )
+        }>
         <View style={styles.bottomSheetRow}>
           <Text style={styles.rowText}>Report a problem</Text>
           <View style={styles.iconContainer}>
