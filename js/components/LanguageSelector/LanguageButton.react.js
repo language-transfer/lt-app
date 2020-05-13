@@ -35,7 +35,7 @@ const LanguageButton = (props) => {
           <TouchableNativeFeedback onPress={props.onPress} useForeground={true}>
             <View style={styles.sectionContainer}>
               <Text style={{...styles.courseTitle, ...textStyle}}>
-                {CourseData.getCourseTitle(props.course)}
+                {CourseData.getCourseShortTitle(props.course)}
               </Text>
               <Text style={{...styles.courseDetails, ...textStyle}}>
                 {lessonCount} lessons

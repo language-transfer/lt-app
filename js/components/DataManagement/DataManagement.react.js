@@ -28,7 +28,7 @@ const DataManagement = (props) => {
   }, [props.navigation]);
 
   const {course} = props.route.params;
-  const courseTitle = CourseData.getCourseTitle(course);
+  const courseTitle = CourseData.getCourseShortTitle(course);
 
   const confirm = (message) =>
     new Promise((done) =>

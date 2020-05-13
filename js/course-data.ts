@@ -69,7 +69,8 @@ const data = {
   spanish: {
     image: spanishCover,
     imageWithText: spanishCoverWithText,
-    title: 'Spanish',
+    shortTitle: 'Spanish',
+    fullTitle: 'Complete Spanish',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/spanish-meta.json',
     fallbackLessonCount: 90,
@@ -83,7 +84,8 @@ const data = {
   arabic: {
     image: arabicCover,
     imageWithText: arabicCoverWithText,
-    title: 'Arabic',
+    shortTitle: 'Arabic',
+    fullTitle: 'Introduction to Arabic',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/arabic-meta.json',
     fallbackLessonCount: 38,
@@ -97,7 +99,8 @@ const data = {
   turkish: {
     image: turkishCover,
     imageWithText: turkishCoverWithText,
-    title: 'Turkish',
+    shortTitle: 'Turkish',
+    fullTitle: 'Introduction to Turkish',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/turkish-meta.json',
     fallbackLessonCount: 44,
@@ -111,7 +114,8 @@ const data = {
   german: {
     image: germanCover,
     imageWithText: germanCoverWithText,
-    title: 'German',
+    shortTitle: 'German',
+    fullTitle: 'Complete German',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/german-meta.json',
     fallbackLessonCount: 50,
@@ -125,7 +129,8 @@ const data = {
   greek: {
     image: greekCover,
     imageWithText: greekCoverWithText,
-    title: 'Greek',
+    shortTitle: 'Greek',
+    fullTitle: 'Complete Greek',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/greek-meta.json',
     fallbackLessonCount: 120,
@@ -139,7 +144,8 @@ const data = {
   italian: {
     image: italianCover,
     imageWithText: italianCoverWithText,
-    title: 'Italian',
+    shortTitle: 'Italian',
+    fullTitle: 'Introduction to Italian',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/italian-meta.json',
     fallbackLessonCount: 45,
@@ -153,7 +159,8 @@ const data = {
   swahili: {
     image: swahiliCover,
     imageWithText: swahiliCoverWithText,
-    title: 'Swahili',
+    shortTitle: 'Swahili',
+    fullTitle: 'Complete Swahili',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/swahili-meta.json',
     fallbackLessonCount: 110,
@@ -167,7 +174,8 @@ const data = {
   french: {
     image: frenchCover,
     imageWithText: frenchCoverWithText,
-    title: 'French',
+    shortTitle: 'French',
+    fullTitle: 'Introduction to French',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/french-meta.json',
     fallbackLessonCount: 40,
@@ -181,7 +189,8 @@ const data = {
   ingles: {
     image: inglesCover,
     imageWithText: inglesCoverWithText,
-    title: 'Inglés',
+    shortTitle: 'Inglés',
+    fullTitle: 'Introducción a Inglés',
     metaUrl:
       'https://language-transfer.us-east-1.linodeobjects.com/ingles-meta.json',
     fallbackLessonCount: 40,
@@ -203,8 +212,12 @@ const CourseData = {
     return Object.keys(data);
   },
 
-  getCourseTitle(course: Course): string {
-    return data[course].title;
+  getCourseShortTitle(course: Course): string {
+    return data[course].shortTitle;
+  },
+
+  getCourseFullTitle(course: Course): string {
+    return data[course].fullTitle;
   },
 
   getCourseImage(course: Course) {

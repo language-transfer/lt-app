@@ -121,7 +121,7 @@ const ListenBody = (props) => {
       <View style={styles.body}>
         <View style={styles.lessonName}>
           <Text style={styles.courseTitle}>
-            {CourseData.getCourseTitle(course)}
+            {CourseData.getCourseShortTitle(course)}
           </Text>
           <Text style={styles.lesson}>
             {CourseData.getLessonTitle(course, lesson)}

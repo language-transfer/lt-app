@@ -63,7 +63,7 @@ export const genEnqueueFile = async (
     title: `${CourseData.getLessonTitle(
       course,
       lesson,
-    )}: ${CourseData.getCourseTitle(course)}`,
+    )}: ${CourseData.getCourseFullTitle(course)}`,
     artist: 'Language Transfer',
     artwork: CourseData.getCourseImageWithText(course),
   });

@@ -17,7 +17,7 @@ const LanguageHomeHeader = (props) => {
         <Icon style={styles.menuButton} name="menu" size={28} />
       </TouchableNativeFeedback>
       <Text style={styles.headerText}>
-        {CourseData.getCourseTitle(props.route.params.course)}
+        {CourseData.getCourseFullTitle(props.route.params.course)}
       </Text>
     </View>
   );

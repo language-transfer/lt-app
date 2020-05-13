@@ -107,7 +107,7 @@ const ListenBottomSheet = (props) => {
           Linking.openURL(
             'mailto:info@languagetransfer.org' +
               `?subject=${encodeURIComponent(
-                `Feedback about ${CourseData.getCourseTitle(
+                `Feedback about ${CourseData.getCourseShortTitle(
                   props.course,
                 )} ${CourseData.getLessonTitle(props.course, props.lesson)}`,
               )}`,

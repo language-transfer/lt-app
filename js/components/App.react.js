@@ -103,7 +103,7 @@ const App = () => {
           name="All Lessons"
           component={AllLessons}
           options={({route}) => ({
-            headerTitle: `${CourseData.getCourseTitle(
+            headerTitle: `${CourseData.getCourseShortTitle(
               route.params.course,
             )}: All Lessons`,
           })}
@@ -126,7 +126,7 @@ const App = () => {
           name="Data Management"
           component={DataManagement}
           options={({route}) => ({
-            headerTitle: `${CourseData.getCourseTitle(
+            headerTitle: `${CourseData.getCourseShortTitle(
               route.params.course,
             )}: Data Management`,
           })}
