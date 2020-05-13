@@ -25,7 +25,7 @@ const renderDownloadProgress = (downloaded, downloadState, downloading) => {
         name="trash"
         type="font-awesome-5"
         accessibilityLabel="delete download"
-        size={36}
+        size={24}
       />
     );
   }
@@ -38,7 +38,7 @@ const renderDownloadProgress = (downloaded, downloadState, downloading) => {
         name="exclamation"
         type="font-awesome-5"
         accessibilityLabel="download error"
-        size={36}
+        size={24}
       />
     );
   }
@@ -52,8 +52,8 @@ const renderDownloadProgress = (downloaded, downloadState, downloading) => {
     return (
       <ProgressCircle
         percent={percent}
-        radius={24}
-        borderWidth={6}
+        radius={20}
+        borderWidth={5}
         color="#333"
         shadowColor="#ddd"
         bgColor="white">
@@ -74,7 +74,7 @@ const renderDownloadProgress = (downloaded, downloadState, downloading) => {
         name="download"
         type="font-awesome-5"
         accessibilityLabel="download"
-        size={36}
+        size={24}
       />
     </View>
   );
