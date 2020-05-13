@@ -66,7 +66,7 @@ const LanguageHomeBody = (props) => {
             }}>
             <Text style={styles.metadataWarningText}>
               If this screen does not load, check your Internet connection or
-              try updating or reinstalling the Lanugage Transfer app.
+              try updating or reinstalling the Language Transfer app.
             </Text>
           </View>
         </View>
