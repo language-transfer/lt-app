@@ -30,7 +30,7 @@ const LanguageSelector = ({navigation}) => {
 
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const imageHeight = 0.4 * Dimensions.get('screen').height;
-  const cardsMarginTop = imageHeight + 80 + 40;
+  const cardsMarginTop = imageHeight + 80 + 20 + 90 + 40;
 
   const styles = StyleSheet.create({
     wrapper: {
@@ -49,6 +49,14 @@ const LanguageSelector = ({navigation}) => {
       alignSelf: 'center',
       position: 'absolute',
       marginTop: 80,
+    },
+    mottoText: {
+      alignSelf: 'center',
+      position: 'absolute',
+      marginTop: 80 + imageHeight + 50,
+      fontSize: 24,
+      textAlign: 'center',
+      paddingHorizontal: 60,
     },
     courseList: {
       marginTop: cardsMarginTop,
@@ -89,6 +97,19 @@ const LanguageSelector = ({navigation}) => {
           resizeMode="contain"
           accessibilityLabel="Language Transfer"
         />
+
+        <Animated.Text
+          style={[
+            styles.mottoText,
+            {
+              opacity: scrollAnim.interpolate({
+                inputRange: [0, cardsMarginTop / 10],
+                outputRange: [1, 0],
+              }),
+            },
+          ]}>
+          Learn a language as if you knew it already!
+        </Animated.Text>
 
         <Animated.ScrollView
           style={styles.scrollView}
