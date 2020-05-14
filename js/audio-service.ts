@@ -133,6 +133,56 @@ export default async () => {
       await TrackPlayer.seekTo(Math.max(0, position - interval));
     }),
 
+    // next and previous aren't possible, if the notification behaves,
+    // but some UI kits will disobey and add these buttons. might as well make them work.
+    // they don't seek to the saved spot, but honestly I don't care very much. they probably shouldn't.
+    TrackPlayer.addEventListener('remote-next', async () => {
+      const nextLesson = CourseData.getNextLesson(
+        currentlyPlaying.course,
+        currentlyPlaying.lesson,
+      );
+
+      log({
+        action: 'skip',
+        surface: 'remote',
+        course: currentlyPlaying?.course,
+        lesson: nextLesson,
+      });
+
+      if (nextLesson === null) {
+        return;
+      }
+
+      await genEnqueueFile(currentlyPlaying.course, nextLesson);
+      await TrackPlayer.play();
+      navigate('Listen', {course: currentlyPlaying.course, lesson: nextLesson});
+    }),
+
+    TrackPlayer.addEventListener('remote-previous', async () => {
+      const previousLesson = CourseData.getPreviousLesson(
+        currentlyPlaying.course,
+        currentlyPlaying.lesson,
+      );
+
+      log({
+        action: 'previous',
+        surface: 'remote',
+        course: currentlyPlaying?.course,
+        lesson: previousLesson,
+      });
+
+      if (previousLesson === null) {
+        return;
+      }
+
+      await genEnqueueFile(currentlyPlaying.course, previousLesson);
+      await TrackPlayer.play();
+      navigate('Listen', {
+        course: currentlyPlaying.course,
+        lesson: previousLesson,
+      });
+    }),
+
     TrackPlayer.addEventListener('playback-state', async ({state}) => {
       if (state !== STATE_PLAYING) return;
 

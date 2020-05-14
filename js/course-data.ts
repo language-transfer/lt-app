@@ -303,6 +303,14 @@ const CourseData = {
     return lesson + 1;
   },
 
+  getPreviousLesson(course: Course, lesson: number): number | null {
+    if (lesson - 1 === -1) {
+      return null;
+    }
+
+    return lesson - 1;
+  },
+
   getLessonIndices(course: Course): Array<number> {
     return courseMeta[course].lessons.map((_, i) => i);
   },
