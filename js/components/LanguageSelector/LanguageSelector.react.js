@@ -128,7 +128,7 @@ const LanguageSelector = ({navigation}) => {
             styles.mottoText,
             {
               opacity: scrollAnim.interpolate({
-                inputRange: [0, cardsMarginTop / 10],
+                inputRange: [0, cardsMarginTop / 5],
                 outputRange: [1, 0],
               }),
             },
