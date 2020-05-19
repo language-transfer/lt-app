@@ -11,10 +11,6 @@ import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {ScrollView} from 'react-native-gesture-handler';
 
 import {
-  genPreferenceAutoplay,
-  genSetPreferenceAutoplay,
-  genPreferenceAutoplayNonDownloaded,
-  genSetPreferenceAutoplayNonDownloaded,
   genSetPreferenceAutoDeleteFinished,
   genPreferenceAutoDeleteFinished,
   genPreferenceStreamQuality,
@@ -44,16 +40,12 @@ const Settings = (props) => {
     (async () => {
       if (needsUpdate) {
         const [
-          autoplay,
-          autoplayNonDownloaded,
           autoDeleteFinished,
           streamQuality,
           downloadQuality,
           downloadOnlyOnWifi,
           allowDataCollection,
         ] = await Promise.all([
-          genPreferenceAutoplay(),
-          genPreferenceAutoplayNonDownloaded(),
           genPreferenceAutoDeleteFinished(),
           genPreferenceStreamQuality(),
           genPreferenceDownloadQuality(),
@@ -62,8 +54,6 @@ const Settings = (props) => {
         ]);
 
         setSettings({
-          autoplay,
-          autoplayNonDownloaded,
           autoDeleteFinished,
           streamQuality,
           downloadQuality,
@@ -84,73 +74,6 @@ const Settings = (props) => {
     // todo: refactor this. a nice array of settings. like back in the day, on 1332.io.
     <ScrollView>
       <View style={styles.body}>
-        <TouchableNativeFeedback
-          onPress={async () => {
-            if (settings.autoplayNonDownloaded && settings.autoplay) {
-              await genSetPreferenceAutoplayNonDownloaded(false);
-            }
-            await genSetPreferenceAutoplay(!settings.autoplay);
-            setNeedsUpdate(true);
-          }}>
-          <View style={styles.settingsRow}>
-            <View style={styles.settingsValueContainer}>
-              <Icon
-                style={{
-                  ...styles.settingsCheck,
-                  ...(settings.autoplay ? {} : {opacity: 0}),
-                }}
-                accessibilityLabel={settings.autoplay ? 'enabled' : 'disabled'}
-                name="check"
-                type="font-awesome-5"
-              />
-            </View>
-            <View style={styles.settingsText}>
-              <Text style={styles.settingsTitle}>Autoplay</Text>
-              <Text style={styles.settingsDescription}>
-                Automatically advance to the next lesson when each lesson
-                finishes.
-              </Text>
-            </View>
-          </View>
-        </TouchableNativeFeedback>
-        <TouchableNativeFeedback
-          onPress={async () => {
-            await genSetPreferenceAutoplayNonDownloaded(
-              !settings.autoplayNonDownloaded,
-            );
-            setNeedsUpdate(true);
-          }}
-          disabled={!settings.autoplay}>
-          <View
-            style={{
-              ...styles.settingsRow,
-              ...(settings.autoplay ? {} : {opacity: 0.3}),
-            }}>
-            <View style={styles.settingsValueContainer}>
-              <Icon
-                style={{
-                  ...styles.settingsCheck,
-                  ...(settings.autoplayNonDownloaded ? {} : {opacity: 0}),
-                }}
-                accessibilityLabel={
-                  settings.autoplayNonDownloaded ? 'enabled' : 'disabled'
-                }
-                name="check"
-                type="font-awesome-5"
-              />
-            </View>
-            <View style={styles.settingsText}>
-              <Text style={styles.settingsTitle}>
-                Autoplay non-downloaded tracks
-              </Text>
-              <Text style={styles.settingsDescription}>
-                Autoplay even if the next track isn't downloaded to the device.
-                Turning this off can help you avoid using mobile data if you
-                prefer to download lessons in advance.
-              </Text>
-            </View>
-          </View>
-        </TouchableNativeFeedback>
         <TouchableNativeFeedback
           onPress={async () => {
             await genSetPreferenceAutoDeleteFinished(

@@ -24,7 +24,7 @@ import {genEnqueueFile} from '../../audio-service';
 
 import {log} from '../../metrics';
 
-let fresh = true; // have we autoplayed for this screen already?
+let fresh = true; // have we (not) autoplayed for this screen already?
 
 const Listen = (props) => {
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);

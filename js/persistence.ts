@@ -172,17 +172,6 @@ const preference = (name, defaultValue, fromString) => {
   ];
 };
 
-export const [genPreferenceAutoplay, genSetPreferenceAutoplay] = preference(
-  'autoplay',
-  true,
-  (b) => b === 'true',
-);
-
-export const [
-  genPreferenceAutoplayNonDownloaded,
-  genSetPreferenceAutoplayNonDownloaded,
-] = preference('autoplay-non-downloaded', true, (b) => b === 'true');
-
 export const [
   genPreferenceAutoDeleteFinished,
   genSetPreferenceAutoDeleteFinished,

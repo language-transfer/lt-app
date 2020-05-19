@@ -4,8 +4,6 @@ import {
   genAutopause,
   genUpdateProgressForLesson,
   genMarkLessonFinished,
-  genPreferenceAutoplay,
-  genPreferenceAutoplayNonDownloaded,
   genPreferenceStreamQuality,
 } from './persistence';
 import CourseData, {Course} from './course-data';
@@ -17,6 +15,9 @@ let currentlyPlaying = null;
 let updateInterval = null;
 
 export let audioServiceSubscriptions = [];
+
+// when we enqueue then skip, it acts like we skipped from track 1 to track n. suppress the event
+let suppressTrackChange = false;
 
 export const genEnqueueFile = async (
   course: Course,
@@ -49,32 +50,42 @@ export const genEnqueueFile = async (
 
   const quality = await genPreferenceStreamQuality();
 
-  let url = CourseData.getLessonUrl(course, lesson, quality);
-  if (await DownloadManager.genIsDownloaded(course, lesson)) {
-    url = DownloadManager.getDownloadSaveLocation(
-      DownloadManager.getDownloadId(course, lesson),
-    );
-  }
+  const tracks = await Promise.all(
+    CourseData.getLessonIndices(course).map((l) =>
+      (async (thisLesson) => {
+        let url = CourseData.getLessonUrl(course, thisLesson, quality);
+        if (await DownloadManager.genIsDownloaded(course, thisLesson)) {
+          url = DownloadManager.getDownloadSaveLocation(
+            DownloadManager.getDownloadId(course, thisLesson),
+          );
+        }
+
+        return {
+          id: CourseData.getLessonId(course, thisLesson),
+          url,
+          title: `${CourseData.getLessonTitle(
+            course,
+            thisLesson,
+          )}: ${CourseData.getCourseFullTitle(course)}`,
+          artist: 'Language Transfer',
+          artwork: CourseData.getCourseImageWithText(course),
+        };
+      })(l),
+    ),
+  );
 
   // Add a track to the queue
-  await TrackPlayer.add({
-    id: CourseData.getLessonId(course, lesson),
-    url,
-    title: `${CourseData.getLessonTitle(
-      course,
-      lesson,
-    )}: ${CourseData.getCourseFullTitle(course)}`,
-    artist: 'Language Transfer',
-    artwork: CourseData.getCourseImageWithText(course),
-  });
+  if (lesson !== 0) {
+    // we get an event for skipping that needs to be suppressed, UNLESS we're legitimately trying to play lesson 1
+    suppressTrackChange = true;
+  }
+  await TrackPlayer.add(tracks);
+  await TrackPlayer.skip(CourseData.getLessonId(course, lesson));
 
   currentlyPlaying = {course, lesson};
 };
 
-// we need to suppress playback-queue-ended unless it actually played the track through
-let intentionalDestroy = false;
 export const genStopPlaying = async () => {
-  intentionalDestroy = true;
   currentlyPlaying = null;
   await TrackPlayer.pause(); // might fix bugs where sometimes the notification goes away but keeps playing
   await TrackPlayer.destroy();
@@ -131,56 +142,6 @@ export default async () => {
       });
 
       await TrackPlayer.seekTo(Math.max(0, position - interval));
-    }),
-
-    // next and previous aren't possible, if the notification behaves,
-    // but some UI kits will disobey and add these buttons. might as well make them work.
-    // they don't seek to the saved spot, but honestly I don't care very much. they probably shouldn't.
-    TrackPlayer.addEventListener('remote-next', async () => {
-      const nextLesson = CourseData.getNextLesson(
-        currentlyPlaying.course,
-        currentlyPlaying.lesson,
-      );
-
-      log({
-        action: 'skip',
-        surface: 'remote',
-        course: currentlyPlaying?.course,
-        lesson: nextLesson,
-      });
-
-      if (nextLesson === null) {
-        return;
-      }
-
-      await genEnqueueFile(currentlyPlaying.course, nextLesson);
-      await TrackPlayer.play();
-      navigate('Listen', {course: currentlyPlaying.course, lesson: nextLesson});
-    }),
-
-    TrackPlayer.addEventListener('remote-previous', async () => {
-      const previousLesson = CourseData.getPreviousLesson(
-        currentlyPlaying.course,
-        currentlyPlaying.lesson,
-      );
-
-      log({
-        action: 'previous',
-        surface: 'remote',
-        course: currentlyPlaying?.course,
-        lesson: previousLesson,
-      });
-
-      if (previousLesson === null) {
-        return;
-      }
-
-      await genEnqueueFile(currentlyPlaying.course, previousLesson);
-      await TrackPlayer.play();
-      navigate('Listen', {
-        course: currentlyPlaying.course,
-        lesson: previousLesson,
-      });
     }),
 
     TrackPlayer.addEventListener('playback-state', async ({state}) => {
@@ -242,65 +203,93 @@ export default async () => {
       }
     }),
 
-    TrackPlayer.addEventListener('playback-queue-ended', async (params) => {
-      if (intentionalDestroy) {
-        intentionalDestroy = false;
+    // welcome! you've found it. the worst code in the codebase.
+    // I have a personal policy of including explicit blame whenever I write code I know someone will curse me for one day.
+    // contact me@timothyaveni.com with your complaints.
+    TrackPlayer.addEventListener('playback-track-changed', async (params) => {
+      const wasPlaying = currentlyPlaying;
+
+      if (params.track === null || wasPlaying === null) {
+        // starting to play a track from nothing
+        // also lands here if we stop the track explicitly
         return;
       }
 
-      if (params.track === null) {
-        // honestly not sure why/when this can happen but it can and it's causing problems
+      if (suppressTrackChange) {
+        suppressTrackChange = false;
         return;
       }
 
-      if (currentlyPlaying === null) {
-        // ...what?
+      if (params.nextTrack === null) {
+        // the queue is ended. this isn't DRY, but it's tricky to get all the cases right here in a clean way.
+        log({
+          action: 'finish_lesson',
+          course: wasPlaying?.course,
+          lesson: wasPlaying?.lesson,
+        });
+        await genMarkLessonFinished(wasPlaying.course, wasPlaying.lesson);
+        await genUpdateProgressForLesson(
+          wasPlaying.course,
+          wasPlaying.lesson,
+          0,
+        );
+        pop();
+        return;
+      }
+
+      // ASSUMPTION: we're in the same course as the old track
+      currentlyPlaying = {
+        course: wasPlaying.course,
+        lesson: CourseData.getLessonNumberForId(
+          wasPlaying.course,
+          params.nextTrack,
+        ),
+      };
+
+      if (!currentlyPlaying.lesson) {
+        // TODO: don't fail silently here? should be impossible, but bugs happen
+        return;
+      }
+
+      log({
+        action: 'track_changed',
+        course: wasPlaying.course,
+        lesson: wasPlaying.lesson,
+        position: params.position,
+      });
+
+      const trackDuration = CourseData.getLessonDuration(
+        wasPlaying.course,
+        wasPlaying.lesson,
+      );
+      console.log(trackDuration);
+      // threshold compare, though in practice it's much smaller than 0.5
+      if (params.position < trackDuration - 0.5) {
+        // just a skip, track didn't finish
+        navigate('Listen', {
+          course: currentlyPlaying.course,
+          lesson: currentlyPlaying.lesson,
+        });
         return;
       }
 
       log({
         action: 'finish_lesson',
-        course: currentlyPlaying?.course,
-        lesson: currentlyPlaying?.lesson,
+        course: wasPlaying?.course,
+        lesson: wasPlaying?.lesson,
       });
 
       // guess who worked out the hard way that if you do the next two concurrently you get a race condition
 
-      await genMarkLessonFinished(
-        currentlyPlaying.course,
-        currentlyPlaying.lesson,
-      );
+      await genMarkLessonFinished(wasPlaying.course, wasPlaying.lesson);
 
       // otherwise it's very tricky to play it again!
-      await genUpdateProgressForLesson(
-        currentlyPlaying.course,
-        currentlyPlaying.lesson,
-        0,
-      );
+      await genUpdateProgressForLesson(wasPlaying.course, wasPlaying.lesson, 0);
 
-      const nextLesson = CourseData.getNextLesson(
-        currentlyPlaying.course,
-        currentlyPlaying.lesson,
-      );
-
-      if (
-        nextLesson === null || // :o you did it!
-        !(await genPreferenceAutoplay()) ||
-        (!(await genPreferenceAutoplayNonDownloaded()) &&
-          !(await DownloadManager.genIsDownloaded(
-            currentlyPlaying.course,
-            nextLesson,
-          )))
-      ) {
-        // sorry sir, no can do
-        pop();
-        return;
-      }
-
-      await genEnqueueFile(currentlyPlaying.course, nextLesson);
-      await TrackPlayer.play();
-      // this "I'm not using context" thing is getting out of hand
-      navigate('Listen', {course: currentlyPlaying.course, lesson: nextLesson});
+      navigate('Listen', {
+        course: currentlyPlaying.course,
+        lesson: currentlyPlaying.lesson,
+      });
     }),
   ];
 };

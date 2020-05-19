@@ -286,6 +286,16 @@ const CourseData = {
     return courseMeta[course].lessons[lesson].id;
   },
 
+  getLessonNumberForId(course: Course, lessonId: string): number | null {
+    const index = courseMeta[course].lessons.findIndex(
+      (l) => l.id === lessonId,
+    );
+    if (index === -1) {
+      return null;
+    }
+    return index;
+  },
+
   getLessonUrl(course: Course, lesson: number, quality: string): string {
     const urls = courseMeta[course].lessons[lesson].urls;
     if (quality === 'high') {

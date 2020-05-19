@@ -18,7 +18,7 @@ const LanguageButton = (props) => {
   const lessonCount = CourseData.getFallbackLessonCount(props.course);
 
   const textStyle = {
-    color: 'black', //todo
+    color: 'black',
   };
 
   return (

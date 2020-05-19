@@ -171,11 +171,15 @@ const DownloadManager = {
     subscriptionArray.splice(subscriptionArray.indexOf(callback), 1);
   },
 
+  genIsDownloadedForDownloadId: async (
+    downloadId: string,
+  ): Promise<boolean> => {
+    return await fs.exists(DownloadManager.getDownloadSaveLocation(downloadId));
+  },
+
   genIsDownloaded: async (course: Course, lesson: number): Promise<boolean> => {
-    return await fs.exists(
-      DownloadManager.getDownloadSaveLocation(
-        DownloadManager.getDownloadId(course, lesson),
-      ),
+    return await DownloadManager.genIsDownloadedForDownloadId(
+      DownloadManager.getDownloadId(course, lesson),
     );
   },
 
