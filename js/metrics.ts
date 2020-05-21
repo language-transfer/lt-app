@@ -3,7 +3,7 @@ import DeviceInfo from 'react-native-device-info';
 import {genPreferenceAllowDataCollection, genMetricsToken} from './persistence';
 import CourseData from './course-data';
 
-const LOG_ENDPOINT = 'http://192.168.0.11:6774/log';
+const LOG_ENDPOINT = 'https://metrics.languagetransfer.org/log';
 
 export const log = async (data): Promise<void> => {
   const [permitted, user_token] = await Promise.all([
