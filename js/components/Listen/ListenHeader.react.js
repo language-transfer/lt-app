@@ -23,12 +23,6 @@ const ListenHeader = (props) => {
       justifyContent: 'center',
       borderRadius: 28,
     },
-    headerText: {
-      fontFamily: 'sans-serif-medium',
-      fontWeight: 'normal',
-      fontSize: 20,
-      color: CourseData.getCourseUIColors(props.route.params.course).text,
-    },
     dummy: {
       // I wanted to use pos:abs on the button but couldn't work it out
       // so we're just flexing and balancing it on the right

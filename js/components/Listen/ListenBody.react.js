@@ -75,45 +75,6 @@ const ListenBody = (props) => {
       paddingHorizontal: '10%',
       alignItems: 'center',
     },
-
-    scrubber: {
-      paddingHorizontal: '10%',
-    },
-    progressBar: {
-      height: 4,
-      width: '100%',
-      marginBottom: 15,
-      flexDirection: 'row',
-    },
-    progressMade: {
-      height: 4,
-      flex: 2 * 60 + 40,
-      backgroundColor: CourseData.getCourseUIColors(course).text,
-    },
-    progressLeft: {
-      height: 4,
-      flex: 7 * 60 + 2 - (2 * 60 + 40),
-      backgroundColor: CourseData.getCourseUIColors(course).backgroundAccent,
-    },
-    progressTextContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-    },
-    progressText: {
-      color: CourseData.getCourseUIColors(course).text,
-    },
-
-    bottomButtons: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      width: '100%',
-      paddingHorizontal: '10%',
-      alignItems: 'center',
-    },
-
-    bottomButton: {
-      maxWidth: 72,
-    },
   });
 
   return (

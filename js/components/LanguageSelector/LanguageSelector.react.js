@@ -33,13 +33,13 @@ const LanguageSelector = ({navigation}) => {
   const cardsMarginTop = imageHeight + 80 + 40;
 
   const styles = StyleSheet.create({
-    wrapper: {
+    screenWrapper: {
       width: '100%',
       height: '100%',
       justifyContent: 'space-between',
       backgroundColor: 'white',
     },
-    wrapper2: {
+    pageWrapper: {
       position: 'absolute',
       width: '100%',
       height: '100%',
@@ -91,8 +91,8 @@ const LanguageSelector = ({navigation}) => {
   });
 
   return (
-    <View style={styles.wrapper}>
-      <View style={styles.wrapper2}>
+    <View style={styles.screenWrapper}>
+      <View style={styles.pageWrapper}>
         <Animated.Image
           source={logo}
           style={[

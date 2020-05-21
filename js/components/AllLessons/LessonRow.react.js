@@ -238,18 +238,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  downloadedText: {
-    justifyContent: 'center',
-  },
   downloadButton: {
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 5,
     paddingHorizontal: 10,
-  },
-  downloadButtonText: {
-    color: 'rgb(56, 88, 152)',
   },
 });
 
