@@ -4,7 +4,6 @@ import {
   Text,
   StatusBar,
   StyleSheet,
-  Image,
   TouchableNativeFeedback,
   Linking,
 } from 'react-native';
@@ -14,7 +13,6 @@ import {ScrollView} from 'react-native-gesture-handler';
 
 import DeviceInfo from 'react-native-device-info';
 
-import logo from '../../../resources/LT-logo-text.png';
 import {Icon} from 'react-native-elements';
 import {log} from '../../metrics';
 
@@ -60,12 +58,6 @@ const About = (props) => {
   return (
     <ScrollView>
       <View style={styles.body}>
-        {/* <Image
-          source={logo}
-          style={styles.headerImage}
-          resizeMode="contain"
-          accessibilityLabel="Language Transfer logo"
-        /> */}
         {header('Language Transfer')}
         <View style={[styles.bodySection, shownSection('Language Transfer')]}>
           <Text style={styles.bodyText}>

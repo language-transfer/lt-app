@@ -1,11 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
   StatusBar,
   StyleSheet,
-  Image,
-  CheckBox,
   TouchableNativeFeedback,
   Alert,
 } from 'react-native';

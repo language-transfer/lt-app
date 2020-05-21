@@ -5,7 +5,6 @@ import {Icon} from 'react-native-elements';
 
 import CourseData from '../../course-data';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
-import {log} from '../../metrics';
 
 const LanguageHomeHeader = (props) => {
   return (

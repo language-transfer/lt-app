@@ -1,16 +1,7 @@
 import 'react-native-gesture-handler';
 
-import React, {useEffect, useContext, useState} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  Button,
-  AppState,
-} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {AppState} from 'react-native';
 
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';

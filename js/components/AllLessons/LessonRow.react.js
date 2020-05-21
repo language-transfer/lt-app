@@ -242,7 +242,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   downloadButton: {
-    // backgroundColor: 'rgb(231, 243, 255)',
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',

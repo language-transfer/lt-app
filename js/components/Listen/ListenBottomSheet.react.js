@@ -1,13 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import {
   StyleSheet,
   View,
   Text,
-  StatusBar,
-  Button,
   Linking,
   TouchableNativeFeedback,
-  ActivityIndicator,
 } from 'react-native';
 
 import {Icon} from 'react-native-elements';

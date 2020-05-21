@@ -1,15 +1,5 @@
 import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  Image,
-  Button,
-  ImageBackground,
-} from 'react-native';
+import {StyleSheet, View, Text, ImageBackground} from 'react-native';
 
 import CourseData from '../../course-data';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, View, Text, StatusBar, Linking} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
@@ -9,7 +9,6 @@ import {
 } from '../../persistence';
 
 import CourseData from '../../course-data';
-import DownloadManager from '../../download-manager';
 
 import formatDuration from 'format-duration';
 

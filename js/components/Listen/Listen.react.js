@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, View, StatusBar} from 'react-native';
 
 import ListenHeader from './ListenHeader.react';
@@ -6,19 +6,13 @@ import ListenBody from './ListenBody.react';
 import TrackPlayer, {
   STATE_NONE,
   STATE_PLAYING,
-  STATE_PAUSED,
   STATE_READY,
   STATE_CONNECTING,
 } from 'react-native-track-player';
 
 import CourseData from '../../course-data';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
-import DownloadManager from '../../download-manager';
-import {
-  setCurrentlyPlaying,
-  audioServiceSubscriptions,
-  genStopPlaying,
-} from '../../audio-service';
+import {audioServiceSubscriptions, genStopPlaying} from '../../audio-service';
 import {genProgressForLesson} from '../../persistence';
 import {genEnqueueFile} from '../../audio-service';
 
@@ -44,7 +38,6 @@ const Listen = (props) => {
 
   useEffect(() => {
     return props.navigation.addListener('blur', () => {
-      // fresh = true;
       genStopPlaying();
     });
   }, [props.nagivation]);
