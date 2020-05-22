@@ -38,7 +38,7 @@ export type Course =
     version: 0,
     lessons: [
       {
-        url: 'https://download.languagetransfer.org/spanish/spanish1.mp3',
+        url: 'https://downloads.languagetransfer.org/spanish/spanish1.mp3',
         id: 'spanish1',
         duration: 334.132,
         title: 'Lesson 1',
@@ -53,7 +53,7 @@ export type Course =
         ],
       },
       {
-        url: 'https://download.languagetransfer.org/spanish/spanish2.mp3',
+        url: 'https://downloads.languagetransfer.org/spanish/spanish2.mp3',
         id: 'spanish2',
         ...
       },
@@ -73,7 +73,7 @@ const data = {
     imageWithText: spanishCoverWithText,
     shortTitle: 'Spanish',
     fullTitle: 'Complete Spanish',
-    metaUrl: 'https://download.languagetransfer.org/spanish/spanish-meta.json',
+    metaUrl: 'https://downloads.languagetransfer.org/spanish/spanish-meta.json',
     fallbackLessonCount: 90,
     uiColors: {
       background: '#7186d0',
@@ -87,7 +87,7 @@ const data = {
     imageWithText: arabicCoverWithText,
     shortTitle: 'Arabic',
     fullTitle: 'Introduction to Arabic',
-    metaUrl: 'https://download.languagetransfer.org/arabic/arabic-meta.json',
+    metaUrl: 'https://downloads.languagetransfer.org/arabic/arabic-meta.json',
     fallbackLessonCount: 38,
     uiColors: {
       background: '#c2930f',
@@ -101,7 +101,7 @@ const data = {
     imageWithText: turkishCoverWithText,
     shortTitle: 'Turkish',
     fullTitle: 'Introduction to Turkish',
-    metaUrl: 'https://download.languagetransfer.org/turkish/turkish-meta.json',
+    metaUrl: 'https://downloads.languagetransfer.org/turkish/turkish-meta.json',
     fallbackLessonCount: 44,
     uiColors: {
       background: '#a20b3b',
@@ -115,7 +115,7 @@ const data = {
     imageWithText: germanCoverWithText,
     shortTitle: 'German',
     fullTitle: 'Complete German',
-    metaUrl: 'https://download.languagetransfer.org/german/german-meta.json',
+    metaUrl: 'https://downloads.languagetransfer.org/german/german-meta.json',
     fallbackLessonCount: 50,
     uiColors: {
       background: '#009900',
@@ -129,7 +129,7 @@ const data = {
     imageWithText: greekCoverWithText,
     shortTitle: 'Greek',
     fullTitle: 'Complete Greek',
-    metaUrl: 'https://download.languagetransfer.org/greek/greek-meta.json',
+    metaUrl: 'https://downloads.languagetransfer.org/greek/greek-meta.json',
     fallbackLessonCount: 120,
     uiColors: {
       background: '#d57d2f',
@@ -143,7 +143,7 @@ const data = {
     imageWithText: italianCoverWithText,
     shortTitle: 'Italian',
     fullTitle: 'Introduction to Italian',
-    metaUrl: 'https://download.languagetransfer.org/italian/italian-meta.json',
+    metaUrl: 'https://downloads.languagetransfer.org/italian/italian-meta.json',
     fallbackLessonCount: 45,
     uiColors: {
       background: '#e423ae',
@@ -157,7 +157,7 @@ const data = {
     imageWithText: swahiliCoverWithText,
     shortTitle: 'Swahili',
     fullTitle: 'Complete Swahili',
-    metaUrl: 'https://download.languagetransfer.org/swahili/swahili-meta.json',
+    metaUrl: 'https://downloads.languagetransfer.org/swahili/swahili-meta.json',
     fallbackLessonCount: 110,
     uiColors: {
       background: '#12eddd',
@@ -171,7 +171,7 @@ const data = {
     imageWithText: frenchCoverWithText,
     shortTitle: 'French',
     fullTitle: 'Introduction to French',
-    metaUrl: 'https://download.languagetransfer.org/french/french-meta.json',
+    metaUrl: 'https://downloads.languagetransfer.org/french/french-meta.json',
     fallbackLessonCount: 40,
     uiColors: {
       background: '#10bdff',
@@ -185,7 +185,7 @@ const data = {
     imageWithText: inglesCoverWithText,
     shortTitle: 'Inglés',
     fullTitle: 'Introducción a Inglés',
-    metaUrl: 'https://download.languagetransfer.org/ingles/ingles-meta.json',
+    metaUrl: 'https://downloads.languagetransfer.org/ingles/ingles-meta.json',
     fallbackLessonCount: 40,
     uiColors: {
       background: '#7186d0',
