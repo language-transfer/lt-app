@@ -66,13 +66,22 @@ const LanguageSelector = ({navigation}) => {
       height: BOTTOM_NAV_HEIGHT,
       backgroundColor: 'rgba(255, 255, 255, 0.6)',
     },
+    aboutSectionHr: {
+      width: '100%',
+      height: 4,
+      backgroundColor: '#ddd',
+      marginTop: 40,
+    },
+    aboutSectionWrapper: {
+      backgroundColor: '#eee',
+    },
     aboutSection: {
       marginHorizontal: 40,
-      marginVertical: 50,
+      marginVertical: 40,
     },
     aboutSectionText: {
       fontSize: 16,
-      marginBottom: 16,
+      marginBottom: 24,
     },
     additionalButton: {
       borderRadius: 10,
@@ -134,22 +143,25 @@ const LanguageSelector = ({navigation}) => {
                 onPress={() => navigation.navigate('Language Home', {course})}
               />
             ))}
-            <View style={styles.aboutSection}>
-              <Text style={styles.aboutSectionText}>
-                Language Transfer is the work of just one guy! Mihalis is trying
-                to build a team of course writers. Find out more:
-              </Text>
-              <View style={styles.additionalButton}>
-                <TouchableNativeFeedback
-                  onPress={() => navigation.navigate('About')}
-                  useForeground={true}>
-                  <View style={styles.additionalButtonInner}>
-                    <Text style={styles.additionalButtonText}>
-                      About Language Transfer
-                    </Text>
-                    <Icon name="info" type="font-awesome-5" />
-                  </View>
-                </TouchableNativeFeedback>
+            <View style={styles.aboutSectionHr} />
+            <View style={styles.aboutSectionWrapper}>
+              <View style={styles.aboutSection}>
+                <Text style={styles.aboutSectionText}>
+                  Language Transfer is the work of just one guy! Mihalis is
+                  trying to build a team of course writers. Find out more:
+                </Text>
+                <View style={styles.additionalButton}>
+                  <TouchableNativeFeedback
+                    onPress={() => navigation.navigate('About')}
+                    useForeground={true}>
+                    <View style={styles.additionalButtonInner}>
+                      <Text style={styles.additionalButtonText}>
+                        About Language Transfer
+                      </Text>
+                      <Icon name="info" type="font-awesome-5" />
+                    </View>
+                  </TouchableNativeFeedback>
+                </View>
               </View>
             </View>
           </View>

@@ -26,6 +26,7 @@ const About = (props) => {
   }, [props.navigation]);
 
   const [sections, setSections] = useState({
+    'Coming Soon': true,
     'Language Transfer': true,
     Privacy: false,
     'LT App': false,
@@ -58,6 +59,60 @@ const About = (props) => {
   return (
     <ScrollView>
       <View style={styles.body}>
+        {header('Coming Soon')}
+        <View style={[styles.bodySection, shownSection('Coming Soon')]}>
+          <Text style={styles.bodyText}>
+            We're always thinking about how to make the Language Transfer app
+            better! Here's some of what we're planning for the future of the
+            app:
+          </Text>
+
+          <Text style={styles.listElement}>
+            {'\u2022'} Arabic vocabulary cards, including audio from native
+            speakers of Arabic.
+          </Text>
+          <Text style={styles.listElement}>
+            {'\u2022'} Ways to share Language Transfer and your progress with
+            your friends on social media.
+          </Text>
+          <Text style={styles.listElement}>
+            {'\u2022'} Intelligent automatic pausing when the teacher asks a
+            question.
+          </Text>
+
+          <Text style={styles.bodyText}>
+            To help us understand where pauses occur in the course audio, we
+            collect data about listening patterns. By using the Thinking Method,
+            you're helping us learn about how real people engage with the
+            Language Transfer course audio. To learn more about what data we
+            collect (and about how you can turn off this data collection), see
+            the 'Privacy' section on this About page.
+          </Text>
+
+          <Text style={[styles.bodyText, styles.bodyTextAboveButton]}>
+            If you have any feedback that you'd like to share about how we can
+            improve the Language Transfer app, feel free to send an email:
+          </Text>
+
+          <View style={styles.additionalButton}>
+            <TouchableNativeFeedback
+              onPress={() => {
+                Linking.openURL(
+                  'mailto:info@languagetransfer.org' +
+                    `?subject=${encodeURIComponent(
+                      `Feedback about the Language Transfer app`,
+                    )}`,
+                );
+              }}
+              useForeground={true}>
+              <View style={styles.additionalButtonInner}>
+                <Text style={styles.additionalButtonText}>Contact us</Text>
+                <Icon name="envelope" type="font-awesome-5" />
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+        </View>
+
         {header('Language Transfer')}
         <View style={[styles.bodySection, shownSection('Language Transfer')]}>
           <Text style={styles.bodyText}>
@@ -74,17 +129,17 @@ const About = (props) => {
           </Text>
 
           <Text style={styles.bodyText}>
+            The free model reflects a desire to play a cooperative and caring
+            role in society, rather than a competitive one.
+          </Text>
+
+          <Text style={[styles.bodyText, styles.bodyTextAboveButton]}>
             Contributions from individuals comprise 100% of Language Transfer's
             funding. If Language Transfer has helped you, and you are able,
             please consider contributing to the project.
           </Text>
 
-          <Text style={styles.bodyText}>
-            The free model reflects a desire to play a cooperative and caring
-            role in society, rather than a competitive one.
-          </Text>
-
-          <View style={[styles.additionalButton, {marginTop: 24}]}>
+          <View style={styles.additionalButton}>
             <TouchableNativeFeedback
               onPress={() => {
                 log({
@@ -163,11 +218,14 @@ const About = (props) => {
         {header('Privacy')}
         <View style={[styles.bodySection, shownSection('Privacy')]}>
           <Text style={styles.bodyText}>
-            We will never sell your data. If you do not opt out of data
-            collection (in the Settings pane of this app), we collect anonymous
-            usage information so we can learn about how best to improve the app.
+            We collect anonymous usage information so we can learn about how
+            best to improve the app. You're welcome to opt out of data
+            collection in the Settings pane of this app.
+          </Text>
+          <Text style={styles.bodyText}>
             This usage information does not identify you or single you out in
-            any way. Here's what we do track:
+            any way; we do not (and cannot) sell your personal information.
+            Here's what we do track:
           </Text>
 
           <Text style={styles.listElement}>
@@ -191,9 +249,9 @@ const About = (props) => {
           </Text>
 
           <Text style={styles.bodyText}>
-            If you choose to report a problem from within the app, we may retain
-            any information you send to us indefinitely so we can address the
-            problem.
+            If you choose to contact us or report a problem from within the app,
+            we may retain any information you send to us indefinitely so we can
+            take action on your feedback.
           </Text>
         </View>
 
@@ -254,11 +312,15 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     paddingHorizontal: 30,
   },
+  bodyTextAboveButton: {
+    marginBottom: 24,
+  },
 
   listElement: {
     fontSize: 20,
     marginLeft: 16 + 30,
     marginRight: 30,
+    marginBottom: 12,
   },
 
   additionalButton: {
