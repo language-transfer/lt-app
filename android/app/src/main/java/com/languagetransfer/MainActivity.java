@@ -1,4 +1,4 @@
-package com.languagetransfer;
+package org.languagetransfer;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
