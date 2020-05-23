@@ -26,7 +26,6 @@ const About = (props) => {
   }, [props.navigation]);
 
   const [sections, setSections] = useState({
-    'Coming Soon': true,
     'Language Transfer': true,
     Privacy: false,
     'LT App': false,
@@ -59,60 +58,6 @@ const About = (props) => {
   return (
     <ScrollView>
       <View style={styles.body}>
-        {header('Coming Soon')}
-        <View style={[styles.bodySection, shownSection('Coming Soon')]}>
-          <Text style={styles.bodyText}>
-            We're always thinking about how to make the Language Transfer app
-            better! Here's some of what we're planning for the future of the
-            app:
-          </Text>
-
-          <Text style={styles.listElement}>
-            {'\u2022'} Arabic vocabulary cards, including audio from native
-            speakers of Arabic.
-          </Text>
-          <Text style={styles.listElement}>
-            {'\u2022'} Ways to share Language Transfer and your progress with
-            your friends on social media.
-          </Text>
-          <Text style={styles.listElement}>
-            {'\u2022'} Intelligent automatic pausing when the teacher asks a
-            question.
-          </Text>
-
-          <Text style={styles.bodyText}>
-            To help us understand where pauses occur in the course audio, we
-            collect data about listening patterns. By using the Thinking Method,
-            you're helping us learn about how real people engage with the
-            Language Transfer course audio. To learn more about what data we
-            collect (and about how you can turn off this data collection), see
-            the 'Privacy' section on this About page.
-          </Text>
-
-          <Text style={[styles.bodyText, styles.bodyTextAboveButton]}>
-            If you have any feedback that you'd like to share about how we can
-            improve the Language Transfer app, feel free to send an email:
-          </Text>
-
-          <View style={styles.additionalButton}>
-            <TouchableNativeFeedback
-              onPress={() => {
-                Linking.openURL(
-                  'mailto:info@languagetransfer.org' +
-                    `?subject=${encodeURIComponent(
-                      `Feedback about the Language Transfer app`,
-                    )}`,
-                );
-              }}
-              useForeground={true}>
-              <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>Contact us</Text>
-                <Icon name="envelope" type="font-awesome-5" />
-              </View>
-            </TouchableNativeFeedback>
-          </View>
-        </View>
-
         {header('Language Transfer')}
         <View style={[styles.bodySection, shownSection('Language Transfer')]}>
           <Text style={styles.bodyText}>
@@ -257,6 +202,55 @@ const About = (props) => {
 
         {header('LT App')}
         <View style={[styles.bodySection, shownSection('LT App')]}>
+          <Text style={styles.bodyText}>
+            Here's some of what we're planning for the future of the app:
+          </Text>
+
+          <Text style={styles.listElement}>
+            {'\u2022'} Arabic vocabulary cards, including audio from native
+            speakers of Arabic.
+          </Text>
+          <Text style={styles.listElement}>
+            {'\u2022'} Ways to share Language Transfer and your progress with
+            your friends on social media.
+          </Text>
+          <Text style={styles.listElement}>
+            {'\u2022'} Intelligent automatic pausing when the teacher asks a
+            question.
+          </Text>
+
+          <Text style={styles.bodyText}>
+            To help us understand where pauses occur in the course audio, we
+            collect data about listening patterns. By using the Thinking Method,
+            you're helping us learn about how real people engage with the
+            Language Transfer course audio. To learn more about what data we
+            collect (and about how you can turn off this data collection), see
+            the 'Privacy' section on this About page.
+          </Text>
+
+          <Text style={[styles.bodyText, styles.bodyTextAboveButton]}>
+            If you have any feedback that you'd like to share about how we can
+            improve the Language Transfer app, feel free to send an email:
+          </Text>
+
+          <View style={styles.additionalButton}>
+            <TouchableNativeFeedback
+              onPress={() => {
+                Linking.openURL(
+                  'mailto:info@languagetransfer.org' +
+                    `?subject=${encodeURIComponent(
+                      `Feedback about the Language Transfer app`,
+                    )}`,
+                );
+              }}
+              useForeground={true}>
+              <View style={styles.additionalButtonInner}>
+                <Text style={styles.additionalButtonText}>Contact us</Text>
+                <Icon name="envelope" type="font-awesome-5" />
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+
           <Text style={styles.bodyText}>
             The Language Transfer app is free, open-source software. You can
             find its source code on GitHub:
