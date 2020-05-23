@@ -77,6 +77,9 @@ const ListenBody = (props) => {
     },
   });
 
+  const smallIconSize = 0.175 * Dimensions.get('screen').width;
+  const largeIconSize = 0.4 * Dimensions.get('screen').width;
+
   return (
     <>
       <View style={styles.body}>
@@ -97,7 +100,7 @@ const ListenBody = (props) => {
               name="replay-10"
               type="material"
               accessibilityLabel="skip backwards ten seconds"
-              size={72}
+              size={smallIconSize}
               color={CourseData.getCourseUIColors(course).text}
             />
           </TouchableNativeFeedback>
@@ -109,13 +112,13 @@ const ListenBody = (props) => {
                 name={props.playing ? 'pause' : 'play-arrow'}
                 accessibilityLabel={props.playing ? 'pause' : 'play'}
                 type="material"
-                size={172}
+                size={largeIconSize}
                 color={CourseData.getCourseUIColors(course).text}
               />
             </TouchableNativeFeedback>
           ) : (
             <ActivityIndicator
-              size={172}
+              size={largeIconSize}
               color={CourseData.getCourseUIColors(course).text}
             />
           )}
@@ -128,7 +131,7 @@ const ListenBody = (props) => {
               name="settings"
               type="material"
               accessibilityLabel="other actions for this lesson"
-              size={72}
+              size={smallIconSize}
               color={CourseData.getCourseUIColors(course).text}
             />
           </TouchableNativeFeedback>
