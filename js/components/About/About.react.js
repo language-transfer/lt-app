@@ -115,7 +115,7 @@ const About = (props) => {
               useForeground={true}>
               <View style={styles.additionalButtonInner}>
                 <Text style={styles.additionalButtonText}>
-                  Make a one-time contribution
+                  Make a one-time contribution to Language Transfer
                 </Text>
                 <Icon name="donate" type="font-awesome-5" />
               </View>
@@ -329,9 +329,11 @@ const styles = StyleSheet.create({
     padding: 25,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   additionalButtonText: {
     fontSize: 20,
+    maxWidth: '90%',
   },
 });
 

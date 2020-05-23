@@ -93,9 +93,11 @@ const LanguageSelector = ({navigation}) => {
       padding: 25,
       flexDirection: 'row',
       justifyContent: 'space-between',
+      alignItems: 'center',
     },
     additionalButtonText: {
       fontSize: 20,
+      maxWidth: '90%',
     },
   });
 
