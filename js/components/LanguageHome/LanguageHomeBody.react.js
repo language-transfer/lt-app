@@ -74,6 +74,8 @@ const LanguageHomeBody = (props) => {
     );
   }
 
+  const donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo = true;
+
   return (
     <View style={styles.body}>
       <ScrollView>
@@ -112,25 +114,46 @@ const LanguageHomeBody = (props) => {
           </TouchableNativeFeedback>
         </View>
 
-        <View style={styles.additionalButton}>
-          <TouchableNativeFeedback
-            onPress={() => {
-              log({
-                action: 'open_patreon',
-                surface: 'language_home',
-                course: props.route.params.course,
-              });
-              Linking.openURL('https://www.patreon.com/languagetransfer');
-            }}
-            useForeground={true}>
-            <View style={styles.additionalButtonInner}>
-              <Text style={styles.additionalButtonText}>
-                Support Language Transfer
-              </Text>
-              <Icon name="patreon" type="font-awesome-5" />
-            </View>
-          </TouchableNativeFeedback>
-        </View>
+        {donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo ? (
+          <View style={styles.additionalButton}>
+            <TouchableNativeFeedback
+              onPress={() => {
+                log({
+                  action: 'visit_website',
+                  surface: 'language_home',
+                });
+                Linking.openURL('https://www.languagetransfer.org/');
+              }}
+              useForeground={true}>
+              <View style={styles.additionalButtonInner}>
+                <Text style={styles.additionalButtonText}>
+                  Visit languagetransfer.org
+                </Text>
+                <Icon name="link" type="font-awesome-5" />
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+        ) : (
+          <View style={styles.additionalButton}>
+            <TouchableNativeFeedback
+              onPress={() => {
+                log({
+                  action: 'open_patreon',
+                  surface: 'language_home',
+                  course: props.route.params.course,
+                });
+                Linking.openURL('https://www.patreon.com/languagetransfer');
+              }}
+              useForeground={true}>
+              <View style={styles.additionalButtonInner}>
+                <Text style={styles.additionalButtonText}>
+                  Support Language Transfer
+                </Text>
+                <Icon name="patreon" type="font-awesome-5" />
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+        )}
       </ScrollView>
     </View>
   );

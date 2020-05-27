@@ -55,6 +55,9 @@ const About = (props) => {
     );
   };
 
+  // TODO: get this from the build environment
+  const donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo = true;
+
   return (
     <ScrollView>
       <View style={styles.body}>
@@ -67,60 +70,73 @@ const About = (props) => {
             will take care of itself!
           </Text>
 
-          <Text style={styles.bodyText}>
-            Language Transfer is totally free, developed by Mihalis Eleftheriou.
-            There's no LT team, though many volunteers have helped along the
-            way.
-          </Text>
+          {donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo ? (
+            <>
+              <Text style={[styles.bodyText, styles.bodyTextAboveButton]}>
+                Language Transfer is a unique project in more ways than one.
+                Learn more about Language Transfer here:
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.bodyText}>
+                Language Transfer is totally free, developed by Mihalis
+                Eleftheriou. There's no LT team, though many volunteers have
+                helped along the way.
+              </Text>
 
-          <Text style={styles.bodyText}>
-            The free model reflects a desire to play a cooperative and caring
-            role in society, rather than a competitive one.
-          </Text>
+              <Text style={styles.bodyText}>
+                The free model reflects a desire to play a cooperative and
+                caring role in society, rather than a competitive one.
+              </Text>
 
-          <Text style={[styles.bodyText, styles.bodyTextAboveButton]}>
-            Contributions from individuals comprise 100% of Language Transfer's
-            funding. If Language Transfer has helped you, and you are able,
-            please consider contributing to the project.
-          </Text>
+              <Text style={[styles.bodyText, styles.bodyTextAboveButton]}>
+                Contributions from individuals comprise 100% of Language
+                Transfer's funding. If Language Transfer has helped you, and you
+                are able, please consider contributing to the project.
+              </Text>
 
-          <View style={styles.additionalButton}>
-            <TouchableNativeFeedback
-              onPress={() => {
-                log({
-                  action: 'open_patreon',
-                  surface: 'about',
-                });
-                Linking.openURL('https://www.patreon.com/languagetransfer');
-              }}
-              useForeground={true}>
-              <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>
-                  Contribute on Patreon
-                </Text>
-                <Icon name="patreon" type="font-awesome-5" />
+              <View style={styles.additionalButton}>
+                <TouchableNativeFeedback
+                  onPress={() => {
+                    log({
+                      action: 'open_patreon',
+                      surface: 'about',
+                    });
+                    Linking.openURL('https://www.patreon.com/languagetransfer');
+                  }}
+                  useForeground={true}>
+                  <View style={styles.additionalButtonInner}>
+                    <Text style={styles.additionalButtonText}>
+                      Contribute on Patreon
+                    </Text>
+                    <Icon name="patreon" type="font-awesome-5" />
+                  </View>
+                </TouchableNativeFeedback>
               </View>
-            </TouchableNativeFeedback>
-          </View>
 
-          <View style={styles.additionalButton}>
-            <TouchableNativeFeedback
-              onPress={() => {
-                log({
-                  action: 'visit_donate_page',
-                  surface: 'about',
-                });
-                Linking.openURL('https://www.languagetransfer.org/donations');
-              }}
-              useForeground={true}>
-              <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>
-                  Make a one-time contribution to Language Transfer
-                </Text>
-                <Icon name="donate" type="font-awesome-5" />
+              <View style={styles.additionalButton}>
+                <TouchableNativeFeedback
+                  onPress={() => {
+                    log({
+                      action: 'visit_donate_page',
+                      surface: 'about',
+                    });
+                    Linking.openURL(
+                      'https://www.languagetransfer.org/donations',
+                    );
+                  }}
+                  useForeground={true}>
+                  <View style={styles.additionalButtonInner}>
+                    <Text style={styles.additionalButtonText}>
+                      Make a one-time contribution to Language Transfer
+                    </Text>
+                    <Icon name="donate" type="font-awesome-5" />
+                  </View>
+                </TouchableNativeFeedback>
               </View>
-            </TouchableNativeFeedback>
-          </View>
+            </>
+          )}
 
           <View style={styles.additionalButton}>
             <TouchableNativeFeedback
@@ -129,7 +145,7 @@ const About = (props) => {
                   action: 'visit_website',
                   surface: 'about',
                 });
-                Linking.openURL('https://www.languagetransfer.org/');
+                Linking.openURL('https://www.languagetransfer.org/about');
               }}
               useForeground={true}>
               <View style={styles.additionalButtonInner}>
