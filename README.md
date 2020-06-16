@@ -26,7 +26,7 @@ You can find them on the [Language Transfer website](https://www.languagetransfe
   <img src="./resources/google-play-store/screenshots/Screenshot_20200520-203755.png" alt="App screenshot: language home page" width="216" height="384">
 </p>
 
-This app is developed in React Native. For now, we're just building and developing on Android, but an iOS version is likely to come in the future.
+This app is developed in React Native, and is designed to work with both iOS & Android platforms.
 
 ### Goals
 

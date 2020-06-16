@@ -1,38 +1,4 @@
-import spanishCover from '../resources/spanish-cover-stylized.png';
-import spanishCoverWithText from '../resources/spanish-cover-stylized-with-text.png';
-import arabicCover from '../resources/arabic-cover-stylized.png';
-import arabicCoverWithText from '../resources/arabic-cover-stylized-with-text.png';
-import turkishCover from '../resources/turkish-cover-stylized.png';
-import turkishCoverWithText from '../resources/turkish-cover-stylized-with-text.png';
-import germanCover from '../resources/german-cover-stylized.png';
-import germanCoverWithText from '../resources/german-cover-stylized-with-text.png';
-import greekCover from '../resources/greek-cover-stylized.png';
-import greekCoverWithText from '../resources/greek-cover-stylized-with-text.png';
-import italianCover from '../resources/italian-cover-stylized.png';
-import italianCoverWithText from '../resources/italian-cover-stylized-with-text.png';
-import swahiliCover from '../resources/swahili-cover-stylized.png';
-import swahiliCoverWithText from '../resources/swahili-cover-stylized-with-text.png';
-import frenchCover from '../resources/french-cover-stylized.png';
-import frenchCoverWithText from '../resources/french-cover-stylized-with-text.png';
-import inglesCover from '../resources/ingles-cover-stylized.png';
-import inglesCoverWithText from '../resources/ingles-cover-stylized-with-text.png';
-
-import fs from 'react-native-fs';
-import path from 'react-native-path';
-import DownloadManager from './download-manager';
-
-export type Course =
-  | 'spanish'
-  | 'arabic'
-  | 'turkish'
-  | 'german'
-  | 'greek'
-  | 'italian'
-  | 'swahili'
-  | 'french'
-  | 'ingles';
-
-/* SAMPLE METADATA: 
+/* SAMPLE METADATA:
 
   {
     version: 0,
@@ -65,9 +31,37 @@ export type Course =
   },
 */
 
-const courseMeta = {};
+import spanishCover from '../resources/spanish-cover-stylized.png';
+import spanishCoverWithText from '../resources/spanish-cover-stylized-with-text.png';
+import arabicCover from '../resources/arabic-cover-stylized.png';
+import arabicCoverWithText from '../resources/arabic-cover-stylized-with-text.png';
+import turkishCover from '../resources/turkish-cover-stylized.png';
+import turkishCoverWithText from '../resources/turkish-cover-stylized-with-text.png';
+import germanCover from '../resources/german-cover-stylized.png';
+import germanCoverWithText from '../resources/german-cover-stylized-with-text.png';
+import greekCover from '../resources/greek-cover-stylized.png';
+import greekCoverWithText from '../resources/greek-cover-stylized-with-text.png';
+import italianCover from '../resources/italian-cover-stylized.png';
+import italianCoverWithText from '../resources/italian-cover-stylized-with-text.png';
+import swahiliCover from '../resources/swahili-cover-stylized.png';
+import swahiliCoverWithText from '../resources/swahili-cover-stylized-with-text.png';
+import frenchCover from '../resources/french-cover-stylized.png';
+import frenchCoverWithText from '../resources/french-cover-stylized-with-text.png';
+import inglesCover from '../resources/ingles-cover-stylized.png';
+import inglesCoverWithText from '../resources/ingles-cover-stylized-with-text.png';
 
-const data = {
+import fs from 'react-native-fs';
+// @ts-ignore
+import path from 'react-native-path';
+import DownloadManager from './download-manager';
+
+type CourseDataMap = {[key in Course]: ICourseData};
+
+type CourseMetadataMap = {[key in Course]: ICourseMetaData | undefined};
+
+const courseMeta: CourseMetadataMap = {} as CourseMetadataMap;
+
+const data: CourseDataMap = {
   spanish: {
     image: spanishCover,
     imageWithText: spanishCoverWithText,
@@ -201,7 +195,12 @@ const CourseData = {
     return !!data[course];
   },
 
-  getCourseList(): Array<string> {
+  getCourseData(course: Course): ICourseData {
+    return data[course];
+  },
+
+  getCourseList(): Array<Course> {
+    // @ts-ignore
     return Object.keys(data);
   },
 
@@ -213,28 +212,28 @@ const CourseData = {
     return data[course].fullTitle;
   },
 
-  getCourseImage(course: Course) {
+  getCourseImage(course: Course): any {
     return data[course].image;
   },
 
-  getCourseImageWithText(course: Course) {
+  getCourseImageWithText(course: Course): any {
     return data[course].imageWithText;
   },
 
-  getCourseUIColors(course: Course) {
+  getCourseUIColors(course: Course): IUIColors {
     return data[course].uiColors;
   },
 
-  getFallbackLessonCount(course: Course) {
+  getFallbackLessonCount(course: Course): number {
     return data[course].fallbackLessonCount;
   },
 
-  isCourseMetadataLoaded(course: Course) {
+  isCourseMetadataLoaded(course: Course): boolean {
     return !!courseMeta[course];
   },
 
-  getMetadataVersion(course: Course) {
-    return courseMeta[course].version;
+  getMetadataVersion(course: Course): number {
+    return courseMeta[course]!.version;
   },
 
   async genLoadCourseMetadata(
@@ -275,12 +274,16 @@ const CourseData = {
     courseMeta[course] = undefined;
   },
 
+  getLessonData(course: Course, lesson: number): ILessonData {
+    return courseMeta[course]!.lessons[lesson];
+  },
+
   getLessonId(course: Course, lesson: number): string {
-    return courseMeta[course].lessons[lesson].id;
+    return courseMeta[course]!.lessons[lesson].id;
   },
 
   getLessonNumberForId(course: Course, lessonId: string): number | null {
-    const index = courseMeta[course].lessons.findIndex(
+    const index = courseMeta[course]!.lessons.findIndex(
       (l) => l.id === lessonId,
     );
     if (index === -1) {
@@ -290,7 +293,7 @@ const CourseData = {
   },
 
   getLessonUrl(course: Course, lesson: number, quality: string): string {
-    const urls = courseMeta[course].lessons[lesson].urls;
+    const urls = courseMeta[course]!.lessons[lesson].urls;
     if (quality === 'high') {
       return urls[urls.length - 1];
     } else {
@@ -299,14 +302,14 @@ const CourseData = {
   },
 
   getNextLesson(course: Course, lesson: number): number | null {
-    if (lesson + 1 === courseMeta[course].lessons.length) {
+    if (lesson + 1 === courseMeta[course]!.lessons.length) {
       return null;
     }
 
     return lesson + 1;
   },
 
-  getPreviousLesson(course: Course, lesson: number): number | null {
+  getPreviousLesson(_course: Course, lesson: number): number | null {
     if (lesson - 1 === -1) {
       return null;
     }
@@ -315,15 +318,15 @@ const CourseData = {
   },
 
   getLessonIndices(course: Course): Array<number> {
-    return courseMeta[course].lessons.map((_, i) => i);
+    return courseMeta[course]!.lessons.map((_, i) => i);
   },
 
-  getLessonTitle(course: Course, lesson: number) {
-    return courseMeta[course].lessons[lesson].title;
+  getLessonTitle(course: Course, lesson: number): string {
+    return courseMeta[course]!.lessons[lesson].title;
   },
 
-  getLessonDuration(course: Course, lesson: number) {
-    return courseMeta[course].lessons[lesson].duration;
+  getLessonDuration(course: Course, lesson: number): number {
+    return courseMeta[course]!.lessons[lesson].duration;
   },
 };
 

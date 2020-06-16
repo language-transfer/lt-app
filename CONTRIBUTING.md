@@ -10,9 +10,15 @@ Then, clone and install dependencies for the repository.
 2. `cd lt-app`
 3. `npm install`
 
+When developing for iOS, you'll also need to install native dependencies by running:
+
+4. `cd ios && pod install`
+
 When you're ready to run the app, run:
 
     npx react-native run-android
+    # or, for ios:
+    npx react-native run-ios
 
 To build a production-ready release, add on the `--variant=release` flag:
 

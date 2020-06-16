@@ -1,20 +1,24 @@
-import TrackPlayer, {STATE_PLAYING} from 'react-native-track-player';
-import BackgroundTimer from 'react-native-background-timer';
+import TrackPlayer, {State, Event, Capability} from 'react-native-track-player';
+import BackgroundTimer, {IntervalId} from 'react-native-background-timer';
 import {
   genAutopause,
   genUpdateProgressForLesson,
   genMarkLessonFinished,
   genPreferenceStreamQuality,
 } from './persistence';
-import CourseData, {Course} from './course-data';
+import CourseData from './course-data';
 import DownloadManager from './download-manager';
 import {navigate, pop} from './navigation-ref';
 import {log} from './metrics';
 
-let currentlyPlaying = null;
-let updateInterval = null;
+type CurrentPlaying = {
+  course: Course;
+  lesson: number;
+};
 
-export let audioServiceSubscriptions = [];
+let currentlyPlaying: CurrentPlaying | null = null;
+let updateInterval: IntervalId | null = null;
+let audioServiceSubscriptions: any[] = [];
 
 // when we enqueue then skip, it acts like we skipped from track 1 to track n. suppress the event
 let suppressTrackChange = false;
@@ -23,22 +27,24 @@ export const genEnqueueFile = async (
   course: Course,
   lesson: number,
 ): Promise<void> => {
-  TrackPlayer.setupPlayer();
+  await TrackPlayer.setupPlayer();
 
   TrackPlayer.updateOptions({
     stopWithApp: false,
     capabilities: [
-      TrackPlayer.CAPABILITY_PLAY,
-      TrackPlayer.CAPABILITY_PAUSE,
-      TrackPlayer.CAPABILITY_JUMP_BACKWARD,
-      TrackPlayer.CAPABILITY_STOP,
+      Capability.Play,
+      Capability.Pause,
+      Capability.JumpBackward,
+      Capability.Stop,
     ],
     compactCapabilities: [
-      TrackPlayer.CAPABILITY_PLAY,
-      TrackPlayer.CAPABILITY_PAUSE,
-      TrackPlayer.CAPABILITY_JUMP_BACKWARD,
+      Capability.Play,
+      Capability.Pause,
+      Capability.JumpBackward,
     ],
     jumpInterval: 10,
+    // this will be added in the next major release, i think?
+    // @ts-ignore
     alwaysPauseOnInterruption: true,
     color: parseInt(
       CourseData.getCourseUIColors(course).background.substring(1),
@@ -95,7 +101,7 @@ export default async () => {
   audioServiceSubscriptions.forEach((s) => s.remove());
 
   audioServiceSubscriptions = [
-    TrackPlayer.addEventListener('remote-play', async () => {
+    TrackPlayer.addEventListener(Event.RemotePlay, async () => {
       await TrackPlayer.play();
       const position = await TrackPlayer.getPosition();
       log({
@@ -107,7 +113,7 @@ export default async () => {
       });
     }),
 
-    TrackPlayer.addEventListener('remote-pause', async () => {
+    TrackPlayer.addEventListener(Event.RemotePause, async () => {
       await TrackPlayer.pause();
       const position = await TrackPlayer.getPosition();
       log({
@@ -119,7 +125,7 @@ export default async () => {
       });
     }),
 
-    TrackPlayer.addEventListener('remote-stop', async () => {
+    TrackPlayer.addEventListener(Event.RemoteStop, async () => {
       const position = await TrackPlayer.getPosition();
       log({
         action: 'stop',
@@ -131,21 +137,26 @@ export default async () => {
       await genStopPlaying();
     }),
 
-    TrackPlayer.addEventListener('remote-jump-backward', async ({interval}) => {
-      const position = await TrackPlayer.getPosition();
-      log({
-        action: 'jump_backward',
-        surface: 'remote',
-        course: currentlyPlaying?.course,
-        lesson: currentlyPlaying?.lesson,
-        position,
-      });
+    TrackPlayer.addEventListener(
+      Event.RemoteJumpBackward,
+      async ({interval}) => {
+        const position = await TrackPlayer.getPosition();
+        log({
+          action: 'jump_backward',
+          surface: 'remote',
+          course: currentlyPlaying?.course,
+          lesson: currentlyPlaying?.lesson,
+          position,
+        });
 
-      await TrackPlayer.seekTo(Math.max(0, position - interval));
-    }),
+        await TrackPlayer.seekTo(Math.max(0, position - interval));
+      },
+    ),
 
-    TrackPlayer.addEventListener('playback-state', async ({state}) => {
-      if (state !== STATE_PLAYING) return;
+    TrackPlayer.addEventListener(Event.PlaybackState, async ({state}) => {
+      if (state !== State.Playing) {
+        return;
+      }
 
       const autopauseConfig = await genAutopause();
 
@@ -168,29 +179,31 @@ export default async () => {
       // }, nextPause - position);
     }),
 
-    TrackPlayer.addEventListener('playback-state', async ({state}) => {
-      if (state === STATE_PLAYING) {
+    TrackPlayer.addEventListener(Event.PlaybackState, async ({state}) => {
+      if (state === State.Playing) {
         if (updateInterval) {
           BackgroundTimer.clearInterval(updateInterval);
         }
 
         const update = async () => {
-          const [position, state] = await Promise.all([
+          const [position, currState] = await Promise.all([
             TrackPlayer.getPosition(),
             TrackPlayer.getState(),
           ]);
 
-          if (state !== STATE_PLAYING) {
+          if (currState !== State.Playing) {
             // happens sometimes. /shrug
-            BackgroundTimer.clearInterval(updateInterval);
+            if (updateInterval) {
+              BackgroundTimer.clearInterval(updateInterval);
+            }
             return;
           }
 
-          if (position !== null) {
+          if (position !== null && currentlyPlaying) {
             await genUpdateProgressForLesson(
               currentlyPlaying.course,
               currentlyPlaying.lesson,
-              position,
+              position as number,
             );
           }
         };
@@ -199,14 +212,16 @@ export default async () => {
         updateInterval = BackgroundTimer.setInterval(update, 3000); // don't wake up the CPU too often, if we can help it
         update();
       } else {
-        BackgroundTimer.clearInterval(updateInterval);
+        if (updateInterval) {
+          BackgroundTimer.clearInterval(updateInterval);
+        }
       }
     }),
 
     // welcome! you've found it. the worst code in the codebase.
     // I have a personal policy of including explicit blame whenever I write code I know someone will curse me for one day.
     // contact me@timothyaveni.com with your complaints.
-    TrackPlayer.addEventListener('playback-track-changed', async (params) => {
+    TrackPlayer.addEventListener(Event.PlaybackTrackChanged, async (params) => {
       const wasPlaying = currentlyPlaying;
 
       if (params.track === null || wasPlaying === null) {
@@ -243,10 +258,10 @@ export default async () => {
         lesson: CourseData.getLessonNumberForId(
           wasPlaying.course,
           params.nextTrack,
-        ),
+        )!,
       };
 
-      if (!currentlyPlaying.lesson) {
+      if (!currentlyPlaying?.lesson) {
         // TODO: don't fail silently here? should be impossible, but bugs happen
         return;
       }
@@ -262,7 +277,7 @@ export default async () => {
         wasPlaying.course,
         wasPlaying.lesson,
       );
-      console.log(trackDuration);
+
       // threshold compare, though in practice it's much smaller than 0.5
       if (params.position < trackDuration - 0.5) {
         // just a skip, track didn't finish

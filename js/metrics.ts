@@ -5,13 +5,15 @@ import CourseData from './course-data';
 
 const LOG_ENDPOINT = 'https://metrics.languagetransfer.org/log';
 
-export const log = async (data): Promise<void> => {
+export const log = async (data: any): Promise<void> => {
   const [permitted, user_token] = await Promise.all([
     genPreferenceAllowDataCollection(),
     genMetricsToken(),
   ]);
 
-  if (!permitted) return;
+  if (!permitted) {
+    return;
+  }
 
   if (data.course && CourseData.isCourseMetadataLoaded(data.course)) {
     data.metadata_version = CourseData.getMetadataVersion(data.course);
@@ -20,6 +22,7 @@ export const log = async (data): Promise<void> => {
   try {
     await fetch(LOG_ENDPOINT, {
       method: 'POST',
+      // @ts-ignore
       cache: 'no-cache',
       headers: {
         'Content-Type': 'application/json',

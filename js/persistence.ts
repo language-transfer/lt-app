@@ -1,5 +1,4 @@
 import {AsyncStorage} from 'react-native';
-import type {Course} from './course-data';
 import DownloadManager from './download-manager';
 import CourseData from './course-data';
 
@@ -10,6 +9,11 @@ import {log} from './metrics';
 // Some operations are not atomic. I don't expect it to cause problems, so I
 // haven't gone to the effort of adding a mutex. mostly because I don't like
 // the API for the most popular library.
+
+export interface IProgress {
+  finished: boolean;
+  progress: number | null;
+}
 
 export const genAutopause = async (): Promise<{
   type: 'off' | 'timed' | 'manual';
@@ -38,9 +42,7 @@ export const genMostRecentListenedLessonForCourse = async (
   return parseInt(mostRecentLesson, 10);
 };
 
-export const genMostRecentListenedCourse = async (
-  course: Course,
-): Promise<Course | null> => {
+export const genMostRecentListenedCourse = async (): Promise<Course | null> => {
   return (await AsyncStorage.getItem('@activity/most-recent-course')) as Course;
 };
 
@@ -50,7 +52,7 @@ export const genProgressForLesson = async (
 ): Promise<{
   finished: boolean;
   progress: number | null;
-}> => {
+} | null> => {
   if (lesson === null) {
     return null;
   }
@@ -150,23 +152,28 @@ export const genDeleteMetricsToken = async (): Promise<void> => {
   await AsyncStorage.removeItem('@metrics/user-token');
 };
 
-const preference = (name, defaultValue, fromString) => {
+type PreferenceMethods = [() => Promise<any>, (val: any) => Promise<void>];
+const preference = (
+  name: string,
+  defaultValue: any,
+  fromString: (str: string) => any,
+): PreferenceMethods => {
   return [
-    async (): Promise<boolean> => {
-      const preference = await AsyncStorage.getItem(`@preferences/${name}`);
-      if (preference === null) {
+    async (): Promise<any> => {
+      const val = await AsyncStorage.getItem(`@preferences/${name}`);
+      if (val === null) {
         return defaultValue;
       }
 
-      return fromString(preference);
+      return fromString(val);
     },
-    async (preference: any): Promise<void> => {
-      await AsyncStorage.setItem(`@preferences/${name}`, '' + preference);
+    async (val: any): Promise<void> => {
+      await AsyncStorage.setItem(`@preferences/${name}`, '' + val);
       // log after setting the preference so we respect the 'allow data collection' preference
       log({
         action: 'set_preference',
         surface: name,
-        setting_value: preference,
+        setting_value: val,
       });
     },
   ];

@@ -32,7 +32,7 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
 
         @Override
         protected String getJSMainModuleName() {
-          return "js/index";
+          return "index";
         }
       };
 
