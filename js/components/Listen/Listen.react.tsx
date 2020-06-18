@@ -113,6 +113,21 @@ const Listen = (props: Props) => {
     }
   }, [course, lesson, playing, position]);
 
+  const seekTo = useCallback(
+    (seconds) => {
+      log({
+        action: 'change_position',
+        surface: 'listen_screen',
+        course,
+        lesson,
+        position,
+      });
+
+      TrackPlayer.seekTo(seconds);
+    },
+    [course, lesson, position],
+  );
+
   const skipBack = useCallback(() => {
     log({
       action: 'jump_backward',
@@ -142,6 +157,7 @@ const Listen = (props: Props) => {
           setBottomSheetOpen={setBottomSheetOpen}
           toggle={toggle}
           skipBack={skipBack}
+          seekTo={seekTo}
           ready={ready}
           playing={playing}
         />

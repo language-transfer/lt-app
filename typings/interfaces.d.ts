@@ -5,6 +5,8 @@ declare global {
 
   type Callback = () => void;
 
+  type CallbackWithParam<T> = (param: T) => void;
+
   type Maybe<T> = T | null | undefined;
 
   type Course =

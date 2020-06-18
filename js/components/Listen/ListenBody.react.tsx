@@ -20,6 +20,7 @@ import {log} from '../../metrics';
 interface IProps {
   setBottomSheetOpen: (val: boolean) => void;
   skipBack: Callback;
+  seekTo: CallbackWithParam<number>;
   toggle: Callback;
   ready: boolean;
   playing: boolean;
@@ -28,6 +29,7 @@ interface IProps {
 const ListenBody = ({
   setBottomSheetOpen,
   skipBack,
+  seekTo,
   toggle,
   ready,
   playing,
@@ -126,7 +128,7 @@ const ListenBody = ({
           </TouchableNativeFeedback>
         </View>
 
-        <ListenScrubber />
+        <ListenScrubber seekTo={seekTo} />
       </View>
 
       <RBSheet
