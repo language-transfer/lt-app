@@ -1,0 +1,17 @@
+name: Lint PR
+
+on:
+  push:
+    branches:
+      - master
+  pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        run: npm install
+      - name: Lint
+        run: npm run lint
