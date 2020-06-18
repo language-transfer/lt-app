@@ -19,7 +19,7 @@ platform :ios do
   desc "Push a new beta build to TestFlight"
   lane :beta do
     increment_build_number(xcodeproj: "LanguageTransfer.xcodeproj")
-    commit_version_bump(xcodeproj: "#{XCODE_PROJ}")
+    # commit_version_bump(xcodeproj: "#{XCODE_PROJ}")
     build_app(workspace: "LanguageTransfer.xcworkspace", scheme: "LanguageTransfer")
     upload_to_testflight(skip_waiting_for_build_processing: true)
   end
