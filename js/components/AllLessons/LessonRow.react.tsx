@@ -6,13 +6,14 @@ import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
 
 import {Icon} from 'react-native-elements';
 import formatDuration from 'format-duration';
+import prettyBytes from 'pretty-bytes';
 import {genProgressForLesson, IProgress} from '../../persistence';
 import DownloadManager, {
   useDownloadStatus,
   DownloadProgress,
 } from '../../download-manager';
 import CourseData from '../../course-data';
-
+import {usePreference} from '../../persistence';
 import {log} from '../../metrics';
 
 export const LESSON_ROW_HEIGHT = 72;
@@ -129,6 +130,7 @@ const LessonRow = ({
 }) => {
   const {navigate} = useNavigation<LanguageStackScreenProps>();
   const downloadState = useDownloadStatus(course, lesson);
+  const downloadQuality = usePreference<Quality>('download-quality', 'low');
 
   const [progress, setProgress] = useState<IProgress | null>(null);
   const [downloaded, setDownloaded] = useState<boolean | null>(null);
@@ -197,6 +199,12 @@ const LessonRow = ({
           {ready
             ? renderDownloadProgress(downloaded!, downloadState, downloading)
             : null}
+
+          <Text style={styles.lessonSizeText}>
+            {prettyBytes(
+              CourseData.getLessonSizeInBytes(course, lesson, downloadQuality),
+            )}
+          </Text>
         </View>
       </TouchableNativeFeedback>
     </View>
@@ -236,6 +244,10 @@ const styles = StyleSheet.create({
   },
   lessonDurationText: {
     fontSize: 16,
+  },
+  lessonSizeText: {
+    fontSize: 12,
+    color: 'gray',
   },
 
   finishedIcon: {

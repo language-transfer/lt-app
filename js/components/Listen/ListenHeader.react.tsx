@@ -19,6 +19,7 @@ const ListenHeader = () => {
         {backgroundColor: courseData.uiColors.background},
       ]}>
       <TouchableNativeFeedback
+        hitSlop={{top: 50, bottom: 50, left: 50, right: 50}}
         style={styles.backButton}
         onPress={() => pop()}
         // @ts-ignore

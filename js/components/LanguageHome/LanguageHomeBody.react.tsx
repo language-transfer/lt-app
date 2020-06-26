@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useMemo} from 'react';
+import React, {useState, useCallback} from 'react';
 import {StyleSheet, View, Text, Linking, ActivityIndicator} from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
@@ -19,12 +19,9 @@ let metadataWarningTimeout: NodeJS.Timeout | null = null;
 const LanguageHomeBody = () => {
   const {navigate} = useNavigation<LanguageStackScreenProps>();
   const {course} = useCourseContext();
-  const [loadingMetadata, setLoadingMetadata] = useState(false);
+  const [loadingMetadata, setLoadingMetadata] = useState(true);
   const [showMetadataWarning, setShowMetadataWarning] = useState(false);
-  const hasMetadata = useMemo(
-    () => !CourseData.isCourseMetadataLoaded(course),
-    [course],
-  );
+  const hasMetadata = CourseData.isCourseMetadataLoaded(course);
 
   useFocusEffect(
     useCallback(() => {

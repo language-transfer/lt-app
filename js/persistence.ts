@@ -1,3 +1,4 @@
+import {useState, useEffect} from 'react';
 import {AsyncStorage} from 'react-native';
 import DownloadManager from './download-manager';
 import CourseData from './course-data';
@@ -154,7 +155,7 @@ export const genDeleteMetricsToken = async (): Promise<void> => {
 
 type PreferenceMethods = [() => Promise<any>, (val: any) => Promise<void>];
 const preference = (
-  name: string,
+  name: Preference,
   defaultValue: any,
   fromString: (str: string) => any,
 ): PreferenceMethods => {
@@ -203,3 +204,19 @@ export const [
   genPreferenceAllowDataCollection,
   genSetPreferenceAllowDataCollection,
 ] = preference('allow-data-collection', true, (b) => b === 'true');
+
+export function usePreference<T>(key: Preference, defaultValue: any) {
+  const [value, setValue] = useState<T>(null!);
+
+  useEffect(() => {
+    async function loadValue() {
+      const [loadFn] = preference(key, defaultValue, (b) => b);
+      setValue(await loadFn());
+    }
+
+    loadValue();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return value;
+}

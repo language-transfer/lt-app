@@ -18,6 +18,7 @@ import {
   usePlaybackStateIs,
   STATE_READY,
   STATE_PLAYING,
+  STATE_PAUSED,
 } from 'react-native-track-player';
 import {log} from '../../metrics';
 import useIsLessonDownloaded from '../../hooks/useIsLessonDownloaded';
@@ -36,6 +37,7 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
   const {position} = useTrackPlayerProgress();
   const ready = usePlaybackStateIs(STATE_READY);
   const playing = usePlaybackStateIs(STATE_PLAYING);
+  const paused = usePlaybackStateIs(STATE_PAUSED);
   const bottomSheet = useRef<RBSheet>(null!);
 
   const {course, courseData} = useCourseContext();
@@ -82,7 +84,7 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
               color={courseData.uiColors.text}
             />
           </TouchableNativeFeedback>
-          {ready || playing ? (
+          {ready || playing || paused ? (
             <TouchableNativeFeedback
               // @ts-ignore
               background={TouchableNativeFeedback.Ripple(null, true)}

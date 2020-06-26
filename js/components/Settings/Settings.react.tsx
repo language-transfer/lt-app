@@ -20,8 +20,8 @@ import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 
 interface ISettings {
   autoDeleteFinished: boolean;
-  streamQuality: 'high' | 'low';
-  downloadQuality: 'high' | 'low';
+  streamQuality: Quality;
+  downloadQuality: Quality;
   downloadOnlyOnWifi: boolean;
   allowDataCollection: boolean;
 }

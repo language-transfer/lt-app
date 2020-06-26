@@ -14,8 +14,6 @@ export default function useIsLessonDownloaded() {
       setDownloaded(resp);
     }
 
-    __DEV__ && console.log({checking: {course, lesson}});
-
     setDownloaded(null);
     checkIfDownloaded();
   }, [course, lesson]);

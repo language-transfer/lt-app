@@ -11,6 +11,8 @@ declare global {
 
   type KeyValMap = {[key: string]: any};
 
+  type FileSizeMap = {[key: string]: number};
+
   type Course =
     | 'spanish'
     | 'arabic'
@@ -21,6 +23,15 @@ declare global {
     | 'swahili'
     | 'french'
     | 'ingles';
+
+  type Preference =
+    | 'auto-delete-finished'
+    | 'stream-quality'
+    | 'download-quality'
+    | 'download-only-on-wifi'
+    | 'allow-data-collection';
+
+  type Quality = 'high' | 'low';
 
   interface IUIColors {
     background: string;
@@ -37,6 +48,7 @@ declare global {
     metaUrl: string;
     fallbackLessonCount: number;
     uiColors: IUIColors;
+    bundledFirstLesson: string;
   }
 
   export interface ICourseMetaData {
@@ -48,6 +60,7 @@ declare global {
     id: string;
     title: string;
     urls: string[];
+    filesizes: FileSizeMap;
     duration: number;
   }
 }

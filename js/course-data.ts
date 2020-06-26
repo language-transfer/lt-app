@@ -33,22 +33,31 @@
 
 import spanishCover from '../resources/spanish-cover-stylized.png';
 import spanishCoverWithText from '../resources/spanish-cover-stylized-with-text.png';
+import spanishFirstLesson from '../resources/courses/spanish1-lq.mp3';
 import arabicCover from '../resources/arabic-cover-stylized.png';
 import arabicCoverWithText from '../resources/arabic-cover-stylized-with-text.png';
+import arabicFirstLesson from '../resources/courses/arabic1-lq.mp3';
 import turkishCover from '../resources/turkish-cover-stylized.png';
 import turkishCoverWithText from '../resources/turkish-cover-stylized-with-text.png';
+import turkisFirstLesson from '../resources/courses/turkish1-lq.mp3';
 import germanCover from '../resources/german-cover-stylized.png';
 import germanCoverWithText from '../resources/german-cover-stylized-with-text.png';
+import germanFirstLesson from '../resources/courses/german1-lq.mp3';
 import greekCover from '../resources/greek-cover-stylized.png';
 import greekCoverWithText from '../resources/greek-cover-stylized-with-text.png';
+import greekFirstLesson from '../resources/courses/greek1-lq.mp3';
 import italianCover from '../resources/italian-cover-stylized.png';
 import italianCoverWithText from '../resources/italian-cover-stylized-with-text.png';
+import italiaFirstLesson from '../resources/courses/italian1-lq.mp3';
 import swahiliCover from '../resources/swahili-cover-stylized.png';
 import swahiliCoverWithText from '../resources/swahili-cover-stylized-with-text.png';
+import swahiliFirstLesson from '../resources/courses/swahili1-lq.mp3';
 import frenchCover from '../resources/french-cover-stylized.png';
 import frenchCoverWithText from '../resources/french-cover-stylized-with-text.png';
+import frenchFirstLesson from '../resources/courses/french1-lq.mp3';
 import inglesCover from '../resources/ingles-cover-stylized.png';
 import inglesCoverWithText from '../resources/ingles-cover-stylized-with-text.png';
+import inglesFirstLesson from '../resources/courses/ingles1-lq.mp3';
 
 import fs from 'react-native-fs';
 // @ts-ignore
@@ -75,6 +84,7 @@ const data: CourseDataMap = {
       text: 'white',
       backgroundAccent: '#516198',
     },
+    bundledFirstLesson: spanishFirstLesson,
   },
   arabic: {
     image: arabicCover,
@@ -89,6 +99,7 @@ const data: CourseDataMap = {
       text: 'black',
       backgroundAccent: '#806006',
     },
+    bundledFirstLesson: arabicFirstLesson,
   },
   turkish: {
     image: turkishCover,
@@ -103,6 +114,7 @@ const data: CourseDataMap = {
       text: 'white',
       backgroundAccent: '#760629',
     },
+    bundledFirstLesson: turkisFirstLesson,
   },
   german: {
     image: germanCover,
@@ -117,6 +129,7 @@ const data: CourseDataMap = {
       text: 'white',
       backgroundAccent: '#006400',
     },
+    bundledFirstLesson: germanFirstLesson,
   },
   greek: {
     image: greekCover,
@@ -131,6 +144,7 @@ const data: CourseDataMap = {
       text: 'white',
       backgroundAccent: '#9c5a20',
     },
+    bundledFirstLesson: greekFirstLesson,
   },
   italian: {
     image: italianCover,
@@ -145,6 +159,7 @@ const data: CourseDataMap = {
       text: 'white',
       backgroundAccent: '#a7177f',
     },
+    bundledFirstLesson: italiaFirstLesson,
   },
   swahili: {
     image: swahiliCover,
@@ -159,6 +174,7 @@ const data: CourseDataMap = {
       text: 'black',
       backgroundAccent: '#0aaea2',
     },
+    bundledFirstLesson: swahiliFirstLesson,
   },
   french: {
     image: frenchCover,
@@ -173,6 +189,7 @@ const data: CourseDataMap = {
       text: 'white',
       backgroundAccent: '#098abc',
     },
+    bundledFirstLesson: frenchFirstLesson,
   },
   ingles: {
     image: inglesCover,
@@ -187,6 +204,7 @@ const data: CourseDataMap = {
       text: 'white',
       backgroundAccent: '#516198',
     },
+    bundledFirstLesson: inglesFirstLesson,
   },
 };
 
@@ -292,7 +310,7 @@ const CourseData = {
     return index;
   },
 
-  getLessonUrl(course: Course, lesson: number, quality: string): string {
+  getLessonUrl(course: Course, lesson: number, quality: Quality): string {
     const urls = courseMeta[course]!.lessons[lesson].urls;
     if (quality === 'high') {
       return urls[urls.length - 1];
@@ -327,6 +345,15 @@ const CourseData = {
 
   getLessonDuration(course: Course, lesson: number): number {
     return courseMeta[course]!.lessons[lesson].duration;
+  },
+
+  getLessonSizeInBytes(
+    course: Course,
+    lesson: number,
+    quality: Quality,
+  ): number {
+    const url = this.getLessonUrl(course, lesson, quality);
+    return courseMeta[course]!.lessons[lesson].filesizes[url];
   },
 };
 
