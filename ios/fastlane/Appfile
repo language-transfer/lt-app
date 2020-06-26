@@ -1,8 +1,2 @@
-app_identifier("org.schonfeld.LanguageTransfer") # The bundle identifier of your app
-apple_id("michael@schonfeld.org") # Your Apple email address
-
-itc_team_id("118376240") # App Store Connect Team ID
-team_id("CWU2SFQ4UF") # Developer Portal Team ID
-
-# For more information about the Appfile, see:
-#     https://docs.fastlane.tools/advanced/#appfile
+app_identifier("org.LanguageTransfer") # The bundle identifier of your app
+apple_id("michaileleftheriou@gmail.com") # Your Apple email address

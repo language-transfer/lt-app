@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useMemo} from 'react';
 import {StyleSheet, View, Text, Linking, ActivityIndicator} from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
@@ -13,23 +13,30 @@ import CourseData from '../../course-data';
 import {log} from '../../metrics';
 import {useCourseContext} from '../Context/CourseContext';
 
+const donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo = true;
 let metadataWarningTimeout: NodeJS.Timeout | null = null;
 
 const LanguageHomeBody = () => {
   const {navigate} = useNavigation<LanguageStackScreenProps>();
   const {course} = useCourseContext();
-
-  // @TOOD: why do we need this state?
-  const [, setMetadataLoadedForCourse] = useState<Course | null>(null);
+  const [loadingMetadata, setLoadingMetadata] = useState(false);
   const [showMetadataWarning, setShowMetadataWarning] = useState(false);
+  const hasMetadata = useMemo(
+    () => !CourseData.isCourseMetadataLoaded(course),
+    [course],
+  );
 
   useFocusEffect(
     useCallback(() => {
-      const load = async () => {
+      async function loadMetadata() {
+        setLoadingMetadata(true);
+
         if (metadataWarningTimeout !== null) {
           clearTimeout(metadataWarningTimeout);
         }
 
+        // if metadata hasn't loaded after 5s, show a
+        // preemptive connection warning
         metadataWarningTimeout = setTimeout(() => {
           log({
             action: 'show_metadata_warning',
@@ -37,18 +44,18 @@ const LanguageHomeBody = () => {
             course,
           });
           setShowMetadataWarning(true);
-        }, 5000);
+        }, 1000);
 
         await CourseData.genLoadCourseMetadata(course);
-        setMetadataLoadedForCourse(course);
         clearTimeout(metadataWarningTimeout);
         setShowMetadataWarning(false);
-      };
+        setLoadingMetadata(false);
+      }
 
-      load();
+      loadMetadata();
 
       return () => {
-        // just throwing this everywhere to see what sticks
+        // hopefully metadata has loaded by now, and there's nothing to clear out
         if (metadataWarningTimeout !== null) {
           clearTimeout(metadataWarningTimeout);
         }
@@ -56,27 +63,24 @@ const LanguageHomeBody = () => {
     }, [course]),
   );
 
-  if (!CourseData.isCourseMetadataLoaded(course)) {
+  if (loadingMetadata || !hasMetadata) {
     return (
       <View style={styles.body}>
         <View style={styles.loading}>
           <ActivityIndicator size={96} />
-          <View
-            style={[
-              styles.metadataWarning,
-              !showMetadataWarning && styles.metadataWarningHidden,
-            ]}>
-            <Text style={styles.metadataWarningText}>
-              If this screen does not load, check your Internet connection or
-              try updating or reinstalling the Language Transfer app.
-            </Text>
-          </View>
+
+          {showMetadataWarning && (
+            <View style={styles.metadataWarning}>
+              <Text style={styles.metadataWarningText}>
+                If this screen does not load, check your Internet connection or
+                try updating or reinstalling the Language Transfer app.
+              </Text>
+            </View>
+          )}
         </View>
       </View>
     );
   }
-
-  const donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo = true;
 
   return (
     <View style={styles.body}>
@@ -162,9 +166,6 @@ const styles = StyleSheet.create({
     width: '80%',
     alignSelf: 'center',
     marginTop: 24,
-  },
-  metadataWarningHidden: {
-    opacity: 0,
   },
   metadataWarningText: {textAlign: 'center'},
 

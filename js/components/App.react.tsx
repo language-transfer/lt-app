@@ -2,7 +2,6 @@ import 'react-native-gesture-handler';
 
 import React, {useEffect, useState, useMemo} from 'react';
 import {AppState, AppStateStatus} from 'react-native';
-
 import {NavigationContainer} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -10,9 +9,8 @@ import DrawerContent from './Nav/DrawerContent.react';
 import HomeNav from './Nav/HomeNav.react';
 import LanguageNav from './Nav/LanguageNav.react';
 import Splash from './Nav/Splash.react';
-
 import {genMostRecentListenedCourse} from '../persistence';
-
+import useNavStateLogger from '../hooks/useNavStateLogger';
 import CourseData from '../course-data';
 import {navigationRef} from '../navigation-ref';
 import {log} from '../metrics';
@@ -55,6 +53,8 @@ const App = () => {
     loadRecentCourse();
   }, []);
 
+  const onStateChange = useNavStateLogger();
+
   const initialRouteName = useMemo(
     () =>
       !recentCourse || !CourseData.courseExists(recentCourse)
@@ -69,23 +69,7 @@ const App = () => {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer
-        ref={navigationRef}
-        onStateChange={(state) => {
-          const route = state?.routes[state.index];
-          if (!route) {
-            return;
-          }
-
-          log({
-            action: 'navigate',
-            surface: route.name,
-            // @ts-ignore
-            course: route.params?.course,
-            // @ts-ignore
-            lesson: route.params?.lesson,
-          });
-        }}>
+      <NavigationContainer ref={navigationRef} onStateChange={onStateChange}>
         <Drawer.Navigator
           initialRouteName={initialRouteName}
           drawerContent={(props) => <DrawerContent {...props} />}>

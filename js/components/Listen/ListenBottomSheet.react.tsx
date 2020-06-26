@@ -19,7 +19,7 @@ import {log} from '../../metrics';
 import formatDuration from 'format-duration';
 
 interface IProps {
-  downloaded: boolean;
+  downloaded: Maybe<boolean>;
 }
 
 const ListenBottomSheet = ({downloaded}: IProps) => {

@@ -1,5 +1,5 @@
 import React, {useEffect, useCallback, useState, useMemo} from 'react';
-import {StyleSheet, StatusBar, StatusBarStyle} from 'react-native';
+import {StyleSheet, StatusBarStyle} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import {StackScreenProps} from '@react-navigation/stack';
 import {LanguageStackParamList} from '../Nav/LanguageNav.react';
@@ -17,10 +17,10 @@ import TrackPlayer, {
 import CourseData from '../../course-data';
 import {useCourseContext} from '../Context/CourseContext';
 import {LessonProvider} from '../Context/LessonContext';
-import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {genStopPlaying, genEnqueueFile} from '../../audio-service';
 import {genProgressForLesson} from '../../persistence';
 import {log} from '../../metrics';
+import {useSetStatusBarStyle} from '../../hooks/useStatusBarStyle';
 
 type Props = StackScreenProps<LanguageStackParamList, 'Listen'>;
 
@@ -32,7 +32,7 @@ const Listen = (props: Props) => {
   const {position} = useProgress();
   const playbackState = usePlaybackState();
 
-  // go back to the previos screen when the user stops
+  // go back to the previous screen when the user stops
   // the music remotely (from the locked screen view?)
   useTrackPlayerEvents([Event.RemoteStop], () => props.navigation.pop());
 
@@ -44,16 +44,18 @@ const Listen = (props: Props) => {
 
   // adjust the status bar style according to the course colors,
   // and the bottom sheet visibility
+  const setStatusBarStyle = useSetStatusBarStyle();
   useEffect(() => {
-    const light = !bottomSheetOpen && courseData.uiColors.text === 'black';
-    StatusBar.setBackgroundColor(courseData.uiColors.background);
-    // please excuse this ternary I honestly have no idea which is which anymore
-    StatusBar.setBarStyle(
-      ((light ? 'dark' : 'light') + '-content') as StatusBarStyle,
-      true,
+    const navBarLight =
+      !bottomSheetOpen && courseData.uiColors.text === 'black';
+    setStatusBarStyle(
+      courseData.uiColors.background,
+      ((navBarLight ? 'dark' : 'light') + '-content') as StatusBarStyle,
+      'transparent',
+      navBarLight,
     );
-    changeNavigationBarColor('transparent', light, true);
   }, [
+    setStatusBarStyle,
     bottomSheetOpen,
     courseData.uiColors.text,
     courseData.uiColors.background,

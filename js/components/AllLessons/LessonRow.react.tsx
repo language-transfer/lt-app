@@ -1,12 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableNativeFeedback,
-  Dimensions,
-  Platform,
-} from 'react-native';
+import {View, Text, StyleSheet, TouchableNativeFeedback} from 'react-native';
 import ProgressCircle from 'react-native-progress-circle';
 import {useNavigation} from '@react-navigation/native';
 import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
@@ -165,7 +158,7 @@ const LessonRow = ({
         onPress={() => {
           navigate('Listen', {lesson});
         }}>
-        <View style={styles.lessonRow}>
+        <View style={styles.lessonBox}>
           {ready ? (
             <View style={styles.text}>
               <Icon
@@ -214,16 +207,14 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
   },
-  lessonRow: {
-    // do we actually need 28p padding for Anroid
-    padding: Platform.select({ios: 0, android: 28}),
+  lessonBox: {
+    paddingHorizontal: 20,
     backgroundColor: 'white',
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: Dimensions.get('screen').width - LESSON_ROW_HEIGHT,
-    height: LESSON_ROW_HEIGHT,
   },
   downloadBox: {
     width: LESSON_ROW_HEIGHT,
@@ -259,7 +250,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 5,
-    paddingHorizontal: 10,
   },
 });
 

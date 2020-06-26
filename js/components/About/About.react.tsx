@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableNativeFeedback,
   Linking,
+  ViewStyle,
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
@@ -23,7 +24,7 @@ const About = () => {
     'LT App': false,
   });
 
-  const shownSection = (title: Section) =>
+  const shownSection = (title: Section): ViewStyle =>
     sections[title] ? {} : {display: 'none'};
 
   const header = (title: Section) => {
@@ -55,7 +56,7 @@ const About = () => {
     <ScrollView style={styles.body} contentContainerStyle={styles.container}>
       <View>
         {header('Language Transfer')}
-        <View style={[styles.bodySection, shownSection('Language Transfer')]}>
+        <View style={shownSection('Language Transfer')}>
           <Text style={styles.bodyText}>
             Language Transfer audio courses capture real life learning
             experiences in which you can participate fully, wherever you are in
@@ -170,7 +171,7 @@ const About = () => {
           </View>
         </View>
         {header('Privacy')}
-        <View style={[styles.bodySection, shownSection('Privacy')]}>
+        <View style={shownSection('Privacy')}>
           <Text style={styles.bodyText}>
             We collect anonymous usage information so we can learn about how
             best to improve the app. You're welcome to opt out of data
@@ -210,7 +211,7 @@ const About = () => {
         </View>
 
         {header('LT App')}
-        <View style={[styles.bodySection, shownSection('LT App')]}>
+        <View style={shownSection('LT App')}>
           <Text style={styles.bodyText}>
             Here's some of what we're planning for the future of the app:
           </Text>
@@ -286,7 +287,8 @@ const About = () => {
           </View>
 
           <Text style={styles.bodyText}>
-            The app's core maintainer is Timothy J. Aveni.
+            The app's core maintainers are Timothy J. Aveni, and Michael
+            Schonfeld.
           </Text>
           <Text style={styles.bodyText}>
             This is version {DeviceInfo.getVersion()} of the Language Transfer
@@ -317,7 +319,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
   },
-  bodySection: {},
   bodyText: {
     fontSize: 20,
     marginVertical: 10,

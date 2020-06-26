@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
+import {Alert} from 'react-native';
 import fs from 'react-native-fs';
-
 import CourseData from './course-data';
 import DeviceInfo from 'react-native-device-info';
 import Downloader, {DownloadTask} from 'react-native-background-downloader';
@@ -104,9 +104,7 @@ const DownloadManager = {
         // doesn't check in-progress downloads, but hey, it's a start
         DeviceInfo.getFreeDiskStorage().then((freeDiskStorage) => {
           if (totalBytes > freeDiskStorage) {
-            // @ts-ignore
-            // eslint-disable-next-line no-alert
-            alert(
+            Alert.alert(
               "You don't have enough storage space on your phone to download this lesson.",
             );
             DownloadManager.stopDownload(downloadId);

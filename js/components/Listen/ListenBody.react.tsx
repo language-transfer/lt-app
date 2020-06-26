@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -13,9 +13,9 @@ import ListenBottomSheet from './ListenBottomSheet.react';
 import {useCourseContext} from '../Context/CourseContext';
 import {useLessonContext} from '../Context/LessonContext';
 import ListenScrubber from './ListenScrubber.react';
-import DownloadManager from '../../download-manager';
 import {useProgress} from 'react-native-track-player';
 import {log} from '../../metrics';
+import useIsLessonDownloaded from '../../hooks/useIsLessonDownloaded';
 
 interface IProps {
   setBottomSheetOpen: (val: boolean) => void;
@@ -25,6 +25,9 @@ interface IProps {
   ready: boolean;
   playing: boolean;
 }
+
+const smallIconSize = 0.175 * Dimensions.get('screen').width;
+const largeIconSize = 0.4 * Dimensions.get('screen').width;
 
 const ListenBody = ({
   setBottomSheetOpen,
@@ -39,16 +42,7 @@ const ListenBody = ({
 
   const {course, courseData} = useCourseContext();
   const {lesson, lessonData} = useLessonContext();
-
-  const [downloaded, setDownloaded] = useState<boolean>(false);
-  useEffect(() => {
-    (async () => {
-      const resp = await DownloadManager.genIsDownloaded(course, lesson);
-      setDownloaded(resp);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  const downloaded = useIsLessonDownloaded();
   if (downloaded === null) {
     return (
       <ActivityIndicator
@@ -58,9 +52,6 @@ const ListenBody = ({
       />
     );
   }
-
-  const smallIconSize = 0.175 * Dimensions.get('screen').width;
-  const largeIconSize = 0.4 * Dimensions.get('screen').width;
 
   return (
     <>

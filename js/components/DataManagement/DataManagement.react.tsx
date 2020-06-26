@@ -51,9 +51,7 @@ const DataManagement = () => {
                 course,
               });
               await CourseData.genLoadCourseMetadata(course, true);
-              // @ts-ignore
-              // eslint-disable-next-line no-alert
-              alert(`Refreshed course metadata for ${courseTitle}!`);
+              Alert.alert(`Refreshed course metadata for ${courseTitle}!`);
             }}
             useForeground={true}>
             <View style={styles.buttonInner}>
@@ -87,9 +85,7 @@ const DataManagement = () => {
                   course,
                 });
                 await genDeleteProgressForCourse(course);
-                // @ts-ignore
-                // eslint-disable-next-line no-alert
-                alert(`Deleted all progress for ${courseTitle}.`);
+                Alert.alert(`Deleted all progress for ${courseTitle}.`);
               } else {
                 log({
                   action: 'delete_course_progress_explicit_dismiss',
@@ -133,9 +129,9 @@ const DataManagement = () => {
                 await DownloadManager.genDeleteFinishedDownloadsForCourse(
                   course,
                 );
-                // @ts-ignore
-                // eslint-disable-next-line no-alert
-                alert(`Deleted all finished downloads for ${courseTitle}.`);
+                Alert.alert(
+                  `Deleted all finished downloads for ${courseTitle}.`,
+                );
               } else {
                 log({
                   action: 'delete_finished_course_downloads_explicit_dismiss',
@@ -177,9 +173,7 @@ const DataManagement = () => {
                 });
                 DownloadManager.stopAllDownloadsForCourse(course);
                 await DownloadManager.genDeleteAllDownloadsForCourse(course);
-                // @ts-ignore
-                // eslint-disable-next-line no-alert
-                alert(`Deleted all downloads for ${courseTitle}.`);
+                Alert.alert(`Deleted all downloads for ${courseTitle}.`);
               } else {
                 log({
                   action: 'delete_course_downloads_explicit_dismiss',
@@ -230,9 +224,7 @@ const DataManagement = () => {
                 navigate('Home', {
                   screen: 'Language Selector',
                 });
-                // @ts-ignore
-                // eslint-disable-next-line no-alert
-                alert(`Deleted all data related to ${courseTitle}.`);
+                Alert.alert(`Deleted all data related to ${courseTitle}.`);
               } else {
                 log({
                   action: 'delete_all_course_data_explicit_dismiss',

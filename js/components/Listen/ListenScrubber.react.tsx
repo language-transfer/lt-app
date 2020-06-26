@@ -1,5 +1,5 @@
-import React, {useState, useRef, useEffect, useCallback} from 'react';
-import {StyleSheet, View, Text, Animated} from 'react-native';
+import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react';
+import {StyleSheet, View, Text, Animated, Dimensions} from 'react-native';
 import {useProgress} from 'react-native-track-player';
 import formatDuration from 'format-duration';
 import {useCourseContext} from '../Context/CourseContext';
@@ -8,6 +8,7 @@ import {
   PanGestureHandler,
   State,
   PanGestureHandlerStateChangeEvent,
+  PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/native';
 
@@ -22,6 +23,20 @@ const ListenScrubber = ({seekTo}: IProps) => {
   const {position, duration} = useProgress(200);
   const [dragging, setDragging] = useState(false);
   const [width, setWidth] = useState(0);
+
+  // we'll use this seconds:"pixels" ratio & the scrubber's
+  // offset to determine how much to seek, when the
+  // user drags the scrubber handle
+  const secondsPerScreenPoint = useMemo(() => duration / width, [
+    duration,
+    width,
+  ]);
+  const scrubberOffset = useMemo(
+    // this is basically a calculation of how far from the left edge
+    // the scrubber is located
+    () => (Dimensions.get('screen').width - width) / 2,
+    [width],
+  );
 
   // keep our animated value up-to-date with the
   // player's progress, except when the user is actively
@@ -41,14 +56,25 @@ const ListenScrubber = ({seekTo}: IProps) => {
     extrapolate: 'clamp',
   });
 
-  // disable screen gestures (only meaningful on iOS)
-  // and highlight the handle, as soon as the user touches
-  // the handle... we don't want to wait for PanHandler's ACTIVE
-  // state cos that might "feel weird"
+  // disable screen gestures (only meaningful on iOS; mostly so that the left
+  // drawer doesn't open with the drag) and highlight the handle,
+  // as soon as the user touches the handle...
+  // we don't want to wait for PanHandler's ACTIVE state cos that might "feel weird"
   const onHandleTouchStart = useCallback(() => {
     setDragging(true);
     setOptions({gestureEnabled: false});
   }, [setOptions]);
+
+  const onGestureEvent = useCallback(
+    (event: PanGestureHandlerGestureEvent) => {
+      const x = event.nativeEvent.absoluteX - scrubberOffset;
+      const newPosition = x * secondsPerScreenPoint;
+      // dragged position can't be beyond the lesson's duration
+      const boundedNewPosition = Math.max(0, Math.min(duration, newPosition));
+      animVal.current.setValue(boundedNewPosition);
+    },
+    [secondsPerScreenPoint, scrubberOffset, duration],
+  );
 
   // when the user releases the handle, re-enable screen gestures,
   // and seek the player to the desired seconds position
@@ -84,12 +110,10 @@ const ListenScrubber = ({seekTo}: IProps) => {
           ]}
         />
         <PanGestureHandler
-          onGestureEvent={Animated.event(
-            [{nativeEvent: {absoluteX: animVal.current}}],
-            {
-              useNativeDriver: false,
-            },
-          )}
+          maxPointers={1}
+          minDist={0}
+          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          onGestureEvent={onGestureEvent}
           onHandlerStateChange={onPanRelease}>
           <Animated.View
             onTouchStart={onHandleTouchStart}

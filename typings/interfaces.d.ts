@@ -9,6 +9,8 @@ declare global {
 
   type Maybe<T> = T | null | undefined;
 
+  type KeyValMap = {[key: string]: any};
+
   type Course =
     | 'spanish'
     | 'arabic'
