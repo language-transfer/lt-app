@@ -96,11 +96,3 @@ target 'LanguageTransfer' do
   end
 end
 
-target 'LanguageTransfer-tvOS' do
-  # Pods for LanguageTransfer-tvOS
-
-  target 'LanguageTransfer-tvOSTests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
-end

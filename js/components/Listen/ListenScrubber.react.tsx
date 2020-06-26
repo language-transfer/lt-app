@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react';
 import {StyleSheet, View, Text, Animated, Dimensions} from 'react-native';
-import {useProgress} from 'react-native-track-player';
+import {useTrackPlayerProgress} from 'react-native-track-player';
 import formatDuration from 'format-duration';
 import {useCourseContext} from '../Context/CourseContext';
 import {useLessonContext} from '../Context/LessonContext';
@@ -20,7 +20,7 @@ const ListenScrubber = ({seekTo}: IProps) => {
   const {setOptions} = useNavigation();
   const {courseData} = useCourseContext();
   const {lessonData} = useLessonContext();
-  const {position, duration} = useProgress(200);
+  const {position, duration} = useTrackPlayerProgress(200);
   const [dragging, setDragging] = useState(false);
   const [width, setWidth] = useState(0);
 
@@ -56,15 +56,6 @@ const ListenScrubber = ({seekTo}: IProps) => {
     extrapolate: 'clamp',
   });
 
-  // disable screen gestures (only meaningful on iOS; mostly so that the left
-  // drawer doesn't open with the drag) and highlight the handle,
-  // as soon as the user touches the handle...
-  // we don't want to wait for PanHandler's ACTIVE state cos that might "feel weird"
-  const onHandleTouchStart = useCallback(() => {
-    setDragging(true);
-    setOptions({gestureEnabled: false});
-  }, [setOptions]);
-
   const onGestureEvent = useCallback(
     (event: PanGestureHandlerGestureEvent) => {
       const x = event.nativeEvent.absoluteX - scrubberOffset;
@@ -76,14 +67,21 @@ const ListenScrubber = ({seekTo}: IProps) => {
     [secondsPerScreenPoint, scrubberOffset, duration],
   );
 
-  // when the user releases the handle, re-enable screen gestures,
-  // and seek the player to the desired seconds position
-  const onPanRelease = useCallback(
+  const onHandlerStateChange = useCallback(
     (event: PanGestureHandlerStateChangeEvent) => {
-      if (event.nativeEvent.state === State.END) {
+      if (event.nativeEvent.state === State.BEGAN) {
+        setDragging(true);
+        // disable screen gestures (only meaningful on iOS; mostly so that the left
+        // drawer doesn't open with the drag) and highlight the handle,
+        // as soon as the user touches the handle...
+        // we don't want to wait for PanHandler's ACTIVE state cos that might "feel weird"
+        setOptions({gestureEnabled: false});
+      } else if (event.nativeEvent.state === State.END) {
         setDragging(false);
         // @ts-ignore
         seekTo(animVal.current._value);
+        // when the user releases the handle, re-enable screen gestures,
+        // and seek the player to the desired seconds position
         setOptions({gestureEnabled: true});
       }
     },
@@ -114,9 +112,8 @@ const ListenScrubber = ({seekTo}: IProps) => {
           minDist={0}
           hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
           onGestureEvent={onGestureEvent}
-          onHandlerStateChange={onPanRelease}>
+          onHandlerStateChange={onHandlerStateChange}>
           <Animated.View
-            onTouchStart={onHandleTouchStart}
             style={[
               styles.progressHandle,
               dragging && styles.progressHandleActive,

@@ -32,7 +32,7 @@
     "react-native-reanimated": "^1.9.0",
     "react-native-safe-area-context": "^3.0.5",
     "react-native-screens": "^2.8.0",
-    "react-native-track-player": "^2.0.0-rc13",
+    "react-native-track-player": "git://github.com/react-native-kit/react-native-track-player.git#dev",
     "react-native-vector-icons": "^6.6.0",
     "uuid": "^8.1.0"
   },

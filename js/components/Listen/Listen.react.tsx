@@ -6,12 +6,11 @@ import {LanguageStackParamList} from '../Nav/LanguageNav.react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ListenHeader from './ListenHeader.react';
 import ListenBody from './ListenBody.react';
-// the typings for this library are just awful...
 import TrackPlayer, {
-  State,
-  Event,
-  usePlaybackState,
-  useProgress,
+  STATE_PLAYING,
+  TrackPlayerEvents,
+  usePlaybackStateIs,
+  useTrackPlayerProgress,
   useTrackPlayerEvents,
 } from 'react-native-track-player';
 import CourseData from '../../course-data';
@@ -29,18 +28,16 @@ const Listen = (props: Props) => {
   const {lesson} = props.route.params;
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
 
-  const {position} = useProgress();
-  const playbackState = usePlaybackState();
+  const {position} = useTrackPlayerProgress();
+  const playing = usePlaybackStateIs(STATE_PLAYING);
+
+  // const [] = useState(false);
 
   // go back to the previous screen when the user stops
   // the music remotely (from the locked screen view?)
-  useTrackPlayerEvents([Event.RemoteStop], () => props.navigation.pop());
-
-  // ready state isn't exactly what you'd expect... so we'll make up our
-  // own definition of "Ready"
-  const ready =
-    playbackState !== State.None && playbackState !== State.Connecting;
-  const playing = playbackState === State.Playing;
+  useTrackPlayerEvents([TrackPlayerEvents.REMOTE_STOP], () =>
+    props.navigation.pop(),
+  );
 
   // adjust the status bar style according to the course colors,
   // and the bottom sheet visibility
@@ -61,10 +58,18 @@ const Listen = (props: Props) => {
     courseData.uiColors.background,
   ]);
 
-  // load & queue audio file
+  // load & queue audio file, find the last heard offset, and start
+  // the lesson
   useFocusEffect(
     useCallback(() => {
-      genEnqueueFile(course, lesson);
+      async function playLesson() {
+        await genEnqueueFile(course, lesson);
+        const progress = await genProgressForLesson(course, lesson);
+        await TrackPlayer.seekTo(progress!.progress || 0);
+        await TrackPlayer.play();
+      }
+
+      playLesson();
 
       // stop playing when leaving this screen
       return () => {
@@ -76,20 +81,6 @@ const Listen = (props: Props) => {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
-
-  // auto play when ready, & skip to last saved offset
-  useEffect(() => {
-    async function startAndSkip() {
-      const progress = await genProgressForLesson(course, lesson);
-      await TrackPlayer.seekTo(progress!.progress || 0);
-      await TrackPlayer.play();
-    }
-
-    if (playbackState === State.Ready) {
-      startAndSkip();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playbackState]);
 
   const toggle = useCallback(() => {
     if (!playing) {
@@ -160,8 +151,6 @@ const Listen = (props: Props) => {
           toggle={toggle}
           skipBack={skipBack}
           seekTo={seekTo}
-          ready={ready}
-          playing={playing}
         />
       </SafeAreaView>
     </LessonProvider>

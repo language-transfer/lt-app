@@ -14,7 +14,7 @@ import {genMarkLessonFinished} from '../../persistence';
 import {genStopPlaying} from '../../audio-service';
 import {useNavigation} from '@react-navigation/native';
 import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
-import {useProgress} from 'react-native-track-player';
+import {useTrackPlayerProgress} from 'react-native-track-player';
 import {log} from '../../metrics';
 import formatDuration from 'format-duration';
 
@@ -23,7 +23,7 @@ interface IProps {
 }
 
 const ListenBottomSheet = ({downloaded}: IProps) => {
-  const {position} = useProgress();
+  const {position} = useTrackPlayerProgress();
   const {pop} = useNavigation<LanguageStackScreenProps>();
   const {course, courseData} = useCourseContext();
   const {lesson, lessonData} = useLessonContext();

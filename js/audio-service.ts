@@ -1,4 +1,11 @@
-import TrackPlayer, {State, Event, Capability} from 'react-native-track-player';
+import TrackPlayer, {
+  TrackPlayerEvents,
+  CAPABILITY_PLAY,
+  CAPABILITY_PAUSE,
+  CAPABILITY_STOP,
+  CAPABILITY_JUMP_BACKWARD,
+  STATE_PLAYING,
+} from 'react-native-track-player';
 import BackgroundTimer, {IntervalId} from 'react-native-background-timer';
 import {
   genAutopause,
@@ -32,15 +39,15 @@ export const genEnqueueFile = async (
   TrackPlayer.updateOptions({
     stopWithApp: false,
     capabilities: [
-      Capability.Play,
-      Capability.Pause,
-      Capability.JumpBackward,
-      Capability.Stop,
+      CAPABILITY_PLAY,
+      CAPABILITY_PAUSE,
+      CAPABILITY_JUMP_BACKWARD,
+      CAPABILITY_STOP,
     ],
     compactCapabilities: [
-      Capability.Play,
-      Capability.Pause,
-      Capability.JumpBackward,
+      CAPABILITY_PLAY,
+      CAPABILITY_PAUSE,
+      CAPABILITY_JUMP_BACKWARD,
     ],
     jumpInterval: 10,
     // this will be added in the next major release, i think?
@@ -101,7 +108,7 @@ export default async () => {
   audioServiceSubscriptions.forEach((s) => s.remove());
 
   audioServiceSubscriptions = [
-    TrackPlayer.addEventListener(Event.RemotePlay, async () => {
+    TrackPlayer.addEventListener(TrackPlayerEvents.REMOTE_PLAY, async () => {
       await TrackPlayer.play();
       const position = await TrackPlayer.getPosition();
       log({
@@ -113,7 +120,7 @@ export default async () => {
       });
     }),
 
-    TrackPlayer.addEventListener(Event.RemotePause, async () => {
+    TrackPlayer.addEventListener(TrackPlayerEvents.REMOTE_PAUSE, async () => {
       await TrackPlayer.pause();
       const position = await TrackPlayer.getPosition();
       log({
@@ -125,7 +132,7 @@ export default async () => {
       });
     }),
 
-    TrackPlayer.addEventListener(Event.RemoteStop, async () => {
+    TrackPlayer.addEventListener(TrackPlayerEvents.REMOTE_STOP, async () => {
       const position = await TrackPlayer.getPosition();
       log({
         action: 'stop',
@@ -138,7 +145,7 @@ export default async () => {
     }),
 
     TrackPlayer.addEventListener(
-      Event.RemoteJumpBackward,
+      TrackPlayerEvents.REMOTE_JUMP_BACKWARD,
       async ({interval}) => {
         const position = await TrackPlayer.getPosition();
         log({
@@ -153,158 +160,171 @@ export default async () => {
       },
     ),
 
-    TrackPlayer.addEventListener(Event.PlaybackState, async ({state}) => {
-      if (state !== State.Playing) {
-        return;
-      }
-
-      const autopauseConfig = await genAutopause();
-
-      switch (autopauseConfig.type) {
-        case 'off':
+    TrackPlayer.addEventListener(
+      TrackPlayerEvents.PLAYBACK_STATE,
+      async ({state}) => {
+        if (state !== STATE_PLAYING) {
           return;
-        case 'timed':
-          return;
-        case 'manual':
-          return;
-      }
-
-      // const position = await TrackPlayer.getPosition();
-
-      // // ...todo. needs to be at least 0.5s or some threshold after current position
-      // const nextPause = position + 4000;
-
-      // let nextPauseTimeout = window.setTimeout(() => {
-      //   TrackPlayer.pause();
-      // }, nextPause - position);
-    }),
-
-    TrackPlayer.addEventListener(Event.PlaybackState, async ({state}) => {
-      if (state === State.Playing) {
-        if (updateInterval) {
-          BackgroundTimer.clearInterval(updateInterval);
         }
 
-        const update = async () => {
-          const [position, currState] = await Promise.all([
-            TrackPlayer.getPosition(),
-            TrackPlayer.getState(),
-          ]);
+        const autopauseConfig = await genAutopause();
 
-          if (currState !== State.Playing) {
-            // happens sometimes. /shrug
-            if (updateInterval) {
-              BackgroundTimer.clearInterval(updateInterval);
-            }
+        switch (autopauseConfig.type) {
+          case 'off':
             return;
-          }
-
-          if (position !== null && currentlyPlaying) {
-            await genUpdateProgressForLesson(
-              currentlyPlaying.course,
-              currentlyPlaying.lesson,
-              position as number,
-            );
-          }
-        };
-
-        // #419 seems to say that window.setInterval should work here, but... it doesn't
-        updateInterval = BackgroundTimer.setInterval(update, 3000); // don't wake up the CPU too often, if we can help it
-        update();
-      } else {
-        if (updateInterval) {
-          BackgroundTimer.clearInterval(updateInterval);
+          case 'timed':
+            return;
+          case 'manual':
+            return;
         }
-      }
-    }),
+
+        // const position = await TrackPlayer.getPosition();
+
+        // // ...todo. needs to be at least 0.5s or some threshold after current position
+        // const nextPause = position + 4000;
+
+        // let nextPauseTimeout = window.setTimeout(() => {
+        //   TrackPlayer.pause();
+        // }, nextPause - position);
+      },
+    ),
+
+    TrackPlayer.addEventListener(
+      TrackPlayerEvents.PLAYBACK_STATE,
+      async ({state}) => {
+        if (state === STATE_PLAYING) {
+          if (updateInterval) {
+            BackgroundTimer.clearInterval(updateInterval);
+          }
+
+          const update = async () => {
+            const [position, currState] = await Promise.all([
+              TrackPlayer.getPosition(),
+              TrackPlayer.getState(),
+            ]);
+
+            if (currState !== STATE_PLAYING) {
+              // happens sometimes. /shrug
+              if (updateInterval) {
+                BackgroundTimer.clearInterval(updateInterval);
+              }
+              return;
+            }
+
+            if (position !== null && currentlyPlaying) {
+              await genUpdateProgressForLesson(
+                currentlyPlaying.course,
+                currentlyPlaying.lesson,
+                position as number,
+              );
+            }
+          };
+
+          // #419 seems to say that window.setInterval should work here, but... it doesn't
+          updateInterval = BackgroundTimer.setInterval(update, 3000); // don't wake up the CPU too often, if we can help it
+          update();
+        } else {
+          if (updateInterval) {
+            BackgroundTimer.clearInterval(updateInterval);
+          }
+        }
+      },
+    ),
 
     // welcome! you've found it. the worst code in the codebase.
     // I have a personal policy of including explicit blame whenever I write code I know someone will curse me for one day.
     // contact me@timothyaveni.com with your complaints.
-    TrackPlayer.addEventListener(Event.PlaybackTrackChanged, async (params) => {
-      const wasPlaying = currentlyPlaying;
+    TrackPlayer.addEventListener(
+      TrackPlayerEvents.PLAYBACK_TRACK_CHANGED,
+      async (params) => {
+        const wasPlaying = currentlyPlaying;
 
-      if (params.track === null || wasPlaying === null) {
-        // starting to play a track from nothing
-        // also lands here if we stop the track explicitly
-        return;
-      }
+        if (params.track === null || wasPlaying === null) {
+          // starting to play a track from nothing
+          // also lands here if we stop the track explicitly
+          return;
+        }
 
-      if (suppressTrackChange) {
-        suppressTrackChange = false;
-        return;
-      }
+        if (suppressTrackChange) {
+          suppressTrackChange = false;
+          return;
+        }
 
-      if (params.nextTrack === null) {
-        // the queue is ended. this isn't DRY, but it's tricky to get all the cases right here in a clean way.
+        if (params.nextTrack === null) {
+          // the queue is ended. this isn't DRY, but it's tricky to get all the cases right here in a clean way.
+          log({
+            action: 'finish_lesson',
+            course: wasPlaying?.course,
+            lesson: wasPlaying?.lesson,
+          });
+          await genMarkLessonFinished(wasPlaying.course, wasPlaying.lesson);
+          await genUpdateProgressForLesson(
+            wasPlaying.course,
+            wasPlaying.lesson,
+            0,
+          );
+          pop();
+          return;
+        }
+
+        // ASSUMPTION: we're in the same course as the old track
+        currentlyPlaying = {
+          course: wasPlaying.course,
+          lesson: CourseData.getLessonNumberForId(
+            wasPlaying.course,
+            params.nextTrack,
+          )!,
+        };
+
+        if (!currentlyPlaying?.lesson) {
+          // TODO: don't fail silently here? should be impossible, but bugs happen
+          return;
+        }
+
+        log({
+          action: 'track_changed',
+          course: wasPlaying.course,
+          lesson: wasPlaying.lesson,
+          position: params.position,
+        });
+
+        const trackDuration = CourseData.getLessonDuration(
+          wasPlaying.course,
+          wasPlaying.lesson,
+        );
+
+        // threshold compare, though in practice it's much smaller than 0.5
+        if (params.position < trackDuration - 0.5) {
+          // just a skip, track didn't finish
+          navigate('Listen', {
+            course: currentlyPlaying.course,
+            lesson: currentlyPlaying.lesson,
+          });
+          return;
+        }
+
         log({
           action: 'finish_lesson',
           course: wasPlaying?.course,
           lesson: wasPlaying?.lesson,
         });
+
+        // guess who worked out the hard way that if you do the next two concurrently you get a race condition
+
         await genMarkLessonFinished(wasPlaying.course, wasPlaying.lesson);
+
+        // otherwise it's very tricky to play it again!
         await genUpdateProgressForLesson(
           wasPlaying.course,
           wasPlaying.lesson,
           0,
         );
-        pop();
-        return;
-      }
 
-      // ASSUMPTION: we're in the same course as the old track
-      currentlyPlaying = {
-        course: wasPlaying.course,
-        lesson: CourseData.getLessonNumberForId(
-          wasPlaying.course,
-          params.nextTrack,
-        )!,
-      };
-
-      if (!currentlyPlaying?.lesson) {
-        // TODO: don't fail silently here? should be impossible, but bugs happen
-        return;
-      }
-
-      log({
-        action: 'track_changed',
-        course: wasPlaying.course,
-        lesson: wasPlaying.lesson,
-        position: params.position,
-      });
-
-      const trackDuration = CourseData.getLessonDuration(
-        wasPlaying.course,
-        wasPlaying.lesson,
-      );
-
-      // threshold compare, though in practice it's much smaller than 0.5
-      if (params.position < trackDuration - 0.5) {
-        // just a skip, track didn't finish
         navigate('Listen', {
           course: currentlyPlaying.course,
           lesson: currentlyPlaying.lesson,
         });
-        return;
-      }
-
-      log({
-        action: 'finish_lesson',
-        course: wasPlaying?.course,
-        lesson: wasPlaying?.lesson,
-      });
-
-      // guess who worked out the hard way that if you do the next two concurrently you get a race condition
-
-      await genMarkLessonFinished(wasPlaying.course, wasPlaying.lesson);
-
-      // otherwise it's very tricky to play it again!
-      await genUpdateProgressForLesson(wasPlaying.course, wasPlaying.lesson, 0);
-
-      navigate('Listen', {
-        course: currentlyPlaying.course,
-        lesson: currentlyPlaying.lesson,
-      });
-    }),
+      },
+    ),
   ];
 };

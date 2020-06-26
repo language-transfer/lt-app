@@ -13,7 +13,12 @@ import ListenBottomSheet from './ListenBottomSheet.react';
 import {useCourseContext} from '../Context/CourseContext';
 import {useLessonContext} from '../Context/LessonContext';
 import ListenScrubber from './ListenScrubber.react';
-import {useProgress} from 'react-native-track-player';
+import {
+  useTrackPlayerProgress,
+  usePlaybackStateIs,
+  STATE_READY,
+  STATE_PLAYING,
+} from 'react-native-track-player';
 import {log} from '../../metrics';
 import useIsLessonDownloaded from '../../hooks/useIsLessonDownloaded';
 
@@ -22,22 +27,15 @@ interface IProps {
   skipBack: Callback;
   seekTo: CallbackWithParam<number>;
   toggle: Callback;
-  ready: boolean;
-  playing: boolean;
 }
 
 const smallIconSize = 0.175 * Dimensions.get('screen').width;
 const largeIconSize = 0.4 * Dimensions.get('screen').width;
 
-const ListenBody = ({
-  setBottomSheetOpen,
-  skipBack,
-  seekTo,
-  toggle,
-  ready,
-  playing,
-}: IProps) => {
-  const {position} = useProgress();
+const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
+  const {position} = useTrackPlayerProgress();
+  const ready = usePlaybackStateIs(STATE_READY);
+  const playing = usePlaybackStateIs(STATE_PLAYING);
   const bottomSheet = useRef<RBSheet>(null!);
 
   const {course, courseData} = useCourseContext();
