@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {AsyncStorage} from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import DownloadManager from './download-manager';
 import CourseData from './course-data';
 
