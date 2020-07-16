@@ -41,7 +41,7 @@ const LanguageHomeBody = () => {
             course,
           });
           setShowMetadataWarning(true);
-        }, 1000);
+        }, 5000);
 
         await CourseData.genLoadCourseMetadata(course);
         clearTimeout(metadataWarningTimeout);

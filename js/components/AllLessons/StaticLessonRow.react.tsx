@@ -1,8 +1,8 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, TouchableNativeFeedback} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
-
+import {genProgressForLesson} from '../../persistence';
 import {Icon} from 'react-native-elements';
 import formatDuration from 'format-duration';
 import CourseData from '../../course-data';
@@ -17,6 +17,14 @@ const StaticLessonRow = ({
   lastUpdateTime: Date | null;
 }) => {
   const {navigate} = useNavigation<LanguageStackScreenProps>();
+  const [finished, setFinished] = useState<boolean>(null!);
+
+  useEffect(() => {
+    (async () => {
+      const progressResp = await genProgressForLesson(course, lesson);
+      setFinished(progressResp?.finished || false);
+    })();
+  }, [course, lesson]);
 
   return (
     <View style={styles.row}>
@@ -27,12 +35,16 @@ const StaticLessonRow = ({
         <View style={styles.lessonBox}>
           <View style={styles.text}>
             <Icon
-              style={styles.finishedIcon}
+              style={{
+                ...styles.finishedIcon,
+                ...(finished ? {} : {opacity: 0}),
+              }}
               name="check"
               type="font-awesome-5"
               accessibilityLabel={'finished'}
               size={24}
             />
+
             <Text style={styles.lessonTitleText}>
               {CourseData.getLessonTitle(course, lesson)}
             </Text>

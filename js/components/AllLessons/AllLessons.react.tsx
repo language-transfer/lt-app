@@ -22,7 +22,7 @@ const AllLessons = () => {
   const {course} = useCourseContext();
   const indices = CourseData.getLessonIndices(course);
 
-  const downloadQuality = usePreference<Quality>('download-quality', 'low');
+  const downloadQuality = usePreference<Quality>('download-quality', 'high');
   const [showDownloadAll, setShowDownloadAll] = useState(true);
   const downloadAll = useCallback(() => {
     const courseTitle = CourseData.getCourseShortTitle(course);

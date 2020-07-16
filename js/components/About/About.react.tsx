@@ -287,7 +287,7 @@ const About = () => {
           </View>
 
           <Text style={styles.bodyText}>
-            The app's core maintainers are Timothy J. Aveni, and Michael
+            The app's core maintainers are Timothy J. Aveni and Michael
             Schonfeld.
           </Text>
           <Text style={styles.bodyText}>

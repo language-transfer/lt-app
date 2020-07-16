@@ -52,7 +52,7 @@ const LanguageNav = (props: any) => {
           component={LanguageHome}
           options={() => ({
             headerLeft: () => <DrawerMenuButton />,
-            headerTitle: `${courseData.shortTitle}: All Lessons`,
+            headerTitle: `${courseData.fullTitle}: All Lessons`,
           })}
         />
         <Stack.Screen
@@ -66,7 +66,7 @@ const LanguageNav = (props: any) => {
           name="All Lessons"
           component={AllLessons}
           options={() => ({
-            headerTitle: `${courseData.shortTitle}: All Lessons`,
+            headerTitle: `${courseData.fullTitle}: All Lessons`,
             headerBackTitleVisible: false,
           })}
         />
@@ -74,7 +74,7 @@ const LanguageNav = (props: any) => {
           name="Data Management"
           component={DataManagement}
           options={() => ({
-            headerTitle: `${courseData.shortTitle}: Data Management`,
+            headerTitle: `${courseData.fullTitle}: Data Management`,
             headerBackTitleVisible: false,
           })}
         />
