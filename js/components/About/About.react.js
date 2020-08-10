@@ -205,14 +205,14 @@ const About = (props) => {
 
           <Text style={styles.bodyText}>
             We do not store your IP address permanently, though it may be kept
-            for a short period after your usage of the app to that we can
+            for a short period after your usage of the app so that we can
             protect our servers from malicious use.
           </Text>
 
           <Text style={styles.bodyText}>
             If you choose to contact us or report a problem from within the app,
-            we may retain any information you send to us indefinitely so we can
-            take action on your feedback.
+            we may retain any information you send to us indefinitely so that we
+            can take action on your feedback.
           </Text>
         </View>
 
