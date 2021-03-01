@@ -16,6 +16,7 @@ const LanguageHome = (props) => {
       props.navigation.addListener('focus', () => {
         StatusBar.setBackgroundColor('white');
         StatusBar.setBarStyle('dark-content', true);
+        StatusBar.setTranslucent(true);
         changeNavigationBarColor('transparent', true);
       }),
       props.navigation.addListener('blur', () => {

@@ -21,6 +21,7 @@ const DataManagement = (props) => {
     return props.navigation.addListener('focus', () => {
       StatusBar.setBackgroundColor('white');
       StatusBar.setBarStyle('dark-content', true);
+      StatusBar.setTranslucent(true);
       changeNavigationBarColor('white', true);
     });
   }, [props.navigation]);

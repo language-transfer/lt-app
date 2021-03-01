@@ -33,6 +33,7 @@ const Listen = (props) => {
     );
     // please excuse this ternary I honestly have no idea which is which anymore
     StatusBar.setBarStyle((light ? 'dark' : 'light') + '-content', true);
+    StatusBar.setTranslucent(true);
     changeNavigationBarColor('transparent', light);
   }, [props.route.params.course, bottomSheetOpen]);
 

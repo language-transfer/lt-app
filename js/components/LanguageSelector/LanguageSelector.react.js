@@ -22,6 +22,7 @@ const LanguageSelector = ({navigation}) => {
     const unsubscribe = navigation.addListener('focus', () => {
       StatusBar.setBackgroundColor('white');
       StatusBar.setBarStyle('dark-content', true);
+      StatusBar.setTranslucent(true);
       changeNavigationBarColor('transparent', true);
     });
 
