@@ -11,19 +11,9 @@ import {
 } from './persistence';
 import {log} from './metrics';
 
-type Callback = (val: any) => void;
-
-export type DownloadProgress = {
-  requested: boolean;
-  totalBytes: number | null;
-  bytesWritten: number;
-  error: any;
-  finished: boolean;
-};
-
 const DownloadManager = {
-  _subscriptions: {} as {[key: string]: Callback[]},
-  _downloads: {} as {[key: string]: any},
+  _subscriptions: {} as {[key: string]: ((download: Download) => any)[]},
+  _downloads: {} as {[key: string]: Download},
 
   // I know this is just a roundabout way of putting a slash back in but go with me here
   getCourseIdForDownloadId: (id: string): Course => {
@@ -159,7 +149,7 @@ const DownloadManager = {
 
   subscribeToDownloadUpdates: (
     downloadId: string,
-    callback: Callback /*: (number => any) */,
+    callback: (download: Download) => any,
   ) => {
     if (!(downloadId in DownloadManager._subscriptions)) {
       DownloadManager._subscriptions[downloadId] = [];
@@ -168,7 +158,7 @@ const DownloadManager = {
     DownloadManager._subscriptions[downloadId].push(callback);
   },
 
-  unsubscribeFromDownloadUpdates: (downloadId: string, callback: Callback) => {
+  unsubscribeFromDownloadUpdates: (downloadId: string, callback: (download: Download) => any) => {
     const subscriptionArray = DownloadManager._subscriptions[downloadId];
     subscriptionArray.splice(subscriptionArray.indexOf(callback), 1);
   },
@@ -257,7 +247,7 @@ const DownloadManager = {
 export const useDownloadStatus = (
   course: Course,
   lesson: number,
-): DownloadProgress => {
+): Download => {
   const downloadId = DownloadManager.getDownloadId(course, lesson);
 
   const [downloadProgress, setDownloadProgress] = useState(

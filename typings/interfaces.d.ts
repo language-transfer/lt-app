@@ -1,18 +1,7 @@
+import {DownloadTask} from 'react-native-background-downloader';
 import {IntervalId} from 'react-native-background-timer';
 
 declare global {
-  type x = IntervalId;
-
-  type Callback = () => void;
-
-  type CallbackWithParam<T> = (param: T) => void;
-
-  type Maybe<T> = T | null | undefined;
-
-  type KeyValMap = {[key: string]: any};
-
-  type FileSizeMap = {[key: string]: number};
-
   type Course =
     | 'spanish'
     | 'arabic'
@@ -33,34 +22,43 @@ declare global {
 
   type Quality = 'high' | 'low';
 
-  interface IUIColors {
+  interface UIColors {
     background: string;
     softBackground: string;
     text: string;
     backgroundAccent: string;
   }
 
-  interface ICourseData {
+  interface CourseData {
     image: any;
     imageWithText: any;
     shortTitle: string;
     fullTitle: string;
     metaUrl: string;
     fallbackLessonCount: number;
-    uiColors: IUIColors;
+    uiColors: UIColors;
     bundledFirstLesson: string;
   }
 
-  export interface ICourseMetaData {
+  export interface CourseMetaData {
     version: number;
-    lessons: ILessonData[];
+    lessons: LessonData[];
   }
 
-  export interface ILessonData {
+  export interface LessonData {
     id: string;
     title: string;
     urls: string[];
-    filesizes: FileSizeMap;
+    filesizes: {[key: string]: number};
     duration: number;
+  }
+
+  export interface Download {
+    requested: boolean,
+    totalBytes: number | null,
+    bytesWritten: number,
+    error: any,
+    finished: boolean,
+    downloadTask: DownloadTask,
   }
 }

@@ -13,11 +13,11 @@ import {
 } from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/native';
 
-interface IProps {
-  seekTo: CallbackWithParam<number>;
+interface Props {
+  seekTo: (pos: number) => any;
 }
 
-const ListenScrubber = ({seekTo}: IProps) => {
+const ListenScrubber = ({seekTo}: Props) => {
   const {setOptions} = useNavigation();
   const {course} = useCourseContext();
   const {lesson} = useLessonContext();

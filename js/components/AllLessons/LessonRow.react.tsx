@@ -7,11 +7,8 @@ import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
 import {Icon} from 'react-native-elements';
 import formatDuration from 'format-duration';
 import prettyBytes from 'pretty-bytes';
-import {genProgressForLesson, IProgress} from '../../persistence';
-import DownloadManager, {
-  useDownloadStatus,
-  DownloadProgress,
-} from '../../download-manager';
+import {genProgressForLesson, Progress} from '../../persistence';
+import DownloadManager, {useDownloadStatus} from '../../download-manager';
 import CourseData from '../../course-data';
 import {usePreference} from '../../persistence';
 import {log} from '../../metrics';
@@ -20,7 +17,7 @@ export const LESSON_ROW_HEIGHT = 72;
 
 const renderDownloadProgress = (
   downloaded: boolean,
-  downloadState: DownloadProgress,
+  downloadState: Download,
   downloading: boolean,
 ) => {
   if (downloaded) {
@@ -132,7 +129,7 @@ const LessonRow = ({
   const downloadState = useDownloadStatus(course, lesson);
   const downloadQuality = usePreference<Quality>('download-quality', 'low');
 
-  const [progress, setProgress] = useState<IProgress | null>(null);
+  const [progress, setProgress] = useState<Progress | null>(null);
   const [downloaded, setDownloaded] = useState<boolean | null>(null);
   const [lastDeletionAction, setLastDeletionAction] = useState(null);
 

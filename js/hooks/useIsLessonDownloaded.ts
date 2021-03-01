@@ -7,7 +7,7 @@ export default function useIsLessonDownloaded() {
   const {course} = useCourseContext();
   const {lesson} = useLessonContext();
 
-  const [downloaded, setDownloaded] = useState<Maybe<boolean>>(null);
+  const [downloaded, setDownloaded] = useState<boolean | null>(null);
   useEffect(() => {
     async function checkIfDownloaded() {
       const resp = await DownloadManager.genIsDownloaded(course, lesson);

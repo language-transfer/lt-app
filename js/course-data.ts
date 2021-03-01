@@ -64,9 +64,9 @@ import fs from 'react-native-fs';
 import path from 'react-native-path';
 import DownloadManager from './download-manager';
 
-type CourseDataMap = {[key in Course]: ICourseData};
+type CourseDataMap = {[key in Course]: CourseData};
 
-type CourseMetadataMap = {[key in Course]: ICourseMetaData | undefined};
+type CourseMetadataMap = {[key in Course]: CourseMetaData | undefined};
 
 const courseMeta: CourseMetadataMap = {} as CourseMetadataMap;
 
@@ -213,7 +213,7 @@ const CourseData = {
     return !!data[course];
   },
 
-  getCourseData(course: Course): ICourseData {
+  getCourseData(course: Course): CourseData {
     return data[course];
   },
 
@@ -238,7 +238,7 @@ const CourseData = {
     return data[course].imageWithText;
   },
 
-  getCourseUIColors(course: Course): IUIColors {
+  getCourseUIColors(course: Course): UIColors {
     return data[course].uiColors;
   },
 
@@ -292,7 +292,7 @@ const CourseData = {
     courseMeta[course] = undefined;
   },
 
-  getLessonData(course: Course, lesson: number): ILessonData {
+  getLessonData(course: Course, lesson: number): LessonData {
     return courseMeta[course]!.lessons[lesson];
   },
 

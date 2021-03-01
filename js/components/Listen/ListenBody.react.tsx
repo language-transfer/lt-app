@@ -24,17 +24,17 @@ import {
 import {log} from '../../metrics';
 import useIsLessonDownloaded from '../../hooks/useIsLessonDownloaded';
 
-interface IProps {
-  setBottomSheetOpen: (val: boolean) => void;
-  skipBack: Callback;
-  seekTo: CallbackWithParam<number>;
-  toggle: Callback;
+interface Props {
+  setBottomSheetOpen: (val: boolean) => any;
+  skipBack: () => any;
+  seekTo: (pos: number) => any;
+  toggle: () => any;
 }
 
 const smallIconSize = 0.175 * Dimensions.get('screen').width;
 const largeIconSize = 0.4 * Dimensions.get('screen').width;
 
-const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
+const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: Props) => {
   const {position} = useTrackPlayerProgress();
   const ready = usePlaybackStateIs(STATE_READY);
   const playing = usePlaybackStateIs(STATE_PLAYING);

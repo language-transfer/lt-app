@@ -11,7 +11,7 @@ import {log} from './metrics';
 // haven't gone to the effort of adding a mutex. mostly because I don't like
 // the API for the most popular library.
 
-export interface IProgress {
+export interface Progress {
   finished: boolean;
   progress: number | null;
 }

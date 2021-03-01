@@ -19,11 +19,11 @@ import {useTrackPlayerProgress} from 'react-native-track-player';
 import {log} from '../../metrics';
 import formatDuration from 'format-duration';
 
-interface IProps {
-  downloaded: Maybe<boolean>;
+interface Props {
+  downloaded: boolean | null;
 }
 
-const ListenBottomSheet = ({downloaded}: IProps) => {
+const ListenBottomSheet = ({downloaded}: Props) => {
   const {position} = useTrackPlayerProgress();
   const {pop} = useNavigation<LanguageStackScreenProps>();
   const {course} = useCourseContext();

@@ -18,7 +18,7 @@ import {
 import {Icon} from 'react-native-elements';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 
-interface ISettings {
+interface Settings {
   autoDeleteFinished: boolean;
   streamQuality: Quality;
   downloadQuality: Quality;
@@ -29,7 +29,7 @@ interface ISettings {
 const Settings = () => {
   useStatusBarStyle('white', 'dark-content');
   const [needsUpdate, setNeedsUpdate] = useState(true);
-  const [settings, setSettings] = useState<ISettings | null>(null);
+  const [settings, setSettings] = useState<Settings | null>(null);
   useEffect(() => {
     (async () => {
       if (needsUpdate) {

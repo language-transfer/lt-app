@@ -2,9 +2,9 @@ import {NavigationState} from '@react-navigation/native';
 import {log} from '../metrics';
 import {useCallback} from 'react';
 
-// this will return an object the route's params,
+// this will return an object with the route's params,
 // along with any params set in nested routes
-export function getNestedParams(state: Maybe<NavigationState>): KeyValMap {
+export function getNestedParams(state: any): {[key: string]: any} {
   if (!state) {
     return {};
   }
@@ -23,7 +23,8 @@ export function getNestedParams(state: Maybe<NavigationState>): KeyValMap {
 }
 
 export default function useNavStateLogger() {
-  return useCallback((state: Maybe<NavigationState>) => {
+  // todo: this type signature is messed up
+  return useCallback((state: any) => {
     const route = state?.routes[state.index];
     if (!route) {
       return;

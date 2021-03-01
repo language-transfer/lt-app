@@ -18,7 +18,7 @@ import {log} from '../metrics';
 export type AppParamList = {
   Home: undefined;
   Language: {
-    course: Maybe<Course>;
+    course: Course | null;
   };
 };
 

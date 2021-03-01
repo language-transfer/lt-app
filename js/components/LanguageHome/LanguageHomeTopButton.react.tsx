@@ -8,7 +8,7 @@ import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 import {
   genMostRecentListenedLessonForCourse,
   genProgressForLesson,
-  IProgress,
+  Progress,
 } from '../../persistence';
 
 import CourseData from '../../course-data';
@@ -19,7 +19,7 @@ import formatDuration from 'format-duration';
 const getNextLesson = (
   course: Course,
   lastLesson: number,
-  progress: IProgress,
+  progress: Progress,
 ): number => {
   if (lastLesson === null) {
     return 0;

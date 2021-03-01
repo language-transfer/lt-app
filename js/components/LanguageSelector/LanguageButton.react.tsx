@@ -4,12 +4,12 @@ import {StyleSheet, View, Text, ImageBackground} from 'react-native';
 import CourseData from '../../course-data';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
-interface IProps {
+interface Props {
   course: Course;
   onPress: () => void;
 }
 
-const LanguageButton = ({course, onPress}: IProps) => {
+const LanguageButton = ({course, onPress}: Props) => {
   const lessonCount = CourseData.getFallbackLessonCount(course);
 
   return (

@@ -1,11 +1,11 @@
 import React, {createContext, useContext} from 'react';
 import {ViewProps} from 'react-native';
 
-interface ILessonContextShape {
+interface LessonContextShape {
   lesson: number;
 }
-const LessonContext = createContext<ILessonContextShape>(
-  {} as ILessonContextShape,
+const LessonContext = createContext<LessonContextShape>(
+  {} as LessonContextShape,
 );
 
 export const useLessonContext = () => useContext(LessonContext);
