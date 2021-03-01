@@ -48,7 +48,7 @@ const LanguageNav = (props: any) => {
           component={LanguageHome}
           options={() => ({
             headerLeft: () => <DrawerMenuButton />,
-            headerTitle: `${CourseData.getCourseFullTitle(course)}: All Lessons`,
+            headerTitle: `${CourseData.getCourseFullTitle(course)}`,
           })}
         />
         <Stack.Screen
