@@ -1,38 +1,4 @@
-import spanishCover from '../resources/spanish-cover-stylized.png';
-import spanishCoverWithText from '../resources/spanish-cover-stylized-with-text.png';
-import arabicCover from '../resources/arabic-cover-stylized.png';
-import arabicCoverWithText from '../resources/arabic-cover-stylized-with-text.png';
-import turkishCover from '../resources/turkish-cover-stylized.png';
-import turkishCoverWithText from '../resources/turkish-cover-stylized-with-text.png';
-import germanCover from '../resources/german-cover-stylized.png';
-import germanCoverWithText from '../resources/german-cover-stylized-with-text.png';
-import greekCover from '../resources/greek-cover-stylized.png';
-import greekCoverWithText from '../resources/greek-cover-stylized-with-text.png';
-import italianCover from '../resources/italian-cover-stylized.png';
-import italianCoverWithText from '../resources/italian-cover-stylized-with-text.png';
-import swahiliCover from '../resources/swahili-cover-stylized.png';
-import swahiliCoverWithText from '../resources/swahili-cover-stylized-with-text.png';
-import frenchCover from '../resources/french-cover-stylized.png';
-import frenchCoverWithText from '../resources/french-cover-stylized-with-text.png';
-import inglesCover from '../resources/ingles-cover-stylized.png';
-import inglesCoverWithText from '../resources/ingles-cover-stylized-with-text.png';
-
-import fs from 'react-native-fs';
-import path from 'react-native-path';
-import DownloadManager from './download-manager';
-
-export type Course =
-  | 'spanish'
-  | 'arabic'
-  | 'turkish'
-  | 'german'
-  | 'greek'
-  | 'italian'
-  | 'swahili'
-  | 'french'
-  | 'ingles';
-
-/* SAMPLE METADATA: 
+/* SAMPLE METADATA:
 
   {
     version: 0,
@@ -65,9 +31,46 @@ export type Course =
   },
 */
 
-const courseMeta = {};
+import spanishCover from '../resources/spanish-cover-stylized.png';
+import spanishCoverWithText from '../resources/spanish-cover-stylized-with-text.png';
+import spanishFirstLesson from '../resources/courses/spanish1-lq.mp3';
+import arabicCover from '../resources/arabic-cover-stylized.png';
+import arabicCoverWithText from '../resources/arabic-cover-stylized-with-text.png';
+import arabicFirstLesson from '../resources/courses/arabic1-lq.mp3';
+import turkishCover from '../resources/turkish-cover-stylized.png';
+import turkishCoverWithText from '../resources/turkish-cover-stylized-with-text.png';
+import turkisFirstLesson from '../resources/courses/turkish1-lq.mp3';
+import germanCover from '../resources/german-cover-stylized.png';
+import germanCoverWithText from '../resources/german-cover-stylized-with-text.png';
+import germanFirstLesson from '../resources/courses/german1-lq.mp3';
+import greekCover from '../resources/greek-cover-stylized.png';
+import greekCoverWithText from '../resources/greek-cover-stylized-with-text.png';
+import greekFirstLesson from '../resources/courses/greek1-lq.mp3';
+import italianCover from '../resources/italian-cover-stylized.png';
+import italianCoverWithText from '../resources/italian-cover-stylized-with-text.png';
+import italiaFirstLesson from '../resources/courses/italian1-lq.mp3';
+import swahiliCover from '../resources/swahili-cover-stylized.png';
+import swahiliCoverWithText from '../resources/swahili-cover-stylized-with-text.png';
+import swahiliFirstLesson from '../resources/courses/swahili1-lq.mp3';
+import frenchCover from '../resources/french-cover-stylized.png';
+import frenchCoverWithText from '../resources/french-cover-stylized-with-text.png';
+import frenchFirstLesson from '../resources/courses/french1-lq.mp3';
+import inglesCover from '../resources/ingles-cover-stylized.png';
+import inglesCoverWithText from '../resources/ingles-cover-stylized-with-text.png';
+import inglesFirstLesson from '../resources/courses/ingles1-lq.mp3';
 
-const data = {
+import fs from 'react-native-fs';
+// @ts-ignore
+import path from 'react-native-path';
+import DownloadManager from './download-manager';
+
+type CourseDataMap = {[key in Course]: ICourseData};
+
+type CourseMetadataMap = {[key in Course]: ICourseMetaData | undefined};
+
+const courseMeta: CourseMetadataMap = {} as CourseMetadataMap;
+
+const data: CourseDataMap = {
   spanish: {
     image: spanishCover,
     imageWithText: spanishCoverWithText,
@@ -81,6 +84,7 @@ const data = {
       text: 'white',
       backgroundAccent: '#516198',
     },
+    bundledFirstLesson: spanishFirstLesson,
   },
   arabic: {
     image: arabicCover,
@@ -95,6 +99,7 @@ const data = {
       text: 'black',
       backgroundAccent: '#806006',
     },
+    bundledFirstLesson: arabicFirstLesson,
   },
   turkish: {
     image: turkishCover,
@@ -109,6 +114,7 @@ const data = {
       text: 'white',
       backgroundAccent: '#760629',
     },
+    bundledFirstLesson: turkisFirstLesson,
   },
   german: {
     image: germanCover,
@@ -123,6 +129,7 @@ const data = {
       text: 'white',
       backgroundAccent: '#006400',
     },
+    bundledFirstLesson: germanFirstLesson,
   },
   greek: {
     image: greekCover,
@@ -137,6 +144,7 @@ const data = {
       text: 'white',
       backgroundAccent: '#9c5a20',
     },
+    bundledFirstLesson: greekFirstLesson,
   },
   italian: {
     image: italianCover,
@@ -151,6 +159,7 @@ const data = {
       text: 'white',
       backgroundAccent: '#a7177f',
     },
+    bundledFirstLesson: italiaFirstLesson,
   },
   swahili: {
     image: swahiliCover,
@@ -165,6 +174,7 @@ const data = {
       text: 'black',
       backgroundAccent: '#0aaea2',
     },
+    bundledFirstLesson: swahiliFirstLesson,
   },
   french: {
     image: frenchCover,
@@ -179,6 +189,7 @@ const data = {
       text: 'white',
       backgroundAccent: '#098abc',
     },
+    bundledFirstLesson: frenchFirstLesson,
   },
   ingles: {
     image: inglesCover,
@@ -193,6 +204,7 @@ const data = {
       text: 'white',
       backgroundAccent: '#516198',
     },
+    bundledFirstLesson: inglesFirstLesson,
   },
 };
 
@@ -201,7 +213,12 @@ const CourseData = {
     return !!data[course];
   },
 
-  getCourseList(): Array<string> {
+  getCourseData(course: Course): ICourseData {
+    return data[course];
+  },
+
+  getCourseList(): Array<Course> {
+    // @ts-ignore
     return Object.keys(data);
   },
 
@@ -213,28 +230,28 @@ const CourseData = {
     return data[course].fullTitle;
   },
 
-  getCourseImage(course: Course) {
+  getCourseImage(course: Course): any {
     return data[course].image;
   },
 
-  getCourseImageWithText(course: Course) {
+  getCourseImageWithText(course: Course): any {
     return data[course].imageWithText;
   },
 
-  getCourseUIColors(course: Course) {
+  getCourseUIColors(course: Course): IUIColors {
     return data[course].uiColors;
   },
 
-  getFallbackLessonCount(course: Course) {
+  getFallbackLessonCount(course: Course): number {
     return data[course].fallbackLessonCount;
   },
 
-  isCourseMetadataLoaded(course: Course) {
+  isCourseMetadataLoaded(course: Course): boolean {
     return !!courseMeta[course];
   },
 
-  getMetadataVersion(course: Course) {
-    return courseMeta[course].version;
+  getMetadataVersion(course: Course): number {
+    return courseMeta[course]!.version;
   },
 
   async genLoadCourseMetadata(
@@ -275,12 +292,16 @@ const CourseData = {
     courseMeta[course] = undefined;
   },
 
+  getLessonData(course: Course, lesson: number): ILessonData {
+    return courseMeta[course]!.lessons[lesson];
+  },
+
   getLessonId(course: Course, lesson: number): string {
-    return courseMeta[course].lessons[lesson].id;
+    return courseMeta[course]!.lessons[lesson].id;
   },
 
   getLessonNumberForId(course: Course, lessonId: string): number | null {
-    const index = courseMeta[course].lessons.findIndex(
+    const index = courseMeta[course]!.lessons.findIndex(
       (l) => l.id === lessonId,
     );
     if (index === -1) {
@@ -289,8 +310,8 @@ const CourseData = {
     return index;
   },
 
-  getLessonUrl(course: Course, lesson: number, quality: string): string {
-    const urls = courseMeta[course].lessons[lesson].urls;
+  getLessonUrl(course: Course, lesson: number, quality: Quality): string {
+    const urls = courseMeta[course]!.lessons[lesson].urls;
     if (quality === 'high') {
       return urls[urls.length - 1];
     } else {
@@ -299,14 +320,14 @@ const CourseData = {
   },
 
   getNextLesson(course: Course, lesson: number): number | null {
-    if (lesson + 1 === courseMeta[course].lessons.length) {
+    if (lesson + 1 === courseMeta[course]!.lessons.length) {
       return null;
     }
 
     return lesson + 1;
   },
 
-  getPreviousLesson(course: Course, lesson: number): number | null {
+  getPreviousLesson(_course: Course, lesson: number): number | null {
     if (lesson - 1 === -1) {
       return null;
     }
@@ -315,15 +336,24 @@ const CourseData = {
   },
 
   getLessonIndices(course: Course): Array<number> {
-    return courseMeta[course].lessons.map((_, i) => i);
+    return courseMeta[course]!.lessons.map((_, i) => i);
   },
 
-  getLessonTitle(course: Course, lesson: number) {
-    return courseMeta[course].lessons[lesson].title;
+  getLessonTitle(course: Course, lesson: number): string {
+    return courseMeta[course]!.lessons[lesson].title;
   },
 
-  getLessonDuration(course: Course, lesson: number) {
-    return courseMeta[course].lessons[lesson].duration;
+  getLessonDuration(course: Course, lesson: number): number {
+    return courseMeta[course]!.lessons[lesson].duration;
+  },
+
+  getLessonSizeInBytes(
+    course: Course,
+    lesson: number,
+    quality: Quality,
+  ): number {
+    const url = this.getLessonUrl(course, lesson, quality);
+    return courseMeta[course]!.lessons[lesson].filesizes[url];
   },
 };
 
