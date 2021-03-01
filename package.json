@@ -49,7 +49,6 @@
     "@typescript-eslint/parser": "^3.6.0",
     "babel-jest": "^26.1.0",
     "eslint": "^7.4.0",
-    "husky": "^4.2.5",
     "jest": "^26.1.0",
     "metro-react-native-babel-preset": "^0.60.0",
     "prettier": "^2.0.5",
@@ -58,10 +57,5 @@
   },
   "jest": {
     "preset": "react-native"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint"
-    }
   }
 }
