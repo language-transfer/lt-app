@@ -1,4 +1,4 @@
-import React, {useEffect, useCallback, useState, useMemo} from 'react';
+import React, {useEffect, useCallback, useState} from 'react';
 import {StyleSheet, StatusBarStyle} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import {StackScreenProps} from '@react-navigation/stack';
@@ -54,8 +54,7 @@ const Listen = (props: Props) => {
   }, [
     setStatusBarStyle,
     bottomSheetOpen,
-    CourseData.getCourseUIColors(course).text,
-    CourseData.getCourseUIColors(course).background,
+    course,
   ]);
 
   // load & queue audio file, find the last heard offset, and start
