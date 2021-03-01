@@ -15,6 +15,7 @@ export function useSetStatusBarStyle() {
     ) => {
       if (isAndroid) {
         StatusBar.setBackgroundColor(backgroundColor);
+        StatusBar.setTranslucent(true);
       }
 
       StatusBar.setBarStyle(style, true);
