@@ -33,7 +33,7 @@ This app is developed in React Native. For now, we're just building and developi
 The Language Transfer app should be:
 
 - 100% free, like the Language Transfer courses
-- Accessibile and easy to use for the visually impaired
+- Accessible and easy to use for the visually impaired
 - Considerate of users in areas with poor network quality, expensive Internet access, or low-end devices
 - Free of distractions and annoyances, like advertisements or superfluous notifications
 - Self-sustaining: maintainable and easy to build even in the absence of the original maintainers
