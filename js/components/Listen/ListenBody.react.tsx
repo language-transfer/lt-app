@@ -10,6 +10,7 @@ import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import ListenBottomSheet from './ListenBottomSheet.react';
+import CourseData from '../../course-data';
 import {useCourseContext} from '../Context/CourseContext';
 import {useLessonContext} from '../Context/LessonContext';
 import ListenScrubber from './ListenScrubber.react';
@@ -41,7 +42,7 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
   const bottomSheet = useRef<RBSheet>(null!);
 
   const {course, courseData} = useCourseContext();
-  const {lesson, lessonData} = useLessonContext();
+  const {lesson} = useLessonContext();
   const downloaded = useIsLessonDownloaded();
   if (downloaded === null) {
     return (
@@ -67,7 +68,7 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
             {courseData.shortTitle}
           </Text>
           <Text style={[styles.lesson, {color: courseData.uiColors.text}]}>
-            {lessonData.title}
+            {CourseData.getLessonTitle(course, lesson)}
           </Text>
         </View>
 

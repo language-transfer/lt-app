@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import {Icon} from 'react-native-elements';
 import {useCourseContext} from '../Context/CourseContext';
+import CourseData from '../../course-data';
 import {useLessonContext} from '../Context/LessonContext';
 import DownloadManager from '../../download-manager';
 import {genMarkLessonFinished} from '../../persistence';
@@ -26,7 +27,7 @@ const ListenBottomSheet = ({downloaded}: IProps) => {
   const {position} = useTrackPlayerProgress();
   const {pop} = useNavigation<LanguageStackScreenProps>();
   const {course, courseData} = useCourseContext();
-  const {lesson, lessonData} = useLessonContext();
+  const {lesson} = useLessonContext();
 
   return (
     <>
@@ -98,7 +99,7 @@ const ListenBottomSheet = ({downloaded}: IProps) => {
                 ---<br>
                 <br>
                 Course: ${courseData.fullTitle}<br>
-                ${lessonData.title}<br>
+                ${CourseData.getLessonTitle(course, lesson)}<br>
                 Position: ${formatDuration(position * 1000)}`,
               )}`,
           )

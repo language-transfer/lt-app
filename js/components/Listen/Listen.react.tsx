@@ -133,13 +133,8 @@ const Listen = (props: Props) => {
     TrackPlayer.seekTo(Math.max(0, position - 10));
   }, [course, lesson, position]);
 
-  const lessonData = useMemo(() => CourseData.getLessonData(course, lesson), [
-    course,
-    lesson,
-  ]);
-
   return (
-    <LessonProvider lesson={lesson} lessonData={lessonData}>
+    <LessonProvider lesson={lesson}>
       <SafeAreaView
         style={[
           styles.container,

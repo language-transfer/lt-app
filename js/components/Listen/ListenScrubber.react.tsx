@@ -2,6 +2,7 @@ import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react';
 import {StyleSheet, View, Text, Animated, Dimensions} from 'react-native';
 import {useTrackPlayerProgress} from 'react-native-track-player';
 import formatDuration from 'format-duration';
+import CourseData from '../../course-data';
 import {useCourseContext} from '../Context/CourseContext';
 import {useLessonContext} from '../Context/LessonContext';
 import {
@@ -18,8 +19,8 @@ interface IProps {
 
 const ListenScrubber = ({seekTo}: IProps) => {
   const {setOptions} = useNavigation();
-  const {courseData} = useCourseContext();
-  const {lessonData} = useLessonContext();
+  const {course, courseData} = useCourseContext();
+  const {lesson} = useLessonContext();
   const {position, duration} = useTrackPlayerProgress(200);
   const [dragging, setDragging] = useState(false);
   const [width, setWidth] = useState(0);
@@ -140,7 +141,7 @@ const ListenScrubber = ({seekTo}: IProps) => {
           }}>
           {/* downloaded metadata should be fine for track duration, since it can't
             get out of sync if we don't reuse filenames (IDs) */}
-          {formatDuration(lessonData.duration * 1000)}
+          {formatDuration(CourseData.getLessonDuration(course, lesson) * 1000)}
         </Text>
       </View>
     </View>
