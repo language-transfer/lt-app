@@ -19,7 +19,7 @@ interface IProps {
 
 const ListenScrubber = ({seekTo}: IProps) => {
   const {setOptions} = useNavigation();
-  const {course, courseData} = useCourseContext();
+  const {course} = useCourseContext();
   const {lesson} = useLessonContext();
   const {position, duration} = useTrackPlayerProgress(200);
   const [dragging, setDragging] = useState(false);
@@ -95,7 +95,7 @@ const ListenScrubber = ({seekTo}: IProps) => {
         style={[
           styles.progressBar,
           {
-            backgroundColor: courseData.uiColors.backgroundAccent,
+            backgroundColor: CourseData.getCourseUIColors(course).backgroundAccent,
           },
         ]}
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
@@ -103,7 +103,7 @@ const ListenScrubber = ({seekTo}: IProps) => {
           style={[
             styles.progressMade,
             {
-              backgroundColor: courseData.uiColors.text,
+              backgroundColor: CourseData.getCourseUIColors(course).text,
               width: progressWidth,
             },
           ]}
@@ -118,7 +118,7 @@ const ListenScrubber = ({seekTo}: IProps) => {
             style={[
               styles.progressHandle,
               dragging && styles.progressHandleActive,
-              {backgroundColor: courseData.uiColors.text},
+              {backgroundColor: CourseData.getCourseUIColors(course).text},
               {left: progressWidth},
             ]}
           />
@@ -128,7 +128,7 @@ const ListenScrubber = ({seekTo}: IProps) => {
       <View style={styles.progressTextContainer}>
         <Text
           style={{
-            color: courseData.uiColors.text,
+            color: CourseData.getCourseUIColors(course).text,
           }}>
           {
             // @ts-ignore
@@ -137,7 +137,7 @@ const ListenScrubber = ({seekTo}: IProps) => {
         </Text>
         <Text
           style={{
-            color: courseData.uiColors.text,
+            color: CourseData.getCourseUIColors(course).text,
           }}>
           {/* downloaded metadata should be fine for track duration, since it can't
             get out of sync if we don't reuse filenames (IDs) */}

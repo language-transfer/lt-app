@@ -24,7 +24,7 @@ import {useSetStatusBarStyle} from '../../hooks/useStatusBarStyle';
 type Props = StackScreenProps<LanguageStackParamList, 'Listen'>;
 
 const Listen = (props: Props) => {
-  const {course, courseData} = useCourseContext();
+  const {course} = useCourseContext();
   const {lesson} = props.route.params;
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
 
@@ -44,9 +44,9 @@ const Listen = (props: Props) => {
   const setStatusBarStyle = useSetStatusBarStyle();
   useEffect(() => {
     const navBarLight =
-      !bottomSheetOpen && courseData.uiColors.text === 'black';
+      !bottomSheetOpen && CourseData.getCourseUIColors(course).text === 'black';
     setStatusBarStyle(
-      courseData.uiColors.background,
+      CourseData.getCourseUIColors(course).background,
       ((navBarLight ? 'dark' : 'light') + '-content') as StatusBarStyle,
       'transparent',
       navBarLight,
@@ -54,8 +54,8 @@ const Listen = (props: Props) => {
   }, [
     setStatusBarStyle,
     bottomSheetOpen,
-    courseData.uiColors.text,
-    courseData.uiColors.background,
+    CourseData.getCourseUIColors(course).text,
+    CourseData.getCourseUIColors(course).background,
   ]);
 
   // load & queue audio file, find the last heard offset, and start
@@ -138,7 +138,7 @@ const Listen = (props: Props) => {
       <SafeAreaView
         style={[
           styles.container,
-          {backgroundColor: courseData.uiColors.background},
+          {backgroundColor: CourseData.getCourseUIColors(course).background},
         ]}>
         <ListenHeader />
         <ListenBody

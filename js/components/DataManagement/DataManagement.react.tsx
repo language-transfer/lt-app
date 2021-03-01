@@ -19,8 +19,8 @@ import {log} from '../../metrics';
 const DataManagement = () => {
   useStatusBarStyle('white', 'dark-content');
   const {navigate} = useNavigation<LanguageStackScreenProps>();
-  const {course, courseData} = useCourseContext();
-  const courseTitle = courseData.shortTitle;
+  const {course} = useCourseContext();
+  const courseTitle = CourseData.getCourseShortTitle(course);
 
   const confirm = (message: string) =>
     new Promise((done) =>

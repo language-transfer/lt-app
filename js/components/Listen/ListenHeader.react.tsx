@@ -7,16 +7,17 @@ import {useCourseContext} from '../Context/CourseContext';
 import {useNavigation} from '@react-navigation/native';
 import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
+import CourseData from '../../course-data';
 
 const ListenHeader = () => {
   const {pop} = useNavigation<LanguageStackScreenProps>();
-  const {courseData} = useCourseContext();
+  const {course} = useCourseContext();
 
   return (
     <View
       style={[
         styles.header,
-        {backgroundColor: courseData.uiColors.background},
+        {backgroundColor: CourseData.getCourseUIColors(course).background},
       ]}>
       <TouchableNativeFeedback
         hitSlop={{top: 50, bottom: 50, left: 50, right: 50}}
@@ -28,7 +29,7 @@ const ListenHeader = () => {
           name="arrow-left"
           type="font-awesome-5"
           size={18}
-          color={courseData.uiColors.text}
+          color={CourseData.getCourseUIColors(course).text}
         />
       </TouchableNativeFeedback>
     </View>

@@ -26,7 +26,7 @@ interface IProps {
 const ListenBottomSheet = ({downloaded}: IProps) => {
   const {position} = useTrackPlayerProgress();
   const {pop} = useNavigation<LanguageStackScreenProps>();
-  const {course, courseData} = useCourseContext();
+  const {course} = useCourseContext();
   const {lesson} = useLessonContext();
 
   return (
@@ -89,16 +89,16 @@ const ListenBottomSheet = ({downloaded}: IProps) => {
           Linking.openURL(
             'mailto:info@languagetransfer.org' +
               `?subject=${encodeURIComponent(
-                `Feedback about ${courseData.fullTitle}`,
+                `Feedback about ${CourseData.getCourseFullTitle(course)}`,
               )}&body=${encodeURIComponent(
                 `Hi! I found a problem with the ${
-                  courseData.fullTitle
+                  CourseData.getCourseFullTitle(course)
                 } course within the Language Transfer app:<br>
                 <br>
                 <br>
                 ---<br>
                 <br>
-                Course: ${courseData.fullTitle}<br>
+                Course: ${CourseData.getCourseFullTitle(course)}<br>
                 ${CourseData.getLessonTitle(course, lesson)}<br>
                 Position: ${formatDuration(position * 1000)}`,
               )}`,

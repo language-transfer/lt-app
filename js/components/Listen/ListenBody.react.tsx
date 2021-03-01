@@ -41,7 +41,7 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
   const paused = usePlaybackStateIs(STATE_PAUSED);
   const bottomSheet = useRef<RBSheet>(null!);
 
-  const {course, courseData} = useCourseContext();
+  const {course} = useCourseContext();
   const {lesson} = useLessonContext();
   const downloaded = useIsLessonDownloaded();
   if (downloaded === null) {
@@ -49,7 +49,7 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
       <ActivityIndicator
         size={64}
         style={styles.loader}
-        color={courseData.uiColors.text}
+        color={CourseData.getCourseUIColors(course).text}
       />
     );
   }
@@ -60,14 +60,14 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
         style={[
           styles.body,
           {
-            backgroundColor: courseData.uiColors.background,
+            backgroundColor: CourseData.getCourseUIColors(course).background,
           },
         ]}>
         <View style={styles.lessonName}>
-          <Text style={[styles.courseTitle, {color: courseData.uiColors.text}]}>
-            {courseData.shortTitle}
+          <Text style={[styles.courseTitle, {color: CourseData.getCourseUIColors(course).text}]}>
+            {CourseData.getCourseShortTitle(course)}
           </Text>
-          <Text style={[styles.lesson, {color: courseData.uiColors.text}]}>
+          <Text style={[styles.lesson, {color: CourseData.getCourseUIColors(course).text}]}>
             {CourseData.getLessonTitle(course, lesson)}
           </Text>
         </View>
@@ -82,7 +82,7 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
               type="material"
               accessibilityLabel="skip backwards ten seconds"
               size={smallIconSize}
-              color={courseData.uiColors.text}
+              color={CourseData.getCourseUIColors(course).text}
             />
           </TouchableNativeFeedback>
           {ready || playing || paused ? (
@@ -95,13 +95,13 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
                 accessibilityLabel={playing ? 'pause' : 'play'}
                 type="material"
                 size={largeIconSize}
-                color={courseData.uiColors.text}
+                color={CourseData.getCourseUIColors(course).text}
               />
             </TouchableNativeFeedback>
           ) : (
             <ActivityIndicator
               size={largeIconSize}
-              color={courseData.uiColors.text}
+              color={CourseData.getCourseUIColors(course).text}
             />
           )}
           <TouchableNativeFeedback
@@ -115,7 +115,7 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: IProps) => {
               type="material"
               accessibilityLabel="other actions for this lesson"
               size={smallIconSize}
-              color={courseData.uiColors.text}
+              color={CourseData.getCourseUIColors(course).text}
             />
           </TouchableNativeFeedback>
         </View>

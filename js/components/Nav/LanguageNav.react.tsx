@@ -39,20 +39,16 @@ const LanguageNav = (props: any) => {
   if (!course) {
     return null;
   }
-  const courseData = CourseData.getCourseData(course as Course);
-  if (!courseData) {
-    return null;
-  }
 
   return (
-    <CourseProvider course={course} courseData={courseData}>
+    <CourseProvider course={course}>
       <Stack.Navigator initialRouteName={'Language Home'}>
         <Stack.Screen
           name="Language Home"
           component={LanguageHome}
           options={() => ({
             headerLeft: () => <DrawerMenuButton />,
-            headerTitle: `${courseData.fullTitle}: All Lessons`,
+            headerTitle: `${CourseData.getCourseFullTitle(course)}: All Lessons`,
           })}
         />
         <Stack.Screen
@@ -66,7 +62,7 @@ const LanguageNav = (props: any) => {
           name="All Lessons"
           component={AllLessons}
           options={() => ({
-            headerTitle: `${courseData.fullTitle}: All Lessons`,
+            headerTitle: `${CourseData.getCourseFullTitle(course)}: All Lessons`,
             headerBackTitleVisible: false,
           })}
         />
@@ -74,7 +70,7 @@ const LanguageNav = (props: any) => {
           name="Data Management"
           component={DataManagement}
           options={() => ({
-            headerTitle: `${courseData.fullTitle}: Data Management`,
+            headerTitle: `${CourseData.getCourseFullTitle(course)}: Data Management`,
             headerBackTitleVisible: false,
           })}
         />
