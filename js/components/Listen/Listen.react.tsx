@@ -2,7 +2,6 @@ import React, {useEffect, useCallback, useState} from 'react';
 import {StyleSheet, StatusBarStyle} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import {StackScreenProps} from '@react-navigation/stack';
-import {LanguageStackParamList} from '../Nav/LanguageNav.react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ListenHeader from './ListenHeader.react';
 import ListenBody from './ListenBody.react';
@@ -14,27 +13,20 @@ import TrackPlayer, {
   useTrackPlayerEvents,
 } from 'react-native-track-player';
 import CourseData from '../../course-data';
-import {useCourseContext} from '../Context/CourseContext';
-import {LessonProvider} from '../Context/LessonContext';
 import {genStopPlaying, genEnqueueFile} from '../../audio-service';
 import {genProgressForLesson} from '../../persistence';
 import {log} from '../../metrics';
 import {useSetStatusBarStyle} from '../../hooks/useStatusBarStyle';
 
-type Props = StackScreenProps<LanguageStackParamList, 'Listen'>;
-
-const Listen = (props: Props) => {
-  const {course} = useCourseContext();
-  const {lesson} = props.route.params;
+const Listen = (props: any) => {
+  const {course, lesson} = props.route.params;
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
 
   const {position} = useTrackPlayerProgress();
   const playing = usePlaybackStateIs(STATE_PLAYING);
 
-  // const [] = useState(false);
-
   // go back to the previous screen when the user stops
-  // the music remotely (from the locked screen view?)
+  // the music from outside the app
   useTrackPlayerEvents([TrackPlayerEvents.REMOTE_STOP], () =>
     props.navigation.pop(),
   );
@@ -133,28 +125,28 @@ const Listen = (props: Props) => {
   }, [course, lesson, position]);
 
   return (
-    <LessonProvider lesson={lesson}>
-      <SafeAreaView
-        style={[
-          styles.container,
-          {backgroundColor: CourseData.getCourseUIColors(course).background},
-        ]}>
-        <ListenHeader />
-        <ListenBody
-          setBottomSheetOpen={setBottomSheetOpen}
-          toggle={toggle}
-          skipBack={skipBack}
-          seekTo={seekTo}
-        />
-      </SafeAreaView>
-    </LessonProvider>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: CourseData.getCourseUIColors(course).background },
+      ]}>
+      <ListenHeader course={course} />
+      <ListenBody
+        course={course}
+        lesson={lesson}
+        setBottomSheetOpen={setBottomSheetOpen}
+        toggle={toggle}
+        skipBack={skipBack}
+        seekTo={seekTo}
+      />
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
   },
 });
 

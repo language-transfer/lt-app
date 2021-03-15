@@ -6,20 +6,20 @@ import {
   TouchableNativeFeedback,
   Alert,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
 import {ScrollView} from 'react-native-gesture-handler';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import CourseData from '../../course-data';
-import {useCourseContext} from '../Context/CourseContext';
 import DownloadManager from '../../download-manager';
 import {genDeleteProgressForCourse} from '../../persistence';
 import {log} from '../../metrics';
+import { useNavigation } from '@react-navigation/core';
+import { MainNavigationProp } from '../App.react';
 
-const DataManagement = () => {
+const DataManagement = ({route}) => {
   useStatusBarStyle('white', 'dark-content');
-  const {navigate} = useNavigation<LanguageStackScreenProps>();
-  const {course} = useCourseContext();
+  const {navigate} = useNavigation<MainNavigationProp<'Data Management'>>();
+
+  const {course} = route.params;
   const courseTitle = CourseData.getCourseShortTitle(course);
 
   const confirm = (message: string) =>
@@ -221,9 +221,7 @@ const DataManagement = () => {
 
                 // @see https://github.com/react-navigation/react-navigation/issues/6931
                 // @ts-ignore
-                navigate('Home', {
-                  screen: 'Language Selector',
-                });
+                navigate('Language Selector');
                 Alert.alert(`Deleted all data related to ${courseTitle}.`);
               } else {
                 log({

@@ -3,24 +3,20 @@ import {StyleSheet, View, Text, Animated, Dimensions} from 'react-native';
 import {useTrackPlayerProgress} from 'react-native-track-player';
 import formatDuration from 'format-duration';
 import CourseData from '../../course-data';
-import {useCourseContext} from '../Context/CourseContext';
-import {useLessonContext} from '../Context/LessonContext';
 import {
   PanGestureHandler,
   State,
   PanGestureHandlerStateChangeEvent,
   PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
-import {useNavigation} from '@react-navigation/native';
 
 interface Props {
+  course: Course,
+  lesson: number,
   seekTo: (pos: number) => any;
 }
 
-const ListenScrubber = ({seekTo}: Props) => {
-  const {setOptions} = useNavigation();
-  const {course} = useCourseContext();
-  const {lesson} = useLessonContext();
+const ListenScrubber = ({course, lesson, seekTo}: Props) => {
   const {position, duration} = useTrackPlayerProgress(200);
   const [dragging, setDragging] = useState(false);
   const [width, setWidth] = useState(0);
@@ -72,21 +68,13 @@ const ListenScrubber = ({seekTo}: Props) => {
     (event: PanGestureHandlerStateChangeEvent) => {
       if (event.nativeEvent.state === State.BEGAN) {
         setDragging(true);
-        // disable screen gestures (only meaningful on iOS; mostly so that the left
-        // drawer doesn't open with the drag) and highlight the handle,
-        // as soon as the user touches the handle...
-        // we don't want to wait for PanHandler's ACTIVE state cos that might "feel weird"
-        setOptions({gestureEnabled: false});
       } else if (event.nativeEvent.state === State.END) {
         setDragging(false);
         // @ts-ignore
         seekTo(animVal.current._value);
-        // when the user releases the handle, re-enable screen gestures,
-        // and seek the player to the desired seconds position
-        setOptions({gestureEnabled: true});
       }
     },
-    [seekTo, setOptions],
+    [seekTo],
   );
 
   return (

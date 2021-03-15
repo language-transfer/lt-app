@@ -1,12 +1,7 @@
 import {useState, useEffect} from 'react';
-import {useCourseContext} from '../components/Context/CourseContext';
-import {useLessonContext} from '../components/Context/LessonContext';
 import DownloadManager from '../download-manager';
 
-export default function useIsLessonDownloaded() {
-  const {course} = useCourseContext();
-  const {lesson} = useLessonContext();
-
+export default function useIsLessonDownloaded(course: Course, lesson: number) {
   const [downloaded, setDownloaded] = useState<boolean | null>(null);
   useEffect(() => {
     async function checkIfDownloaded() {

@@ -1,8 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, TouchableNativeFeedback} from 'react-native';
 import ProgressCircle from 'react-native-progress-circle';
-import {useNavigation} from '@react-navigation/native';
-import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
 
 import {Icon} from 'react-native-elements';
 import formatDuration from 'format-duration';
@@ -12,6 +10,9 @@ import DownloadManager, {useDownloadStatus} from '../../download-manager';
 import CourseData from '../../course-data';
 import {usePreference} from '../../persistence';
 import {log} from '../../metrics';
+import { useNavigation } from '@react-navigation/core';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { MainNavigationProp } from '../App.react';
 
 export const LESSON_ROW_HEIGHT = 72;
 
@@ -86,7 +87,7 @@ const handleDownloadClick = async (
   lesson: number,
   downloaded: boolean,
   downloading: boolean,
-  setLastDeletionAction: (val: any) => void,
+  setLastDeletionAction: (val: number | null) => void,
 ) => {
   if (downloading) {
     log({
@@ -125,13 +126,14 @@ const LessonRow = ({
   lesson: number;
   lastUpdateTime: Date | null;
 }) => {
-  const {navigate} = useNavigation<LanguageStackScreenProps>();
   const downloadState = useDownloadStatus(course, lesson);
   const downloadQuality = usePreference<Quality>('download-quality', 'low');
 
   const [progress, setProgress] = useState<Progress | null>(null);
   const [downloaded, setDownloaded] = useState<boolean | null>(null);
-  const [lastDeletionAction, setLastDeletionAction] = useState(null);
+  const [lastDeletionAction, setLastDeletionAction] = useState<number | null>(null);
+
+  const {navigate} = useNavigation<MainNavigationProp<'Listen'>>();
 
   useEffect(() => {
     (async () => {
@@ -155,7 +157,7 @@ const LessonRow = ({
     <View style={styles.row}>
       <TouchableNativeFeedback
         onPress={() => {
-          navigate('Listen', {lesson});
+          navigate('Listen', {course, lesson});
         }}>
         <View style={styles.lessonBox}>
           {ready ? (

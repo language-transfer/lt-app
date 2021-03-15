@@ -33,9 +33,6 @@ export default function useNavStateLogger() {
     // Try to find {course, lesson} in the navigation
     // params. since <Lesson/> is a nested screen inside LangNav,
     // we'll need to recursively check route params.
-    // You might wonder why we don't just use the {Course,Lesson}Context
-    // objects? -- because their respective providers are nested in the NavigationContainer,
-    // and thus are inaccessible to NavigationContainer's onStateChange
     const params = getNestedParams(state);
 
     log({

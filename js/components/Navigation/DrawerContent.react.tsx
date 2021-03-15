@@ -1,9 +1,17 @@
 import React from 'react';
 import {StyleSheet, Text, View, Image} from 'react-native';
 import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
-import {Icon} from 'react-native-elements';
+import {Icon} from 'react-native-elements';import {navigate} from '../../navigation-ref';
+
 
 const Drawer = (props: any) => {
+  // since we're using an independent NavigationContext for the Stack navigator,
+  // we need to explicitly close the drawer when we navigate
+  const navigateAndCloseDrawer = screen => () => {
+    props.navigation.closeDrawer();
+    navigate(screen);
+  };
+
   return (
     <DrawerContentScrollView {...props}>
       <View style={styles.headerContainer}>
@@ -28,9 +36,7 @@ const Drawer = (props: any) => {
             <Text style={styles.menuItemText}>All Languages</Text>
           </View>
         )}
-        onPress={() =>
-          props.navigation.navigate('Home', {screen: 'Language Selector'})
-        }
+        onPress={navigateAndCloseDrawer('Language Selector')}
       />
       <DrawerItem
         label={() => (
@@ -44,7 +50,7 @@ const Drawer = (props: any) => {
             <Text style={styles.menuItemText}>Settings</Text>
           </View>
         )}
-        onPress={() => props.navigation.navigate('Home', {screen: 'Settings'})}
+        onPress={navigateAndCloseDrawer('Settings')}
       />
       <DrawerItem
         label={() => (
@@ -58,7 +64,7 @@ const Drawer = (props: any) => {
             <Text style={styles.menuItemText}>About</Text>
           </View>
         )}
-        onPress={() => props.navigation.navigate('Home', {screen: 'About'})}
+        onPress={navigateAndCloseDrawer('About')}
       />
     </DrawerContentScrollView>
   );

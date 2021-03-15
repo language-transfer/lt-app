@@ -9,13 +9,13 @@ import {
   Text,
   Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {HomeStackScreenProps} from '../Nav/HomeNav.react';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import LanguageButton from './LanguageButton.react';
 import logo from '../../../resources/LT-logo-text.png';
 import CourseData from '../../course-data';
 import {Icon} from 'react-native-elements';
+import { useNavigation } from '@react-navigation/core';
+import { MainNavigationProp } from '../App.react';
 
 const BOTTOM_NAV_HEIGHT = Platform.select({ios: 0, android: 48});
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
@@ -23,8 +23,8 @@ const IMAGE_HEIGHT = 0.4 * SCREEN_HEIGHT;
 const CARDS_MARGIN_TOP = IMAGE_HEIGHT + 80 + 40;
 
 const LanguageSelector = () => {
+  const {navigate} = useNavigation<MainNavigationProp<'Language Selector'>>();
   useStatusBarStyle('white', 'dark-content', 'transparent');
-  const {navigate} = useNavigation<HomeStackScreenProps>();
 
   const scrollAnim = useRef(new Animated.Value(0)).current;
 
@@ -70,12 +70,7 @@ const LanguageSelector = () => {
                 course={course}
                 key={course}
                 onPress={() =>
-                  navigate('Language', {
-                    // @see https://github.com/react-navigation/react-navigation/issues/6931
-                    // @ts-ignore
-                    screen: 'Language Home',
-                    course,
-                  })
+                  navigate('Language Home', {course})
                 }
               />
             ))}
@@ -90,7 +85,7 @@ const LanguageSelector = () => {
                   <TouchableNativeFeedback
                     // @see https://github.com/react-navigation/react-navigation/issues/6931
                     // @ts-ignore
-                    onPress={() => navigate('Home', {screen: 'About'})}
+                    onPress={() => navigate('About')}
                     useForeground={true}>
                     <View style={styles.additionalButtonInner}>
                       <Text style={styles.additionalButtonText}>

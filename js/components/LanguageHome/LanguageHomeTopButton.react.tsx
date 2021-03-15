@@ -1,7 +1,6 @@
 import React, {useState, useCallback} from 'react';
 import {StyleSheet, View, Text} from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
 
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
@@ -12,9 +11,9 @@ import {
 } from '../../persistence';
 
 import CourseData from '../../course-data';
-import {useCourseContext} from '../Context/CourseContext';
 
 import formatDuration from 'format-duration';
+import { MainNavigationProp } from '../App.react';
 
 const getNextLesson = (
   course: Course,
@@ -36,10 +35,8 @@ const getNextLesson = (
   return nextLesson;
 };
 
-const LanguageHomeTopButton = () => {
-  const {navigate} = useNavigation<LanguageStackScreenProps>();
-  const {course} = useCourseContext();
-
+const LanguageHomeTopButton = ({course}: {course: Course}) => {
+  const {navigate} = useNavigation<MainNavigationProp<'Language Home'>>();
   const [lastListenState, setLastListenState] = useState<any>(null);
 
   useFocusEffect(
@@ -74,7 +71,7 @@ const LanguageHomeTopButton = () => {
     <View style={styles.lessonPlayBox}>
       <TouchableNativeFeedback
         useForeground={true}
-        onPress={() => navigate('Listen', {lesson})}>
+        onPress={() => navigate('Listen', {course, lesson})}>
         <View style={styles.lessonPlayBoxInner}>
           <View style={styles.textPlayFlex}>
             <Text style={styles.lessonTitle}>

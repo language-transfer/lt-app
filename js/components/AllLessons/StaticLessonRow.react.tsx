@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, TouchableNativeFeedback} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
 import {genProgressForLesson} from '../../persistence';
 import {Icon} from 'react-native-elements';
 import formatDuration from 'format-duration';
 import CourseData from '../../course-data';
 import {LESSON_ROW_HEIGHT} from './LessonRow.react';
+import { useNavigation } from '@react-navigation/core';
+import { MainNavigationProp } from '../App.react';
 
 const StaticLessonRow = ({
   course,
@@ -16,8 +16,8 @@ const StaticLessonRow = ({
   lesson: number;
   lastUpdateTime: Date | null;
 }) => {
-  const {navigate} = useNavigation<LanguageStackScreenProps>();
   const [finished, setFinished] = useState<boolean>(null!);
+  const {navigate} = useNavigation<MainNavigationProp<'All Lessons'>>();
 
   useEffect(() => {
     (async () => {
@@ -30,7 +30,7 @@ const StaticLessonRow = ({
     <View style={styles.row}>
       <TouchableNativeFeedback
         onPress={() => {
-          navigate('Listen', {lesson});
+          navigate('Listen', {course, lesson});
         }}>
         <View style={styles.lessonBox}>
           <View style={styles.text}>

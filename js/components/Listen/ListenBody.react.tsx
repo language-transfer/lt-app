@@ -11,8 +11,6 @@ import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import ListenBottomSheet from './ListenBottomSheet.react';
 import CourseData from '../../course-data';
-import {useCourseContext} from '../Context/CourseContext';
-import {useLessonContext} from '../Context/LessonContext';
 import ListenScrubber from './ListenScrubber.react';
 import {
   useTrackPlayerProgress,
@@ -25,6 +23,8 @@ import {log} from '../../metrics';
 import useIsLessonDownloaded from '../../hooks/useIsLessonDownloaded';
 
 interface Props {
+  course: Course,
+  lesson: number,
   setBottomSheetOpen: (val: boolean) => any;
   skipBack: () => any;
   seekTo: (pos: number) => any;
@@ -34,16 +34,14 @@ interface Props {
 const smallIconSize = 0.175 * Dimensions.get('screen').width;
 const largeIconSize = 0.4 * Dimensions.get('screen').width;
 
-const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: Props) => {
+const ListenBody = ({course, lesson, setBottomSheetOpen, skipBack, seekTo, toggle}: Props) => {
   const {position} = useTrackPlayerProgress();
   const ready = usePlaybackStateIs(STATE_READY);
   const playing = usePlaybackStateIs(STATE_PLAYING);
   const paused = usePlaybackStateIs(STATE_PAUSED);
   const bottomSheet = useRef<RBSheet>(null!);
 
-  const {course} = useCourseContext();
-  const {lesson} = useLessonContext();
-  const downloaded = useIsLessonDownloaded();
+  const downloaded = useIsLessonDownloaded(course, lesson);
   if (downloaded === null) {
     return (
       <ActivityIndicator
@@ -120,7 +118,7 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: Props) => {
           </TouchableNativeFeedback>
         </View>
 
-        <ListenScrubber seekTo={seekTo} />
+        <ListenScrubber course={course} lesson={lesson} seekTo={seekTo} />
       </View>
 
       <RBSheet
@@ -156,7 +154,7 @@ const ListenBody = ({setBottomSheetOpen, skipBack, seekTo, toggle}: Props) => {
           });
           setBottomSheetOpen(false);
         }}>
-        <ListenBottomSheet downloaded={downloaded} />
+        <ListenBottomSheet course={course} lesson={lesson} downloaded={downloaded} />
       </RBSheet>
     </>
   );

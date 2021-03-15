@@ -7,27 +7,26 @@ import {
   TouchableNativeFeedback,
 } from 'react-native';
 import {Icon} from 'react-native-elements';
-import {useCourseContext} from '../Context/CourseContext';
 import CourseData from '../../course-data';
-import {useLessonContext} from '../Context/LessonContext';
 import DownloadManager from '../../download-manager';
 import {genMarkLessonFinished} from '../../persistence';
 import {genStopPlaying} from '../../audio-service';
 import {useNavigation} from '@react-navigation/native';
-import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
 import {useTrackPlayerProgress} from 'react-native-track-player';
 import {log} from '../../metrics';
 import formatDuration from 'format-duration';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { MainNavigationProp } from '../App.react';
 
 interface Props {
+  course: Course,
+  lesson: number,
   downloaded: boolean | null;
 }
 
-const ListenBottomSheet = ({downloaded}: Props) => {
+const ListenBottomSheet = ({course, lesson, downloaded}: Props) => {
   const {position} = useTrackPlayerProgress();
-  const {pop} = useNavigation<LanguageStackScreenProps>();
-  const {course} = useCourseContext();
-  const {lesson} = useLessonContext();
+  const {pop} = useNavigation<MainNavigationProp<'Listen'>>();
 
   return (
     <>

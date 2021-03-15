@@ -12,19 +12,19 @@ import LessonRow, {LESSON_ROW_HEIGHT} from './LessonRow.react';
 import StaticLessonRow from './StaticLessonRow.react';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import CourseData from '../../course-data';
-import {useCourseContext} from '../Context/CourseContext';
 import DownloadManager from '../../download-manager';
 import prettyBytes from 'pretty-bytes';
 import {usePreference} from '../../persistence';
 
-const AllLessons = () => {
+const AllLessons = ({route}) => {
   useStatusBarStyle('white', 'dark-content');
-  const {course} = useCourseContext();
+  const {course} = route.params;
   const indices = CourseData.getLessonIndices(course);
 
   const downloadQuality = usePreference<Quality>('download-quality', 'high');
   const [showDownloadAll, setShowDownloadAll] = useState(true);
   const downloadAll = useCallback(() => {
+    // TODO(ios-merge): downloadQuality can be null
     const courseTitle = CourseData.getCourseShortTitle(course);
 
     // calculate size needed for all lessons

@@ -3,15 +3,13 @@ import {StyleSheet, View, StatusBar} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 
-import {useCourseContext} from '../Context/CourseContext';
 import {useNavigation} from '@react-navigation/native';
-import {LanguageStackScreenProps} from '../Nav/LanguageNav.react';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 import CourseData from '../../course-data';
+import { MainNavigationProp } from '../App.react';
 
-const ListenHeader = () => {
-  const {pop} = useNavigation<LanguageStackScreenProps>();
-  const {course} = useCourseContext();
+const ListenHeader = ({course}: {course: Course}) => {
+  const {pop} = useNavigation<MainNavigationProp<'Listen'>>();
 
   return (
     <View
@@ -40,7 +38,6 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'flex-start',
     marginTop: StatusBar.currentHeight,
-    paddingTop: 20,
   },
   backButton: {},
 });
