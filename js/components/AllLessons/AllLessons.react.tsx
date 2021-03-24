@@ -15,14 +15,20 @@ import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
 import prettyBytes from 'pretty-bytes';
 import {usePreference} from '../../persistence';
+import {Icon} from 'react-native-elements';
+
+import {throttle} from 'lodash';
 
 const AllLessons = ({route}) => {
   useStatusBarStyle('white', 'dark-content');
   const {course} = route.params;
   const indices = CourseData.getLessonIndices(course);
 
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
+  const [lastChildUpdateTime, setLastChildUpdateTime] = useState<Date | null>(null);
+
   const downloadQuality = usePreference<Quality>('download-quality', 'high');
-  const [showDownloadAll, setShowDownloadAll] = useState(true);
+  const [downloadedCount, setDownloadedCount] = useState<number | null>(null);
   const downloadAll = useCallback(() => {
     // TODO(ios-merge): downloadQuality can be null
     const courseTitle = CourseData.getCourseShortTitle(course);
@@ -57,100 +63,121 @@ const AllLessons = ({route}) => {
               .forEach((lesson) =>
                 DownloadManager.startDownload(course, lesson),
               );
-            setShowDownloadAll(false);
           },
         },
       ],
     );
   }, [course, indices, downloadQuality]);
 
-  // hide the Download All button if everything is
-  // already downloaded
-  useEffect(() => {
-    async function isEverythingAlreadyDownloaded() {
-      const everythingIsDownloaded = (
-        await Promise.all(
-          indices.map((lesson) =>
-            DownloadManager.genIsDownloadedForDownloadId(
-              DownloadManager.getDownloadId(course, lesson),
-            ),
+  async function countDownloads() {
+    console.log('actual call');
+
+    const downloadedCount = (
+      await Promise.all(
+        indices.map((lesson) =>
+          DownloadManager.genIsDownloadedForDownloadId(
+            DownloadManager.getDownloadId(course, lesson),
           ),
-        )
-      ).reduce((_, val) => val, true);
-      setShowDownloadAll(!everythingIsDownloaded);
-    }
+        ),
+      )
+    ).reduce((acc, n) => +n + acc, 0);
+    setDownloadedCount(downloadedCount);
+  }
 
-    isEverythingAlreadyDownloaded();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // todo: just cache genIsDownloaded, god damn
+  // cache invalidation isn't even hard here, we can assume we're the only ones changing the download state
+  const throttledCountDownloads = throttle(countDownloads, 2000);
 
-  const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
+  useEffect(useCallback(() => { throttledCountDownloads() }, []), [lastUpdateTime, lastChildUpdateTime]);
+
   useFocusEffect(
     useCallback(() => {
       setLastUpdateTime(new Date());
     }, []),
   );
 
+  const allDownloaded = downloadedCount !== null && downloadedCount === indices.length;
+  
   return (
-    <FlatList
-      ListHeaderComponent={
-        showDownloadAll ? (
-          <View style={styles.allContainer}>
-            <TouchableNativeFeedback onPress={downloadAll}>
+    <>
+      <FlatList
+        data={indices}
+        renderItem={({item}) =>
+          item === 0 ? (
+            <StaticLessonRow
+              course={course}
+              lesson={item}
+              lastUpdateTime={lastUpdateTime}
+            />
+          ) : (
+            <LessonRow
+              course={course}
+              lesson={item}
+              lastUpdateTime={lastUpdateTime}
+              setLastChildUpdateTime={setLastChildUpdateTime}
+            />
+          )
+        }
+        keyExtractor={(lesson) => String(lesson)}
+        getItemLayout={(_, index) => ({
+          length: LESSON_ROW_HEIGHT,
+          offset: LESSON_ROW_HEIGHT * index,
+          index,
+        })}
+      />
+      {downloadedCount === null ? null :
+        <View style={styles.bottomContainer}>
+          <Text style={styles.bottomLeftText}>
+            {downloadedCount}/{indices.length} downloaded.
+          </Text>
+          <View style={allDownloaded ? {opacity: 0.4} : {}}>
+            <TouchableNativeFeedback onPress={downloadAll} disabled={allDownloaded}>
               <View style={styles.allButton}>
+                <View>
+                  <Icon
+                    name="download"
+                    type="font-awesome-5"
+                    size={16}
+                    color="#888"
+                  />
+                </View>
                 <Text style={styles.allText}>
-                  Download All {indices.length} Lessons
+                  Download All
                 </Text>
               </View>
             </TouchableNativeFeedback>
           </View>
-        ) : null
+        </View>
       }
-      data={indices}
-      renderItem={({item}) =>
-        item === 0 ? (
-          <StaticLessonRow
-            course={course}
-            lesson={item}
-            lastUpdateTime={lastUpdateTime}
-          />
-        ) : (
-          <LessonRow
-            course={course}
-            lesson={item}
-            lastUpdateTime={lastUpdateTime}
-          />
-        )
-      }
-      keyExtractor={(lesson) => String(lesson)}
-      getItemLayout={(_, index) => ({
-        length: LESSON_ROW_HEIGHT,
-        offset: LESSON_ROW_HEIGHT * index,
-        index,
-      })}
-    />
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  allContainer: {
-    backgroundColor: '#eee',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    borderBottomColor: 'lightgray',
-    borderBottomWidth: StyleSheet.hairlineWidth,
+  bottomContainer: {
+    backgroundColor: '#fff',
+    borderTopColor: '#eee',
+    borderTopWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   allButton: {
-    backgroundColor: '#3498db',
     borderColor: '#2980b9',
     flex: 0,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
   },
+  bottomLeftText: {
+    color: 'black',
+    fontSize: 20,
+  },
   allText: {
-    color: 'white',
+    color: '#888',
     fontSize: 16,
   },
 });

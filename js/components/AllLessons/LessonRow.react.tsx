@@ -88,6 +88,7 @@ const handleDownloadClick = async (
   downloaded: boolean,
   downloading: boolean,
   setLastDeletionAction: (val: number | null) => void,
+  setLastChildUpdateTime: (val: number) => void,
 ) => {
   if (downloading) {
     log({
@@ -114,6 +115,7 @@ const handleDownloadClick = async (
     });
     await DownloadManager.genDeleteDownload(course, lesson);
     setLastDeletionAction(+new Date());
+    setLastChildUpdateTime(+new Date());
   }
 };
 
@@ -121,10 +123,12 @@ const LessonRow = ({
   course,
   lesson,
   lastUpdateTime,
+  setLastChildUpdateTime,
 }: {
   course: Course;
   lesson: number;
   lastUpdateTime: Date | null;
+  setLastChildUpdateTime: (number) => void,
 }) => {
   const downloadState = useDownloadStatus(course, lesson);
   const downloadQuality = usePreference<Quality>('download-quality', 'low');
@@ -146,6 +150,10 @@ const LessonRow = ({
       setDownloaded(downloadedResp);
     })();
   }, [course, downloadState, lastDeletionAction, lesson, lastUpdateTime]);
+
+  useEffect(() => {
+    setLastChildUpdateTime(+new Date());
+  }, [downloadState]);
 
   const ready = progress !== null && downloaded !== null;
 
@@ -192,6 +200,7 @@ const LessonRow = ({
             downloaded!,
             downloading,
             setLastDeletionAction,
+            setLastChildUpdateTime,
           );
         }}>
         <View style={styles.downloadBox}>
