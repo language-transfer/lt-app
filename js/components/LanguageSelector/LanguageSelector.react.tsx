@@ -101,7 +101,6 @@ const LanguageSelector = () => {
         </Animated.ScrollView>
       </View>
       <View style={styles.topTranslucent} />
-      <View style={styles.bottomTranslucent} />
     </View>
   );
 };
@@ -127,7 +126,6 @@ const styles = StyleSheet.create({
   },
   courseList: {
     marginTop: CARDS_MARGIN_TOP,
-    marginBottom: BOTTOM_NAV_HEIGHT,
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -136,10 +134,6 @@ const styles = StyleSheet.create({
   topTranslucent: {
     height: StatusBar.currentHeight,
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
-  },
-  bottomTranslucent: {
-    height: BOTTOM_NAV_HEIGHT,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
   },
   aboutSectionHr: {
     width: '100%',
