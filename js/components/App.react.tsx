@@ -177,7 +177,9 @@ const App = () => {
                       title: 'Settings',
                     }}
                   />
-                </Stack.Navigator></NavigationContainer>}
+                </Stack.Navigator>
+              </NavigationContainer>
+            }
           </Drawer.Screen>
         </Drawer.Navigator>
       </NavigationContainer>
