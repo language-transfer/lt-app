@@ -17,9 +17,8 @@ const Drawer = (props: any) => {
       <View style={styles.headerContainer}>
         <Image
           style={styles.headerImage}
-          source={require('../../../resources/LT-logo.png')}
+          source={require('../../../resources/LT-logo-text.png')}
         />
-        <Text style={styles.headerText}>Language Transfer</Text>
       </View>
 
       <DrawerItem
@@ -80,8 +79,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   headerImage: {
+    marginTop: 20,
     width: 150,
-    height: 150,
+    height: 200,
     resizeMode: 'contain',
   },
   headerText: {
