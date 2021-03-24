@@ -40,7 +40,6 @@ const Listen = (props: any) => {
     setStatusBarStyle(
       CourseData.getCourseUIColors(course).background,
       ((navBarLight ? 'dark' : 'light') + '-content') as StatusBarStyle,
-      'transparent',
       navBarLight,
     );
   }, [

@@ -10,7 +10,6 @@ export function useSetStatusBarStyle() {
     (
       backgroundColor: string,
       style: StatusBarStyle,
-      navBarColor?: string,
       navBarLight?: boolean,
     ) => {
       if (isAndroid) {
@@ -20,7 +19,7 @@ export function useSetStatusBarStyle() {
 
       StatusBar.setBarStyle(style, true);
       changeNavigationBarColor(
-        navBarColor || backgroundColor,
+        backgroundColor,
         navBarLight === undefined ? true : navBarLight,
         true,
       );

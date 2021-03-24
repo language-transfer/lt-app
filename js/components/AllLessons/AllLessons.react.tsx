@@ -70,8 +70,6 @@ const AllLessons = ({route}) => {
   }, [course, indices, downloadQuality]);
 
   async function countDownloads() {
-    console.log('actual call');
-
     const downloadedCount = (
       await Promise.all(
         indices.map((lesson) =>
