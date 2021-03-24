@@ -128,10 +128,10 @@ const LessonRow = ({
   course: Course;
   lesson: number;
   lastUpdateTime: Date | null;
-  setLastChildUpdateTime: (number) => void,
+  setLastChildUpdateTime: (time: number) => void,
 }) => {
   const downloadState = useDownloadStatus(course, lesson);
-  const downloadQuality = usePreference<Quality>('download-quality', 'low');
+  const downloadQuality = usePreference<Quality>('download-quality', 'high');
 
   const [progress, setProgress] = useState<Progress | null>(null);
   const [downloaded, setDownloaded] = useState<boolean | null>(null);
@@ -207,12 +207,14 @@ const LessonRow = ({
           {ready
             ? renderDownloadProgress(downloaded!, downloadState, downloading)
             : null}
-
-          <Text style={styles.lessonSizeText}>
-            {prettyBytes(
-              CourseData.getLessonSizeInBytes(course, lesson, downloadQuality),
-            )}
-          </Text>
+          {ready
+            ? <Text style={styles.lessonSizeText}>
+                {prettyBytes(
+                  CourseData.getLessonSizeInBytes(course, lesson, downloadQuality),
+                )}
+              </Text>
+            : null
+          }
         </View>
       </TouchableNativeFeedback>
     </View>

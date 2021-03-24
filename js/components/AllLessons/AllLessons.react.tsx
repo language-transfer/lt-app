@@ -96,6 +96,10 @@ const AllLessons = ({route}) => {
 
   const allDownloaded = downloadedCount !== null && downloadedCount === indices.length;
   
+  if (downloadQuality === null) {
+    return null;
+  }
+
   return (
     <>
       <FlatList
