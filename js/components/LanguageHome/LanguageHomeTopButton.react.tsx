@@ -60,10 +60,36 @@ const LanguageHomeTopButton = ({course}: {course: Course}) => {
     }, [course]),
   );
 
+  // TODO: kinda temp, but at least it doesn't look awful. should add a loading thingy.
+  // just make sure it's the same height as the actual button
   if (lastListenState === null) {
-    return null;
+    return <View style={[styles.lessonPlayBox, styles.invisible]}>
+      <View style={styles.lessonPlayBoxInner}>
+        <View style={styles.textPlayFlex}>
+          <Text style={styles.lessonTitle}>
+            -
+          </Text>
+          <Icon name="play" type="font-awesome-5" />
+        </View>
+        <View style={styles.progressBar}>
+          <View style={[styles.progressMade, { flex: 0 }]} />
+          <View
+            style={[
+              styles.progressLeft,
+              { flex: 1 },
+            ]}
+          />
+        </View>
+        <View style={styles.progressText}>
+          <Text>-</Text>
+          <Text>
+            -
+          </Text>
+        </View>
+      </View>
+    </View>;
   }
-
+  
   const progress = lastListenState.progressForThisLesson;
   const lesson = lastListenState.nextLesson;
 
@@ -103,6 +129,9 @@ const LanguageHomeTopButton = ({course}: {course: Course}) => {
 };
 
 const styles = StyleSheet.create({
+  invisible: {
+    opacity: 0,
+  },
   lessonPlayBox: {
     margin: 25,
     borderRadius: 10,
