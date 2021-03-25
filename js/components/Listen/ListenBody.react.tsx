@@ -163,6 +163,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'space-around',
+    paddingHorizontal: 24,
   },
 
   lessonName: {

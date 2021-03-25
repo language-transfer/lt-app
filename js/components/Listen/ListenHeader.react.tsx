@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, View, StatusBar} from 'react-native';
+import {StyleSheet, View, StatusBar, Text} from 'react-native';
 
 import {Icon} from 'react-native-elements';
 
@@ -18,7 +18,6 @@ const ListenHeader = ({course}: {course: Course}) => {
         {backgroundColor: CourseData.getCourseUIColors(course).background},
       ]}>
       <TouchableNativeFeedback
-        hitSlop={{top: 50, bottom: 50, left: 50, right: 50}}
         style={styles.backButton}
         onPress={() => pop()}
         // @ts-ignore
@@ -39,7 +38,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginTop: StatusBar.currentHeight,
   },
-  backButton: {},
+  backButton: {
+    width: 56,
+    height: 56,
+    justifyContent: 'center',
+    borderRadius: 28,
+  },
 });
 
 export default ListenHeader;
