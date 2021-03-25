@@ -24,6 +24,14 @@ const LanguageButton = ({course, onPress}: Props) => {
         <View style={styles.rippleWrapper}>
           <TouchableNativeFeedback onPress={onPress} useForeground={true}>
             <View style={styles.sectionContainer}>
+              <Text style={[
+                styles.courseType,
+                {
+                  color: CourseData.getCourseUIColors(course).backgroundAccent,
+                },
+              ]}>
+                {CourseData.getCourseType(course)}
+              </Text>
               <Text style={styles.courseTitle}>
                 {CourseData.getCourseShortTitle(course)}
               </Text>
@@ -39,7 +47,7 @@ const LanguageButton = ({course, onPress}: Props) => {
 const styles = StyleSheet.create({
   sectionWrapper: {
     width: 150,
-    height: 185,
+    height: 200,
     margin: 15,
   },
   sectionContainer: {
@@ -67,8 +75,15 @@ const styles = StyleSheet.create({
     top: 5,
     left: 5,
   },
+  courseType: {
+    fontSize: 14,
+    // color: 'rgba(0, 0, 0, 0.5)',
+    lineHeight: 14,
+    textTransform: 'uppercase',
+  },
   courseTitle: {
     fontSize: 28,
+    lineHeight: 32,
     fontWeight: 'bold',
     color: 'black',
   },

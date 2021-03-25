@@ -34,6 +34,7 @@ declare global {
     imageWithText: any;
     shortTitle: string;
     fullTitle: string;
+    courseType: 'intro' | 'complete';
     metaUrl: string;
     fallbackLessonCount: number;
     uiColors: UIColors;

@@ -76,6 +76,7 @@ const data: CourseDataMap = {
     imageWithText: spanishCoverWithText,
     shortTitle: 'Spanish',
     fullTitle: 'Complete Spanish',
+    courseType: 'complete',
     metaUrl: 'https://downloads.languagetransfer.org/spanish/spanish-meta.json',
     fallbackLessonCount: 90,
     uiColors: {
@@ -91,6 +92,7 @@ const data: CourseDataMap = {
     imageWithText: arabicCoverWithText,
     shortTitle: 'Arabic',
     fullTitle: 'Introduction to Arabic',
+    courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/arabic/arabic-meta.json',
     fallbackLessonCount: 38,
     uiColors: {
@@ -106,6 +108,7 @@ const data: CourseDataMap = {
     imageWithText: turkishCoverWithText,
     shortTitle: 'Turkish',
     fullTitle: 'Introduction to Turkish',
+    courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/turkish/turkish-meta.json',
     fallbackLessonCount: 44,
     uiColors: {
@@ -121,6 +124,7 @@ const data: CourseDataMap = {
     imageWithText: germanCoverWithText,
     shortTitle: 'German',
     fullTitle: 'Complete German',
+    courseType: 'complete',
     metaUrl: 'https://downloads.languagetransfer.org/german/german-meta.json',
     fallbackLessonCount: 50,
     uiColors: {
@@ -136,6 +140,7 @@ const data: CourseDataMap = {
     imageWithText: greekCoverWithText,
     shortTitle: 'Greek',
     fullTitle: 'Complete Greek',
+    courseType: 'complete',
     metaUrl: 'https://downloads.languagetransfer.org/greek/greek-meta.json',
     fallbackLessonCount: 120,
     uiColors: {
@@ -151,6 +156,7 @@ const data: CourseDataMap = {
     imageWithText: italianCoverWithText,
     shortTitle: 'Italian',
     fullTitle: 'Introduction to Italian',
+    courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/italian/italian-meta.json',
     fallbackLessonCount: 45,
     uiColors: {
@@ -166,6 +172,7 @@ const data: CourseDataMap = {
     imageWithText: swahiliCoverWithText,
     shortTitle: 'Swahili',
     fullTitle: 'Complete Swahili',
+    courseType: 'complete',
     metaUrl: 'https://downloads.languagetransfer.org/swahili/swahili-meta.json',
     fallbackLessonCount: 110,
     uiColors: {
@@ -181,6 +188,7 @@ const data: CourseDataMap = {
     imageWithText: frenchCoverWithText,
     shortTitle: 'French',
     fullTitle: 'Introduction to French',
+    courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/french/french-meta.json',
     fallbackLessonCount: 40,
     uiColors: {
@@ -196,6 +204,7 @@ const data: CourseDataMap = {
     imageWithText: inglesCoverWithText,
     shortTitle: 'Inglés',
     fullTitle: 'Introducción a Inglés',
+    courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/ingles/ingles-meta.json',
     fallbackLessonCount: 40,
     uiColors: {
@@ -228,6 +237,10 @@ const CourseData = {
 
   getCourseFullTitle(course: Course): string {
     return data[course].fullTitle;
+  },
+
+  getCourseType(course: Course): string {
+    return data[course].courseType;
   },
 
   getCourseImage(course: Course): any {
