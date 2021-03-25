@@ -11,4 +11,4 @@ TrackPlayer.registerPlaybackService(() => audioService);
 DownloadManager.copyBundledTracksIfFirstLoad();
 DownloadManager.resumeDownloads();
 
-console.disableYellowBox = true; // not my fault, I swear, the side-menu library is the culprit
+console.disableYellowBox = true; // not my fault, I swear, the track player library is the culprit
