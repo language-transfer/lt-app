@@ -29,7 +29,6 @@ const AllLessons = ({route}) => {
   const downloadQuality = usePreference<Quality>('download-quality', 'high');
   const [downloadedCount, setDownloadedCount] = useState<number | null>(null);
   const downloadAll = useCallback(async () => {
-    // TODO(ios-merge): downloadQuality can be null
     const courseTitle = CourseData.getCourseShortTitle(course);
 
     const downloadedMask = await Promise.all(
