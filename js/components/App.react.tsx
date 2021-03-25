@@ -7,9 +7,9 @@ import {createDrawerNavigator} from '@react-navigation/drawer';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import DrawerContent from './Navigation/DrawerContent.react';
 import {genMostRecentListenedCourse} from '../persistence';
-import useNavStateLogger from '../hooks/useNavStateLogger';
+import logNavState from '../logNavState';
 import CourseData from '../course-data';
-import {navigationRef} from '../navigation-ref';
+import {setNavigationRef} from '../navigation-ref';
 import {log} from '../metrics';
 import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
 import Listen from './Listen/Listen.react';
@@ -84,24 +84,20 @@ const App = () => {
 
   const [gestureEnabled, setGestureEnabled] = useState(screensWithDisabledDrawer.includes(initialRouteName));
 
-  const navStateLogger = useNavStateLogger();
-
-  useEffect(() => {
-    if (navigationRef.current) {
-      // onStateChange won't work for some reason
-      // https://stackoverflow.com/questions/60593474
-      return navigationRef.current.addListener('state', e => {
-        const state = e.data.state;
-        navStateLogger(state);
-
-        if (state.routes.length && screensWithDisabledDrawer.includes(state.routes[state.routes.length - 1].name)) {
-          setGestureEnabled(false);
-        } else {
-          setGestureEnabled(true);
-        }
-      });
-    }
-  }, [navigationRef.current]);
+  const registerNavigationListener = (node) => {
+    // onStateChange won't work for some reason
+    // https://stackoverflow.com/questions/60593474
+    node.addListener('state', e => {
+      const state = e.data.state;
+      if (!state) return;
+      logNavState(state);
+      if (state.routes.length && screensWithDisabledDrawer.includes(state.routes[state.routes.length - 1].name)) {
+        setGestureEnabled(false);
+      } else {
+        setGestureEnabled(true);
+      }
+    });
+  }
 
   if (!loaded) {
     return <SplashScreen />;
@@ -117,7 +113,12 @@ const App = () => {
           drawerContent={(props) => <DrawerContent {...props} />}>
           <Drawer.Screen name="Main" options={{ gestureEnabled }}>
             {() => // TODO(ios-merge): put this in another file probably
-              <NavigationContainer ref={navigationRef} independent>
+              <NavigationContainer ref={node => {
+                if (node !== null) {
+                  setNavigationRef(node);
+                  registerNavigationListener(node);
+                }
+              }} independent>
                 <Stack.Navigator initialRouteName={initialRouteName}>
                   <Stack.Screen
                     name="Language Home"
