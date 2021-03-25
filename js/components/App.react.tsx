@@ -112,7 +112,7 @@ const App = () => {
         <Drawer.Navigator
           drawerContent={(props) => <DrawerContent {...props} />}>
           <Drawer.Screen name="Main" options={{ gestureEnabled }}>
-            {() => // TODO(ios-merge): put this in another file probably
+            {() =>
               <NavigationContainer ref={node => {
                 if (node !== null) {
                   setNavigationRef(node);
@@ -184,7 +184,6 @@ const App = () => {
           </Drawer.Screen>
         </Drawer.Navigator>
       </NavigationContainer>
-
     </SafeAreaProvider>
   );
 };
