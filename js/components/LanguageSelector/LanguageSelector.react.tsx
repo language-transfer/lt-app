@@ -17,7 +17,6 @@ import {Icon} from 'react-native-elements';
 import { useNavigation } from '@react-navigation/core';
 import { MainNavigationProp } from '../App.react';
 
-const BOTTOM_NAV_HEIGHT = Platform.select({ios: 0, android: 48});
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
 const IMAGE_HEIGHT = 0.4 * SCREEN_HEIGHT;
 const CARDS_MARGIN_TOP = IMAGE_HEIGHT + 80 + 40;
@@ -101,6 +100,18 @@ const LanguageSelector = () => {
         </Animated.ScrollView>
       </View>
       <View style={styles.topTranslucent} />
+      <Animated.View style={[
+        styles.scrollIndicator,
+        {
+          opacity: scrollAnim.interpolate({
+            inputRange: [0, 100],
+            outputRange: [1, 0],
+          }),
+        }
+      ]}>
+        <Text style={styles.scrollIndicatorText}>scroll for more</Text>
+        <Icon name="angle-double-down" type="font-awesome-5" color="#999" size={14} />
+      </Animated.View>
     </View>
   );
 };
@@ -167,6 +178,22 @@ const styles = StyleSheet.create({
   additionalButtonText: {
     fontSize: 20,
     maxWidth: '90%',
+  },
+  scrollIndicator: {
+    position: 'absolute',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'center',
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    padding: 6,
+  },
+  scrollIndicatorText: {
+    fontSize: 14,
+    color: '#666',
+    marginRight: 14,
   },
 });
 
