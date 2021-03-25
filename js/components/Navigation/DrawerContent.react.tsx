@@ -7,7 +7,7 @@ import {Icon} from 'react-native-elements';import {navigate} from '../../navigat
 const Drawer = (props: any) => {
   // since we're using an independent NavigationContext for the Stack navigator,
   // we need to explicitly close the drawer when we navigate
-  const navigateAndCloseDrawer = screen => () => {
+  const navigateAndCloseDrawer = (screen: any) => () => {
     props.navigation.closeDrawer();
     navigate(screen);
   };

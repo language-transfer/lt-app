@@ -1,15 +1,12 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {DrawerNavigationProp} from '@react-navigation/drawer';
-import {AppParamList} from '../App.react';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 import {Icon} from 'react-native-elements';
-
-type Props = DrawerNavigationProp<AppParamList>;
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 
 const DrawerMenuButton = () => {
-  const {openDrawer} = useNavigation<Props>();
+  const {openDrawer} = useNavigation<DrawerNavigationProp<{Main: undefined}, 'Main'>>();
 
   return (
     <TouchableNativeFeedback

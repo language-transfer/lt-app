@@ -15,7 +15,7 @@ import {log} from '../../metrics';
 import { useNavigation } from '@react-navigation/core';
 import { MainNavigationProp } from '../App.react';
 
-const DataManagement = ({route}) => {
+const DataManagement = ({route}: {route: any}) => {
   useStatusBarStyle('white', 'dark-content');
   const {navigate} = useNavigation<MainNavigationProp<'Data Management'>>();
 

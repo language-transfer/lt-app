@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 
-import React, {useEffect, useState, useMemo, useCallback} from 'react';
-import {AppState, AppStateStatus, useWindowDimensions} from 'react-native';
+import React, {useEffect, useState, useMemo} from 'react';
+import {AppState, AppStateStatus} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -84,10 +84,10 @@ const App = () => {
 
   const [gestureEnabled, setGestureEnabled] = useState(screensWithDisabledDrawer.includes(initialRouteName));
 
-  const registerNavigationListener = (node) => {
+  const registerNavigationListener = (node: any) => {
     // onStateChange won't work for some reason
     // https://stackoverflow.com/questions/60593474
-    node.addListener('state', e => {
+    node.addListener('state', (e: any) => {
       const state = e.data.state;
       if (!state) return;
       logNavState(state);

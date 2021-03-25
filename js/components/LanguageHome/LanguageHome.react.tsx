@@ -16,7 +16,7 @@ import { MainNavigationProp } from '../App.react';
 const donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo = true;
 let metadataWarningTimeout: NodeJS.Timeout | null = null;
 
-const LanguageHomeBody = ({route}) => {
+const LanguageHomeBody = ({route}: {route: any}) => {
   const {course} = route.params;
   const {navigate} = useNavigation<MainNavigationProp<'Language Home'>>();
   const [loadingMetadata, setLoadingMetadata] = useState(true);

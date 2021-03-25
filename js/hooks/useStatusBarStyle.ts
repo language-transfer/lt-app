@@ -31,12 +31,11 @@ export function useSetStatusBarStyle() {
 export default function useStatusBarStyle(
   backgroundColor: string,
   style: StatusBarStyle,
-  navBarColor?: string,
 ) {
   const setStatusBarStyle = useSetStatusBarStyle();
   useFocusEffect(
     useCallback(() => {
-      setStatusBarStyle(backgroundColor, style, navBarColor);
-    }, [setStatusBarStyle, backgroundColor, style, navBarColor]),
+      setStatusBarStyle(backgroundColor, style);
+    }, [setStatusBarStyle, backgroundColor, style]),
   );
 }

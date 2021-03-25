@@ -24,7 +24,7 @@ const CARDS_MARGIN_TOP = IMAGE_HEIGHT + 80 + 40;
 
 const LanguageSelector = () => {
   const {navigate} = useNavigation<MainNavigationProp<'Language Selector'>>();
-  useStatusBarStyle('white', 'dark-content', 'transparent');
+  useStatusBarStyle('white', 'dark-content');
 
   const scrollAnim = useRef(new Animated.Value(0)).current;
 

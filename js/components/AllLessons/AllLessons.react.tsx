@@ -19,7 +19,7 @@ import {Icon} from 'react-native-elements';
 
 import {throttle} from 'lodash';
 
-const AllLessons = ({route}) => {
+const AllLessons = ({route}: {route: any}) => {
   useStatusBarStyle('white', 'dark-content');
   const {course} = route.params;
   const indices = CourseData.getLessonIndices(course);
