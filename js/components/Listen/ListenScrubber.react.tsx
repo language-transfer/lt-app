@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react';
 import {StyleSheet, View, Text, Animated, Dimensions} from 'react-native';
-import {useTrackPlayerProgress} from 'react-native-track-player';
+import TrackPlayer from 'react-native-track-player';
 import formatDuration from 'format-duration';
 import CourseData from '../../course-data';
 import {
@@ -17,7 +17,20 @@ interface Props {
 }
 
 const ListenScrubber = ({course, lesson, seekTo}: Props) => {
-  const {position, duration} = useTrackPlayerProgress(200);
+  const duration = CourseData.getLessonDuration(course, lesson);
+  const [position, setPosition] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const position = await TrackPlayer.getPosition();
+
+      setPosition(position || 0);
+    }, 200);
+    return () => {
+      clearInterval(interval);
+    };
+  });
+
   const [dragging, setDragging] = useState(false);
   const [width, setWidth] = useState(0);
 

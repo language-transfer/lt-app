@@ -12,8 +12,7 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import ListenBottomSheet from './ListenBottomSheet.react';
 import CourseData from '../../course-data';
 import ListenScrubber from './ListenScrubber.react';
-import {
-  useTrackPlayerProgress,
+import TrackPlayer, {
   usePlaybackStateIs,
   STATE_READY,
   STATE_PLAYING,
@@ -35,11 +34,10 @@ const smallIconSize = 0.175 * Dimensions.get('screen').width;
 const largeIconSize = 0.4 * Dimensions.get('screen').width;
 
 const ListenBody = ({course, lesson, setBottomSheetOpen, skipBack, seekTo, toggle}: Props) => {
-  const {position} = useTrackPlayerProgress();
   const ready = usePlaybackStateIs(STATE_READY);
   const playing = usePlaybackStateIs(STATE_PLAYING);
   const paused = usePlaybackStateIs(STATE_PAUSED);
-  const bottomSheet = useRef<RBSheet>(null!);
+  const bottomSheet = useRef<RBSheet | null>(null);
 
   const downloaded = useIsLessonDownloaded(course, lesson);
   if (downloaded === null) {
@@ -134,23 +132,23 @@ const ListenBody = ({course, lesson, setBottomSheetOpen, skipBack, seekTo, toggl
           },
         }}
         closeOnDragDown={true}
-        onOpen={() => {
+        onOpen={async () => {
           log({
             action: 'open_bottom_sheet',
             surface: 'listen_screen',
             course,
             lesson,
-            position,
+            position: await TrackPlayer.getPosition(),
           });
           setBottomSheetOpen(true);
         }}
-        onClose={() => {
+        onClose={async () => {
           log({
             action: 'close_bottom_sheet',
             surface: 'listen_screen',
             course,
             lesson,
-            position,
+            position: await TrackPlayer.getPosition(),
           });
           setBottomSheetOpen(false);
         }}>
