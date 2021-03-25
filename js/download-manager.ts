@@ -1,29 +1,21 @@
 import {useState, useEffect} from 'react';
+import {Alert, Image} from 'react-native';
 import fs from 'react-native-fs';
-
-import type {Course} from './course-data';
 import CourseData from './course-data';
 import DeviceInfo from 'react-native-device-info';
-import Downloader from 'react-native-background-downloader';
-import DownloadTask from 'react-native-background-downloader/lib/downloadTask';
+import Downloader, {DownloadTask} from 'react-native-background-downloader';
 import {
   genProgressForLesson,
   genPreferenceDownloadQuality,
   genPreferenceDownloadOnlyOnWifi,
+  genPreferenceIsFirstLoad,
+  genSetPreferenceIsFirstLoad,
 } from './persistence';
 import {log} from './metrics';
 
-export type DownloadProgress = {
-  requested: boolean;
-  totalBytes: number | null;
-  bytesWritten: number;
-  error: any;
-  finished: boolean;
-};
-
 const DownloadManager = {
-  _subscriptions: {},
-  _downloads: {},
+  _subscriptions: {} as {[key: string]: ((download: Download) => any)[]},
+  _downloads: {} as {[key: string]: Download},
 
   // I know this is just a roundabout way of putting a slash back in but go with me here
   getCourseIdForDownloadId: (id: string): Course => {
@@ -74,6 +66,8 @@ const DownloadManager = {
         destination: DownloadManager.getDownloadStagingLocation(
           DownloadManager.getDownloadId(course, lesson),
         ),
+        // `network` really is a property, as per docs
+        // @ts-ignore
         network: wifiOnly
           ? Downloader.Network.WIFI_ONLY
           : Downloader.Network.ALL,
@@ -102,7 +96,7 @@ const DownloadManager = {
         // doesn't check in-progress downloads, but hey, it's a start
         DeviceInfo.getFreeDiskStorage().then((freeDiskStorage) => {
           if (totalBytes > freeDiskStorage) {
-            alert(
+            Alert.alert(
               "You don't have enough storage space on your phone to download this lesson.",
             );
             DownloadManager.stopDownload(downloadId);
@@ -157,7 +151,7 @@ const DownloadManager = {
 
   subscribeToDownloadUpdates: (
     downloadId: string,
-    callback /*: (number => any) */,
+    callback: (download: Download) => any,
   ) => {
     if (!(downloadId in DownloadManager._subscriptions)) {
       DownloadManager._subscriptions[downloadId] = [];
@@ -166,7 +160,7 @@ const DownloadManager = {
     DownloadManager._subscriptions[downloadId].push(callback);
   },
 
-  unsubscribeFromDownloadUpdates: (downloadId: string, callback) => {
+  unsubscribeFromDownloadUpdates: (downloadId: string, callback: (download: Download) => any) => {
     const subscriptionArray = DownloadManager._subscriptions[downloadId];
     subscriptionArray.splice(subscriptionArray.indexOf(callback), 1);
   },
@@ -207,9 +201,9 @@ const DownloadManager = {
   genDeleteAllDownloadsForCourse: async (course: Course): Promise<void> => {
     await Promise.all(
       CourseData.getLessonIndices(course).map((lesson) =>
-        (async (lesson) => {
-          if (await DownloadManager.genIsDownloaded(course, lesson)) {
-            await DownloadManager.genDeleteDownload(course, lesson);
+        (async (lessonInput) => {
+          if (await DownloadManager.genIsDownloaded(course, lessonInput)) {
+            await DownloadManager.genDeleteDownload(course, lessonInput);
           }
         })(lesson),
       ),
@@ -221,12 +215,12 @@ const DownloadManager = {
   ): Promise<void> => {
     await Promise.all(
       CourseData.getLessonIndices(course).map((lesson) =>
-        (async (lesson) => {
+        (async (lessonInput) => {
           if (
-            (await genProgressForLesson(course, lesson)).finished &&
-            (await DownloadManager.genIsDownloaded(course, lesson))
+            (await genProgressForLesson(course, lessonInput))!.finished &&
+            (await DownloadManager.genIsDownloaded(course, lessonInput))
           ) {
-            await DownloadManager.genDeleteDownload(course, lesson);
+            await DownloadManager.genDeleteDownload(course, lessonInput);
           }
         })(lesson),
       ),
@@ -250,9 +244,33 @@ const DownloadManager = {
       }
     });
   },
+
+  copyBundledTracksIfFirstLoad: async (): Promise<void> => {
+    if (await genPreferenceIsFirstLoad()) {
+      for (const course of CourseData.getCourseList()) {
+        if (CourseData.getBundledFirstLesson(course) === null) continue;
+
+        const localUrl = Image.resolveAssetSource(CourseData.getBundledFirstLesson(course)).uri;
+        DownloadManager.attachCallbacks(Downloader.download({
+          id: CourseData.getBundledFirstLessonId(course),
+          url: localUrl,
+          destination: DownloadManager.getDownloadStagingLocation(
+            CourseData.getBundledFirstLessonId(course),
+          ),
+          // @ts-ignore
+          network: Downloader.Network.ALL,
+        }));
+      }
+    }
+
+    await genSetPreferenceIsFirstLoad(false);
+  },
 };
 
-export const useDownloadStatus = (course, lesson): DownloadProgress => {
+export const useDownloadStatus = (
+  course: Course,
+  lesson: number,
+): Download => {
   const downloadId = DownloadManager.getDownloadId(course, lesson);
 
   const [downloadProgress, setDownloadProgress] = useState(
@@ -261,7 +279,7 @@ export const useDownloadStatus = (course, lesson): DownloadProgress => {
 
   useEffect(() => {
     // not sure, but I think I need to make a new function inside useEffect
-    const update = (progress) => {
+    const update = (progress: any) => {
       setDownloadProgress(progress);
     };
 
@@ -269,7 +287,7 @@ export const useDownloadStatus = (course, lesson): DownloadProgress => {
     return () => {
       DownloadManager.unsubscribeFromDownloadUpdates(downloadId, update);
     };
-  }, [downloadProgress]);
+  }, [downloadId, downloadProgress]);
 
   return downloadProgress;
 };

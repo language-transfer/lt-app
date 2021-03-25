@@ -10,13 +10,33 @@ Then, clone and install dependencies for the repository.
 2. `cd lt-app`
 3. `npm install`
 
+When developing for iOS, you'll also need to install native dependencies by running:
+
+4. `cd ios && pod install`
+
 When you're ready to run the app, run:
 
     npx react-native run-android
+    # or, for ios:
+    npx react-native run-ios
 
 To build a production-ready release, add on the `--variant=release` flag:
 
     npx react-native run-android --variant=release
+
+## Releasing iOS App Updates
+
+The iOS app release flow is currently set up with Fastlane. To create a new beta release, simply run:
+
+    cd ios && fastlane beta
+
+Your code will be compiled and uploaded to TestFlight. To create a production release, simply run:
+
+    cd ios && fastlane release
+
+In order to use Language Transfer's own App Store Connect account, you'll need to obtain the organization's Apple Provisioning Profile & Developer Certificate. Both can be obtained by contacting Mihalis.
+
+For more help about the iOS development flow, contact [@bacoseason](mailto:michael@schonfeld.org).
 
 ## Issues & Pull Requests
 
