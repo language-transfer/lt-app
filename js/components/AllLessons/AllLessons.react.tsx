@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableNativeFeedback,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import {FlatList} from 'react-native-gesture-handler';
@@ -28,7 +29,9 @@ const AllLessons = ({route}) => {
 
   const downloadQuality = usePreference<Quality>('download-quality', 'high');
   const [downloadedCount, setDownloadedCount] = useState<number | null>(null);
+  const [downloadAllLoading, setDownloadAllLoading] = useState(false);
   const downloadAll = useCallback(async () => {
+    setDownloadAllLoading(true);
     const courseTitle = CourseData.getCourseShortTitle(course);
 
     const downloadedMask = await Promise.all(
@@ -45,6 +48,8 @@ const AllLessons = ({route}) => {
       )
       .reduce((acc, val) => acc + val, 0);
 
+
+    setDownloadAllLoading(false);
     Alert.alert(
       'Download all lessons?',
       `This will download ${
@@ -125,15 +130,21 @@ const AllLessons = ({route}) => {
             {downloadedCount}/{indices.length} downloaded.
           </Text>
           <View style={allDownloaded ? {opacity: 0.4} : {}}>
-            <TouchableNativeFeedback onPress={downloadAll} disabled={allDownloaded}>
+            <TouchableNativeFeedback onPress={downloadAll} disabled={allDownloaded || downloadAllLoading}>
               <View style={styles.allButton}>
                 <View>
-                  <Icon
-                    name="download"
-                    type="font-awesome-5"
-                    size={16}
-                    color="#888"
-                  />
+                  {downloadAllLoading
+                    ? <ActivityIndicator
+                        size={17}
+                        color="#888"
+                      />
+                    : <Icon
+                        name="download"
+                        type="font-awesome-5"
+                        size={16}
+                        color="#888"
+                      />
+                  }
                 </View>
                 <Text style={styles.allText}>
                   Download All
