@@ -18,7 +18,8 @@ declare global {
     | 'stream-quality'
     | 'download-quality'
     | 'download-only-on-wifi'
-    | 'allow-data-collection';
+    | 'allow-data-collection'
+    | 'is-first-load';
 
   type Quality = 'high' | 'low';
 
@@ -38,7 +39,8 @@ declare global {
     metaUrl: string;
     fallbackLessonCount: number;
     uiColors: UIColors;
-    bundledFirstLesson: string;
+    bundledFirstLesson: number;
+    bundledFirstLessonId: string;
   }
 
   export interface CourseMetaData {

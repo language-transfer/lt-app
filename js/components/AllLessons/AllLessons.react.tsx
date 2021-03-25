@@ -9,7 +9,6 @@ import {
 import {useFocusEffect} from '@react-navigation/native';
 import {FlatList} from 'react-native-gesture-handler';
 import LessonRow, {LESSON_ROW_HEIGHT} from './LessonRow.react';
-import StaticLessonRow from './StaticLessonRow.react';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
@@ -29,14 +28,19 @@ const AllLessons = ({route}) => {
 
   const downloadQuality = usePreference<Quality>('download-quality', 'high');
   const [downloadedCount, setDownloadedCount] = useState<number | null>(null);
-  const downloadAll = useCallback(() => {
+  const downloadAll = useCallback(async () => {
     // TODO(ios-merge): downloadQuality can be null
     const courseTitle = CourseData.getCourseShortTitle(course);
 
-    // calculate size needed for all lessons
+    const downloadedMask = await Promise.all(
+      indices.map(i =>
+        DownloadManager.genIsDownloadedForDownloadId(
+          DownloadManager.getDownloadId(course, i),
+        ).then(b => b ? 1 : 0)
+      )
+    );
     const totalBytes = indices
-      // no need to calculate the first lesson, its prebundled
-      .filter((lesson) => lesson > 0)
+      .filter((lesson) => !downloadedMask[lesson])
       .map((lesson) =>
         CourseData.getLessonSizeInBytes(course, lesson, downloadQuality),
       )
@@ -44,8 +48,8 @@ const AllLessons = ({route}) => {
 
     Alert.alert(
       'Download all lessons?',
-      `This will download all ${
-        indices.length
+      `This will download ${
+        downloadedMask.filter(b => !b).length
       } ${courseTitle} lessons (${prettyBytes(
         totalBytes,
       )}) to your device for offline playback.`,
@@ -58,11 +62,8 @@ const AllLessons = ({route}) => {
           text: 'OK',
           onPress: () => {
             indices
-              // no need to download the first lesson, its prebundled
-              .filter((lesson) => lesson > 0)
-              .forEach((lesson) =>
-                DownloadManager.startDownload(course, lesson),
-              );
+              .filter((lesson) => downloadedMask[lesson])
+              .forEach((lesson) => DownloadManager.startDownload(course, lesson));
           },
         },
       ],
@@ -82,11 +83,11 @@ const AllLessons = ({route}) => {
     setDownloadedCount(downloadedCount);
   }
 
-  // todo: just cache genIsDownloaded, god damn
+  // todo: just cache genIsDownloaded, god damn this is slow
   // cache invalidation isn't even hard here, we can assume we're the only ones changing the download state
   const throttledCountDownloads = throttle(countDownloads, 2000);
 
-  useEffect(useCallback(() => { throttledCountDownloads() }, []), [lastUpdateTime, lastChildUpdateTime]);
+  useEffect(() => { throttledCountDownloads() }, [lastUpdateTime, lastChildUpdateTime]);
 
   useFocusEffect(
     useCallback(() => {
@@ -105,20 +106,12 @@ const AllLessons = ({route}) => {
       <FlatList
         data={indices}
         renderItem={({item}) =>
-          item === 0 ? (
-            <StaticLessonRow
-              course={course}
-              lesson={item}
-              lastUpdateTime={lastUpdateTime}
-            />
-          ) : (
-            <LessonRow
-              course={course}
-              lesson={item}
-              lastUpdateTime={lastUpdateTime}
-              setLastChildUpdateTime={setLastChildUpdateTime}
-            />
-          )
+          <LessonRow
+            course={course}
+            lesson={item}
+            lastUpdateTime={lastUpdateTime}
+            setLastChildUpdateTime={setLastChildUpdateTime}
+          />
         }
         keyExtractor={(lesson) => String(lesson)}
         getItemLayout={(_, index) => ({

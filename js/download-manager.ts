@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {Alert} from 'react-native';
+import {Alert, Image} from 'react-native';
 import fs from 'react-native-fs';
 import CourseData from './course-data';
 import DeviceInfo from 'react-native-device-info';
@@ -8,6 +8,8 @@ import {
   genProgressForLesson,
   genPreferenceDownloadQuality,
   genPreferenceDownloadOnlyOnWifi,
+  genPreferenceIsFirstLoad,
+  genSetPreferenceIsFirstLoad,
 } from './persistence';
 import {log} from './metrics';
 
@@ -241,6 +243,27 @@ const DownloadManager = {
         DownloadManager.stopDownload(downloadId);
       }
     });
+  },
+
+  copyBundledTracksIfFirstLoad: async (): Promise<void> => {
+    if (await genPreferenceIsFirstLoad()) {
+      for (const course of CourseData.getCourseList()) {
+        if (CourseData.getBundledFirstLesson(course) === null) continue;
+
+        const localUrl = Image.resolveAssetSource(CourseData.getBundledFirstLesson(course)).uri;
+        DownloadManager.attachCallbacks(Downloader.download({
+          id: CourseData.getBundledFirstLessonId(course),
+          url: localUrl,
+          destination: DownloadManager.getDownloadStagingLocation(
+            CourseData.getBundledFirstLessonId(course),
+          ),
+          // @ts-ignore
+          network: Downloader.Network.ALL,
+        }));
+      }
+    }
+
+    await genSetPreferenceIsFirstLoad(false);
   },
 };
 

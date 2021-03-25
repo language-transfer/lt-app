@@ -205,6 +205,11 @@ export const [
   genSetPreferenceAllowDataCollection,
 ] = preference('allow-data-collection', true, (b) => b === 'true');
 
+export const [
+  genPreferenceIsFirstLoad,
+  genSetPreferenceIsFirstLoad,
+] = preference('is-first-load', true, (b) => b === 'true');
+
 export function usePreference<T>(key: Preference, defaultValue: any) {
   const [value, setValue] = useState<T>(null!);
 

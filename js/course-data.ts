@@ -33,42 +33,47 @@
 
 import spanishCover from '../resources/spanish-cover-stylized.png';
 import spanishCoverWithText from '../resources/spanish-cover-stylized-with-text.png';
-import spanishFirstLesson from '../resources/courses/spanish1-lq.mp3';
 import arabicCover from '../resources/arabic-cover-stylized.png';
 import arabicCoverWithText from '../resources/arabic-cover-stylized-with-text.png';
-import arabicFirstLesson from '../resources/courses/arabic1-lq.mp3';
 import turkishCover from '../resources/turkish-cover-stylized.png';
 import turkishCoverWithText from '../resources/turkish-cover-stylized-with-text.png';
-import turkisFirstLesson from '../resources/courses/turkish1-lq.mp3';
 import germanCover from '../resources/german-cover-stylized.png';
 import germanCoverWithText from '../resources/german-cover-stylized-with-text.png';
-import germanFirstLesson from '../resources/courses/german1-lq.mp3';
 import greekCover from '../resources/greek-cover-stylized.png';
 import greekCoverWithText from '../resources/greek-cover-stylized-with-text.png';
-import greekFirstLesson from '../resources/courses/greek1-lq.mp3';
 import italianCover from '../resources/italian-cover-stylized.png';
 import italianCoverWithText from '../resources/italian-cover-stylized-with-text.png';
-import italiaFirstLesson from '../resources/courses/italian1-lq.mp3';
 import swahiliCover from '../resources/swahili-cover-stylized.png';
 import swahiliCoverWithText from '../resources/swahili-cover-stylized-with-text.png';
-import swahiliFirstLesson from '../resources/courses/swahili1-lq.mp3';
 import frenchCover from '../resources/french-cover-stylized.png';
 import frenchCoverWithText from '../resources/french-cover-stylized-with-text.png';
-import frenchFirstLesson from '../resources/courses/french1-lq.mp3';
 import inglesCover from '../resources/ingles-cover-stylized.png';
 import inglesCoverWithText from '../resources/ingles-cover-stylized-with-text.png';
-import inglesFirstLesson from '../resources/courses/ingles1-lq.mp3';
 
 import fs from 'react-native-fs';
 // @ts-ignore
 import path from 'react-native-path';
 import DownloadManager from './download-manager';
+import { Platform } from 'react-native';
 
 type CourseDataMap = {[key in Course]: CourseData};
 
 type CourseMetadataMap = {[key in Course]: CourseMetaData | undefined};
 
 const courseMeta: CourseMetadataMap = {} as CourseMetadataMap;
+
+// bundledMediaStripTransform.js transforms these lines to make sure the bundler doesn't include these for non-iOS.
+// the ternaries are unnecessary (the the transform has the same effect) but are kept for clarity
+// if changing any of these lines, **make sure** the android build doesn't include the bundled files
+const spanishFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/spanish1-lq.mp3') : null;
+const arabicFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/arabic1-lq.mp3') : null;
+const turkishFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/turkish1-lq.mp3') : null;
+const germanFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/german1-lq.mp3') : null;
+const greekFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/greek1-lq.mp3') : null;
+const italianFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/italian1-lq.mp3') : null;
+const swahiliFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/swahili1-lq.mp3') : null;
+const frenchFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/french1-lq.mp3') : null;
+const inglesFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/ingles1-lq.mp3') : null;
 
 const data: CourseDataMap = {
   spanish: {
@@ -86,6 +91,7 @@ const data: CourseDataMap = {
       backgroundAccent: '#516198',
     },
     bundledFirstLesson: spanishFirstLesson,
+    bundledFirstLessonId: 'spanish/spanish1',
   },
   arabic: {
     image: arabicCover,
@@ -102,6 +108,7 @@ const data: CourseDataMap = {
       backgroundAccent: '#806006',
     },
     bundledFirstLesson: arabicFirstLesson,
+    bundledFirstLessonId: 'arabic/arabic1',
   },
   turkish: {
     image: turkishCover,
@@ -117,7 +124,8 @@ const data: CourseDataMap = {
       text: 'white',
       backgroundAccent: '#760629',
     },
-    bundledFirstLesson: turkisFirstLesson,
+    bundledFirstLesson: turkishFirstLesson,
+    bundledFirstLessonId: 'turkish/turkish1',
   },
   german: {
     image: germanCover,
@@ -134,6 +142,7 @@ const data: CourseDataMap = {
       backgroundAccent: '#006400',
     },
     bundledFirstLesson: germanFirstLesson,
+    bundledFirstLessonId: 'german/german1',
   },
   greek: {
     image: greekCover,
@@ -150,6 +159,7 @@ const data: CourseDataMap = {
       backgroundAccent: '#9c5a20',
     },
     bundledFirstLesson: greekFirstLesson,
+    bundledFirstLessonId: 'greek/greek1',
   },
   italian: {
     image: italianCover,
@@ -165,7 +175,8 @@ const data: CourseDataMap = {
       text: 'white',
       backgroundAccent: '#a7177f',
     },
-    bundledFirstLesson: italiaFirstLesson,
+    bundledFirstLesson: italianFirstLesson,
+    bundledFirstLessonId: 'italian/italian1',
   },
   swahili: {
     image: swahiliCover,
@@ -182,6 +193,7 @@ const data: CourseDataMap = {
       backgroundAccent: '#0aaea2',
     },
     bundledFirstLesson: swahiliFirstLesson,
+    bundledFirstLessonId: 'swahili/swahili1',
   },
   french: {
     image: frenchCover,
@@ -198,6 +210,7 @@ const data: CourseDataMap = {
       backgroundAccent: '#098abc',
     },
     bundledFirstLesson: frenchFirstLesson,
+    bundledFirstLessonId: 'french/french1',
   },
   ingles: {
     image: inglesCover,
@@ -214,6 +227,7 @@ const data: CourseDataMap = {
       backgroundAccent: '#516198',
     },
     bundledFirstLesson: inglesFirstLesson,
+    bundledFirstLessonId: 'ingles/ingles1',
   },
 };
 
@@ -303,6 +317,14 @@ const CourseData = {
 
   clearCourseMetadata(course: Course): void {
     courseMeta[course] = undefined;
+  },
+
+  getBundledFirstLesson(course: Course): number {
+    return data[course].bundledFirstLesson;
+  },
+
+  getBundledFirstLessonId(course: Course): string {
+    return data[course].bundledFirstLessonId;
   },
 
   getLessonData(course: Course, lesson: number): LessonData {

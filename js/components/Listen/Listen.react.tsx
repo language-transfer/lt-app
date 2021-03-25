@@ -118,11 +118,6 @@ const Listen = (props: any) => {
   };
 
   return (
-    // <SafeAreaView
-    //   style={[
-    //     styles.container,
-    //     { backgroundColor: CourseData.getCourseUIColors(course).background },
-    //   ]}>
     <>
       <ListenHeader course={course} />
       <ListenBody
@@ -134,7 +129,6 @@ const Listen = (props: any) => {
         seekTo={seekTo}
       />
     </>
-    // </SafeAreaView>
   );
 };
 
