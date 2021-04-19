@@ -131,10 +131,7 @@ const ListenScrubber = ({course, lesson, seekTo}: Props) => {
           style={{
             color: CourseData.getCourseUIColors(course).text,
           }}>
-          {
-            // @ts-ignore
-            formatDuration(animVal.current._value * 1000)
-          }
+          {formatDuration(position * 1000)}
         </Text>
         <Text
           style={{
