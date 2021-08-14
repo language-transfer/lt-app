@@ -64,7 +64,14 @@ const About = () => {
             will take care of itself!
           </Text>
 
-          {donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo ? null : (
+          {donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo ? (
+            <>
+              <Text style={[styles.bodyText, styles.bodyTextAboveButton]}>
+                Language Transfer is a unique project in more ways than one.
+                Learn more about Language Transfer here:
+              </Text>
+            </>
+          ) : (
             <>
               <Text style={styles.bodyText}>
                 Language Transfer is totally free, developed by Mihalis
@@ -124,6 +131,25 @@ const About = () => {
               </View>
             </>
           )}
+
+          <View style={styles.additionalButton}>
+            <TouchableNativeFeedback
+              onPress={() => {
+                log({
+                  action: 'visit_website',
+                  surface: 'about',
+                });
+                Linking.openURL('https://www.languagetransfer.org/about');
+              }}
+              useForeground={true}>
+              <View style={styles.additionalButtonInner}>
+                <Text style={styles.additionalButtonText}>
+                  Visit languagetransfer.org
+                </Text>
+                <Icon name="link" type="font-awesome-5" />
+              </View>
+            </TouchableNativeFeedback>
+          </View>
 
           <View style={styles.additionalButton}>
             <TouchableNativeFeedback
