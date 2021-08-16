@@ -66,7 +66,7 @@ const AllLessons = ({route}: {route: any}) => {
           text: 'OK',
           onPress: () => {
             indices
-              .filter((lesson) => downloadedMask[lesson])
+              .filter((lesson) => !downloadedMask[lesson])
               .forEach((lesson) => DownloadManager.startDownload(course, lesson));
           },
         },
