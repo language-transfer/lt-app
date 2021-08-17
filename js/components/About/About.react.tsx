@@ -12,11 +12,14 @@ import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import DeviceInfo from 'react-native-device-info';
 import {Icon} from 'react-native-elements';
 import {log} from '../../metrics';
+import { useNavigation } from '@react-navigation/native';
+import { MainNavigationProp } from '../App.react';
 
 type Section = 'Language Transfer' | 'Privacy' | 'LT App';
 
 const About = () => {
   useStatusBarStyle('white', 'dark-content');
+  const {navigate} = useNavigation<MainNavigationProp<'Licenses'>>();
 
   const [sections, setSections] = useState<{[key in Section]: boolean}>({
     'Language Transfer': true,
@@ -282,6 +285,19 @@ const About = () => {
               <View style={styles.additionalButtonInner}>
                 <Text style={styles.additionalButtonText}>Visit on GitHub</Text>
                 <Icon name="github" type="font-awesome-5" />
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+          <View
+            style={[
+              styles.additionalButton,
+            ]}>
+            <TouchableNativeFeedback
+              onPress={() => navigate('Licenses')}
+              useForeground={true}>
+              <View style={styles.additionalButtonInner}>
+                <Text style={styles.additionalButtonText}>Licenses</Text>
+                <Icon name="osi" type="font-awesome-5" />
               </View>
             </TouchableNativeFeedback>
           </View>

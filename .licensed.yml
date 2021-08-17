@@ -1,0 +1,58 @@
+# If not set, defaults to the directory name of `source_path`
+name: 'Language Transfer'
+
+# Sources of metadata
+sources:
+  gradle: true
+  npm: true
+  yarn: true
+  bundler: true
+
+# Dependencies with these licenses are allowed and will not raise errors or warnings.
+# This list does not have a default value and is required for `licensed status`
+# to succeed.
+allowed:
+  - mit
+  - apache-2.0
+  - bsd-2-clause
+  - bsd-3-clause
+  - cc0-1.0
+  - isc
+  - unlicense
+  - 0bsd
+
+reviewed:
+  npm:
+    - '@hapi/hoek'
+    - '@hapi/topo'
+    - '@sideway/address'
+    - '@sideway/formula'
+    - '@sideway/pinpoint'
+    - atob
+    - 'color-convert'
+    - colors
+    - encoding
+    - 'fs.realpath'
+    - glob
+    - 'hoist-non-react-statics'
+    - joi
+    - lodash
+    - 'lodash.isequal'
+    - 'lodash.throttle'
+    - jsonify # public domain. no license text so this still throws an error
+    - makeerror
+    - 'neo-async'
+    - 'node-stream-zip'
+    - 'react-native-background-downloader'
+    - 'readable-stream'
+    - sax
+    - shelljs
+    - 'source-map'
+    - 'sprintf-js'
+    - 'string_decoder'
+    - tmpl
+    - 'uglify-es'
+    - walker
+    - wcwidth
+    - xcode
+    - yargs

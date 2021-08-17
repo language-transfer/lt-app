@@ -17,6 +17,7 @@ import AllLessons from './AllLessons/AllLessons.react';
 import DataManagement from './DataManagement/DataManagement.react';
 import LanguageSelector from './LanguageSelector/LanguageSelector.react';
 import About from './About/About.react';
+import Licenses from './About/Licenses.react';
 import Settings from './Settings/Settings.react';
 import DrawerMenuButton from './Navigation/DrawerMenuButton.react';
 import LanguageHomeBody from './LanguageHome/LanguageHome.react';
@@ -38,6 +39,7 @@ type MainParamList = {
   };
   'Language Selector': undefined;
   About: undefined;
+  Licenses: undefined;
   Settings: undefined;
 };
 
@@ -169,6 +171,13 @@ const App = () => {
                     component={About}
                     options={{
                       title: 'About',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="Licenses"
+                    component={Licenses}
+                    options={{
+                      title: 'Licenses',
                     }}
                   />
                   <Stack.Screen

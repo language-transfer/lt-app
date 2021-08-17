@@ -1,0 +1,30 @@
+---
+name: shelljs
+version: 0.8.4
+type: npm
+summary: Portable Unix shell commands for Node.js
+homepage: http://github.com/shelljs/shelljs
+license: other
+licenses:
+- sources: LICENSE
+  text: "Copyright (c) 2012, Artur Adib <arturadib@gmail.com>\nAll rights reserved.\n\nYou
+    may use this project under the terms of the New BSD license as follows:\n\nRedistribution
+    and use in source and binary forms, with or without\nmodification, are permitted
+    provided that the following conditions are met:\n    * Redistributions of source
+    code must retain the above copyright\n      notice, this list of conditions and
+    the following disclaimer.\n    * Redistributions in binary form must reproduce
+    the above copyright\n      notice, this list of conditions and the following disclaimer
+    in the\n      documentation and/or other materials provided with the distribution.\n
+    \   * Neither the name of Artur Adib nor the\n      names of the contributors
+    may be used to endorse or promote products\n      derived from this software without
+    specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT
+    HOLDERS AND CONTRIBUTORS \"AS IS\" \nAND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+    BUT NOT LIMITED TO, THE \nIMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    A PARTICULAR PURPOSE \nARE DISCLAIMED. IN NO EVENT SHALL ARTUR ADIB BE LIABLE
+    FOR ANY\nDIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n(INCLUDING,
+    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\nLOSS OF USE,
+    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\nON ANY THEORY
+    OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n(INCLUDING NEGLIGENCE
+    OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF \nTHIS SOFTWARE, EVEN IF ADVISED
+    OF THE POSSIBILITY OF SUCH DAMAGE.\n"
+notices: []

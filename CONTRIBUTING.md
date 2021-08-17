@@ -38,6 +38,10 @@ In order to use Language Transfer's own App Store Connect account, you'll need t
 
 For more help about the iOS development flow, contact [@bacoseason](mailto:michael@schonfeld.org).
 
+## Dependencies
+
+We use GitHub's [Licensed](https://github.com/github/licensed) to track dependency licenses. When adding new dependencies, use `licensed status` in the root and make sure there are no errors (unless there's missing license text for a public domain dependency). Then generate an update to NOTICES with `licensed notices`. This needs to be uploaded manually to the downloads server to keep the app up-to-date.
+
 ## Issues & Pull Requests
 
 For now, go ahead and open issues/PRs willy-nilly. We'll get some guidelines in here if we need to standardize or manage project work. It would be wise to check with the core project maintainers before starting work on a PR, just to make sure you don't duplicate work or go too far in the wrong direction.

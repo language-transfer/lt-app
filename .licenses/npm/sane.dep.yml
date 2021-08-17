@@ -1,0 +1,11 @@
+---
+name: sane
+version: 4.1.0
+type: npm
+summary: Sane aims to be fast, small, and reliable file system watcher.
+homepage: https://github.com/amasad/sane
+license: mit
+licenses:
+- sources: README.md
+  text: MIT
+notices: []

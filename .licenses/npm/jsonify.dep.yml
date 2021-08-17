@@ -1,0 +1,9 @@
+---
+name: jsonify
+version: 0.0.0
+type: npm
+summary: JSON without touching any globals
+homepage: https://github.com/substack/jsonify#readme
+license: other
+licenses: []
+notices: []
