@@ -57,7 +57,7 @@ const renderRatingBanner = (currentLesson: number, ratingButtonDismissed: boolea
             surface: 'rate_button',
           });
           dismissRatingButton(false);
-          Linking.openURL('http://play.google.com/store/apps/details?id=org.languagetransfer');
+          Linking.openURL('https://play.google.com/store/apps/details?id=org.languagetransfer');
         }}>
           <View style={styles.ratingButtonInner}>
             <Icon color="white" name="star" solid size={14} type="font-awesome-5" />
