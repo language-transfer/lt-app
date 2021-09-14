@@ -1,7 +1,8 @@
 import React from 'react';
 import {StyleSheet, Text, View, Image} from 'react-native';
 import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
-import {Icon} from 'react-native-elements';import {navigate} from '../../navigation-ref';
+import {Icon} from 'react-native-elements';
+import {navigate} from '../../navigation-ref';
 
 
 const Drawer = (props: any) => {

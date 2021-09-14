@@ -7,7 +7,6 @@ import {
   Animated,
   TouchableNativeFeedback,
   Text,
-  Platform,
 } from 'react-native';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import LanguageButton from './LanguageButton.react';

@@ -210,6 +210,11 @@ export const [
   genSetPreferenceIsFirstLoad,
 ] = preference('is-first-load', true, (b) => b === 'true');
 
+export const [
+  genPreferenceRatingButtonDismissed,
+  genSetPreferenceRatingButtonDismissed,
+] = preference('rating-button-dismissed', { dismissed: false }, (o) => JSON.parse(o));
+
 export function usePreference<T>(key: Preference, defaultValue: any) {
   const [value, setValue] = useState<T>(null!);
 

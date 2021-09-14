@@ -19,7 +19,8 @@ declare global {
     | 'download-quality'
     | 'download-only-on-wifi'
     | 'allow-data-collection'
-    | 'is-first-load';
+    | 'is-first-load'
+    | 'rating-button-dismissed';
 
   type Quality = 'high' | 'low';
 
