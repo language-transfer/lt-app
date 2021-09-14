@@ -11,7 +11,6 @@ import CourseData from '../../course-data';
 import {usePreference} from '../../persistence';
 import {log} from '../../metrics';
 import { useNavigation } from '@react-navigation/core';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { MainNavigationProp } from '../App.react';
 
 export const LESSON_ROW_HEIGHT = 72;
