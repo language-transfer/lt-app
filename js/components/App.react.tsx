@@ -11,7 +11,7 @@ import logNavState from '../logNavState';
 import CourseData from '../course-data';
 import {setNavigationRef} from '../navigation-ref';
 import {log} from '../metrics';
-import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+import {createStackNavigator, StackNavigationProp} from '@react-navigation/stack';
 import Listen from './Listen/Listen.react';
 import AllLessons from './AllLessons/AllLessons.react';
 import DataManagement from './DataManagement/DataManagement.react';

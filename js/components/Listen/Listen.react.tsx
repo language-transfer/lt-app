@@ -1,7 +1,6 @@
 import React, {useEffect, useCallback, useState} from 'react';
 import {StyleSheet, StatusBarStyle} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import ListenHeader from './ListenHeader.react';
 import ListenBody from './ListenBody.react';
 import TrackPlayer, {

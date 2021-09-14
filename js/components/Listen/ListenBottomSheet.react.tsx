@@ -15,7 +15,6 @@ import {useNavigation} from '@react-navigation/native';
 import {useTrackPlayerProgress} from 'react-native-track-player';
 import {log} from '../../metrics';
 import formatDuration from 'format-duration';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { MainNavigationProp } from '../App.react';
 
 interface Props {
