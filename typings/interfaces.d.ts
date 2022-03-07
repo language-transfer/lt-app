@@ -21,7 +21,8 @@ declare global {
     | 'download-only-on-wifi'
     | 'allow-data-collection'
     | 'is-first-load'
-    | 'rating-button-dismissed';
+    | 'rating-button-dismissed'
+    | 'killswitch-course-version-v1';
 
   type Quality = 'high' | 'low';
 

@@ -57,6 +57,7 @@ import fs from 'react-native-fs';
 import path from 'react-native-path';
 import DownloadManager from './download-manager';
 import { Platform } from 'react-native';
+import { genPreferenceKillswitchCourseVersionV1, genSetPreferenceKillswitchCourseVersionV1 } from './persistence';
 
 type CourseDataMap = {[key in Course]: CourseData};
 
@@ -77,6 +78,8 @@ const swahiliFirstLesson = Platform.OS === 'ios' ? require('../resources/courses
 const frenchFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/french1-lq.mp3') : null;
 const inglesFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/ingles1-lq.mp3') : null;
 const musicFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/music1-lq.mp3') : null;
+
+const META_VERSIONS_URL = 'https://downloads.languagetransfer.org/course-versions.json';
 
 const data: CourseDataMap = {
   spanish: {
@@ -333,6 +336,37 @@ const CourseData = {
       await fs.mkdir(DownloadManager.getDownloadFolderForCourse(course));
     }
     await fs.writeFile(localPath, JSON.stringify(json));
+
+    if (!forceLoadFromServer) {
+      // simplest way to avoid a loop
+      CourseData.genGentlyCheckForMetadataUpdates();
+    }
+  },
+
+  async genGentlyCheckForMetadataUpdates(): Promise<void> {
+    try {
+      const killswitched = await genPreferenceKillswitchCourseVersionV1();
+      if (killswitched) {
+        return;
+      }
+
+      const json = await fetch(META_VERSIONS_URL).then((r) => r.json());
+      if (json.killswitch) { // I don't trust myself not to ddos myself
+        await genSetPreferenceKillswitchCourseVersionV1(true);
+        return;
+      }
+      const courses = CourseData.getCourseList();
+      for (const course of courses) {
+        const thisCourseMeta = courseMeta[course];
+        if (thisCourseMeta && thisCourseMeta.version) {
+          if (thisCourseMeta.version !== json.courseVersions[course]) {
+            await CourseData.genLoadCourseMetadata(course, true);
+          }
+        }
+      }
+    } catch (e) {
+      // whoops! no problem, this is a best-effort thing. should probably log this but /shrug
+    }
   },
 
   clearCourseMetadata(course: Course): void {
