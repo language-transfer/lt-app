@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     fontWeight: 'bold',
     color: 'black',
+    textAlign: 'center',
   },
   courseDetails: {
     fontSize: 16,

@@ -63,15 +63,83 @@ const LanguageSelector = () => {
             {useNativeDriver: false},
           )}>
           <View style={styles.courseList}>
-            {CourseData.getCourseList().map((course) => (
-              <LanguageButton
-                course={course}
-                key={course}
-                onPress={() =>
-                  navigate('Language Home', {course})
-                }
-              />
-            ))}
+            <View style={styles.sectionHeaderFirst}>
+              <Text style={styles.sectionHeaderText}>
+                New!
+              </Text>
+            </View>
+            <LanguageButton
+              course="music"
+              onPress={() =>
+                navigate('Language Home', {course: "music"})
+              }
+            />
+
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionHeaderText}>
+                Language courses
+              </Text>
+            </View>
+            <LanguageButton
+              course="spanish"
+              onPress={() =>
+                navigate('Language Home', {course: "spanish"})
+              }
+            />
+            <LanguageButton
+              course="arabic"
+              onPress={() =>
+                navigate('Language Home', {course: "arabic"})
+              }
+            />
+            <LanguageButton
+              course="turkish"
+              onPress={() =>
+                navigate('Language Home', {course: "turkish"})
+              }
+            />
+            <LanguageButton
+              course="german"
+              onPress={() =>
+                navigate('Language Home', {course: "german"})
+              }
+            />
+            <LanguageButton
+              course="greek"
+              onPress={() =>
+                navigate('Language Home', {course: "greek"})
+              }
+            />
+            <LanguageButton
+              course="italian"
+              onPress={() =>
+                navigate('Language Home', {course: "italian"})
+              }
+            />
+            <LanguageButton
+              course="swahili"
+              onPress={() =>
+                navigate('Language Home', {course: "swahili"})
+              }
+            />
+            <LanguageButton
+              course="french"
+              onPress={() =>
+                navigate('Language Home', {course: "french"})
+              }
+            />
+
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionHeaderText}>
+                For Spanish speakers
+              </Text>
+            </View>
+            <LanguageButton
+              course="ingles"
+              onPress={() =>
+                navigate('Language Home', {course: "ingles"})
+              }
+            />
             <View style={styles.aboutSectionHr} />
             <View style={styles.aboutSectionWrapper}>
               <View style={styles.aboutSection}>
@@ -141,6 +209,20 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
+  sectionHeaderFirst: {
+    width: '100%',
+    textAlign: 'center',
+  },
+  sectionHeader: {
+    width: '100%',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  sectionHeaderText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   topTranslucent: {
     height: StatusBar.currentHeight,
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -186,7 +268,7 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     padding: 6,
   },
   scrollIndicatorText: {

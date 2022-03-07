@@ -11,7 +11,8 @@ declare global {
     | 'italian'
     | 'swahili'
     | 'french'
-    | 'ingles';
+    | 'ingles'
+    | 'music';
 
   type Preference =
     | 'auto-delete-finished'
@@ -27,7 +28,7 @@ declare global {
   interface UIColors {
     background: string;
     softBackground: string;
-    text: string;
+    text: 'white' | 'black';
     backgroundAccent: string;
   }
 
@@ -38,7 +39,7 @@ declare global {
     fullTitle: string;
     courseType: 'intro' | 'complete';
     metaUrl: string;
-    fallbackLessonCount: number;
+    fallbackLessonCount: string;
     uiColors: UIColors;
     bundledFirstLesson: number;
     bundledFirstLessonId: string;
