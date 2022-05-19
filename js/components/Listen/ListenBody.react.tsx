@@ -13,10 +13,8 @@ import ListenBottomSheet from './ListenBottomSheet.react';
 import CourseData from '../../course-data';
 import ListenScrubber from './ListenScrubber.react';
 import TrackPlayer, {
-  usePlaybackStateIs,
-  STATE_READY,
-  STATE_PLAYING,
-  STATE_PAUSED,
+  usePlaybackState,
+  State,
 } from 'react-native-track-player';
 import {log} from '../../metrics';
 import useIsLessonDownloaded from '../../hooks/useIsLessonDownloaded';
@@ -34,9 +32,10 @@ const smallIconSize = 0.175 * Dimensions.get('screen').width;
 const largeIconSize = 0.4 * Dimensions.get('screen').width;
 
 const ListenBody = ({course, lesson, setBottomSheetOpen, skipBack, seekTo, toggle}: Props) => {
-  const ready = usePlaybackStateIs(STATE_READY);
-  const playing = usePlaybackStateIs(STATE_PLAYING);
-  const paused = usePlaybackStateIs(STATE_PAUSED);
+  const playbackState = usePlaybackState();
+  const ready = playbackState === State.Ready;
+  const playing = playbackState === State.Playing;
+  const paused = playbackState === State.Paused;
   const bottomSheet = useRef<RBSheet | null>(null);
 
   const downloaded = useIsLessonDownloaded(course, lesson);
