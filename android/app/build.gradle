@@ -134,8 +134,8 @@ android {
         applicationId "org.languagetransfer"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 8
-        versionName "1.4.0"
+        versionCode 9
+        versionName "1.5.0"
         multiDexEnabled true
     }
     splits {
