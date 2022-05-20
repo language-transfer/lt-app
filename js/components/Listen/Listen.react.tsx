@@ -4,9 +4,9 @@ import {useFocusEffect} from '@react-navigation/native';
 import ListenHeader from './ListenHeader.react';
 import ListenBody from './ListenBody.react';
 import TrackPlayer, {
-  STATE_PLAYING,
-  TrackPlayerEvents,
-  usePlaybackStateIs,
+  State,
+  Event,
+  usePlaybackState,
   useTrackPlayerEvents,
 } from 'react-native-track-player';
 import CourseData from '../../course-data';
@@ -19,11 +19,12 @@ const Listen = (props: any) => {
   const {course, lesson} = props.route.params;
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
 
-  const playing = usePlaybackStateIs(STATE_PLAYING);
+  const playbackState = usePlaybackState();
+  const playing = playbackState === State.Playing;
 
   // go back to the previous screen when the user stops
   // the music from outside the app
-  useTrackPlayerEvents([TrackPlayerEvents.REMOTE_STOP], () =>
+  useTrackPlayerEvents([Event.RemoteStop], () =>
     props.navigation.pop(),
   );
 

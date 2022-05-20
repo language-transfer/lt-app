@@ -9,7 +9,7 @@ import DrawerContent from './Navigation/DrawerContent.react';
 import {genMostRecentListenedCourse} from '../persistence';
 import logNavState from '../logNavState';
 import CourseData from '../course-data';
-import {setNavigationRef} from '../navigation-ref';
+import {setNavigationRef, setDrawerNavigationRef} from '../navigation-ref';
 import {log} from '../metrics';
 import {createStackNavigator, StackNavigationProp} from '@react-navigation/stack';
 import Listen from './Listen/Listen.react';
@@ -110,7 +110,11 @@ const App = () => {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer ref={node => {
+          if (node !== null) {
+            setDrawerNavigationRef(node);
+          }
+        }}>
         <Drawer.Navigator
           drawerContent={(props) => <DrawerContent {...props} />}>
           <Drawer.Screen name="Main" options={{ gestureEnabled }}>

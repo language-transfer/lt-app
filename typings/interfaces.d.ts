@@ -11,7 +11,8 @@ declare global {
     | 'italian'
     | 'swahili'
     | 'french'
-    | 'ingles';
+    | 'ingles'
+    | 'music';
 
   type Preference =
     | 'auto-delete-finished'
@@ -20,14 +21,15 @@ declare global {
     | 'download-only-on-wifi'
     | 'allow-data-collection'
     | 'is-first-load'
-    | 'rating-button-dismissed';
+    | 'rating-button-dismissed'
+    | 'killswitch-course-version-v1';
 
   type Quality = 'high' | 'low';
 
   interface UIColors {
     background: string;
     softBackground: string;
-    text: string;
+    text: 'white' | 'black';
     backgroundAccent: string;
   }
 
@@ -38,7 +40,7 @@ declare global {
     fullTitle: string;
     courseType: 'intro' | 'complete';
     metaUrl: string;
-    fallbackLessonCount: number;
+    fallbackLessonCount: string;
     uiColors: UIColors;
     bundledFirstLesson: number;
     bundledFirstLessonId: string;

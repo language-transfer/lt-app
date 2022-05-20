@@ -49,12 +49,15 @@ import frenchCover from '../resources/french-cover-stylized.png';
 import frenchCoverWithText from '../resources/french-cover-stylized-with-text.png';
 import inglesCover from '../resources/ingles-cover-stylized.png';
 import inglesCoverWithText from '../resources/ingles-cover-stylized-with-text.png';
+import musicCover from '../resources/music-cover-stylized.png';
+import musicCoverWithText from '../resources/music-cover-stylized-with-text.png';
 
 import fs from 'react-native-fs';
 // @ts-ignore
 import path from 'react-native-path';
 import DownloadManager from './download-manager';
 import { Platform } from 'react-native';
+import { genPreferenceKillswitchCourseVersionV1, genSetPreferenceKillswitchCourseVersionV1 } from './persistence';
 
 type CourseDataMap = {[key in Course]: CourseData};
 
@@ -74,6 +77,9 @@ const italianFirstLesson = Platform.OS === 'ios' ? require('../resources/courses
 const swahiliFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/swahili1-lq.mp3') : null;
 const frenchFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/french1-lq.mp3') : null;
 const inglesFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/ingles1-lq.mp3') : null;
+const musicFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/music1-lq.mp3') : null;
+
+const META_VERSIONS_URL = 'https://downloads.languagetransfer.org/course-versions.json';
 
 const data: CourseDataMap = {
   spanish: {
@@ -83,7 +89,7 @@ const data: CourseDataMap = {
     fullTitle: 'Complete Spanish',
     courseType: 'complete',
     metaUrl: 'https://downloads.languagetransfer.org/spanish/spanish-meta.json',
-    fallbackLessonCount: 90,
+    fallbackLessonCount: '90',
     uiColors: {
       background: '#7186d0',
       softBackground: '#d5d9ee',
@@ -100,7 +106,7 @@ const data: CourseDataMap = {
     fullTitle: 'Introduction to Arabic',
     courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/arabic/arabic-meta.json',
-    fallbackLessonCount: 38,
+    fallbackLessonCount: '38',
     uiColors: {
       background: '#c2930f',
       softBackground: '#e9dccc',
@@ -117,7 +123,7 @@ const data: CourseDataMap = {
     fullTitle: 'Introduction to Turkish',
     courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/turkish/turkish-meta.json',
-    fallbackLessonCount: 44,
+    fallbackLessonCount: '44',
     uiColors: {
       background: '#a20b3b',
       softBackground: '#e0ccce',
@@ -134,7 +140,7 @@ const data: CourseDataMap = {
     fullTitle: 'Complete German',
     courseType: 'complete',
     metaUrl: 'https://downloads.languagetransfer.org/german/german-meta.json',
-    fallbackLessonCount: 50,
+    fallbackLessonCount: '50',
     uiColors: {
       background: '#009900',
       softBackground: '#cbdecb',
@@ -151,7 +157,7 @@ const data: CourseDataMap = {
     fullTitle: 'Complete Greek',
     courseType: 'complete',
     metaUrl: 'https://downloads.languagetransfer.org/greek/greek-meta.json',
-    fallbackLessonCount: 120,
+    fallbackLessonCount: '120',
     uiColors: {
       background: '#d57d2f',
       softBackground: '#efd7cd',
@@ -168,7 +174,7 @@ const data: CourseDataMap = {
     fullTitle: 'Introduction to Italian',
     courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/italian/italian-meta.json',
-    fallbackLessonCount: 45,
+    fallbackLessonCount: '45',
     uiColors: {
       background: '#e423ae',
       softBackground: '#f5cce3',
@@ -185,7 +191,7 @@ const data: CourseDataMap = {
     fullTitle: 'Complete Swahili',
     courseType: 'complete',
     metaUrl: 'https://downloads.languagetransfer.org/swahili/swahili-meta.json',
-    fallbackLessonCount: 110,
+    fallbackLessonCount: '110',
     uiColors: {
       background: '#12eddd',
       softBackground: '#ccf8f2',
@@ -202,7 +208,7 @@ const data: CourseDataMap = {
     fullTitle: 'Introduction to French',
     courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/french/french-meta.json',
-    fallbackLessonCount: 40,
+    fallbackLessonCount: '40',
     uiColors: {
       background: '#10bdff',
       softBackground: '#cce8ff',
@@ -219,7 +225,7 @@ const data: CourseDataMap = {
     fullTitle: 'Introducción a Inglés',
     courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/ingles/ingles-meta.json',
-    fallbackLessonCount: 40,
+    fallbackLessonCount: '40',
     uiColors: {
       background: '#7186d0',
       softBackground: '#d5daee',
@@ -228,6 +234,23 @@ const data: CourseDataMap = {
     },
     bundledFirstLesson: inglesFirstLesson,
     bundledFirstLessonId: 'ingles/ingles1',
+  },
+  music: {
+    image: musicCover,
+    imageWithText: musicCoverWithText,
+    shortTitle: 'Music Theory',
+    fullTitle: 'Introduction to Music Theory',
+    courseType: 'intro',
+    metaUrl: 'https://downloads.languagetransfer.org/music/music-meta.json',
+    fallbackLessonCount: '10+',
+    uiColors: {
+      background: '#f8eebc',
+      softBackground: '#ffffff',
+      text: 'black',
+      backgroundAccent: '#786951',
+    },
+    bundledFirstLesson: musicFirstLesson,
+    bundledFirstLessonId: 'music/music1',
   },
 };
 
@@ -269,7 +292,7 @@ const CourseData = {
     return data[course].uiColors;
   },
 
-  getFallbackLessonCount(course: Course): number {
+  getFallbackLessonCount(course: Course): string {
     return data[course].fallbackLessonCount;
   },
 
@@ -313,6 +336,37 @@ const CourseData = {
       await fs.mkdir(DownloadManager.getDownloadFolderForCourse(course));
     }
     await fs.writeFile(localPath, JSON.stringify(json));
+
+    if (!forceLoadFromServer) {
+      // simplest way to avoid a loop
+      CourseData.genGentlyCheckForMetadataUpdates();
+    }
+  },
+
+  async genGentlyCheckForMetadataUpdates(): Promise<void> {
+    try {
+      const killswitched = await genPreferenceKillswitchCourseVersionV1();
+      if (killswitched) {
+        return;
+      }
+
+      const json = await fetch(META_VERSIONS_URL).then((r) => r.json());
+      if (json.killswitch) { // I don't trust myself not to ddos myself
+        await genSetPreferenceKillswitchCourseVersionV1(true);
+        return;
+      }
+      const courses = CourseData.getCourseList();
+      for (const course of courses) {
+        const thisCourseMeta = courseMeta[course];
+        if (thisCourseMeta && thisCourseMeta.version) {
+          if (thisCourseMeta.version !== json.courseVersions[course]) {
+            await CourseData.genLoadCourseMetadata(course, true);
+          }
+        }
+      }
+    } catch (e) {
+      // whoops! no problem, this is a best-effort thing. should probably log this but /shrug
+    }
   },
 
   clearCourseMetadata(course: Course): void {

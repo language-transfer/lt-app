@@ -1,11 +1,4 @@
-import TrackPlayer, {
-  TrackPlayerEvents,
-  CAPABILITY_PLAY,
-  CAPABILITY_PAUSE,
-  CAPABILITY_STOP,
-  CAPABILITY_JUMP_BACKWARD,
-  STATE_PLAYING,
-} from 'react-native-track-player';
+import TrackPlayer, {State, Event, Capability, IOSCategory} from 'react-native-track-player';
 import BackgroundTimer, {IntervalId} from 'react-native-background-timer';
 import {
   genAutopause,
@@ -39,19 +32,22 @@ export const genEnqueueFile = async (
   TrackPlayer.updateOptions({
     stopWithApp: false,
     capabilities: [
-      CAPABILITY_PLAY,
-      CAPABILITY_PAUSE,
-      CAPABILITY_JUMP_BACKWARD,
-      CAPABILITY_STOP,
+      Capability.Play,
+      Capability.Pause,
+      Capability.JumpBackward,
+      Capability.Stop,
     ],
     compactCapabilities: [
-      CAPABILITY_PLAY,
-      CAPABILITY_PAUSE,
-      CAPABILITY_JUMP_BACKWARD,
+      Capability.Play,
+      Capability.Pause,
+      Capability.JumpBackward,
     ],
-    jumpInterval: 10,
-    // this will be added in the next major release, i think?
-    // @ts-ignore
+    notificationCapabilities: [
+      Capability.Play,
+      Capability.Pause,
+      Capability.JumpBackward,
+    ],
+    backwardJumpInterval: 10,
     alwaysPauseOnInterruption: true,
     color: parseInt(
       CourseData.getCourseUIColors(course).background.substring(1),
@@ -93,7 +89,8 @@ export const genEnqueueFile = async (
     suppressTrackChange = true;
   }
   await TrackPlayer.add(tracks);
-  await TrackPlayer.skip(CourseData.getLessonId(course, lesson));
+  CourseData.getLessonIndices
+  await TrackPlayer.skip(lesson); // TODO: +1? -1?
 
   currentlyPlaying = {course, lesson};
 };
@@ -108,7 +105,7 @@ export default async () => {
   audioServiceSubscriptions.forEach((s) => s.remove());
 
   audioServiceSubscriptions = [
-    TrackPlayer.addEventListener(TrackPlayerEvents.REMOTE_PLAY, async () => {
+    TrackPlayer.addEventListener(Event.RemotePlay, async () => {
       await TrackPlayer.play();
       const position = await TrackPlayer.getPosition();
       log({
@@ -120,7 +117,7 @@ export default async () => {
       });
     }),
 
-    TrackPlayer.addEventListener(TrackPlayerEvents.REMOTE_PAUSE, async () => {
+    TrackPlayer.addEventListener(Event.RemotePause, async () => {
       await TrackPlayer.pause();
       const position = await TrackPlayer.getPosition();
       log({
@@ -132,7 +129,7 @@ export default async () => {
       });
     }),
 
-    TrackPlayer.addEventListener(TrackPlayerEvents.REMOTE_STOP, async () => {
+    TrackPlayer.addEventListener(Event.RemoteStop, async () => {
       const position = await TrackPlayer.getPosition();
       log({
         action: 'stop',
@@ -145,7 +142,7 @@ export default async () => {
     }),
 
     TrackPlayer.addEventListener(
-      TrackPlayerEvents.REMOTE_JUMP_BACKWARD,
+      Event.RemoteJumpBackward,
       async ({interval}) => {
         const position = await TrackPlayer.getPosition();
         log({
@@ -161,9 +158,9 @@ export default async () => {
     ),
 
     TrackPlayer.addEventListener(
-      TrackPlayerEvents.PLAYBACK_STATE,
+      Event.PlaybackState,
       async ({state}) => {
-        if (state !== STATE_PLAYING) {
+        if (state !== State.Playing) {
           return;
         }
 
@@ -190,9 +187,9 @@ export default async () => {
     ),
 
     TrackPlayer.addEventListener(
-      TrackPlayerEvents.PLAYBACK_STATE,
+      Event.PlaybackState,
       async ({state}) => {
-        if (state === STATE_PLAYING) {
+        if (state === State.Playing) {
           if (updateInterval) {
             BackgroundTimer.clearInterval(updateInterval);
           }
@@ -203,7 +200,7 @@ export default async () => {
               TrackPlayer.getState(),
             ]);
 
-            if (currState !== STATE_PLAYING) {
+            if (currState !== State.Playing) {
               // happens sometimes. /shrug
               if (updateInterval) {
                 BackgroundTimer.clearInterval(updateInterval);
@@ -235,11 +232,11 @@ export default async () => {
     // I have a personal policy of including explicit blame whenever I write code I know someone will curse me for one day.
     // contact me@timothyaveni.com with your complaints.
     TrackPlayer.addEventListener(
-      TrackPlayerEvents.PLAYBACK_TRACK_CHANGED,
+      Event.PlaybackTrackChanged,
       async (params) => {
         const wasPlaying = currentlyPlaying;
 
-        if (params.track === null || wasPlaying === null) {
+        if (params.track == null || wasPlaying === null) {
           // starting to play a track from nothing
           // also lands here if we stop the track explicitly
           return;
@@ -270,10 +267,7 @@ export default async () => {
         // ASSUMPTION: we're in the same course as the old track
         currentlyPlaying = {
           course: wasPlaying.course,
-          lesson: CourseData.getLessonNumberForId(
-            wasPlaying.course,
-            params.nextTrack,
-          )!,
+          lesson: params.nextTrack,
         };
 
         if (!currentlyPlaying?.lesson) {

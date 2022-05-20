@@ -12,7 +12,7 @@ import DownloadManager from '../../download-manager';
 import {genMarkLessonFinished} from '../../persistence';
 import {genStopPlaying} from '../../audio-service';
 import {useNavigation} from '@react-navigation/native';
-import {useTrackPlayerProgress} from 'react-native-track-player';
+import {useProgress} from 'react-native-track-player';
 import {log} from '../../metrics';
 import formatDuration from 'format-duration';
 import { MainNavigationProp } from '../App.react';
@@ -24,7 +24,7 @@ interface Props {
 }
 
 const ListenBottomSheet = ({course, lesson, downloaded}: Props) => {
-  const {position} = useTrackPlayerProgress();
+  const {position} = useProgress();
   const {pop} = useNavigation<MainNavigationProp<'Listen'>>();
 
   return (

@@ -215,6 +215,11 @@ export const [
   genSetPreferenceRatingButtonDismissed,
 ] = preference('rating-button-dismissed', { dismissed: false }, (o) => JSON.parse(o));
 
+export const [
+  genPreferenceKillswitchCourseVersionV1,
+  genSetPreferenceKillswitchCourseVersionV1,
+] = preference('killswitch-course-version-v1', false, (b) => b === 'true');
+
 export function usePreference<T>(key: Preference, defaultValue: any) {
   const [value, setValue] = useState<T>(null!);
 
