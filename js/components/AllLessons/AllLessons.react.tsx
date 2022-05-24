@@ -15,6 +15,8 @@ import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
 import prettyBytes from 'pretty-bytes';
 import {usePreference} from '../../persistence';
+import genConditionallyShowErrorOnNoWifi from '../../download-on-wifi-error';
+
 import {Icon} from 'react-native-elements';
 
 import {throttle} from 'lodash';
@@ -64,7 +66,9 @@ const AllLessons = ({route}: {route: any}) => {
         },
         {
           text: 'OK',
-          onPress: () => {
+          onPress: async() => {
+            await genConditionallyShowErrorOnNoWifi();
+            
             indices
               .filter((lesson) => !downloadedMask[lesson])
               .forEach((lesson) => DownloadManager.startDownload(course, lesson));

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableNativeFeedback} from 'react-native';
+import {Alert, View, Text, StyleSheet, TouchableNativeFeedback} from 'react-native';
 import ProgressCircle from 'react-native-progress-circle';
 
 import {Icon} from 'react-native-elements';
@@ -12,6 +12,7 @@ import {usePreference} from '../../persistence';
 import {log} from '../../metrics';
 import { useNavigation } from '@react-navigation/core';
 import { MainNavigationProp } from '../App.react';
+import genConditionallyShowErrorOnNoWifi from '../../download-on-wifi-error';
 
 export const LESSON_ROW_HEIGHT = 72;
 
@@ -98,6 +99,8 @@ const handleDownloadClick = async (
     });
     DownloadManager.stopDownload(DownloadManager.getDownloadId(course, lesson));
   } else if (!downloaded) {
+    await genConditionallyShowErrorOnNoWifi();
+
     log({
       action: 'download_lesson',
       surface: 'all_lessons',
