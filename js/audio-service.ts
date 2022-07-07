@@ -1,3 +1,4 @@
+import {Platform} from 'react-native'; 
 import TrackPlayer, {State, Event, Capability, IOSCategory} from 'react-native-track-player';
 import BackgroundTimer, {IntervalId} from 'react-native-background-timer';
 import {
@@ -84,7 +85,8 @@ export const genEnqueueFile = async (
   );
 
   // Add a track to the queue
-  if (lesson !== 0) {
+  if (lesson !== 0 && Platform.OS === 'android') {
+    // only suppress on android as this was breaking iOS
     // we get an event for skipping that needs to be suppressed, UNLESS we're legitimately trying to play lesson 1
     suppressTrackChange = true;
   }
@@ -286,7 +288,6 @@ export default async () => {
           wasPlaying.course,
           wasPlaying.lesson,
         );
-
         // threshold compare, though in practice it's much smaller than 0.5
         if (params.position < trackDuration - 0.5) {
           // just a skip, track didn't finish
