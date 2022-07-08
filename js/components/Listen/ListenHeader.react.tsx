@@ -29,7 +29,7 @@ const ListenHeader = ({course}: {course: Course}) => {
           <Icon
             name="arrow-left"
             type="font-awesome-5"
-            size={30}
+            size={18}
             color={CourseData.getCourseUIColors(course).text}
           />
         </TouchableNativeFeedback>
