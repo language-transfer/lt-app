@@ -86,13 +86,18 @@ export const genEnqueueFile = async (
 
   // Add a track to the queue
   if (lesson !== 0 && Platform.OS === 'android') {
-    // only suppress on android as this was breaking iOS
     // we get an event for skipping that needs to be suppressed, UNLESS we're legitimately trying to play lesson 1
+    // only suppress on android as this was breaking iOS
+    // when we call the skip function in a few lines, on android the trackchanged event
+    // is happening asynchronously and currentlyPlaying is getting set BEFORE
+    // the trackchanged event is fired.
+    // However, on iOS currentlyPlaying gets set AFTER the trackchanged event is fired.
+    // this causes suppressChange not to be necessary on iOS because currentlyPlaying is null, and
+    // the event handler already returns early.
     suppressTrackChange = true;
   }
   await TrackPlayer.add(tracks);
-  CourseData.getLessonIndices
-  await TrackPlayer.skip(lesson); // TODO: +1? -1?
+  await TrackPlayer.skip(lesson);
 
   currentlyPlaying = {course, lesson};
 };
@@ -288,6 +293,7 @@ export default async () => {
           wasPlaying.course,
           wasPlaying.lesson,
         );
+        
         // threshold compare, though in practice it's much smaller than 0.5
         if (params.position < trackDuration - 0.5) {
           // just a skip, track didn't finish
