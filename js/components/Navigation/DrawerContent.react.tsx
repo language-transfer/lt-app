@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     padding: 0,
     margin: 0,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
   menuItemIcon: {
