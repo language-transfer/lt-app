@@ -293,7 +293,7 @@ export default async () => {
           wasPlaying.course,
           wasPlaying.lesson,
         );
-        
+
         // threshold compare, though in practice it's much smaller than 0.5
         if (params.position < trackDuration - 0.5) {
           // just a skip, track didn't finish
