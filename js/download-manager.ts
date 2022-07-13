@@ -245,7 +245,7 @@ const DownloadManager = {
     });
   },
 
-  copyBundledTracksOnLoad: async (): Promise<void> => {
+  copyBundledTracksIfNotPresent: async (): Promise<void> => {
     // this code runs every time on startup and copies the bundled tracks in iOS
     // into the course downloads.
     // this is so rntp can load bundled tracks from the local filesystem like other tracks
