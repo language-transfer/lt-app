@@ -1,3 +1,4 @@
+import {Platform} from 'react-native'; 
 import TrackPlayer, {State, Event, Capability, IOSCategory} from 'react-native-track-player';
 import BackgroundTimer, {IntervalId} from 'react-native-background-timer';
 import {
@@ -84,13 +85,19 @@ export const genEnqueueFile = async (
   );
 
   // Add a track to the queue
-  if (lesson !== 0) {
+  if (lesson !== 0 && Platform.OS === 'android') {
     // we get an event for skipping that needs to be suppressed, UNLESS we're legitimately trying to play lesson 1
+    // only suppress on android as this was breaking iOS
+    // when we call the skip function in a few lines, on android the trackchanged event
+    // is happening asynchronously and currentlyPlaying is getting set BEFORE
+    // the trackchanged event is fired.
+    // However, on iOS currentlyPlaying gets set AFTER the trackchanged event is fired.
+    // this causes suppressChange not to be necessary on iOS because currentlyPlaying is null, and
+    // the event handler already returns early.
     suppressTrackChange = true;
   }
   await TrackPlayer.add(tracks);
-  CourseData.getLessonIndices
-  await TrackPlayer.skip(lesson); // TODO: +1? -1?
+  await TrackPlayer.skip(lesson);
 
   currentlyPlaying = {course, lesson};
 };
