@@ -6,7 +6,7 @@ import {Icon} from 'react-native-elements';
 import {useNavigation} from '@react-navigation/native';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 import CourseData from '../../course-data';
-import { MainNavigationProp } from '../App.react';
+import {MainNavigationProp} from '../App.react';
 import {getStatusBarHeight} from 'react-native-status-bar-height';
 
 const ListenHeader = ({course}: {course: Course}) => {
@@ -18,9 +18,7 @@ const ListenHeader = ({course}: {course: Course}) => {
         styles.header,
         {backgroundColor: CourseData.getCourseUIColors(course).background},
       ]}>
-      <View style={[
-        styles.backButtonContainer,
-        ]}>
+      <View style={[styles.backButtonContainer]}>
         <TouchableNativeFeedback
           style={styles.backButton}
           onPress={() => pop()}
@@ -54,7 +52,7 @@ const styles = StyleSheet.create({
     height: 56,
     justifyContent: 'center',
     borderRadius: 28,
-  }
+  },
 });
 
 export default ListenHeader;
