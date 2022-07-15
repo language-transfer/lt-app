@@ -303,8 +303,7 @@ const About = () => {
           </View>
 
           <Text style={styles.bodyText}>
-            The app's core maintainers are Timothy J. Aveni and Michael
-            Schonfeld.
+            The app's core maintainers are Timothy J. Aveni and Josh Fayer.
           </Text>
           <Text style={styles.bodyText}>
             This is version {DeviceInfo.getVersion()} of the Language Transfer
