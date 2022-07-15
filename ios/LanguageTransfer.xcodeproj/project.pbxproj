@@ -12,9 +12,8 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		8D4ED3AE4D2D6763C431A265 /* libPods-LanguageTransfer-LanguageTransferTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9FA2B39DDAA799E50CF0BB20 /* libPods-LanguageTransfer-LanguageTransferTests.a */; };
-		A512F3138F81CA950ED5F28B /* libPods-LanguageTransfer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D62DBFDCCCCC1BFE5CC605FA /* libPods-LanguageTransfer.a */; };
-
+		C6D397D51F524559C18B3250 /* libPods-LanguageTransfer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D33933CD6C3BB7F300FE0F48 /* libPods-LanguageTransfer.a */; };
+		D3711E764C03D4EA3183DBF1 /* libPods-LanguageTransfer-LanguageTransferTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C780CF141AD8923B7E8FBDD3 /* libPods-LanguageTransfer-LanguageTransferTests.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,27 +38,25 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = LanguageTransfer/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = LanguageTransfer/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = LanguageTransfer/main.m; sourceTree = "<group>"; };
-		1E2DED7A1D55839C5AFDA83D /* libPods-LanguageTransfer-LanguageTransferTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LanguageTransfer-LanguageTransferTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		287EBDC828FC467B93A1C24E /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
+		3013DA4F538EE60488FF172F /* Pods-LanguageTransfer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LanguageTransfer.release.xcconfig"; path = "Target Support Files/Pods-LanguageTransfer/Pods-LanguageTransfer.release.xcconfig"; sourceTree = "<group>"; };
 		3ECCF02D17F9438D9744F2A9 /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
 		41E3F1EF96304346813CEEA2 /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		49BD9EB3500F48628E52BE29 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		612DF19E1270450BB603D26E /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Feather.ttf"; sourceTree = "<group>"; };
 		6FE21CE82D554523A0F142AC /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
 		709FB80CE9BB44F6928AA20A /* FontAwesome5_Solid.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Solid.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Solid.ttf"; sourceTree = "<group>"; };
-		78135FA00823398916780C3C /* Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig"; path = "Target Support Files/Pods-LanguageTransfer-LanguageTransferTests/Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig"; sourceTree = "<group>"; };
+		74E7DEBDA7CD04DAC17EC472 /* Pods-LanguageTransfer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LanguageTransfer.debug.xcconfig"; path = "Target Support Files/Pods-LanguageTransfer/Pods-LanguageTransfer.debug.xcconfig"; sourceTree = "<group>"; };
 		7AB142EA652047F29894F1DE /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
-		8BB199947019880F805E5328 /* Pods-LanguageTransfer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LanguageTransfer.debug.xcconfig"; path = "Target Support Files/Pods-LanguageTransfer/Pods-LanguageTransfer.debug.xcconfig"; sourceTree = "<group>"; };
-		8C6981A03FBC33F6E2A04A7B /* Pods-LanguageTransfer-LanguageTransferTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LanguageTransfer-LanguageTransferTests.release.xcconfig"; path = "Target Support Files/Pods-LanguageTransfer-LanguageTransferTests/Pods-LanguageTransfer-LanguageTransferTests.release.xcconfig"; sourceTree = "<group>"; };
-		9386047A6D74C1831AEE73A0 /* Pods-LanguageTransfer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LanguageTransfer.release.xcconfig"; path = "Target Support Files/Pods-LanguageTransfer/Pods-LanguageTransfer.release.xcconfig"; sourceTree = "<group>"; };
 		948ECEAF8D4A4F75888F99B0 /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
-		9FA2B39DDAA799E50CF0BB20 /* libPods-LanguageTransfer-LanguageTransferTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LanguageTransfer-LanguageTransferTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA9BCCB47D70459C84ED5262 /* AntDesign.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = AntDesign.ttf; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; };
 		B84ABF6FA6AA4C70924A9A39 /* Fontisto.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Fontisto.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Fontisto.ttf"; sourceTree = "<group>"; };
 		BA286249A4F24EA3B0D2035A /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
-		C4A3AF77DED96BA576C0E03B /* Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig"; path = "Target Support Files/Pods-LanguageTransfer-LanguageTransferTests/Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C780CF141AD8923B7E8FBDD3 /* libPods-LanguageTransfer-LanguageTransferTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LanguageTransfer-LanguageTransferTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD2463FC4DB8DB8FC5A76A7A /* Pods-LanguageTransfer-LanguageTransferTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LanguageTransfer-LanguageTransferTests.release.xcconfig"; path = "Target Support Files/Pods-LanguageTransfer-LanguageTransferTests/Pods-LanguageTransfer-LanguageTransferTests.release.xcconfig"; sourceTree = "<group>"; };
+		D33933CD6C3BB7F300FE0F48 /* libPods-LanguageTransfer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LanguageTransfer.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D37F25CF7F33450DA71ACD95 /* FontAwesome5_Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Regular.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Regular.ttf"; sourceTree = "<group>"; };
-		D62DBFDCCCCC1BFE5CC605FA /* libPods-LanguageTransfer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LanguageTransfer.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9F7E442575197C005FD64D8 /* Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig"; path = "Target Support Files/Pods-LanguageTransfer-LanguageTransferTests/Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig"; sourceTree = "<group>"; };
 		EADFB17A01434986B8F654E4 /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
@@ -72,7 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8D4ED3AE4D2D6763C431A265 /* libPods-LanguageTransfer-LanguageTransferTests.a in Frameworks */,
+				D3711E764C03D4EA3183DBF1 /* libPods-LanguageTransfer-LanguageTransferTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,7 +77,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A512F3138F81CA950ED5F28B /* libPods-LanguageTransfer.a in Frameworks */,
+				C6D397D51F524559C18B3250 /* libPods-LanguageTransfer.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,8 +120,8 @@
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
-				D62DBFDCCCCC1BFE5CC605FA /* libPods-LanguageTransfer.a */,
-				9FA2B39DDAA799E50CF0BB20 /* libPods-LanguageTransfer-LanguageTransferTests.a */,
+				D33933CD6C3BB7F300FE0F48 /* libPods-LanguageTransfer.a */,
+				C780CF141AD8923B7E8FBDD3 /* libPods-LanguageTransfer-LanguageTransferTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -164,10 +161,10 @@
 		8F000096FE63A492E38FA988 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				8BB199947019880F805E5328 /* Pods-LanguageTransfer.debug.xcconfig */,
-				9386047A6D74C1831AEE73A0 /* Pods-LanguageTransfer.release.xcconfig */,
-				C4A3AF77DED96BA576C0E03B /* Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig */,
-				8C6981A03FBC33F6E2A04A7B /* Pods-LanguageTransfer-LanguageTransferTests.release.xcconfig */,
+				74E7DEBDA7CD04DAC17EC472 /* Pods-LanguageTransfer.debug.xcconfig */,
+				3013DA4F538EE60488FF172F /* Pods-LanguageTransfer.release.xcconfig */,
+				D9F7E442575197C005FD64D8 /* Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig */,
+				CD2463FC4DB8DB8FC5A76A7A /* Pods-LanguageTransfer-LanguageTransferTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -202,12 +199,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "LanguageTransferTests" */;
 			buildPhases = (
-				4D8122DFE7A0418F30042C82 /* [CP] Check Pods Manifest.lock */,
+				D49690D7D03B68FA48BA5D3F /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				0E563CC477C106A39B01F751 /* [CP] Embed Pods Frameworks */,
-				46A56FA7E5BEC405479AA595 /* [CP] Copy Pods Resources */,
+				9ACD2721BD87AA6791ECF858 /* [CP] Embed Pods Frameworks */,
+				79390BAC6D76578D749D333C /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -223,14 +220,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "LanguageTransfer" */;
 			buildPhases = (
-				93DBEB4F1D73543921366B93 /* [CP] Check Pods Manifest.lock */,
+				9EB8A7E7060AFBC59625B125 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				72180E86AC56E282A632A4DA /* [CP] Embed Pods Frameworks */,
-				1412524D62A504BB6FB99FBB /* [CP] Copy Pods Resources */,
+				B4E5A4A22529E51B5E8FC737 /* [CP] Embed Pods Frameworks */,
+				47208D833462D0474561A55E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -315,29 +312,7 @@
 			shellPath = /bin/sh;
 			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
 		};
-		0E563CC477C106A39B01F751 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-LanguageTransfer-LanguageTransferTests/Pods-LanguageTransfer-LanguageTransferTests-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/Flipper-DoubleConversion/double-conversion.framework/double-conversion",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/Flipper-Glog/glog.framework/glog",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL-Universal/OpenSSL.framework/OpenSSL",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/double-conversion.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/glog.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LanguageTransfer-LanguageTransferTests/Pods-LanguageTransfer-LanguageTransferTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		1412524D62A504BB6FB99FBB /* [CP] Copy Pods Resources */ = {
+		47208D833462D0474561A55E /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -387,7 +362,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LanguageTransfer/Pods-LanguageTransfer-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		46A56FA7E5BEC405479AA595 /* [CP] Copy Pods Resources */ = {
+		79390BAC6D76578D749D333C /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -437,50 +412,29 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LanguageTransfer-LanguageTransferTests/Pods-LanguageTransfer-LanguageTransferTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		4D8122DFE7A0418F30042C82 /* [CP] Check Pods Manifest.lock */ = {
+		9ACD2721BD87AA6791ECF858 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-LanguageTransfer-LanguageTransferTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		72180E86AC56E282A632A4DA /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-LanguageTransfer/Pods-LanguageTransfer-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-LanguageTransfer-LanguageTransferTests/Pods-LanguageTransfer-LanguageTransferTests-frameworks.sh",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/Flipper-DoubleConversion/double-conversion.framework/double-conversion",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/Flipper-Glog/glog.framework/glog",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL-Universal/OpenSSL.framework/OpenSSL",
 			);
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-LanguageTransfer-checkManifestLockResult.txt",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/double-conversion.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/glog.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LanguageTransfer/Pods-LanguageTransfer-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LanguageTransfer-LanguageTransferTests/Pods-LanguageTransfer-LanguageTransferTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		93DBEB4F1D73543921366B93 /* [CP] Check Pods Manifest.lock */ = {
+		9EB8A7E7060AFBC59625B125 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -502,7 +456,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		86D0CA797AF31F0133E58FB6 /* [CP] Embed Pods Frameworks */ = {
+		B4E5A4A22529E51B5E8FC737 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -522,6 +476,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LanguageTransfer/Pods-LanguageTransfer-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D49690D7D03B68FA48BA5D3F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-LanguageTransfer-LanguageTransferTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		FD10A7F022414F080027D42C /* Start Packager */ = {
@@ -576,7 +552,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C4A3AF77DED96BA576C0E03B /* Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig */;
+			baseConfigurationReference = D9F7E442575197C005FD64D8 /* Pods-LanguageTransfer-LanguageTransferTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -606,7 +582,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8C6981A03FBC33F6E2A04A7B /* Pods-LanguageTransfer-LanguageTransferTests.release.xcconfig */;
+			baseConfigurationReference = CD2463FC4DB8DB8FC5A76A7A /* Pods-LanguageTransfer-LanguageTransferTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -633,13 +609,13 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8BB199947019880F805E5328 /* Pods-LanguageTransfer.debug.xcconfig */;
+			baseConfigurationReference = 74E7DEBDA7CD04DAC17EC472 /* Pods-LanguageTransfer.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = XZUB4ADZC3;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -648,7 +624,7 @@
 				);
 				INFOPLIST_FILE = LanguageTransfer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -665,17 +641,17 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9386047A6D74C1831AEE73A0 /* Pods-LanguageTransfer.release.xcconfig */;
+			baseConfigurationReference = 3013DA4F538EE60488FF172F /* Pods-LanguageTransfer.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = XZUB4ADZC3;
 				INFOPLIST_FILE = LanguageTransfer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
