@@ -244,32 +244,6 @@ const DownloadManager = {
       }
     });
   },
-
-  copyBundledTracksIfNotPresent: async (): Promise<void> => {
-    // this code runs every time on startup and copies the bundled tracks in iOS
-    // into the course downloads.
-    // this is so rntp can load bundled tracks from the local filesystem like other tracks
-    // instead of having to load them from within the app bundle
-    for (const course of CourseData.getCourseList()) {
-      // first, check to see if the lesson is bundled
-      // this will always return false on Android since courses are not bundled
-      if (CourseData.getBundledFirstLesson(course) === null) continue;
-      // if it is, check to see if it's already downloaded
-      if (await DownloadManager.genIsDownloadedForDownloadId(CourseData.getBundledFirstLessonId(course))) continue;
-
-      // if the course isn't downloaded yet, download it
-      const localUrl = Image.resolveAssetSource(CourseData.getBundledFirstLesson(course)).uri;
-      DownloadManager.attachCallbacks(Downloader.download({
-        id: CourseData.getBundledFirstLessonId(course),
-        url: localUrl,
-        destination: DownloadManager.getDownloadStagingLocation(
-          CourseData.getBundledFirstLessonId(course),
-        ),
-        // @ts-ignore
-        network: Downloader.Network.ALL,
-      }));
-    }
-  }
 };
 
 export const useDownloadStatus = (

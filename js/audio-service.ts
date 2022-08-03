@@ -63,16 +63,21 @@ export const genEnqueueFile = async (
   const tracks = await Promise.all(
     CourseData.getLessonIndices(course).map((l) =>
       (async (thisLesson) => {
-        let url = CourseData.getLessonUrl(course, thisLesson, quality);
-        if (await DownloadManager.genIsDownloaded(course, thisLesson)) {
-          url = DownloadManager.getDownloadSaveLocation(
-            DownloadManager.getDownloadId(course, thisLesson),
-          );
+        let resource;
+        if (thisLesson === 0 && CourseData.getBundledFirstLesson(course)) {
+          resource = CourseData.getBundledFirstLesson(course);
+        } else {
+          resource = CourseData.getLessonUrl(course, thisLesson, quality);
+          if (await DownloadManager.genIsDownloaded(course, thisLesson)) {
+            resource = DownloadManager.getDownloadSaveLocation(
+              DownloadManager.getDownloadId(course, thisLesson),
+            );
+          }
         }
 
         return {
           id: CourseData.getLessonId(course, thisLesson),
-          url,
+          url: resource,
           title: `${CourseData.getLessonTitle(
             course,
             thisLesson,
