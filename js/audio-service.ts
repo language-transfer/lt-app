@@ -61,7 +61,9 @@ export const genEnqueueFile = async (
   const quality = await genPreferenceStreamQuality();
 
   const tracks = await Promise.all(
-    CourseData.getLessonIndices(course).map((l) =>
+    CourseData.getLessonIndices(course)
+    .slice(Platform.OS === 'ios' ? lesson : 0)
+    .map((l) =>
       (async (thisLesson) => {
         let resource;
         if (thisLesson === 0 && CourseData.getBundledFirstLesson(course)) {
@@ -102,7 +104,11 @@ export const genEnqueueFile = async (
     suppressTrackChange = true;
   }
   await TrackPlayer.add(tracks);
-  await TrackPlayer.skip(lesson);
+  if (Platform.OS === 'ios') {
+    await TrackPlayer.skip(0);
+  } else {
+    await TrackPlayer.skip(lesson);
+  }
 
   currentlyPlaying = {course, lesson};
 };
@@ -277,12 +283,16 @@ export default async () => {
         }
 
         // ASSUMPTION: we're in the same course as the old track
+        // this is a little silly because we set wasPlaying to currentlyPlaying at the top
+        // and now we're setting currentlyPlaying to the contents of wasPlaying
+        // but I'm still doing that instead of deleting this and only referencing wasPlaying
+        // because currentlyPlaying is used elsewhere and that might screw things up
         currentlyPlaying = {
           course: wasPlaying.course,
-          lesson: params.nextTrack,
+          lesson: wasPlaying.lesson+1,
         };
 
-        if (!currentlyPlaying?.lesson) {
+        if (currentlyPlaying === undefined || currentlyPlaying.lesson === null) {
           // TODO: don't fail silently here? should be impossible, but bugs happen
           return;
         }
