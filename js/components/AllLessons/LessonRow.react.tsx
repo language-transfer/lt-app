@@ -40,15 +40,12 @@ const renderDownloadProgress = (
 
   if (errored) {
     return (
-      <>
-        <Icon
-          name="exclamation"
-          type="font-awesome-5"
-          accessibilityLabel="download error"
-          size={24}
-        />
-        <Text>{JSON.stringify(downloadState.error)}</Text>
-      </>
+      <Icon
+        name="exclamation"
+        type="font-awesome-5"
+        accessibilityLabel="download error"
+        size={24}
+      />
     );
   }
 
