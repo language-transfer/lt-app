@@ -10,8 +10,8 @@ import DownloadManager, {useDownloadStatus} from '../../download-manager';
 import CourseData from '../../course-data';
 import {usePreference} from '../../persistence';
 import {log} from '../../metrics';
-import { useNavigation } from '@react-navigation/core';
-import { MainNavigationProp } from '../App.react';
+import {useNavigation} from '@react-navigation/core';
+import {MainNavigationProp} from '../App.react';
 
 export const LESSON_ROW_HEIGHT = 72;
 
@@ -19,7 +19,12 @@ const renderDownloadProgress = (
   downloaded: boolean,
   downloadState: Download,
   downloading: boolean,
+  bundled: boolean,
 ) => {
+  if (bundled) {
+    return null;
+  }
+
   if (downloaded) {
     return (
       <Icon
@@ -127,14 +132,16 @@ const LessonRow = ({
   course: Course;
   lesson: number;
   lastUpdateTime: Date | null;
-  setLastChildUpdateTime: (time: Date) => void,
+  setLastChildUpdateTime: (time: Date) => void;
 }) => {
   const downloadState = useDownloadStatus(course, lesson);
   const downloadQuality = usePreference<Quality>('download-quality', 'high');
 
   const [progress, setProgress] = useState<Progress | null>(null);
   const [downloaded, setDownloaded] = useState<boolean | null>(null);
-  const [lastDeletionAction, setLastDeletionAction] = useState<number | null>(null);
+  const [lastDeletionAction, setLastDeletionAction] = useState<number | null>(
+    null,
+  );
 
   const {navigate} = useNavigation<MainNavigationProp<'Listen'>>();
 
@@ -159,7 +166,8 @@ const LessonRow = ({
   const finished = progress?.finished;
   const downloading =
     downloadState && !downloadState.error && !downloadState.finished;
-
+  
+  const bundled = !!(lesson === 0 && CourseData.getBundledFirstLesson(course))
   return (
     <View style={styles.row}>
       <TouchableNativeFeedback
@@ -204,16 +212,19 @@ const LessonRow = ({
         }}>
         <View style={styles.downloadBox}>
           {ready
-            ? renderDownloadProgress(downloaded!, downloadState, downloading)
+            ? renderDownloadProgress(downloaded!, downloadState, downloading, bundled)
             : null}
-          {ready
-            ? <Text style={styles.lessonSizeText}>
-                {prettyBytes(
-                  CourseData.getLessonSizeInBytes(course, lesson, downloadQuality),
-                )}
-              </Text>
-            : null
-          }
+          {ready && !bundled ? (
+            <Text style={styles.lessonSizeText}>
+              {prettyBytes(
+                CourseData.getLessonSizeInBytes(
+                  course,
+                  lesson,
+                  downloadQuality,
+                ),
+              )}
+            </Text>
+          ) : null}
         </View>
       </TouchableNativeFeedback>
     </View>
