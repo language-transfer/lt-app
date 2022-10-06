@@ -289,7 +289,7 @@ export default async () => {
         // because currentlyPlaying is used elsewhere and that might screw things up
         currentlyPlaying = {
           course: wasPlaying.course,
-          lesson: wasPlaying.lesson+1,
+          lesson: wasPlaying.lesson + 1,
         };
 
         if (currentlyPlaying === undefined || currentlyPlaying.lesson === null) {
