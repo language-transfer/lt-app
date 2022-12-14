@@ -36,7 +36,7 @@ Your code will be compiled and uploaded to TestFlight. To create a production re
 
 In order to use Language Transfer's own App Store Connect account, you'll need to obtain the organization's Apple Provisioning Profile & Developer Certificate. Both can be obtained by contacting Mihalis.
 
-For more help about the iOS development flow, contact [@bacoseason](mailto:michael@schonfeld.org).
+For more help about the iOS development flow, contact @jafayer.
 
 ## Dependencies
 
@@ -44,7 +44,7 @@ We use GitHub's [Licensed](https://github.com/github/licensed) to track dependen
 
 ## Issues & Pull Requests
 
-For now, go ahead and open issues/PRs willy-nilly. We'll get some guidelines in here if we need to standardize or manage project work. It would be wise to check with the core project maintainers before starting work on a PR, just to make sure you don't duplicate work or go too far in the wrong direction.
+At the moment, there's little outstanding work to be done by contributors. Check with the core project maintainers before starting work on a PR, just to make sure you don't duplicate work or go too far in the wrong direction. Accepting contributions is currently a nontrivial burden on the core maintainers; although of course interest in contributing is appreciated, in practice it can be hard to make sure contributors have the support they need throughout the process. Please don't take offense if your PRs/issues aren't accepted, or if they sit idle for a long time!
 
 ## Questions?
 
