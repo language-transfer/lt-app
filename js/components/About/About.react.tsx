@@ -12,8 +12,8 @@ import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import DeviceInfo from 'react-native-device-info';
 import {Icon} from 'react-native-elements';
 import {log} from '../../metrics';
-import { useNavigation } from '@react-navigation/native';
-import { MainNavigationProp } from '../App.react';
+import {useNavigation} from '@react-navigation/native';
+import {MainNavigationProp} from '../App.react';
 
 type Section = 'Language Transfer' | 'Privacy' | 'LT App';
 
@@ -288,10 +288,7 @@ const About = () => {
               </View>
             </TouchableNativeFeedback>
           </View>
-          <View
-            style={[
-              styles.additionalButton,
-            ]}>
+          <View style={[styles.additionalButton]}>
             <TouchableNativeFeedback
               onPress={() => navigate('Licenses')}
               useForeground={true}>

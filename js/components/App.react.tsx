@@ -11,7 +11,10 @@ import logNavState from '../logNavState';
 import CourseData from '../course-data';
 import {setNavigationRef, setDrawerNavigationRef} from '../navigation-ref';
 import {log} from '../metrics';
-import {createStackNavigator, StackNavigationProp} from '@react-navigation/stack';
+import {
+  createStackNavigator,
+  StackNavigationProp,
+} from '@react-navigation/stack';
 import Listen from './Listen/Listen.react';
 import AllLessons from './AllLessons/AllLessons.react';
 import DataManagement from './DataManagement/DataManagement.react';
@@ -43,7 +46,8 @@ type MainParamList = {
   Settings: undefined;
 };
 
-export type MainNavigationProp<T extends keyof MainParamList> = StackNavigationProp<MainParamList, T>;
+export type MainNavigationProp<T extends keyof MainParamList> =
+  StackNavigationProp<MainParamList, T>;
 
 const App = () => {
   // one day, the Suspense documentation page won't have a bunch of red warnings at the top
@@ -82,24 +86,36 @@ const App = () => {
     [recentCourse],
   );
 
-  const screensWithDisabledDrawer: Array<keyof MainParamList> = ['Language Selector', 'Listen'];
+  const screensWithDisabledDrawer: Array<keyof MainParamList> = [
+    'Language Selector',
+    'Listen',
+  ];
 
-  const [gestureEnabled, setGestureEnabled] = useState(screensWithDisabledDrawer.includes(initialRouteName));
+  const [gestureEnabled, setGestureEnabled] = useState(
+    screensWithDisabledDrawer.includes(initialRouteName),
+  );
 
   const registerNavigationListener = (node: any) => {
     // onStateChange won't work for some reason
     // https://stackoverflow.com/questions/60593474
     node.addListener('state', (e: any) => {
       const state = e.data.state;
-      if (!state) return;
+      if (!state) {
+        return;
+      }
       logNavState(state);
-      if (state.routes.length && screensWithDisabledDrawer.includes(state.routes[state.routes.length - 1].name)) {
+      if (
+        state.routes.length &&
+        screensWithDisabledDrawer.includes(
+          state.routes[state.routes.length - 1].name,
+        )
+      ) {
         setGestureEnabled(false);
       } else {
         setGestureEnabled(true);
       }
     });
-  }
+  };
 
   if (!loaded) {
     return <SplashScreen />;
@@ -110,30 +126,35 @@ const App = () => {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer ref={node => {
+      <NavigationContainer
+        ref={(node) => {
           if (node !== null) {
             setDrawerNavigationRef(node);
           }
         }}>
         <Drawer.Navigator
           drawerContent={(props) => <DrawerContent {...props} />}>
-          <Drawer.Screen name="Main" options={{ gestureEnabled }}>
-            {() =>
-              <NavigationContainer ref={node => {
-                if (node !== null) {
-                  setNavigationRef(node);
-                  registerNavigationListener(node);
-                }
-              }} independent>
+          <Drawer.Screen name="Main" options={{gestureEnabled}}>
+            {() => (
+              <NavigationContainer
+                ref={(node) => {
+                  if (node !== null) {
+                    setNavigationRef(node);
+                    registerNavigationListener(node);
+                  }
+                }}
+                independent>
                 <Stack.Navigator initialRouteName={initialRouteName}>
                   <Stack.Screen
                     name="Language Home"
                     component={LanguageHomeBody}
-                    options={({ route }) => ({
+                    options={({route}) => ({
                       headerLeft: () => <DrawerMenuButton />,
-                      headerTitle: `${CourseData.getCourseFullTitle(route.params.course)}`,
+                      headerTitle: `${CourseData.getCourseFullTitle(
+                        route.params.course,
+                      )}`,
                     })}
-                    initialParams={{ course: recentCourse! }}
+                    initialParams={{course: recentCourse!}}
                   />
                   <Stack.Screen
                     name="Listen"
@@ -146,7 +167,7 @@ const App = () => {
                   <Stack.Screen
                     name="All Lessons"
                     component={AllLessons}
-                    options={({ route }) => ({
+                    options={({route}) => ({
                       headerTitle: `${CourseData.getCourseShortTitle(
                         route.params.course,
                       )}: All Lessons`,
@@ -156,15 +177,17 @@ const App = () => {
                   <Stack.Screen
                     name="Data Management"
                     component={DataManagement}
-                    options={({ route }) => ({
-                      headerTitle: `${CourseData.getCourseFullTitle(route.params.course)}: Data Management`,
+                    options={({route}) => ({
+                      headerTitle: `${CourseData.getCourseFullTitle(
+                        route.params.course,
+                      )}: Data Management`,
                       headerBackTitleVisible: false,
                     })}
                   />
                   <Stack.Screen
                     name="Language Selector"
                     component={LanguageSelector}
-                    options={({ route }) => ({
+                    options={({route}) => ({
                       headerShown: false,
                       // disable drawer swipe in home screen
                       gestureEnabled: route.name !== 'Language Selector',
@@ -193,7 +216,7 @@ const App = () => {
                   />
                 </Stack.Navigator>
               </NavigationContainer>
-            }
+            )}
           </Drawer.Screen>
         </Drawer.Navigator>
       </NavigationContainer>

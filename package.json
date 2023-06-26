@@ -11,6 +11,7 @@
     "prettier": "prettier --write 'js/**/*.js' && prettier --write 'js/**/*.ts'"
   },
   "dependencies": {
+    "@nonam4/react-native-bottom-sheet": "^2.2.3",
     "@react-native-async-storage/async-storage": "^1.14.1",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/drawer": "^5.8.5",
@@ -26,12 +27,11 @@
     "react-native-device-info": "^5.6.2",
     "react-native-elements": "^2.0.4",
     "react-native-fs": "^2.16.6",
-    "react-native-gesture-handler": "^1.6.1",
+    "react-native-gesture-handler": "^2.12.0",
     "react-native-get-random-values": "^1.4.0",
     "react-native-navigation-bar-color": "^2.0.1",
     "react-native-path": "0.0.5",
     "react-native-progress-circle": "^2.1.0",
-    "react-native-raw-bottom-sheet": "^2.2.0",
     "react-native-reanimated": "^1.9.0",
     "react-native-safe-area-context": "^3.1.1",
     "react-native-screens": "^2.9.0",

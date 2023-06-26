@@ -1,5 +1,4 @@
 import {DownloadTask} from 'react-native-background-downloader';
-import {IntervalId} from 'react-native-background-timer';
 
 declare global {
   type Course =
@@ -60,11 +59,11 @@ declare global {
   }
 
   export interface Download {
-    requested: boolean,
-    totalBytes: number | null,
-    bytesWritten: number,
-    error: any,
-    finished: boolean,
-    downloadTask: DownloadTask,
+    requested: boolean;
+    totalBytes: number | null;
+    bytesWritten: number;
+    error: any;
+    finished: boolean;
+    downloadTask: DownloadTask;
   }
 }

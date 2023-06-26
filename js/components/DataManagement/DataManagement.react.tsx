@@ -12,8 +12,8 @@ import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
 import {genDeleteProgressForCourse} from '../../persistence';
 import {log} from '../../metrics';
-import { useNavigation } from '@react-navigation/core';
-import { MainNavigationProp } from '../App.react';
+import {useNavigation} from '@react-navigation/core';
+import {MainNavigationProp} from '../App.react';
 
 const DataManagement = ({route}: {route: any}) => {
   useStatusBarStyle('white', 'dark-content');

@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {Alert, Image} from 'react-native';
+import {Alert} from 'react-native';
 import fs from 'react-native-fs';
 import CourseData from './course-data';
 import DeviceInfo from 'react-native-device-info';
@@ -8,8 +8,6 @@ import {
   genProgressForLesson,
   genPreferenceDownloadQuality,
   genPreferenceDownloadOnlyOnWifi,
-  genPreferenceIsFirstLoad,
-  genSetPreferenceIsFirstLoad,
 } from './persistence';
 import {log} from './metrics';
 
@@ -160,7 +158,10 @@ const DownloadManager = {
     DownloadManager._subscriptions[downloadId].push(callback);
   },
 
-  unsubscribeFromDownloadUpdates: (downloadId: string, callback: (download: Download) => any) => {
+  unsubscribeFromDownloadUpdates: (
+    downloadId: string,
+    callback: (download: Download) => any,
+  ) => {
     const subscriptionArray = DownloadManager._subscriptions[downloadId];
     subscriptionArray.splice(subscriptionArray.indexOf(callback), 1);
   },
@@ -246,10 +247,7 @@ const DownloadManager = {
   },
 };
 
-export const useDownloadStatus = (
-  course: Course,
-  lesson: number,
-): Download => {
+export const useDownloadStatus = (course: Course, lesson: number): Download => {
   const downloadId = DownloadManager.getDownloadId(course, lesson);
 
   const [downloadProgress, setDownloadProgress] = useState(

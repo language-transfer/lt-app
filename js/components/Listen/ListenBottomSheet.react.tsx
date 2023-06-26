@@ -15,11 +15,11 @@ import {useNavigation} from '@react-navigation/native';
 import {useProgress} from 'react-native-track-player';
 import {log} from '../../metrics';
 import formatDuration from 'format-duration';
-import { MainNavigationProp } from '../App.react';
+import {MainNavigationProp} from '../App.react';
 
 interface Props {
-  course: Course,
-  lesson: number,
+  course: Course;
+  lesson: number;
   downloaded: boolean | null;
 }
 
@@ -89,9 +89,9 @@ const ListenBottomSheet = ({course, lesson, downloaded}: Props) => {
               `?subject=${encodeURIComponent(
                 `Feedback about ${CourseData.getCourseFullTitle(course)}`,
               )}&body=${encodeURIComponent(
-                `Hi! I found a problem with the ${
-                  CourseData.getCourseFullTitle(course)
-                } course within the Language Transfer app:<br>
+                `Hi! I found a problem with the ${CourseData.getCourseFullTitle(
+                  course,
+                )} course within the Language Transfer app:<br>
                 <br>
                 <br>
                 ---<br>

@@ -56,8 +56,11 @@ import fs from 'react-native-fs';
 // @ts-ignore
 import path from 'react-native-path';
 import DownloadManager from './download-manager';
-import { Platform } from 'react-native';
-import { genPreferenceKillswitchCourseVersionV1, genSetPreferenceKillswitchCourseVersionV1 } from './persistence';
+import {Platform} from 'react-native';
+import {
+  genPreferenceKillswitchCourseVersionV1,
+  genSetPreferenceKillswitchCourseVersionV1,
+} from './persistence';
 
 type CourseDataMap = {[key in Course]: CourseData};
 
@@ -68,18 +71,37 @@ const courseMeta: CourseMetadataMap = {} as CourseMetadataMap;
 // bundledMediaStripTransform.js transforms these lines to make sure the bundler doesn't include these for non-iOS.
 // the ternaries are unnecessary (the the transform has the same effect) but are kept for clarity
 // if changing any of these lines, **make sure** the android build doesn't include the bundled files
-const spanishFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/spanish1-lq.mp3') : null;
-const arabicFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/arabic1-lq.mp3') : null;
-const turkishFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/turkish1-lq.mp3') : null;
-const germanFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/german1-lq.mp3') : null;
-const greekFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/greek1-lq.mp3') : null;
-const italianFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/italian1-lq.mp3') : null;
-const swahiliFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/swahili1-lq.mp3') : null;
-const frenchFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/french1-lq.mp3') : null;
-const inglesFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/ingles1-lq.mp3') : null;
-const musicFirstLesson = Platform.OS === 'ios' ? require('../resources/courses/music1-lq.mp3') : null;
+const spanishFirstLesson =
+  Platform.OS === 'ios'
+    ? require('../resources/courses/spanish1-lq.mp3')
+    : null;
+const arabicFirstLesson =
+  Platform.OS === 'ios' ? require('../resources/courses/arabic1-lq.mp3') : null;
+const turkishFirstLesson =
+  Platform.OS === 'ios'
+    ? require('../resources/courses/turkish1-lq.mp3')
+    : null;
+const germanFirstLesson =
+  Platform.OS === 'ios' ? require('../resources/courses/german1-lq.mp3') : null;
+const greekFirstLesson =
+  Platform.OS === 'ios' ? require('../resources/courses/greek1-lq.mp3') : null;
+const italianFirstLesson =
+  Platform.OS === 'ios'
+    ? require('../resources/courses/italian1-lq.mp3')
+    : null;
+const swahiliFirstLesson =
+  Platform.OS === 'ios'
+    ? require('../resources/courses/swahili1-lq.mp3')
+    : null;
+const frenchFirstLesson =
+  Platform.OS === 'ios' ? require('../resources/courses/french1-lq.mp3') : null;
+const inglesFirstLesson =
+  Platform.OS === 'ios' ? require('../resources/courses/ingles1-lq.mp3') : null;
+const musicFirstLesson =
+  Platform.OS === 'ios' ? require('../resources/courses/music1-lq.mp3') : null;
 
-const META_VERSIONS_URL = 'https://downloads.languagetransfer.org/course-versions.json';
+const META_VERSIONS_URL =
+  'https://downloads.languagetransfer.org/course-versions.json';
 
 const data: CourseDataMap = {
   spanish: {
@@ -351,7 +373,8 @@ const CourseData = {
       }
 
       const json = await fetch(META_VERSIONS_URL).then((r) => r.json());
-      if (json.killswitch) { // I don't trust myself not to ddos myself
+      if (json.killswitch) {
+        // I don't trust myself not to ddos myself
         await genSetPreferenceKillswitchCourseVersionV1(true);
         return;
       }
