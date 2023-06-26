@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import LanguageButton from './LanguageButton.react';
-import logo from '../../../resources/LT-logo-text.png';
 import CourseData from '../../course-data';
 import {Icon} from 'react-native-elements';
 import { useNavigation } from '@react-navigation/core';
@@ -25,6 +24,7 @@ const LanguageSelector = () => {
   useStatusBarStyle('white', 'dark-content');
 
   const scrollAnim = useRef(new Animated.Value(0)).current;
+  const logo = require('../../../resources/LT-logo-text.png');
 
   return (
     <View style={styles.screenWrapper}>
