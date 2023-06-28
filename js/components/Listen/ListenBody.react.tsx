@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
-import RBSheet from 'react-native-raw-bottom-sheet';
+import RBSheet from '@nonam4/react-native-bottom-sheet';
 import ListenBottomSheet from './ListenBottomSheet.react';
 import CourseData from '../../course-data';
 import ListenScrubber from './ListenScrubber.react';
