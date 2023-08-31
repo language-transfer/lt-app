@@ -13,6 +13,6 @@ module.exports = {
         inlineRequires: false,
       },
     }),
-    babelTransformerPath: require.resolve('./bundledMediaStripTransform'),
+    // babelTransformerPath: require.resolve('./bundledMediaStripTransform'),
   },
 };

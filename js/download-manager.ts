@@ -3,7 +3,7 @@ import {Alert, Image} from 'react-native';
 import fs from 'react-native-fs';
 import CourseData from './course-data';
 import DeviceInfo from 'react-native-device-info';
-import Downloader, {DownloadTask} from 'react-native-background-downloader';
+import Downloader, {DownloadTask} from '@kesha-antonov/react-native-background-downloader';
 import {
   genProgressForLesson,
   genPreferenceDownloadQuality,
