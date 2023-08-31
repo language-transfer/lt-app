@@ -95,7 +95,7 @@ const Listen = (props: any) => {
 
   const seekTo = async (seconds: number) => {
     log({
-      action: 'change_await TrackPlayer.getPosition()',
+      action: 'change_position',
       surface: 'listen_screen',
       course,
       lesson,
