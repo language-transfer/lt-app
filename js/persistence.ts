@@ -185,15 +185,11 @@ export const [
   genSetPreferenceAutoDeleteFinished,
 ] = preference('auto-delete-finished', false, (b) => b === 'true');
 
-export const [
-  genPreferenceStreamQuality,
-  genSetPreferenceStreamQuality,
-] = preference('stream-quality', 'low', (b) => b);
+export const [genPreferenceStreamQuality, genSetPreferenceStreamQuality] =
+  preference('stream-quality', 'low', (b) => b);
 
-export const [
-  genPreferenceDownloadQuality,
-  genSetPreferenceDownloadQuality,
-] = preference('download-quality', 'high', (b) => b);
+export const [genPreferenceDownloadQuality, genSetPreferenceDownloadQuality] =
+  preference('download-quality', 'high', (b) => b);
 
 export const [
   genPreferenceDownloadOnlyOnWifi,
@@ -205,15 +201,15 @@ export const [
   genSetPreferenceAllowDataCollection,
 ] = preference('allow-data-collection', true, (b) => b === 'true');
 
-export const [
-  genPreferenceIsFirstLoad,
-  genSetPreferenceIsFirstLoad,
-] = preference('is-first-load', true, (b) => b === 'true');
+export const [genPreferenceIsFirstLoad, genSetPreferenceIsFirstLoad] =
+  preference('is-first-load', true, (b) => b === 'true');
 
 export const [
   genPreferenceRatingButtonDismissed,
   genSetPreferenceRatingButtonDismissed,
-] = preference('rating-button-dismissed', { dismissed: false }, (o) => JSON.parse(o));
+] = preference('rating-button-dismissed', {dismissed: false}, (o) =>
+  JSON.parse(o),
+);
 
 export const [
   genPreferenceKillswitchCourseVersionV1,

@@ -15,8 +15,8 @@ import {
 import CourseData from '../../course-data';
 
 import formatDuration from 'format-duration';
-import { MainNavigationProp } from '../App.react';
-import { log } from '../../metrics';
+import {MainNavigationProp} from '../App.react';
+import {log} from '../../metrics';
 
 const getNextLesson = (
   course: Course,
@@ -38,7 +38,11 @@ const getNextLesson = (
   return nextLesson;
 };
 
-const renderRatingBanner = (currentLesson: number, ratingButtonDismissed: boolean, dismissRatingButton: (explicit: boolean) => void) => {
+const renderRatingBanner = (
+  currentLesson: number,
+  ratingButtonDismissed: boolean,
+  dismissRatingButton: (explicit: boolean) => void,
+) => {
   if (Platform.OS !== 'android') {
     return null; // for now
   }
@@ -49,30 +53,44 @@ const renderRatingBanner = (currentLesson: number, ratingButtonDismissed: boolea
 
   return (
     <View style={styles.ratingBanner}>
-      <Text style={styles.ratingPrompt}>Help people find Language Transfer!</Text>
+      <Text style={styles.ratingPrompt}>
+        Help people find Language Transfer!
+      </Text>
       <View style={styles.ratingButtonContainer}>
-        <TouchableNativeFeedback style={styles.ratingButton} onPress={() => {
-          log({
-            action: 'open_google_play',
-            surface: 'rate_button',
-          });
-          dismissRatingButton(false);
-          Linking.openURL('https://play.google.com/store/apps/details?id=org.languagetransfer');
-        }}>
+        <TouchableNativeFeedback
+          style={styles.ratingButton}
+          onPress={() => {
+            log({
+              action: 'open_google_play',
+              surface: 'rate_button',
+            });
+            dismissRatingButton(false);
+            Linking.openURL(
+              'https://play.google.com/store/apps/details?id=org.languagetransfer',
+            );
+          }}>
           <View style={styles.ratingButtonInner}>
-            <Icon color="white" name="star" solid size={14} type="font-awesome-5" />
+            <Icon
+              color="white"
+              name="star"
+              solid
+              size={14}
+              type="font-awesome-5"
+            />
             <Text style={styles.ratingButtonText}>Rate</Text>
           </View>
         </TouchableNativeFeedback>
       </View>
       <View style={styles.dismissRatingBannerButtonContainer}>
-        <TouchableNativeFeedback style={styles.dismissRatingBannerButton} onPress={() => {
-          log({
-            action: 'dismiss_rating_button',
-            surface: 'rate_button',
-          });
-          dismissRatingButton(true);
-        }}>
+        <TouchableNativeFeedback
+          style={styles.dismissRatingBannerButton}
+          onPress={() => {
+            log({
+              action: 'dismiss_rating_button',
+              surface: 'rate_button',
+            });
+            dismissRatingButton(true);
+          }}>
           <View style={styles.dismissRatingBannerButtonInner}>
             <Icon color="white" name="times" size={14} type="font-awesome-5" />
           </View>
@@ -85,7 +103,9 @@ const renderRatingBanner = (currentLesson: number, ratingButtonDismissed: boolea
 const LanguageHomeTopButton = ({course}: {course: Course}) => {
   const {navigate} = useNavigation<MainNavigationProp<'Language Home'>>();
   const [lastListenState, setLastListenState] = useState<any>(null);
-  const [dismissedRateButton, setDismissedRateButton] = useState<boolean | null>(null);
+  const [dismissedRateButton, setDismissedRateButton] = useState<
+    boolean | null
+  >(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -105,7 +125,7 @@ const LanguageHomeTopButton = ({course}: {course: Course}) => {
       };
 
       const updateRatingButtonDismissed = async () => {
-        const { dismissed } = await genPreferenceRatingButtonDismissed();
+        const {dismissed} = await genPreferenceRatingButtonDismissed();
         setDismissedRateButton(dismissed);
       };
 
@@ -117,33 +137,26 @@ const LanguageHomeTopButton = ({course}: {course: Course}) => {
   // TODO: kinda temp, but at least it doesn't look awful. should add a loading thingy.
   // just make sure it's the same height as the actual button
   if (lastListenState === null || dismissedRateButton === null) {
-    return <View style={[styles.lessonPlayBox, styles.invisible]}>
-      <View style={styles.lessonPlayBoxInner}>
-        <View style={styles.textPlayFlex}>
-          <Text style={styles.lessonTitle}>
-            -
-          </Text>
-          <Icon name="play" type="font-awesome-5" />
-        </View>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressMade, { flex: 0 }]} />
-          <View
-            style={[
-              styles.progressLeft,
-              { flex: 1 },
-            ]}
-          />
-        </View>
-        <View style={styles.progressText}>
-          <Text>-</Text>
-          <Text>
-            -
-          </Text>
+    return (
+      <View style={[styles.lessonPlayBox, styles.invisible]}>
+        <View style={styles.lessonPlayBoxInner}>
+          <View style={styles.textPlayFlex}>
+            <Text style={styles.lessonTitle}>-</Text>
+            <Icon name="play" type="font-awesome-5" />
+          </View>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressMade, {flex: 0}]} />
+            <View style={[styles.progressLeft, {flex: 1}]} />
+          </View>
+          <View style={styles.progressText}>
+            <Text>-</Text>
+            <Text>-</Text>
+          </View>
         </View>
       </View>
-    </View>;
+    );
   }
-  
+
   const progress = lastListenState.progressForThisLesson;
   const lesson = lastListenState.nextLesson;
 
@@ -178,15 +191,21 @@ const LanguageHomeTopButton = ({course}: {course: Course}) => {
           </View>
         </View>
       </TouchableNativeFeedback>
-      {renderRatingBanner(lesson, dismissedRateButton, async (explicit: boolean) => {
-        await genSetPreferenceRatingButtonDismissed(JSON.stringify({
-          dismissed: true,
-          surface: 'LanguageHomeTopButton',
-          explicit,
-          time: +new Date(),
-        }));
-        setDismissedRateButton(true);
-      })}
+      {renderRatingBanner(
+        lesson,
+        dismissedRateButton,
+        async (explicit: boolean) => {
+          await genSetPreferenceRatingButtonDismissed(
+            JSON.stringify({
+              dismissed: true,
+              surface: 'LanguageHomeTopButton',
+              explicit,
+              time: +new Date(),
+            }),
+          );
+          setDismissedRateButton(true);
+        },
+      )}
     </View>
   );
 };

@@ -11,7 +11,7 @@ import LanguageHomeTopButton from './LanguageHomeTopButton.react';
 import CourseData from '../../course-data';
 import {log} from '../../metrics';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
-import { MainNavigationProp } from '../App.react';
+import {MainNavigationProp} from '../App.react';
 
 const donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo = true;
 let metadataWarningTimeout: NodeJS.Timeout | null = null;

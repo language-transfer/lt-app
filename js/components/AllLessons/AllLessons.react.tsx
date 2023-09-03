@@ -25,7 +25,9 @@ const AllLessons = ({route}: {route: any}) => {
   const indices = CourseData.getLessonIndices(course);
 
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
-  const [lastChildUpdateTime, setLastChildUpdateTime] = useState<Date | null>(null);
+  const [lastChildUpdateTime, setLastChildUpdateTime] = useState<Date | null>(
+    null,
+  );
 
   const downloadQuality = usePreference<Quality>('download-quality', 'high');
   const [downloadedCount, setDownloadedCount] = useState<number | null>(null);
@@ -35,11 +37,11 @@ const AllLessons = ({route}: {route: any}) => {
     const courseTitle = CourseData.getCourseShortTitle(course);
 
     const downloadedMask = await Promise.all(
-      indices.map(i =>
+      indices.map((i) =>
         DownloadManager.genIsDownloadedForDownloadId(
           DownloadManager.getDownloadId(course, i),
-        ).then(b => b ? 1 : 0)
-      )
+        ).then((b) => (b ? 1 : 0)),
+      ),
     );
     const totalBytes = indices
       .filter((lesson) => !downloadedMask[lesson])
@@ -48,12 +50,11 @@ const AllLessons = ({route}: {route: any}) => {
       )
       .reduce((acc, val) => acc + val, 0);
 
-
     setDownloadAllLoading(false);
     Alert.alert(
       'Download all lessons?',
       `This will download ${
-        downloadedMask.filter(b => !b).length
+        downloadedMask.filter((b) => !b).length
       } ${courseTitle} lessons (${prettyBytes(
         totalBytes,
       )}) to your device for offline playback.`,
@@ -67,7 +68,9 @@ const AllLessons = ({route}: {route: any}) => {
           onPress: () => {
             indices
               .filter((lesson) => !downloadedMask[lesson])
-              .forEach((lesson) => DownloadManager.startDownload(course, lesson));
+              .forEach((lesson) =>
+                DownloadManager.startDownload(course, lesson),
+              );
           },
         },
       ],
@@ -91,7 +94,9 @@ const AllLessons = ({route}: {route: any}) => {
   // cache invalidation isn't even hard here, we can assume we're the only ones changing the download state
   const throttledCountDownloads = throttle(countDownloads, 2000);
 
-  useEffect(() => { throttledCountDownloads() }, [lastUpdateTime, lastChildUpdateTime]);
+  useEffect(() => {
+    throttledCountDownloads();
+  }, [lastUpdateTime, lastChildUpdateTime]);
 
   useFocusEffect(
     useCallback(() => {
@@ -99,8 +104,9 @@ const AllLessons = ({route}: {route: any}) => {
     }, []),
   );
 
-  const allDownloaded = downloadedCount !== null && downloadedCount === indices.length;
-  
+  const allDownloaded =
+    downloadedCount !== null && downloadedCount === indices.length;
+
   if (downloadQuality === null) {
     return null;
   }
@@ -109,14 +115,14 @@ const AllLessons = ({route}: {route: any}) => {
     <>
       <FlatList
         data={indices}
-        renderItem={({item}) =>
+        renderItem={({item}) => (
           <LessonRow
             course={course}
             lesson={item}
             lastUpdateTime={lastUpdateTime}
             setLastChildUpdateTime={setLastChildUpdateTime}
           />
-        }
+        )}
         keyExtractor={(lesson) => String(lesson)}
         getItemLayout={(_, index) => ({
           length: LESSON_ROW_HEIGHT,
@@ -124,36 +130,34 @@ const AllLessons = ({route}: {route: any}) => {
           index,
         })}
       />
-      {downloadedCount === null ? null :
+      {downloadedCount === null ? null : (
         <View style={styles.bottomContainer}>
           <Text style={styles.bottomLeftText}>
             {downloadedCount}/{indices.length} downloaded.
           </Text>
           <View style={allDownloaded ? {opacity: 0.4} : {}}>
-            <TouchableNativeFeedback onPress={downloadAll} disabled={allDownloaded || downloadAllLoading}>
+            <TouchableNativeFeedback
+              onPress={downloadAll}
+              disabled={allDownloaded || downloadAllLoading}>
               <View style={styles.allButton}>
                 <View>
-                  {downloadAllLoading
-                    ? <ActivityIndicator
-                        size={17}
-                        color="#888"
-                      />
-                    : <Icon
-                        name="download"
-                        type="font-awesome-5"
-                        size={16}
-                        color="#888"
-                      />
-                  }
+                  {downloadAllLoading ? (
+                    <ActivityIndicator size={17} color="#888" />
+                  ) : (
+                    <Icon
+                      name="download"
+                      type="font-awesome-5"
+                      size={16}
+                      color="#888"
+                    />
+                  )}
                 </View>
-                <Text style={styles.allText}>
-                  Download All
-                </Text>
+                <Text style={styles.allText}>Download All</Text>
               </View>
             </TouchableNativeFeedback>
           </View>
         </View>
-      }
+      )}
     </>
   );
 };

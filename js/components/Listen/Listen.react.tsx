@@ -1,5 +1,5 @@
 import React, {useEffect, useCallback, useState} from 'react';
-import {StyleSheet, StatusBarStyle} from 'react-native';
+import {StatusBarStyle} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import ListenHeader from './ListenHeader.react';
 import ListenBody from './ListenBody.react';
@@ -24,9 +24,7 @@ const Listen = (props: any) => {
 
   // go back to the previous screen when the user stops
   // the music from outside the app
-  useTrackPlayerEvents([Event.RemoteStop], () =>
-    props.navigation.pop(),
-  );
+  useTrackPlayerEvents([Event.RemoteStop], () => props.navigation.pop());
 
   // adjust the status bar style according to the course colors,
   // and the bottom sheet visibility
@@ -39,11 +37,7 @@ const Listen = (props: any) => {
       ((navBarLight ? 'dark' : 'light') + '-content') as StatusBarStyle,
       navBarLight,
     );
-  }, [
-    setStatusBarStyle,
-    bottomSheetOpen,
-    course,
-  ]);
+  }, [setStatusBarStyle, bottomSheetOpen, course]);
 
   // load & queue audio file, find the last heard offset, and start
   // the lesson
@@ -114,7 +108,7 @@ const Listen = (props: any) => {
       position: await TrackPlayer.getPosition(),
     });
 
-    TrackPlayer.seekTo(Math.max(0, await TrackPlayer.getPosition() - 10));
+    TrackPlayer.seekTo(Math.max(0, (await TrackPlayer.getPosition()) - 10));
   };
 
   return (
@@ -131,12 +125,5 @@ const Listen = (props: any) => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-});
 
 export default Listen;

@@ -7,11 +7,7 @@ const isAndroid = Platform.OS === 'android';
 
 export function useSetStatusBarStyle() {
   return useCallback(
-    (
-      backgroundColor: string,
-      style: StatusBarStyle,
-      navBarLight?: boolean,
-    ) => {
+    (backgroundColor: string, style: StatusBarStyle, navBarLight?: boolean) => {
       if (isAndroid) {
         StatusBar.setBackgroundColor(backgroundColor);
         StatusBar.setTranslucent(true);

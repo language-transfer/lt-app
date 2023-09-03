@@ -166,8 +166,8 @@ const LessonRow = ({
   const finished = progress?.finished;
   const downloading =
     downloadState && !downloadState.error && !downloadState.finished;
-  
-  const bundled = !!(lesson === 0 && CourseData.getBundledFirstLesson(course))
+
+  const bundled = !!(lesson === 0 && CourseData.getBundledFirstLesson(course));
   return (
     <View style={styles.row}>
       <TouchableNativeFeedback
@@ -212,7 +212,12 @@ const LessonRow = ({
         }}>
         <View style={styles.downloadBox}>
           {ready
-            ? renderDownloadProgress(downloaded!, downloadState, downloading, bundled)
+            ? renderDownloadProgress(
+                downloaded!,
+                downloadState,
+                downloading,
+                bundled,
+              )
             : null}
           {ready && !bundled ? (
             <Text style={styles.lessonSizeText}>

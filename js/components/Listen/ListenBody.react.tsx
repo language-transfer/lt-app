@@ -8,20 +8,17 @@ import {
 } from 'react-native';
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
-import RBSheet from 'react-native-raw-bottom-sheet';
+import RBSheet from '@nonam4/react-native-bottom-sheet';
 import ListenBottomSheet from './ListenBottomSheet.react';
 import CourseData from '../../course-data';
 import ListenScrubber from './ListenScrubber.react';
-import TrackPlayer, {
-  usePlaybackState,
-  State,
-} from 'react-native-track-player';
+import TrackPlayer, {usePlaybackState, State} from 'react-native-track-player';
 import {log} from '../../metrics';
 import useIsLessonDownloaded from '../../hooks/useIsLessonDownloaded';
 
 interface Props {
-  course: Course,
-  lesson: number,
+  course: Course;
+  lesson: number;
   setBottomSheetOpen: (val: boolean) => any;
   skipBack: () => any;
   seekTo: (pos: number) => any;
@@ -31,7 +28,14 @@ interface Props {
 const smallIconSize = 0.175 * Dimensions.get('screen').width;
 const largeIconSize = 0.4 * Dimensions.get('screen').width;
 
-const ListenBody = ({course, lesson, setBottomSheetOpen, skipBack, seekTo, toggle}: Props) => {
+const ListenBody = ({
+  course,
+  lesson,
+  setBottomSheetOpen,
+  skipBack,
+  seekTo,
+  toggle,
+}: Props) => {
   const playbackState = usePlaybackState();
   const ready = playbackState === State.Ready;
   const playing = playbackState === State.Playing;
@@ -59,10 +63,18 @@ const ListenBody = ({course, lesson, setBottomSheetOpen, skipBack, seekTo, toggl
           },
         ]}>
         <View style={styles.lessonName}>
-          <Text style={[styles.courseTitle, {color: CourseData.getCourseUIColors(course).text}]}>
+          <Text
+            style={[
+              styles.courseTitle,
+              {color: CourseData.getCourseUIColors(course).text},
+            ]}>
             {CourseData.getCourseShortTitle(course)}
           </Text>
-          <Text style={[styles.lesson, {color: CourseData.getCourseUIColors(course).text}]}>
+          <Text
+            style={[
+              styles.lesson,
+              {color: CourseData.getCourseUIColors(course).text},
+            ]}>
             {CourseData.getLessonTitle(course, lesson)}
           </Text>
         </View>
@@ -151,7 +163,11 @@ const ListenBody = ({course, lesson, setBottomSheetOpen, skipBack, seekTo, toggl
           });
           setBottomSheetOpen(false);
         }}>
-        <ListenBottomSheet course={course} lesson={lesson} downloaded={downloaded} />
+        <ListenBottomSheet
+          course={course}
+          lesson={lesson}
+          downloaded={downloaded}
+        />
       </RBSheet>
     </>
   );

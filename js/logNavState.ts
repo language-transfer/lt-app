@@ -21,7 +21,7 @@ export function getNestedParams(state: any): {[key: string]: any} {
 
   return {...route.params};
 }
-  // todo: this type signature is messed up
+// todo: this type signature is messed up
 
 export default function logNavState(state: any) {
   const route = state?.routes[state.index];

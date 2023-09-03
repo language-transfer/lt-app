@@ -10,11 +10,9 @@ import {
 } from 'react-native';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import LanguageButton from './LanguageButton.react';
-import logo from '../../../resources/LT-logo-text.png';
-import CourseData from '../../course-data';
 import {Icon} from 'react-native-elements';
-import { useNavigation } from '@react-navigation/core';
-import { MainNavigationProp } from '../App.react';
+import {useNavigation} from '@react-navigation/core';
+import {MainNavigationProp} from '../App.react';
 
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
 const IMAGE_HEIGHT = 0.4 * SCREEN_HEIGHT;
@@ -25,6 +23,7 @@ const LanguageSelector = () => {
   useStatusBarStyle('white', 'dark-content');
 
   const scrollAnim = useRef(new Animated.Value(0)).current;
+  const logo = require('../../../resources/LT-logo-text.png');
 
   return (
     <View style={styles.screenWrapper}>
@@ -64,81 +63,55 @@ const LanguageSelector = () => {
           )}>
           <View style={styles.courseList}>
             <View style={styles.sectionHeaderFirst}>
-              <Text style={styles.sectionHeaderText}>
-                New!
-              </Text>
+              <Text style={styles.sectionHeaderText}>New!</Text>
             </View>
             <LanguageButton
               course="music"
-              onPress={() =>
-                navigate('Language Home', {course: "music"})
-              }
+              onPress={() => navigate('Language Home', {course: 'music'})}
             />
 
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>
-                Language courses
-              </Text>
+              <Text style={styles.sectionHeaderText}>Language courses</Text>
             </View>
             <LanguageButton
               course="spanish"
-              onPress={() =>
-                navigate('Language Home', {course: "spanish"})
-              }
+              onPress={() => navigate('Language Home', {course: 'spanish'})}
             />
             <LanguageButton
               course="arabic"
-              onPress={() =>
-                navigate('Language Home', {course: "arabic"})
-              }
+              onPress={() => navigate('Language Home', {course: 'arabic'})}
             />
             <LanguageButton
               course="turkish"
-              onPress={() =>
-                navigate('Language Home', {course: "turkish"})
-              }
+              onPress={() => navigate('Language Home', {course: 'turkish'})}
             />
             <LanguageButton
               course="german"
-              onPress={() =>
-                navigate('Language Home', {course: "german"})
-              }
+              onPress={() => navigate('Language Home', {course: 'german'})}
             />
             <LanguageButton
               course="greek"
-              onPress={() =>
-                navigate('Language Home', {course: "greek"})
-              }
+              onPress={() => navigate('Language Home', {course: 'greek'})}
             />
             <LanguageButton
               course="italian"
-              onPress={() =>
-                navigate('Language Home', {course: "italian"})
-              }
+              onPress={() => navigate('Language Home', {course: 'italian'})}
             />
             <LanguageButton
               course="swahili"
-              onPress={() =>
-                navigate('Language Home', {course: "swahili"})
-              }
+              onPress={() => navigate('Language Home', {course: 'swahili'})}
             />
             <LanguageButton
               course="french"
-              onPress={() =>
-                navigate('Language Home', {course: "french"})
-              }
+              onPress={() => navigate('Language Home', {course: 'french'})}
             />
 
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>
-                For Spanish speakers
-              </Text>
+              <Text style={styles.sectionHeaderText}>For Spanish speakers</Text>
             </View>
             <LanguageButton
               course="ingles"
-              onPress={() =>
-                navigate('Language Home', {course: "ingles"})
-              }
+              onPress={() => navigate('Language Home', {course: 'ingles'})}
             />
             <View style={styles.aboutSectionHr} />
             <View style={styles.aboutSectionWrapper}>
@@ -167,17 +140,23 @@ const LanguageSelector = () => {
         </Animated.ScrollView>
       </View>
       <View style={styles.topTranslucent} />
-      <Animated.View style={[
-        styles.scrollIndicator,
-        {
-          opacity: scrollAnim.interpolate({
-            inputRange: [0, 100],
-            outputRange: [1, 0],
-          }),
-        }
-      ]}>
+      <Animated.View
+        style={[
+          styles.scrollIndicator,
+          {
+            opacity: scrollAnim.interpolate({
+              inputRange: [0, 100],
+              outputRange: [1, 0],
+            }),
+          },
+        ]}>
         <Text style={styles.scrollIndicatorText}>scroll for more</Text>
-        <Icon name="angle-double-down" type="font-awesome-5" color="#999" size={14} />
+        <Icon
+          name="angle-double-down"
+          type="font-awesome-5"
+          color="#999"
+          size={14}
+        />
       </Animated.View>
     </View>
   );

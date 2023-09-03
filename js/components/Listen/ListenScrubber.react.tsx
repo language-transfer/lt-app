@@ -11,8 +11,8 @@ import {
 } from 'react-native-gesture-handler';
 
 interface Props {
-  course: Course,
-  lesson: number,
+  course: Course;
+  lesson: number;
   seekTo: (pos: number) => any;
 }
 
@@ -37,10 +37,10 @@ const ListenScrubber = ({course, lesson, seekTo}: Props) => {
   // we'll use this seconds:"pixels" ratio & the scrubber's
   // offset to determine how much to seek, when the
   // user drags the scrubber handle
-  const secondsPerScreenPoint = useMemo(() => duration / width, [
-    duration,
-    width,
-  ]);
+  const secondsPerScreenPoint = useMemo(
+    () => duration / width,
+    [duration, width],
+  );
   const scrubberOffset = useMemo(
     // this is basically a calculation of how far from the left edge
     // the scrubber is located
@@ -96,7 +96,8 @@ const ListenScrubber = ({course, lesson, seekTo}: Props) => {
         style={[
           styles.progressBar,
           {
-            backgroundColor: CourseData.getCourseUIColors(course).backgroundAccent,
+            backgroundColor:
+              CourseData.getCourseUIColors(course).backgroundAccent,
           },
         ]}
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>

@@ -24,12 +24,14 @@ const LanguageButton = ({course, onPress}: Props) => {
         <View style={styles.rippleWrapper}>
           <TouchableNativeFeedback onPress={onPress} useForeground={true}>
             <View style={styles.sectionContainer}>
-              <Text style={[
-                styles.courseType,
-                {
-                  color: CourseData.getCourseUIColors(course).backgroundAccent,
-                },
-              ]}>
+              <Text
+                style={[
+                  styles.courseType,
+                  {
+                    color:
+                      CourseData.getCourseUIColors(course).backgroundAccent,
+                  },
+                ]}>
                 {CourseData.getCourseType(course)}
               </Text>
               <Text style={styles.courseTitle}>

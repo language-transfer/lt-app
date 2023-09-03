@@ -10,7 +10,7 @@ const Licenses = () => {
 
   const licenseUrlWithTag = `${LICENSE_URL}?v=android-${DeviceInfo.getVersion()}`;
 
-  return <WebView source={{ uri: licenseUrlWithTag }} />;
+  return <WebView source={{uri: licenseUrlWithTag}} />;
 };
 
 export default Licenses;

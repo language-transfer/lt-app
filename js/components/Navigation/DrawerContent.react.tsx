@@ -4,7 +4,6 @@ import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
 import {Icon} from 'react-native-elements';
 import {navigate} from '../../navigation-ref';
 
-
 const Drawer = (props: any) => {
   // since we're using an independent NavigationContext for the Stack navigator,
   // we need to explicitly close the drawer when we navigate
