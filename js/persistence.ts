@@ -103,7 +103,7 @@ export const genMarkLessonFinished = async (
       `@activity/${course}/${lesson}`,
       JSON.stringify({
         ...progressObject,
-        finished: true,
+        finished: !progressObject?.finished,
       }),
     ),
     AsyncStorage.setItem(

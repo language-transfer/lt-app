@@ -20,10 +20,11 @@ import { MainNavigationProp } from '../App.react';
 interface Props {
   course: Course,
   lesson: number,
-  downloaded: boolean | null;
+  downloaded: boolean | null,
+  finished: boolean | null;
 }
 
-const ListenBottomSheet = ({course, lesson, downloaded}: Props) => {
+const ListenBottomSheet = ({course, lesson, downloaded, finished}: Props) => {
   const {position} = useProgress();
   const {pop} = useNavigation<MainNavigationProp<'Listen'>>();
 
@@ -43,7 +44,9 @@ const ListenBottomSheet = ({course, lesson, downloaded}: Props) => {
           pop();
         }}>
         <View style={styles.bottomSheetRow}>
-          <Text style={styles.rowText}>Mark as finished</Text>
+          <Text style={styles.rowText}>
+            Mark as {finished ? 'unfinished' : 'finished'}
+          </Text>
           <View style={styles.iconContainer}>
             <Icon
               style={styles.rowIcon}

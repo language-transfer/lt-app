@@ -18,6 +18,7 @@ import TrackPlayer, {
 } from 'react-native-track-player';
 import {log} from '../../metrics';
 import useIsLessonDownloaded from '../../hooks/useIsLessonDownloaded';
+import useIsLessonFinished from '../../hooks/useIsLessonFinished';
 
 interface Props {
   course: Course,
@@ -38,6 +39,7 @@ const ListenBody = ({course, lesson, setBottomSheetOpen, skipBack, seekTo, toggl
   const paused = playbackState === State.Paused;
   const bottomSheet = useRef<RBSheet | null>(null);
 
+  const finished = useIsLessonFinished(course, lesson);
   const downloaded = useIsLessonDownloaded(course, lesson);
   if (downloaded === null) {
     return (
@@ -151,7 +153,7 @@ const ListenBody = ({course, lesson, setBottomSheetOpen, skipBack, seekTo, toggl
           });
           setBottomSheetOpen(false);
         }}>
-        <ListenBottomSheet course={course} lesson={lesson} downloaded={downloaded} />
+        <ListenBottomSheet course={course} lesson={lesson} downloaded={downloaded} finished={finished} />
       </RBSheet>
     </>
   );
