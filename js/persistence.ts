@@ -103,6 +103,35 @@ export const genMarkLessonFinished = async (
       `@activity/${course}/${lesson}`,
       JSON.stringify({
         ...progressObject,
+        finished: true,
+      }),
+    ),
+    AsyncStorage.setItem(
+      `@activity/${course}/most-recent-lesson`,
+      lesson.toString(),
+    ),
+    AsyncStorage.setItem('@activity/most-recent-course', course),
+  ]);
+
+  if (
+    (await genPreferenceAutoDeleteFinished()) &&
+    (await DownloadManager.genIsDownloaded(course, lesson))
+  ) {
+    await DownloadManager.genDeleteDownload(course, lesson);
+  }
+};
+
+export const genToggleLessonFinished = async (
+  course: Course,
+  lesson: number,
+): Promise<void> => {
+  const progressObject = await genProgressForLesson(course, lesson);
+
+  await Promise.all([
+    AsyncStorage.setItem(
+      `@activity/${course}/${lesson}`,
+      JSON.stringify({
+        ...progressObject,
         finished: !progressObject?.finished,
       }),
     ),

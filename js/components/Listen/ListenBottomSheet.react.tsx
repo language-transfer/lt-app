@@ -9,7 +9,7 @@ import {
 import {Icon} from 'react-native-elements';
 import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
-import {genMarkLessonFinished} from '../../persistence';
+import {genMarkLessonFinished, genToggleLessonFinished} from '../../persistence';
 import {genStopPlaying} from '../../audio-service';
 import {useNavigation} from '@react-navigation/native';
 import {useProgress} from 'react-native-track-player';
@@ -40,7 +40,7 @@ const ListenBottomSheet = ({course, lesson, downloaded, finished}: Props) => {
             position,
           });
 
-          await genMarkLessonFinished(course, lesson);
+          await genToggleLessonFinished(course, lesson);
           pop();
         }}>
         <View style={styles.bottomSheetRow}>
