@@ -143,6 +143,7 @@ export const genToggleLessonFinished = async (
   ]);
 
   if (
+    progressObject?.finished &&
     (await genPreferenceAutoDeleteFinished()) &&
     (await DownloadManager.genIsDownloaded(course, lesson))
   ) {
