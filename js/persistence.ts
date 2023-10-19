@@ -11,6 +11,17 @@ import {log} from './metrics';
 // haven't gone to the effort of adding a mutex. mostly because I don't like
 // the API for the most popular library.
 
+enum Preference {
+  AUTO_DELETE_FINISHED = 'auto-delete-finished',
+  STREAM_QUALITY = 'stream-quality',
+  DOWNLOAD_QUALITY = 'download-quality',
+  DOWNLOAD_ONLY_ON_WIFI = 'download-only-on-wifi',
+  ALLOW_DATA_COLLECTION = 'allow-data-collection',
+  IS_FIRST_LOAD = 'is-first-load',
+  RATING_BUTTON_DISMISSED = 'rating-button-dismissed',
+  KILLSWITCH_COURSE_VERSION_V1 = 'killswitch-course-version-v1',
+}
+
 export interface Progress {
   finished: boolean;
   progress: number | null;
@@ -183,42 +194,42 @@ const preference = (
 export const [
   genPreferenceAutoDeleteFinished,
   genSetPreferenceAutoDeleteFinished,
-] = preference('auto-delete-finished', false, (b) => b === 'true');
+] = preference(Preference.AUTO_DELETE_FINISHED, false, (b) => b === 'true');
 
-export const [
-  genPreferenceStreamQuality,
-  genSetPreferenceStreamQuality,
-] = preference('stream-quality', 'low', (b) => b);
+export const [genPreferenceStreamQuality, genSetPreferenceStreamQuality] =
+  preference(Preference.STREAM_QUALITY, 'low', (b) => b);
 
-export const [
-  genPreferenceDownloadQuality,
-  genSetPreferenceDownloadQuality,
-] = preference('download-quality', 'high', (b) => b);
+export const [genPreferenceDownloadQuality, genSetPreferenceDownloadQuality] =
+  preference(Preference.DOWNLOAD_QUALITY, 'high', (b) => b);
 
 export const [
   genPreferenceDownloadOnlyOnWifi,
   genSetPreferenceDownloadOnlyOnWifi,
-] = preference('download-only-on-wifi', true, (b) => b === 'true');
+] = preference(Preference.DOWNLOAD_ONLY_ON_WIFI, true, (b) => b === 'true');
 
 export const [
   genPreferenceAllowDataCollection,
   genSetPreferenceAllowDataCollection,
-] = preference('allow-data-collection', true, (b) => b === 'true');
+] = preference(Preference.ALLOW_DATA_COLLECTION, true, (b) => b === 'true');
 
-export const [
-  genPreferenceIsFirstLoad,
-  genSetPreferenceIsFirstLoad,
-] = preference('is-first-load', true, (b) => b === 'true');
+export const [genPreferenceIsFirstLoad, genSetPreferenceIsFirstLoad] =
+  preference(Preference.IS_FIRST_LOAD, true, (b) => b === 'true');
 
 export const [
   genPreferenceRatingButtonDismissed,
   genSetPreferenceRatingButtonDismissed,
-] = preference('rating-button-dismissed', { dismissed: false }, (o) => JSON.parse(o));
+] = preference(Preference.RATING_BUTTON_DISMISSED, {dismissed: false}, (o) =>
+  JSON.parse(o),
+);
 
 export const [
   genPreferenceKillswitchCourseVersionV1,
   genSetPreferenceKillswitchCourseVersionV1,
-] = preference('killswitch-course-version-v1', false, (b) => b === 'true');
+] = preference(
+  Preference.KILLSWITCH_COURSE_VERSION_V1,
+  false,
+  (b) => b === 'true',
+);
 
 export function usePreference<T>(key: Preference, defaultValue: any) {
   const [value, setValue] = useState<T>(null!);

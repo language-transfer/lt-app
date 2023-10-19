@@ -15,8 +15,21 @@ import {genProgressForLesson} from '../../persistence';
 import {log} from '../../metrics';
 import {useSetStatusBarStyle} from '../../hooks/useStatusBarStyle';
 
-const Listen = (props: any) => {
+interface Props {
+  route: {
+    params: {
+      course: Course;
+      lesson: number;
+    };
+  };
+  navigation: {
+    pop: () => void;
+  };
+}
+
+const Listen = (props: Props) => {
   const {course, lesson} = props.route.params;
+
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
 
   const playbackState = usePlaybackState();
@@ -24,9 +37,7 @@ const Listen = (props: any) => {
 
   // go back to the previous screen when the user stops
   // the music from outside the app
-  useTrackPlayerEvents([Event.RemoteStop], () =>
-    props.navigation.pop(),
-  );
+  useTrackPlayerEvents([Event.RemoteStop], () => props.navigation.pop());
 
   // adjust the status bar style according to the course colors,
   // and the bottom sheet visibility
@@ -39,11 +50,7 @@ const Listen = (props: any) => {
       ((navBarLight ? 'dark' : 'light') + '-content') as StatusBarStyle,
       navBarLight,
     );
-  }, [
-    setStatusBarStyle,
-    bottomSheetOpen,
-    course,
-  ]);
+  }, [setStatusBarStyle, bottomSheetOpen, course]);
 
   // load & queue audio file, find the last heard offset, and start
   // the lesson
@@ -114,7 +121,7 @@ const Listen = (props: any) => {
       position: await TrackPlayer.getPosition(),
     });
 
-    TrackPlayer.seekTo(Math.max(0, await TrackPlayer.getPosition() - 10));
+    TrackPlayer.seekTo(Math.max(0, (await TrackPlayer.getPosition()) - 10));
   };
 
   return (

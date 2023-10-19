@@ -1,5 +1,5 @@
-import {Platform} from 'react-native'; 
-import TrackPlayer, {State, Event, Capability, IOSCategory} from 'react-native-track-player';
+import {Platform, EmitterSubscription} from 'react-native'; 
+import TrackPlayer, {State, Event, Capability} from 'react-native-track-player';
 import BackgroundTimer, {IntervalId} from 'react-native-background-timer';
 import {
   genAutopause,
@@ -19,10 +19,16 @@ type CurrentPlaying = {
 
 let currentlyPlaying: CurrentPlaying | null = null;
 let updateInterval: IntervalId | null = null;
-let audioServiceSubscriptions: any[] = [];
+let audioServiceSubscriptions: EmitterSubscription[] = [];
 
 // when we enqueue then skip, it acts like we skipped from track 1 to track n. suppress the event
 let suppressTrackChange = false;
+
+interface PlaybackTrackChangedEventParams {
+    track: string | null;
+    position: number;
+    nextTrack: string | null;
+}
 
 export const genEnqueueFile = async (
   course: Course,
@@ -118,6 +124,7 @@ export const genStopPlaying = async () => {
   await TrackPlayer.pause(); // might fix bugs where sometimes the notification goes away but keeps playing
   await TrackPlayer.destroy();
 };
+
 
 export default async () => {
   audioServiceSubscriptions.forEach((s) => s.remove());
@@ -246,12 +253,13 @@ export default async () => {
       },
     ),
 
+
     // welcome! you've found it. the worst code in the codebase.
     // I have a personal policy of including explicit blame whenever I write code I know someone will curse me for one day.
     // contact me@timothyaveni.com with your complaints.
     TrackPlayer.addEventListener(
       Event.PlaybackTrackChanged,
-      async (params) => {
+      async (params: PlaybackTrackChangedEventParams) => {
         const wasPlaying = currentlyPlaying;
 
         if (params.track == null || wasPlaying === null) {

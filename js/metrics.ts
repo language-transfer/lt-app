@@ -5,7 +5,18 @@ import CourseData from './course-data';
 
 const LOG_ENDPOINT = 'https://metrics.languagetransfer.org/log';
 
-export const log = async (data: any): Promise<void> => {
+interface Data {
+  action: string;
+  surface?: string;
+  lesson?: number;
+  event?: string;
+  course?: Course;
+  metadata_version?: number;
+  position?: number;
+  setting_value?: number;
+}
+
+export const log = async (data: Data): Promise<void> => {
   const [permitted, user_token] = await Promise.all([
     genPreferenceAllowDataCollection(),
     genMetricsToken(),
