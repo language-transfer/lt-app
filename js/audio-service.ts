@@ -1,5 +1,5 @@
-import {Platform} from 'react-native'; 
-import TrackPlayer, {State, Event, Capability, IOSCategory} from 'react-native-track-player';
+import {Platform, EmitterSubscription} from 'react-native'; 
+import TrackPlayer, {State, Event, Capability} from 'react-native-track-player';
 import BackgroundTimer, {IntervalId} from 'react-native-background-timer';
 import {
   genAutopause,
@@ -19,7 +19,7 @@ type CurrentPlaying = {
 
 let currentlyPlaying: CurrentPlaying | null = null;
 let updateInterval: IntervalId | null = null;
-let audioServiceSubscriptions: any[] = [];
+let audioServiceSubscriptions: EmitterSubscription[] = [];
 
 // when we enqueue then skip, it acts like we skipped from track 1 to track n. suppress the event
 let suppressTrackChange = false;
