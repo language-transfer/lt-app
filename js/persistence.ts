@@ -151,6 +151,52 @@ export const genToggleLessonFinished = async (
   }
 };
 
+export const genSetProgressForCourse = async (
+  course: Course,
+  lastLesson: number,
+): Promise<void> => {
+  const lastLessonIndex = lastLesson - 1;
+  const lessonCount = parseInt(CourseData.getFallbackLessonCount(course), 10);
+
+  if (lastLessonIndex > lessonCount) {
+    return;
+  }
+
+  for (let lesson = 0; lesson <= lastLessonIndex; lesson++) {
+    const progressObject = await genProgressForLesson(course, lesson);
+
+    await AsyncStorage.setItem(
+      `@activity/${course}/${lesson}`,
+      JSON.stringify({
+        ...progressObject,
+        finished: true,
+      }),
+    );
+  }
+
+  await Promise.all([
+    AsyncStorage.setItem(
+      `@activity/${course}/most-recent-lesson`,
+      lastLessonIndex.toString(),
+    ),
+    AsyncStorage.setItem('@activity/most-recent-course', course),
+  ]);
+
+  if (lastLessonIndex < lessonCount) {
+    for (let lesson = lastLessonIndex + 1; lesson < lessonCount; lesson++) {
+      const progressObject = await genProgressForLesson(course, lesson);
+
+      await AsyncStorage.setItem(
+        `@activity/${course}/${lesson}`,
+        JSON.stringify({
+          ...progressObject,
+          finished: false,
+        }),
+      );
+    }
+  }
+};
+
 export const genDeleteProgressForCourse = async (
   course: Course,
 ): Promise<void> => {
