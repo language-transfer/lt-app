@@ -13,6 +13,7 @@ interface Data {
   course?: Course;
   metadata_version?: number;
   position?: number;
+  setting_value?: number;
 }
 
 export const log = async (data: Data): Promise<void> => {
