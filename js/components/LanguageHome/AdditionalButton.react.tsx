@@ -4,11 +4,16 @@ import {View, Text, StyleSheet} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
-interface Props {
+export interface Props {
   onPress: () => void;
   title: string;
   icon: string;
   useForeground: boolean;
+  customStyles?: {
+    additionalButton?: {};
+    additionalButtonInner?: {};
+    additionalButtonText?: {};
+  };
 }
 
 export const AdditionalButton = ({
@@ -16,12 +21,27 @@ export const AdditionalButton = ({
   onPress,
   icon,
   useForeground,
+  customStyles = {
+    additionalButton: {},
+    additionalButtonInner: {},
+    additionalButtonText: {},
+  },
 }: Props) => {
   return (
-    <View style={styles.additionalButton}>
+    <View style={[styles.additionalButton, customStyles.additionalButton]}>
       <TouchableNativeFeedback onPress={onPress} useForeground={useForeground}>
-        <View style={styles.additionalButtonInner}>
-          <Text style={styles.additionalButtonText}>{title}</Text>
+        <View
+          style={[
+            styles.additionalButtonInner,
+            customStyles.additionalButtonInner,
+          ]}>
+          <Text
+            style={[
+              styles.additionalButtonText,
+              customStyles.additionalButtonText,
+            ]}>
+            {title}
+          </Text>
           <Icon name={icon} type="font-awesome-5" />
         </View>
       </TouchableNativeFeedback>
