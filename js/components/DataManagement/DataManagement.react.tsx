@@ -1,22 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableNativeFeedback,
   Alert,
+  Modal,
+  TextInput,
+  Button,
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
-import {genDeleteProgressForCourse} from '../../persistence';
+import {genDeleteProgressForCourse, genSetProgressForCourse} from '../../persistence';
 import {log} from '../../metrics';
 import { useNavigation } from '@react-navigation/core';
 import { MainNavigationProp } from '../App.react';
 
 const DataManagement = ({route}: {route: any}) => {
   useStatusBarStyle('white', 'dark-content');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [lastLessonNumber, _setLastLessonNumber] = useState('');
+  const setLastLessonNumber = (val: string) => {
+    _setLastLessonNumber(val.replace(/[^0-9]/g, ''));
+  };
   const {navigate} = useNavigation<MainNavigationProp<'Data Management'>>();
 
   const {course} = route.params;
@@ -64,6 +72,89 @@ const DataManagement = ({route}: {route: any}) => {
               </Text>
             </View>
           </TouchableNativeFeedback>
+        </View>
+
+        <View style={styles.button}>
+          <TouchableNativeFeedback
+            onPress={async () => setModalVisible(true)}
+            // TODO: Replace with modal with number input and guide text. Added this for testing purposes.
+            useForeground={true}>
+            <View style={styles.buttonInner}>
+              <Text style={styles.buttonTextHeader}>
+                Set {courseTitle} progress
+              </Text>
+              <Text style={styles.buttonText}>
+                This will set all the lessons up to the given lesson number as
+                completed.
+              </Text>
+            </View>
+          </TouchableNativeFeedback>
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              Alert.alert('Modal has been closed.');
+              setModalVisible(!modalVisible);
+              // TODO: How do I do this better? I don't need the value of the input after the modal is closed so it can be discarded. A local variable would suffice.
+              setLastLessonNumber('');
+            }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text style={styles.modalText}>
+                  Set the lesson number you wish to set your course progress to:
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={setLastLessonNumber}
+                  value={lastLessonNumber}
+                  placeholder="Lesson number"
+                  keyboardType="numeric"
+                />
+                <View>
+                  <View>
+                    <View style={styles.modalMargin}>
+                      <Button
+                        title="Cancel"
+                        onPress={() => {
+                          setModalVisible(!modalVisible);
+                          // TODO: How do I do this better? I don't need the value of the input after the modal is closed so it can be discarded. A local variable would suffice.
+                          setLastLessonNumber('');
+                        }}
+                      />
+                    </View>
+                    <View>
+                      <Button
+                        disabled={!lastLessonNumber}
+                        title="Set progress"
+                        onPress={async () => {
+                          const result = await genSetProgressForCourse(
+                            course,
+                            parseInt(lastLessonNumber, 10),
+                          );
+
+                          if (!result.hasPassed) {
+                            Alert.alert(
+                              'Error',
+                              `Please enter a valid lesson number. The ${courseTitle} course consists of ${result.lessonCount} lessons.`,
+                            );
+                          } else {
+                            Alert.alert(
+                              'Success',
+                              `The last completed lesson for this course is now set to lesson number ${lastLessonNumber}.`,
+                            );
+                          }
+                          setModalVisible(!modalVisible);
+                          // TODO: How do I do this better? I don't need the value of the input after the modal is closed so it can be discarded. A local variable would suffice.
+                          setLastLessonNumber('');
+                        }}
+                      />
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Modal>
         </View>
 
         <View style={styles.button}>
@@ -273,6 +364,42 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalMargin: {
+    marginBottom: 15,
   },
 });
 

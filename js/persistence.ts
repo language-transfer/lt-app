@@ -151,15 +151,16 @@ export const genToggleLessonFinished = async (
   }
 };
 
+// TODO: Add return value in case user enters out of range lastLesson.
 export const genSetProgressForCourse = async (
   course: Course,
   lastLesson: number,
-): Promise<void> => {
+): Promise<{hasPassed: boolean; lessonCount: number}> => {
   const lastLessonIndex = lastLesson - 1;
   const lessonCount = parseInt(CourseData.getFallbackLessonCount(course), 10);
 
-  if (lastLessonIndex > lessonCount) {
-    return;
+  if (lastLessonIndex >= lessonCount) {
+    return {hasPassed: false, lessonCount};
   }
 
   for (let lesson = 0; lesson <= lastLessonIndex; lesson++) {
@@ -195,6 +196,8 @@ export const genSetProgressForCourse = async (
       );
     }
   }
+
+  return {hasPassed: true, lessonCount};
 };
 
 export const genDeleteProgressForCourse = async (
