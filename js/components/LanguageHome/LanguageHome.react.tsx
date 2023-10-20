@@ -114,24 +114,6 @@ const LanguageHomeBody = ({route}: {route: any}) => {
             useForeground
           />
         ) : (
-          //   <View style={styles.additionalButton}>
-          //     <TouchableNativeFeedback
-          //       onPress={() => {
-          //         log({
-          //           action: 'visit_website',
-          //           surface: 'language_home',
-          //         });
-          //         Linking.openURL('https://www.languagetransfer.org/');
-          //       }}
-          //       useForeground={true}>
-          //       <View style={styles.additionalButtonInner}>
-          //         <Text style={styles.additionalButtonText}>
-          //           Visit languagetransfer.org
-          //         </Text>
-          //         <Icon name="link" type="font-awesome-5" />
-          //       </View>
-          //     </TouchableNativeFeedback>
-          //   </View>
           <AdditionalButton
             title="Support Language Transfer"
             onPress={() => {
