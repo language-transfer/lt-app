@@ -2,11 +2,7 @@ import React, {useState, useCallback} from 'react';
 import {StyleSheet, View, Text, Linking, ActivityIndicator} from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
-import {Icon} from 'react-native-elements';
-import {
-  TouchableNativeFeedback,
-  ScrollView,
-} from 'react-native-gesture-handler';
+import {ScrollView} from 'react-native-gesture-handler';
 import LanguageHomeTopButton from './LanguageHomeTopButton.react';
 import CourseData from '../../course-data';
 import {log} from '../../metrics';
