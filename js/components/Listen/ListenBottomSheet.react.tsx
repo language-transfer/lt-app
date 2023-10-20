@@ -9,7 +9,7 @@ import {
 import {Icon} from 'react-native-elements';
 import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
-import {genMarkLessonFinished} from '../../persistence';
+import {genMarkLessonFinished, genToggleLessonFinished} from '../../persistence';
 import {genStopPlaying} from '../../audio-service';
 import {useNavigation} from '@react-navigation/native';
 import {useProgress} from 'react-native-track-player';
@@ -20,10 +20,11 @@ import { MainNavigationProp } from '../App.react';
 interface Props {
   course: Course,
   lesson: number,
-  downloaded: boolean | null;
+  downloaded: boolean | null,
+  finished: boolean | null;
 }
 
-const ListenBottomSheet = ({course, lesson, downloaded}: Props) => {
+const ListenBottomSheet = ({course, lesson, downloaded, finished}: Props) => {
   const {position} = useProgress();
   const {pop} = useNavigation<MainNavigationProp<'Listen'>>();
 
@@ -39,11 +40,13 @@ const ListenBottomSheet = ({course, lesson, downloaded}: Props) => {
             position,
           });
 
-          await genMarkLessonFinished(course, lesson);
+          await genToggleLessonFinished(course, lesson);
           pop();
         }}>
         <View style={styles.bottomSheetRow}>
-          <Text style={styles.rowText}>Mark as finished</Text>
+          <Text style={styles.rowText}>
+            Mark as {finished ? 'unfinished' : 'finished'}
+          </Text>
           <View style={styles.iconContainer}>
             <Icon
               style={styles.rowIcon}

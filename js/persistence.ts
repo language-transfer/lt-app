@@ -121,6 +121,85 @@ export const genMarkLessonFinished = async (
   }
 };
 
+export const genToggleLessonFinished = async (
+  course: Course,
+  lesson: number,
+): Promise<void> => {
+  const progressObject = await genProgressForLesson(course, lesson);
+
+  await Promise.all([
+    AsyncStorage.setItem(
+      `@activity/${course}/${lesson}`,
+      JSON.stringify({
+        ...progressObject,
+        finished: !progressObject?.finished,
+      }),
+    ),
+    AsyncStorage.setItem(
+      `@activity/${course}/most-recent-lesson`,
+      lesson.toString(),
+    ),
+    AsyncStorage.setItem('@activity/most-recent-course', course),
+  ]);
+
+  if (
+    progressObject?.finished &&
+    (await genPreferenceAutoDeleteFinished()) &&
+    (await DownloadManager.genIsDownloaded(course, lesson))
+  ) {
+    await DownloadManager.genDeleteDownload(course, lesson);
+  }
+};
+
+// TODO: Add return value in case user enters out of range lastLesson.
+export const genSetProgressForCourse = async (
+  course: Course,
+  lastLesson: number,
+): Promise<{hasPassed: boolean; lessonCount: number}> => {
+  const lastLessonIndex = lastLesson - 1;
+  const lessonCount = parseInt(CourseData.getFallbackLessonCount(course), 10);
+
+  if (lastLessonIndex >= lessonCount) {
+    return {hasPassed: false, lessonCount};
+  }
+
+  for (let lesson = 0; lesson <= lastLessonIndex; lesson++) {
+    const progressObject = await genProgressForLesson(course, lesson);
+
+    await AsyncStorage.setItem(
+      `@activity/${course}/${lesson}`,
+      JSON.stringify({
+        ...progressObject,
+        finished: true,
+      }),
+    );
+  }
+
+  await Promise.all([
+    AsyncStorage.setItem(
+      `@activity/${course}/most-recent-lesson`,
+      lastLessonIndex.toString(),
+    ),
+    AsyncStorage.setItem('@activity/most-recent-course', course),
+  ]);
+
+  if (lastLessonIndex < lessonCount) {
+    for (let lesson = lastLessonIndex + 1; lesson < lessonCount; lesson++) {
+      const progressObject = await genProgressForLesson(course, lesson);
+
+      await AsyncStorage.setItem(
+        `@activity/${course}/${lesson}`,
+        JSON.stringify({
+          ...progressObject,
+          finished: false,
+        }),
+      );
+    }
+  }
+
+  return {hasPassed: true, lessonCount};
+};
+
 export const genDeleteProgressForCourse = async (
   course: Course,
 ): Promise<void> => {
