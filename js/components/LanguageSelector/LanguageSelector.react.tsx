@@ -6,6 +6,7 @@ import {
   Dimensions,
   Animated,
   Text,
+  ImageSourcePropType,
 } from 'react-native';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import LanguageButton from './LanguageButton.react';
@@ -55,7 +56,7 @@ const LanguageSelector = () => {
     <View style={styles.screenWrapper}>
       <View style={styles.pageWrapper}>
         <Animated.Image
-          source={logo}
+          source={logo as ImageSourcePropType}
           style={[
             styles.headerImage,
             {
