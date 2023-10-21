@@ -38,6 +38,17 @@ const LanguageSelector = () => {
   const {navigate} = useNavigation<MainNavigationProp<'Language Selector'>>();
   useStatusBarStyle('white', 'dark-content');
 
+  const languageButtonData: {course: Course}[] = [
+    {course: 'spanish'},
+    {course: 'arabic'},
+    {course: 'turkish'},
+    {course: 'german'},
+    {course: 'greek'},
+    {course: 'italian'},
+    {course: 'swahili'},
+    {course: 'french'},
+  ];
+
   const scrollAnim = useRef(new Animated.Value(0)).current;
 
   return (
@@ -88,38 +99,13 @@ const LanguageSelector = () => {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionHeaderText}>Language courses</Text>
             </View>
-            <LanguageButton
-              course="spanish"
-              onPress={() => navigate('Language Home', {course: 'spanish'})}
-            />
-            <LanguageButton
-              course="arabic"
-              onPress={() => navigate('Language Home', {course: 'arabic'})}
-            />
-            <LanguageButton
-              course="turkish"
-              onPress={() => navigate('Language Home', {course: 'turkish'})}
-            />
-            <LanguageButton
-              course="german"
-              onPress={() => navigate('Language Home', {course: 'german'})}
-            />
-            <LanguageButton
-              course="greek"
-              onPress={() => navigate('Language Home', {course: 'greek'})}
-            />
-            <LanguageButton
-              course="italian"
-              onPress={() => navigate('Language Home', {course: 'italian'})}
-            />
-            <LanguageButton
-              course="swahili"
-              onPress={() => navigate('Language Home', {course: 'swahili'})}
-            />
-            <LanguageButton
-              course="french"
-              onPress={() => navigate('Language Home', {course: 'french'})}
-            />
+
+            {languageButtonData.map(({course}) => (
+              <LanguageButton
+                course={course}
+                onPress={() => navigate('Language Home', {course})}
+              />
+            ))}
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionHeaderText}>For Spanish speakers</Text>
