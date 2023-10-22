@@ -52,42 +52,54 @@ const LanguageSelector = () => {
 
   const scrollAnim = useRef(new Animated.Value(0)).current;
 
+  const imageStyle = [
+    styles.headerImage,
+    {
+      opacity: scrollAnim.interpolate({
+        inputRange: [0, CARDS_MARGIN_TOP / 1.5],
+        outputRange: [1, 0],
+      }),
+      height: scrollAnim.interpolate({
+        inputRange: [0, CARDS_MARGIN_TOP / 1.5],
+        outputRange: [IMAGE_HEIGHT, 0.9 * IMAGE_HEIGHT],
+      }),
+    },
+  ];
+
+  const scrollForMoreStyle = [
+    styles.scrollIndicator,
+    {
+      opacity: scrollAnim.interpolate({
+        inputRange: [0, 100],
+        outputRange: [1, 0],
+      }),
+    },
+  ];
+
+  const onScroll = Animated.event(
+    [
+      {
+        nativeEvent: {
+          contentOffset: {
+            y: scrollAnim,
+          },
+        },
+      },
+    ],
+    {useNativeDriver: false},
+  );
+
   return (
     <View style={styles.screenWrapper}>
       <View style={styles.pageWrapper}>
         <Animated.Image
           source={logo as ImageSourcePropType}
-          style={[
-            styles.headerImage,
-            {
-              opacity: scrollAnim.interpolate({
-                inputRange: [0, CARDS_MARGIN_TOP / 1.5],
-                outputRange: [1, 0],
-              }),
-              height: scrollAnim.interpolate({
-                inputRange: [0, CARDS_MARGIN_TOP / 1.5],
-                outputRange: [IMAGE_HEIGHT, 0.9 * IMAGE_HEIGHT],
-              }),
-            },
-          ]}
+          style={imageStyle}
           resizeMode="contain"
           accessibilityLabel="Language Transfer"
         />
 
-        <Animated.ScrollView
-          style={styles.scrollView}
-          onScroll={Animated.event(
-            [
-              {
-                nativeEvent: {
-                  contentOffset: {
-                    y: scrollAnim,
-                  },
-                },
-              },
-            ],
-            {useNativeDriver: false},
-          )}>
+        <Animated.ScrollView style={styles.scrollView} onScroll={onScroll}>
           <View style={styles.courseList}>
             <View style={styles.sectionHeaderFirst}>
               <Text style={styles.sectionHeaderText}>New!</Text>
@@ -135,16 +147,7 @@ const LanguageSelector = () => {
         </Animated.ScrollView>
       </View>
       <View style={styles.topTranslucent} />
-      <Animated.View
-        style={[
-          styles.scrollIndicator,
-          {
-            opacity: scrollAnim.interpolate({
-              inputRange: [0, 100],
-              outputRange: [1, 0],
-            }),
-          },
-        ]}>
+      <Animated.View style={scrollForMoreStyle}>
         <Text style={styles.scrollIndicatorText}>scroll for more</Text>
         <Icon
           name="angle-double-down"
