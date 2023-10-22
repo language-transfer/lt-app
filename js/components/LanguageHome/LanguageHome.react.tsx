@@ -2,16 +2,13 @@ import React, {useState, useCallback} from 'react';
 import {StyleSheet, View, Text, Linking, ActivityIndicator} from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
-import {Icon} from 'react-native-elements';
-import {
-  TouchableNativeFeedback,
-  ScrollView,
-} from 'react-native-gesture-handler';
+import {ScrollView} from 'react-native-gesture-handler';
 import LanguageHomeTopButton from './LanguageHomeTopButton.react';
 import CourseData from '../../course-data';
 import {log} from '../../metrics';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
-import { MainNavigationProp } from '../App.react';
+import {MainNavigationProp} from '../App.react';
+import {AdditionalButton} from './AdditionalButton.react';
 
 const donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo = true;
 let metadataWarningTimeout: NodeJS.Timeout | null = null;
@@ -85,68 +82,47 @@ const LanguageHomeBody = ({route}: {route: any}) => {
     <View style={styles.body}>
       <ScrollView>
         <LanguageHomeTopButton course={course} />
+        <AdditionalButton
+          title="All lessons"
+          onPress={() => navigate('All Lessons', {course})}
+          icon="list-ol"
+          useForeground
+        />
 
-        <View style={styles.additionalButton}>
-          <TouchableNativeFeedback
-            onPress={() => navigate('All Lessons', {course})}
-            useForeground={true}>
-            <View style={styles.additionalButtonInner}>
-              <Text style={styles.additionalButtonText}>All Lessons</Text>
-              <Icon name="list-ol" type="font-awesome-5" />
-            </View>
-          </TouchableNativeFeedback>
-        </View>
-
-        <View style={styles.additionalButton}>
-          <TouchableNativeFeedback
-            onPress={() => navigate('Data Management', {course})}
-            useForeground={true}>
-            <View style={styles.additionalButtonInner}>
-              <Text style={styles.additionalButtonText}>Data Management</Text>
-              <Icon name="tools" type="font-awesome-5" />
-            </View>
-          </TouchableNativeFeedback>
-        </View>
+        <AdditionalButton
+          title="Data Management"
+          onPress={() => navigate('Data Management', {course})}
+          icon="tools"
+          useForeground
+        />
 
         {donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo ? (
-          <View style={styles.additionalButton}>
-            <TouchableNativeFeedback
-              onPress={() => {
-                log({
-                  action: 'visit_website',
-                  surface: 'language_home',
-                });
-                Linking.openURL('https://www.languagetransfer.org/');
-              }}
-              useForeground={true}>
-              <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>
-                  Visit languagetransfer.org
-                </Text>
-                <Icon name="link" type="font-awesome-5" />
-              </View>
-            </TouchableNativeFeedback>
-          </View>
+          <AdditionalButton
+            title="Visit languagetransfer.org"
+            onPress={() => {
+              log({
+                action: 'visit_website',
+                surface: 'language_home',
+              });
+              Linking.openURL('https://www.languagetransfer.org/');
+            }}
+            icon="link"
+            useForeground
+          />
         ) : (
-          <View style={styles.additionalButton}>
-            <TouchableNativeFeedback
-              onPress={() => {
-                log({
-                  action: 'open_patreon',
-                  surface: 'language_home',
-                  course,
-                });
-                Linking.openURL('https://www.patreon.com/languagetransfer');
-              }}
-              useForeground={true}>
-              <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>
-                  Support Language Transfer
-                </Text>
-                <Icon name="patreon" type="font-awesome-5" />
-              </View>
-            </TouchableNativeFeedback>
-          </View>
+          <AdditionalButton
+            title="Support Language Transfer"
+            onPress={() => {
+              log({
+                action: 'open_patreon',
+                surface: 'language_home',
+                course,
+              });
+              Linking.openURL('https://www.patreon.com/languagetransfer');
+            }}
+            icon="patreon"
+            useForeground
+          />
         )}
       </ScrollView>
     </View>

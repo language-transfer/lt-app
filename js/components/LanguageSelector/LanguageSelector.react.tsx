@@ -5,140 +5,127 @@ import {
   StatusBar,
   Dimensions,
   Animated,
-  TouchableNativeFeedback,
   Text,
+  ImageSourcePropType,
 } from 'react-native';
 import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import LanguageButton from './LanguageButton.react';
 import logo from '../../../resources/LT-logo-text.png';
-import CourseData from '../../course-data';
 import {Icon} from 'react-native-elements';
-import { useNavigation } from '@react-navigation/core';
-import { MainNavigationProp } from '../App.react';
+import {useNavigation} from '@react-navigation/core';
+import {MainNavigationProp} from '../App.react';
+
+import {
+  Props as AdditionalButtonProps,
+  AdditionalButton as RawAdditionalButton,
+} from '../LanguageHome/AdditionalButton.react';
 
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
 const IMAGE_HEIGHT = 0.4 * SCREEN_HEIGHT;
 const CARDS_MARGIN_TOP = IMAGE_HEIGHT + 80 + 40;
 
+const AdditionalButton = ({...rest}: AdditionalButtonProps) => (
+  <RawAdditionalButton
+    customStyles={{
+      additionalButton: styles.additionalButton,
+      additionalButtonInner: styles.additionalButtonInner,
+      additionalButtonText: styles.additionalButtonText,
+    }}
+    {...rest}
+  />
+);
+
 const LanguageSelector = () => {
   const {navigate} = useNavigation<MainNavigationProp<'Language Selector'>>();
   useStatusBarStyle('white', 'dark-content');
 
+  const languageButtonData: {course: Course}[] = [
+    {course: 'spanish'},
+    {course: 'arabic'},
+    {course: 'turkish'},
+    {course: 'german'},
+    {course: 'greek'},
+    {course: 'italian'},
+    {course: 'swahili'},
+    {course: 'french'},
+  ];
+
   const scrollAnim = useRef(new Animated.Value(0)).current;
+
+  const imageStyle = [
+    styles.headerImage,
+    {
+      opacity: scrollAnim.interpolate({
+        inputRange: [0, CARDS_MARGIN_TOP / 1.5],
+        outputRange: [1, 0],
+      }),
+      height: scrollAnim.interpolate({
+        inputRange: [0, CARDS_MARGIN_TOP / 1.5],
+        outputRange: [IMAGE_HEIGHT, 0.9 * IMAGE_HEIGHT],
+      }),
+    },
+  ];
+
+  const scrollForMoreStyle = [
+    styles.scrollIndicator,
+    {
+      opacity: scrollAnim.interpolate({
+        inputRange: [0, 100],
+        outputRange: [1, 0],
+      }),
+    },
+  ];
+
+  const onScroll = Animated.event(
+    [
+      {
+        nativeEvent: {
+          contentOffset: {
+            y: scrollAnim,
+          },
+        },
+      },
+    ],
+    {useNativeDriver: false},
+  );
 
   return (
     <View style={styles.screenWrapper}>
       <View style={styles.pageWrapper}>
         <Animated.Image
-          source={logo}
-          style={[
-            styles.headerImage,
-            {
-              opacity: scrollAnim.interpolate({
-                inputRange: [0, CARDS_MARGIN_TOP / 1.5],
-                outputRange: [1, 0],
-              }),
-              height: scrollAnim.interpolate({
-                inputRange: [0, CARDS_MARGIN_TOP / 1.5],
-                outputRange: [IMAGE_HEIGHT, 0.9 * IMAGE_HEIGHT],
-              }),
-            },
-          ]}
+          source={logo as ImageSourcePropType}
+          style={imageStyle}
           resizeMode="contain"
           accessibilityLabel="Language Transfer"
         />
 
-        <Animated.ScrollView
-          style={styles.scrollView}
-          onScroll={Animated.event(
-            [
-              {
-                nativeEvent: {
-                  contentOffset: {
-                    y: scrollAnim,
-                  },
-                },
-              },
-            ],
-            {useNativeDriver: false},
-          )}>
+        <Animated.ScrollView style={styles.scrollView} onScroll={onScroll}>
           <View style={styles.courseList}>
             <View style={styles.sectionHeaderFirst}>
-              <Text style={styles.sectionHeaderText}>
-                New!
-              </Text>
+              <Text style={styles.sectionHeaderText}>New!</Text>
             </View>
             <LanguageButton
               course="music"
-              onPress={() =>
-                navigate('Language Home', {course: "music"})
-              }
+              onPress={() => navigate('Language Home', {course: 'music'})}
             />
 
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>
-                Language courses
-              </Text>
+              <Text style={styles.sectionHeaderText}>Language courses</Text>
             </View>
-            <LanguageButton
-              course="spanish"
-              onPress={() =>
-                navigate('Language Home', {course: "spanish"})
-              }
-            />
-            <LanguageButton
-              course="arabic"
-              onPress={() =>
-                navigate('Language Home', {course: "arabic"})
-              }
-            />
-            <LanguageButton
-              course="turkish"
-              onPress={() =>
-                navigate('Language Home', {course: "turkish"})
-              }
-            />
-            <LanguageButton
-              course="german"
-              onPress={() =>
-                navigate('Language Home', {course: "german"})
-              }
-            />
-            <LanguageButton
-              course="greek"
-              onPress={() =>
-                navigate('Language Home', {course: "greek"})
-              }
-            />
-            <LanguageButton
-              course="italian"
-              onPress={() =>
-                navigate('Language Home', {course: "italian"})
-              }
-            />
-            <LanguageButton
-              course="swahili"
-              onPress={() =>
-                navigate('Language Home', {course: "swahili"})
-              }
-            />
-            <LanguageButton
-              course="french"
-              onPress={() =>
-                navigate('Language Home', {course: "french"})
-              }
-            />
+
+            {languageButtonData.map(({course}) => (
+              <LanguageButton
+                course={course}
+                onPress={() => navigate('Language Home', {course})}
+              />
+            ))}
 
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>
-                For Spanish speakers
-              </Text>
+              <Text style={styles.sectionHeaderText}>For Spanish speakers</Text>
             </View>
             <LanguageButton
               course="ingles"
-              onPress={() =>
-                navigate('Language Home', {course: "ingles"})
-              }
+              onPress={() => navigate('Language Home', {course: 'ingles'})}
             />
             <View style={styles.aboutSectionHr} />
             <View style={styles.aboutSectionWrapper}>
@@ -147,37 +134,27 @@ const LanguageSelector = () => {
                   Language Transfer is the work of just one guy! Mihalis is
                   trying to build a team of course writers. Find out more:
                 </Text>
-                <View style={styles.additionalButton}>
-                  <TouchableNativeFeedback
-                    // @see https://github.com/react-navigation/react-navigation/issues/6931
-                    // @ts-ignore
-                    onPress={() => navigate('About')}
-                    useForeground={true}>
-                    <View style={styles.additionalButtonInner}>
-                      <Text style={styles.additionalButtonText}>
-                        About Language Transfer
-                      </Text>
-                      <Icon name="info" type="font-awesome-5" />
-                    </View>
-                  </TouchableNativeFeedback>
-                </View>
+
+                <AdditionalButton
+                  title="About Language Transfer"
+                  onPress={() => navigate('About')}
+                  icon="info"
+                  useForeground
+                />
               </View>
             </View>
           </View>
         </Animated.ScrollView>
       </View>
       <View style={styles.topTranslucent} />
-      <Animated.View style={[
-        styles.scrollIndicator,
-        {
-          opacity: scrollAnim.interpolate({
-            inputRange: [0, 100],
-            outputRange: [1, 0],
-          }),
-        }
-      ]}>
+      <Animated.View style={scrollForMoreStyle}>
         <Text style={styles.scrollIndicatorText}>scroll for more</Text>
-        <Icon name="angle-double-down" type="font-awesome-5" color="#999" size={14} />
+        <Icon
+          name="angle-double-down"
+          type="font-awesome-5"
+          color="#999"
+          size={14}
+        />
       </Animated.View>
     </View>
   );

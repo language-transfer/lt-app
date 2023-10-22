@@ -12,8 +12,23 @@ import useStatusBarStyle from '../../hooks/useStatusBarStyle';
 import DeviceInfo from 'react-native-device-info';
 import {Icon} from 'react-native-elements';
 import {log} from '../../metrics';
-import { useNavigation } from '@react-navigation/native';
-import { MainNavigationProp } from '../App.react';
+import {useNavigation} from '@react-navigation/native';
+import {MainNavigationProp} from '../App.react';
+import {
+  Props as AdditionalButtonProps,
+  AdditionalButton as RawAdditionalButton,
+} from '../LanguageHome/AdditionalButton.react';
+
+const AdditionalButton = ({...rest}: AdditionalButtonProps) => (
+  <RawAdditionalButton
+    customStyles={{
+      additionalButton: styles.additionalButton,
+      additionalButtonInner: styles.additionalButtonInner,
+      additionalButtonText: styles.additionalButtonText,
+    }}
+    {...rest}
+  />
+);
 
 type Section = 'Language Transfer' | 'Privacy' | 'LT App';
 
@@ -93,85 +108,47 @@ const About = () => {
                 are able, please consider contributing to the project.
               </Text>
 
-              <View style={styles.additionalButton}>
-                <TouchableNativeFeedback
-                  onPress={() => {
-                    log({
-                      action: 'open_patreon',
-                      surface: 'about',
-                    });
-                    Linking.openURL('https://www.patreon.com/languagetransfer');
-                  }}
-                  useForeground={true}>
-                  <View style={styles.additionalButtonInner}>
-                    <Text style={styles.additionalButtonText}>
-                      Contribute on Patreon
-                    </Text>
-                    <Icon name="patreon" type="font-awesome-5" />
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
+              <AdditionalButton
+                title="Contribute on Patreon"
+                onPress={() => {
+                  log({action: 'open_patreon', surface: 'about'});
+                  Linking.openURL('https://www.patreon.com/languagetransfer');
+                }}
+                icon="patreon"
+                useForeground
+              />
 
-              <View style={styles.additionalButton}>
-                <TouchableNativeFeedback
-                  onPress={() => {
-                    log({
-                      action: 'visit_donate_page',
-                      surface: 'about',
-                    });
-                    Linking.openURL(
-                      'https://www.languagetransfer.org/donations',
-                    );
-                  }}
-                  useForeground={true}>
-                  <View style={styles.additionalButtonInner}>
-                    <Text style={styles.additionalButtonText}>
-                      Make a one-time contribution to Language Transfer
-                    </Text>
-                    <Icon name="donate" type="font-awesome-5" />
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
+              <AdditionalButton
+                title="Make a one-time contribution to Language Transfer"
+                onPress={() => {
+                  log({action: 'visit_donate_page', surface: 'about'});
+                  Linking.openURL('https://www.languagetransfer.org/donations');
+                }}
+                icon="donate"
+                useForeground
+              />
             </>
           )}
 
-          <View style={styles.additionalButton}>
-            <TouchableNativeFeedback
-              onPress={() => {
-                log({
-                  action: 'visit_website',
-                  surface: 'about',
-                });
-                Linking.openURL('https://www.languagetransfer.org/about');
-              }}
-              useForeground={true}>
-              <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>
-                  Visit languagetransfer.org
-                </Text>
-                <Icon name="link" type="font-awesome-5" />
-              </View>
-            </TouchableNativeFeedback>
-          </View>
+          <AdditionalButton
+            title="Visit languagetransfer.org"
+            onPress={() => {
+              log({action: 'visit_website', surface: 'about'});
+              Linking.openURL('https://www.languagetransfer.org/about');
+            }}
+            icon="link"
+            useForeground
+          />
 
-          <View style={styles.additionalButton}>
-            <TouchableNativeFeedback
-              onPress={() => {
-                log({
-                  action: 'open_facebook',
-                  surface: 'about',
-                });
-                Linking.openURL('https://www.facebook.com/languagetransfer');
-              }}
-              useForeground={true}>
-              <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>
-                  Visit on Facebook
-                </Text>
-                <Icon name="facebook-f" type="font-awesome-5" />
-              </View>
-            </TouchableNativeFeedback>
-          </View>
+          <AdditionalButton
+            title="Visit on Facebook"
+            onPress={() => {
+              log({action: 'open_facebook', surface: 'about'});
+              Linking.openURL('https://www.facebook.com/languagetransfer');
+            }}
+            icon="facebook-f"
+            useForeground
+          />
         </View>
         {header('Privacy')}
         <View style={shownSection('Privacy')}>
@@ -246,61 +223,43 @@ const About = () => {
             improve the Language Transfer app, feel free to send an email:
           </Text>
 
-          <View style={styles.additionalButton}>
-            <TouchableNativeFeedback
-              onPress={() => {
-                Linking.openURL(
-                  'mailto:info@languagetransfer.org' +
-                    `?subject=${encodeURIComponent(
-                      'Feedback about the Language Transfer app',
-                    )}`,
-                );
-              }}
-              useForeground={true}>
-              <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>Contact us</Text>
-                <Icon name="envelope" type="font-awesome-5" />
-              </View>
-            </TouchableNativeFeedback>
-          </View>
+          <AdditionalButton
+            title="Contact us"
+            onPress={() => {
+              Linking.openURL(
+                'mailto:info@languagetransfer.org' +
+                  `?subject=${encodeURIComponent(
+                    'Feedback about the Language Transfer app',
+                  )}`,
+              );
+            }}
+            icon="envelope"
+            useForeground
+          />
 
           <Text style={styles.bodyText}>
             The Language Transfer app is free, open-source software. You can
             find its source code on GitHub:
           </Text>
-          <View
-            style={[
-              styles.additionalButton,
-              styles.additionalButtonExtraMargin,
-            ]}>
-            <TouchableNativeFeedback
+
+          <View style={styles.additionalButtonExtraMargin}>
+            <AdditionalButton
+              title="Visit on GitHub"
               onPress={() => {
-                log({
-                  action: 'open_github',
-                  surface: 'about',
-                });
+                log({action: 'open_github', surface: 'about'});
                 Linking.openURL('https://www.github.com/language-transfer');
               }}
-              useForeground={true}>
-              <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>Visit on GitHub</Text>
-                <Icon name="github" type="font-awesome-5" />
-              </View>
-            </TouchableNativeFeedback>
+              icon="github"
+              useForeground
+            />
           </View>
-          <View
-            style={[
-              styles.additionalButton,
-            ]}>
-            <TouchableNativeFeedback
-              onPress={() => navigate('Licenses')}
-              useForeground={true}>
-              <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>Licenses</Text>
-                <Icon name="osi" type="font-awesome-5" />
-              </View>
-            </TouchableNativeFeedback>
-          </View>
+
+          <AdditionalButton
+            title="Licenses"
+            onPress={() => navigate('Licenses')}
+            icon="osi"
+            useForeground
+          />
 
           <Text style={styles.bodyText}>
             The app's core maintainers are Timothy J. Aveni and Josh Fayer.
