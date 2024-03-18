@@ -5,7 +5,7 @@ import ProgressCircle from 'react-native-progress-circle';
 import {Icon} from 'react-native-elements';
 import formatDuration from 'format-duration';
 import prettyBytes from 'pretty-bytes';
-import {genProgressForLesson, Progress} from '../../persistence';
+import {genMarkLesson, genProgressForLesson, Progress} from '../../persistence';
 import DownloadManager, {useDownloadStatus} from '../../download-manager';
 import CourseData from '../../course-data';
 import {usePreference} from '../../persistence';
@@ -166,10 +166,33 @@ const LessonRow = ({
   const finished = progress?.finished;
   const downloading =
     downloadState && !downloadState.error && !downloadState.finished;
-  
-  const bundled = !!(lesson === 0 && CourseData.getBundledFirstLesson(course))
+
+  const bundled = !!(lesson === 0 && CourseData.getBundledFirstLesson(course));
+
+  const handleFinishedPress = async () => {
+    log({
+      action: `mark_${finished ? 'unfinished' : 'finished'}`,
+      surface: 'all_lessons',
+      course,
+      lesson,
+    });
+    await genMarkLesson(course, lesson, !finished);
+    setProgress({...progress!, finished: !finished});
+  };
+
   return (
     <View style={styles.row}>
+      <TouchableNativeFeedback onPress={handleFinishedPress}>
+        <View style={styles.downloadBox}>
+          <Icon
+            style={{opacity: finished ? 1 : 0.2}}
+            name="check"
+            type="font-awesome-5"
+            accessibilityLabel={finished ? 'finished' : 'not finished'}
+            size={24}
+          />
+        </View>
+      </TouchableNativeFeedback>
       <TouchableNativeFeedback
         onPress={() => {
           navigate('Listen', {course, lesson});
@@ -177,16 +200,6 @@ const LessonRow = ({
         <View style={styles.lessonBox}>
           {ready ? (
             <View style={styles.text}>
-              <Icon
-                style={{
-                  ...styles.finishedIcon,
-                  ...(finished ? {} : {opacity: 0}),
-                }}
-                name="check"
-                type="font-awesome-5"
-                accessibilityLabel={finished ? 'finished' : 'not finished'}
-                size={24}
-              />
               <Text style={styles.lessonTitleText}>
                 {CourseData.getLessonTitle(course, lesson)}
               </Text>
@@ -234,12 +247,11 @@ const LessonRow = ({
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-  },
-  lessonBox: {
-    paddingHorizontal: 20,
     backgroundColor: 'white',
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
+  },
+  lessonBox: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -247,9 +259,6 @@ const styles = StyleSheet.create({
   downloadBox: {
     width: LESSON_ROW_HEIGHT,
     height: LESSON_ROW_HEIGHT,
-    backgroundColor: 'white',
-    borderColor: '#ccc',
-    borderBottomWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -268,10 +277,6 @@ const styles = StyleSheet.create({
   lessonSizeText: {
     fontSize: 12,
     color: 'gray',
-  },
-
-  finishedIcon: {
-    marginRight: 24,
   },
   progressCircleText: {
     fontSize: 16,

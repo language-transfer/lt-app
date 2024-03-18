@@ -92,9 +92,10 @@ export const genUpdateProgressForLesson = async (
   ]);
 };
 
-export const genMarkLessonFinished = async (
+export const genMarkLesson = async (
   course: Course,
   lesson: number,
+  finished: boolean,
 ): Promise<void> => {
   const progressObject = await genProgressForLesson(course, lesson);
 
@@ -103,7 +104,7 @@ export const genMarkLessonFinished = async (
       `@activity/${course}/${lesson}`,
       JSON.stringify({
         ...progressObject,
-        finished: true,
+        finished,
       }),
     ),
     AsyncStorage.setItem(
@@ -114,6 +115,7 @@ export const genMarkLessonFinished = async (
   ]);
 
   if (
+    finished &&
     (await genPreferenceAutoDeleteFinished()) &&
     (await DownloadManager.genIsDownloaded(course, lesson))
   ) {
