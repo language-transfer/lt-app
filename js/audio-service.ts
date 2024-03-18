@@ -4,7 +4,7 @@ import BackgroundTimer, {IntervalId} from 'react-native-background-timer';
 import {
   genAutopause,
   genUpdateProgressForLesson,
-  genMarkLessonFinished,
+  genMarkLesson,
   genPreferenceStreamQuality,
 } from './persistence';
 import CourseData from './course-data';
@@ -272,7 +272,7 @@ export default async () => {
             course: wasPlaying?.course,
             lesson: wasPlaying?.lesson,
           });
-          await genMarkLessonFinished(wasPlaying.course, wasPlaying.lesson);
+          await genMarkLesson(wasPlaying.course, wasPlaying.lesson, true);
           await genUpdateProgressForLesson(
             wasPlaying.course,
             wasPlaying.lesson,
@@ -327,7 +327,7 @@ export default async () => {
 
         // guess who worked out the hard way that if you do the next two concurrently you get a race condition
 
-        await genMarkLessonFinished(wasPlaying.course, wasPlaying.lesson);
+        await genMarkLesson(wasPlaying.course, wasPlaying.lesson, true);
 
         // otherwise it's very tricky to play it again!
         await genUpdateProgressForLesson(
