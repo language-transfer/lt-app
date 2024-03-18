@@ -183,7 +183,7 @@ const LessonRow = ({
   return (
     <View style={styles.row}>
       <TouchableNativeFeedback onPress={handleFinishedPress}>
-        <View style={[styles.downloadBox]}>
+        <View style={styles.downloadBox}>
           <Icon
             style={{opacity: finished ? 1 : 0.2}}
             name="check"
