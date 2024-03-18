@@ -15,11 +15,11 @@ import {useNavigation} from '@react-navigation/native';
 import {useProgress} from 'react-native-track-player';
 import {log} from '../../metrics';
 import formatDuration from 'format-duration';
-import { MainNavigationProp } from '../App.react';
+import {MainNavigationProp} from '../App.react';
 
 interface Props {
-  course: Course,
-  lesson: number,
+  course: Course;
+  lesson: number;
   downloaded: boolean | null;
 }
 
