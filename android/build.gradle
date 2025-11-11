@@ -65,4 +65,3 @@ subprojects { prj ->
     if (ns) prj.android { namespace ns }
   }
 }
-

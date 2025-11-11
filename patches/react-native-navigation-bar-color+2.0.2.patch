@@ -1,12 +1,12 @@
 diff --git a/node_modules/react-native-navigation-bar-color/android/build.gradle b/node_modules/react-native-navigation-bar-color/android/build.gradle
-index 9d285c4..d68ad51 100644
+index 9d285c4..3a6eba5 100644
 --- a/node_modules/react-native-navigation-bar-color/android/build.gradle
 +++ b/node_modules/react-native-navigation-bar-color/android/build.gradle
 @@ -16,6 +16,7 @@ def DEFAULT_MIN_SDK_VERSION = 16
  def DEFAULT_TARGET_SDK_VERSION = 26
  
  android {
-+  namespace "dev.thebylito"
++  namespace "com.thebylito.navigationbarcolor"
     compileSdkVersion rootProject.ext.has('compileSdkVersion') ? rootProject.ext.compileSdkVersion : DEFAULT_COMPILE_SDK_VERSION
    buildToolsVersion rootProject.ext.has('buildToolsVersion') ? rootProject.ext.buildToolsVersion : DEFAULT_BUILD_TOOLS_VERSION
  

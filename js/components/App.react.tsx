@@ -3,7 +3,7 @@ import 'react-native-gesture-handler';
 import React, {useEffect, useState, useMemo} from 'react';
 import {AppState, AppStateStatus} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
-import {createDrawerNavigator} from '@react-navigation/drawer';
+// import {createDrawerNavigator} from '@react-navigation/drawer';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import DrawerContent from './Navigation/DrawerContent.react';
 import {genMostRecentListenedCourse} from '../persistence';
@@ -105,7 +105,7 @@ const App = () => {
     return <SplashScreen />;
   }
 
-  const Drawer = createDrawerNavigator<{Main: undefined}>();
+  // const Drawer = createDrawerNavigator<{Main: undefined}>();
   const Stack = createStackNavigator<MainParamList>();
 
   return (
@@ -115,7 +115,7 @@ const App = () => {
             setDrawerNavigationRef(node);
           }
         }}>
-        <Drawer.Navigator
+        {/* <Drawer.Navigator
           drawerContent={(props) => <DrawerContent {...props} />}>
           <Drawer.Screen name="Main" options={{ gestureEnabled }}>
             {() =>
@@ -195,7 +195,7 @@ const App = () => {
               </NavigationContainer>
             }
           </Drawer.Screen>
-        </Drawer.Navigator>
+        </Drawer.Navigator> */}
       </NavigationContainer>
     </SafeAreaProvider>
   );
