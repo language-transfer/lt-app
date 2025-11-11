@@ -2,20 +2,21 @@
 
 buildscript {
     ext {
-        buildToolsVersion = "29.0.2"
-        minSdkVersion = 21
-        compileSdkVersion = 33
-        targetSdkVersion = 33
+        minSdkVersion = 24
+        compileSdkVersion = 36
+        targetSdkVersion = 36
     }
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+        // jcenter()
     }
     dependencies {
-        classpath('com.android.tools.build:gradle:7.4.2')
+        classpath("com.android.tools.build:gradle:8.9.1")
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
     }
 }
 
@@ -32,7 +33,36 @@ allprojects {
         }
 
         google()
-        jcenter()
+        mavenCentral()
+        // jcenter()
         maven { url 'https://www.jitpack.io' }
     }
 }
+
+// Ensure all Android library modules have a compileSdk and BuildConfig enabled under AGP 8+
+subprojects { prj ->
+  prj.plugins.withId("com.android.library") {
+    prj.android {
+      // Match your app; 35 is a quiet default with AGP 8.9 / Build Tools 35.0.0
+      compileSdk 36
+      buildFeatures { buildConfig true }
+    }
+  }
+  // If a library applies Kotlin, ensure it targets JDK 17 (Hermes/RN expects this toolchain).
+  prj.plugins.withId("org.jetbrains.kotlin.android") {
+    prj.kotlin { jvmToolchain(17) }
+  }
+}
+
+// patch android manifest namespaces
+def libraryNamespaces = [
+  "react-native-navigation-bar-color"        : "com.thebylito.navigationbarcolor",
+]
+
+subprojects { prj ->
+  prj.plugins.withId("com.android.library") {
+    def ns = libraryNamespaces[prj.name]
+    if (ns) prj.android { namespace ns }
+  }
+}
+

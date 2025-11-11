@@ -1,7 +1,91 @@
+// Configures the React Native Gradle Settings plugin used for autolinking
+pluginManagement {
+  // Needed so RNGP can resolve com.android.tools.build:gradle (AGP) from Google's repo.
+  repositories {
+    gradlePluginPortal()
+    google()
+    mavenCentral()
+  }
+  includeBuild("../node_modules/@react-native/gradle-plugin")
+}
+plugins { id("com.facebook.react.settings") }
+
+// Ask RN CLI which packages to link; RNGP wires them for us.
+// (Replaces the old native_modules.gradle apply)
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+//  ex.autolinkLibrariesFromCommand()
+}
+
+// --- Manual includes to make PackageList compile ---
+include(':react-native-reanimated')
+project(':react-native-reanimated').projectDir =
+        new File(rootDir, '../node_modules/react-native-reanimated/android')
+
+include(':react-native-gesture-handler')
+project(':react-native-gesture-handler').projectDir =
+        new File(rootDir, '../node_modules/react-native-gesture-handler/android')
+
+include(':react-native-screens')
+project(':react-native-screens').projectDir =
+        new File(rootDir, '../node_modules/react-native-screens/android')
+
+include(':react-native-safe-area-context')
+project(':react-native-safe-area-context').projectDir =
+        new File(rootDir, '../node_modules/react-native-safe-area-context/android')
+
+include(':react-native-vector-icons')
+project(':react-native-vector-icons').projectDir =
+        new File(rootDir, '../node_modules/react-native-vector-icons/android')
+
+include(':react-native-webview')
+project(':react-native-webview').projectDir =
+        new File(rootDir, '../node_modules/react-native-webview/android')
+
+include(':react-native-get-random-values')
+project(':react-native-get-random-values').projectDir =
+        new File(rootDir, '../node_modules/react-native-get-random-values/android')
+
+include(':react-native-fs')
+project(':react-native-fs').projectDir =
+        new File(rootDir, '../node_modules/react-native-fs/android')
+
+include(':react-native-device-info')
+project(':react-native-device-info').projectDir =
+        new File(rootDir, '../node_modules/react-native-device-info/android')
+
+include(':react-native-background-timer')
+project(':react-native-background-timer').projectDir =
+        new File(rootDir, '../node_modules/react-native-background-timer/android')
+
+include(':react-native-navigation-bar-color')
+project(':react-native-navigation-bar-color').projectDir =
+        new File(rootDir, '../node_modules/react-native-navigation-bar-color/android')
+
+include(':react-native-track-player')
+project(':react-native-track-player').projectDir =
+        new File(rootDir, '../node_modules/react-native-track-player/android')
+
+include(':kesha-antonov_react-native-background-downloader')
+project(':kesha-antonov_react-native-background-downloader').projectDir =
+        new File(rootDir, '../node_modules/@kesha-antonov/react-native-background-downloader/android')
+
+include(':react-native-async-storage_async-storage')
+project(':react-native-async-storage_async-storage').projectDir =
+        new File(rootDir, '../node_modules/@react-native-async-storage/async-storage/android')
+
+
 rootProject.name = 'LanguageTransfer'
-include ':react-native-gesture-handler'
-project(':react-native-gesture-handler').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-gesture-handler/android')
-include ':react-native-navigation-bar-color'
-project(':react-native-navigation-bar-color').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-navigation-bar-color/android')
-apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+
+// Old manual includes are no longer needed when using RNGP autolinking.
+// If a specific library fails to autolink, you can re-add a targeted include for it.
+// include ':react-native-gesture-handler'
+// project(':react-native-gesture-handler').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-gesture-handler/android')
+// include ':react-native-navigation-bar-color'
+// project(':react-native-navigation-bar-color').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-navigation-bar-color/android')
+
+// Legacy CLI autolinking (removed upstream) — delete these two lines:
+// apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
+// applyNativeModulesSettingsGradle(settings)
+
 include ':app'
+

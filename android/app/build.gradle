@@ -1,6 +1,15 @@
-apply plugin: "com.android.application"
+plugins {
+  id 'com.android.application'
+  id 'com.facebook.react' // React Native Gradle Plugin (replaces the old react.gradle apply)
+}
 
 import com.android.build.OutputFile
+
+react {
+  // hackier and hackier :/
+  // enableHermes = false
+  // hermesEnabled = false
+}
 
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
@@ -10,6 +19,8 @@ import com.android.build.OutputFile
  * bundle directly from the development server. Below you can see all the possible configurations
  * and their defaults. If you decide to add a configuration block, make sure to add it before the
  * `apply from: "../../node_modules/react-native/react.gradle"` line.
+ *
+ * NOTE: With the new React Native Gradle Plugin, we no longer apply react.gradle manually.
  *
  * project.ext.react = [
  *   // the name of the generated asset file containing your JS bundle
@@ -77,12 +88,7 @@ import com.android.build.OutputFile
  * ]
  */
 
-project.ext.react = [
-    enableHermes: false,
-    entryFile: './index.js',
-]
-
-apply from: "../../node_modules/react-native/react.gradle"
+// Copy icon fonts at build time (recommended RNVI setup)
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 /**
@@ -110,34 +116,36 @@ def enableProguardInReleaseBuilds = false
  * allowing to use e.g. `Date.toLocaleString` and `String.localeCompare` that
  * give correct results when using with locales other than en-US.  Note that
  * this variant is about 6MiB larger per architecture than default.
- */
-def jscFlavor = 'org.webkit:android-jsc:+'
-
-/**
- * Whether to enable the Hermes VM.
  *
- * This should be set on project.ext.react and mirrored here.  If it is not set
- * on project.ext.react, JavaScript will not be compiled to Hermes Bytecode
- * and the benefits of using Hermes will therefore be sharply reduced.
+ * NOTE: Engine selection (Hermes/JSC) is handled by the RN Gradle Plugin via gradle.properties.
  */
-def enableHermes = project.ext.react.get("enableHermes", false);
+// def jscFlavor = 'org.webkit:android-jsc:+'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    namespace "org.languagetransfer"
+
+    // AGP 8+ requires compileSdk to be set explicitly (not via root ext var).
+    // Use 35 to align with Build Tools 35.0.0; bump to 36 if you want once the platform is installed.
+    compileSdk 35
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        // RN modern templates use Java 17; 1.8 also works if you prefer.
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     defaultConfig {
         applicationId "org.languagetransfer"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk 24
+        targetSdk 35
         versionCode 11
         versionName "1.5.2"
         multiDexEnabled true
     }
+
+    // Some older libraries define buildConfigField; AGP 8 requires opting in.
+    buildFeatures { buildConfig true }
+
     splits {
         abi {
             reset()
@@ -146,6 +154,7 @@ android {
             include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }
     }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -162,6 +171,7 @@ android {
             }
         }
     }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -195,45 +205,60 @@ android {
                 output.versionCodeOverride =
                         versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
             }
-
         }
     }
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    //noinspection GradleDynamicVersion
-    implementation "com.facebook.react:react-native:+"  // From node_modules
+
+    // RNGP adds the correct React Native dependency; keeping the old line commented avoids duplicates:
+    // implementation "com.facebook.react:react-native:+"
+    // implementation "com.facebook.react:react-android:0.78.3"
+
+      // implementation("org.webkit:android-jsc:+")
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation project(':react-native-gesture-handler')
 
     implementation project(':react-native-navigation-bar-color')
 
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation "androidx.appcompat:appcompat:1.6.1"   // <-- add this
+    
+// Native modules wired as subprojects
+implementation project(':react-native-reanimated')
+implementation project(':react-native-gesture-handler')
+implementation project(':react-native-screens')
+implementation project(':react-native-safe-area-context')
+implementation project(':react-native-vector-icons')
+implementation project(':react-native-webview')
+implementation project(':react-native-get-random-values')
+implementation project(':react-native-fs')
+implementation project(':react-native-device-info')
+implementation project(':react-native-background-timer')
+implementation project(':react-native-navigation-bar-color')
+implementation project(':react-native-track-player')
+implementation project(':kesha-antonov_react-native-background-downloader')
+implementation project(':react-native-async-storage_async-storage')
 
-    implementation 'com.squareup.okhttp3:okhttp:4.9.0' 
 
+    // Flipper (debug only). Assumes FLIPPER_VERSION is defined upstream (gradle.properties or root build.gradle ext).
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
       exclude group:'com.squareup.okhttp3'
     }
-
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.flipper'
     }
-
     debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.flipper'
     }
 
-    if (enableHermes) {
-        def hermesPath = "../../node_modules/hermes-engine/android/";
-        debugImplementation files(hermesPath + "hermes-debug.aar")
-        releaseImplementation files(hermesPath + "hermes-release.aar")
-    } else {
-        implementation jscFlavor
-    }
+    // Engine selection (Hermes/JSC) is handled by RNGP; keeping legacy block commented for reference:
+    // if (enableHermes) { ... } else { implementation jscFlavor }
 }
 
 // Run this once to be able to run the application with BUCK
@@ -243,4 +268,13 @@ task copyDownloadableDepsToLibs(type: Copy) {
     into 'libs'
 }
 
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+// Compatibility shim for older libraries that read :app.ext.hermesEnabled (RN ≥0.71 uses gradle.properties).
+ext {
+    hermesEnabled = (project.findProperty("hermesEnabled")?.toBoolean() ?: false)
+}
+
+project.ext.react = [
+  enableHermes: false
+]
+
+

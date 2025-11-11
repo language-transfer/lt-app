@@ -5,7 +5,7 @@
  * @format
  */
 
-module.exports = {
+/* module.exports = {
   transformer: {
     getTransformOptions: async () => ({
       transform: {
@@ -15,4 +15,13 @@ module.exports = {
     }),
     // babelTransformerPath: require.resolve('./bundledMediaStripTransform'),
   },
-};
+}; */
+
+// metro.config.js
+const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+
+/** @type {import('metro-config').ConfigT} */
+const config = {};
+
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+

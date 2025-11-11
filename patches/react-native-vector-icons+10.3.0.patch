@@ -1,0 +1,14 @@
+diff --git a/node_modules/react-native-vector-icons/android/build.gradle b/node_modules/react-native-vector-icons/android/build.gradle
+index 3e615e9..7ad2378 100644
+--- a/node_modules/react-native-vector-icons/android/build.gradle
++++ b/node_modules/react-native-vector-icons/android/build.gradle
+@@ -38,6 +38,9 @@ android {
+             }
+         }
+     }
++
++    // AGP 8+: BuildConfig is opt-in for library modules
++    buildFeatures { buildConfig true }
+ }
+ 
+ repositories {
