@@ -18,7 +18,7 @@ Only the open-source Expo CLI workflow is used—there are no Expo Application S
 
 - Course browser with the familiar Language Transfer artwork pulled from the legacy assets.
 - Course home screen that resumes your last lesson, surfaces data management, and links out to Language Transfer resources.
-- Lesson player built on `expo-av`, including seek scrubbing, skip-back, and offline download actions.
+- Lesson player built on `expo-audio`, including seek scrubbing, skip-back, and offline download actions.
 - All-lessons list with progress indicators, download management, and “download all” support.
 - Data management panel mirroring the legacy options for clearing metadata, progress, and downloads.
 - Static About, Licenses (embedded web view), and Settings screens that map the previous preferences to Expo-compatible storage.
@@ -28,7 +28,7 @@ Only the open-source Expo CLI workflow is used—there are no Expo Application S
 - `app/` – Expo Router entry points
 - `src/` – shared logic and UI
   - `data/` – course metadata and fetch helpers
-  - `services/` – audio + download layers built on `expo-av`/`expo-file-system`
+  - `services/` – audio + download layers built on `expo-audio`/`expo-file-system`
   - `components/` – screen components reused by the router routes
   - `storage/` – AsyncStorage persistence helpers and preference APIs
   - `hooks/` – view helpers (status bar, downloads, etc.)

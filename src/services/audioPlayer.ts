@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Audio, AVPlaybackStatusSuccess } from 'expo-av';
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 
 import CourseData from '@/src/data/courseData';
 import DownloadManager from '@/src/services/downloadManager';
@@ -10,6 +10,7 @@ import {
   genUpdateProgressForLesson,
 } from '@/src/storage/persistence';
 import type { Course } from '@/src/types';
+import type { AudioStatus } from 'expo-audio';
 
 type AudioError = {
   message: string;
@@ -30,93 +31,59 @@ export type LessonAudioControls = {
 };
 
 const AUDIO_MODE = {
-  staysActiveInBackground: false,
-  allowsRecordingIOS: false,
-  playsInSilentModeIOS: true,
-  shouldDuckAndroid: true,
+  playsInSilentMode: true,
+  allowsRecording: false,
+  shouldPlayInBackground: false,
+  interruptionMode: 'duckOthers' as const,
+  interruptionModeAndroid: 'duckOthers' as const,
+  shouldRouteThroughEarpiece: false,
 };
 
 export const useLessonAudio = (course: Course, lesson: number): LessonAudioControls => {
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const [status, setStatus] = useState<AVPlaybackStatusSuccess | null>(null);
+  const [source, setSource] = useState<string | null>(null);
   const [error, setError] = useState<AudioError | null>(null);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
   const persistRef = useRef(0);
+  const pendingSeekRef = useRef<number | null>(null);
+
+  const player = useAudioPlayer(source, { updateInterval: 500, keepAudioSessionActive: false });
+  const status: AudioStatus | null = useAudioPlayerStatus(player);
 
   useEffect(() => {
     let mounted = true;
-    let cancelled = false;
+    setError(null);
+    setPosition(0);
+    setSource(null);
 
     async function load() {
-      setStatus(null);
-      setError(null);
-      setPosition(0);
-      if (CourseData.isCourseMetadataLoaded(course)) {
-        setDuration(CourseData.getLessonDuration(course, lesson));
-      } else {
-        setDuration(0);
-      }
-
       try {
+        if (CourseData.isCourseMetadataLoaded(course)) {
+          setDuration(CourseData.getLessonDuration(course, lesson));
+        } else {
+          setDuration(0);
+        }
+
         await CourseData.genLoadCourseMetadata(course);
         setDuration(CourseData.getLessonDuration(course, lesson));
-        await Audio.setAudioModeAsync(AUDIO_MODE);
-        const [quality, downloaded] = await Promise.all([
+        await setAudioModeAsync(AUDIO_MODE);
+
+        const [quality, downloaded, savedProgress] = await Promise.all([
           genPreferenceStreamQuality(),
           DownloadManager.genIsDownloaded(course, lesson),
+          genProgressForLesson(course, lesson),
         ]);
 
         const uri = downloaded
           ? DownloadManager.getDownloadSaveLocation(DownloadManager.getDownloadId(course, lesson))
           : CourseData.getLessonUrl(course, lesson, quality);
 
-        const sound = new Audio.Sound();
-
-        sound.setOnPlaybackStatusUpdate((playbackStatus) => {
-          if (!playbackStatus.isLoaded || !mounted) {
-            return;
-          }
-
-          const successStatus = playbackStatus as AVPlaybackStatusSuccess;
-          setStatus(successStatus);
-          setPosition((successStatus.positionMillis ?? 0) / 1000);
-          if (successStatus.durationMillis) {
-            setDuration(successStatus.durationMillis / 1000);
-          }
-
-          const now = Date.now();
-          if (
-            successStatus.positionMillis !== undefined &&
-            now - persistRef.current > 4000 &&
-            successStatus.isPlaying
-          ) {
-            persistRef.current = now;
-            genUpdateProgressForLesson(course, lesson, successStatus.positionMillis / 1000);
-          }
-
-          if (successStatus.didJustFinish) {
-            genMarkLessonFinished(course, lesson);
-          }
-        });
-
-        const source = uri.startsWith('file://') ? { uri } : { uri, headers: {} };
-        await sound.loadAsync(source, {
-          shouldPlay: false,
-          progressUpdateIntervalMillis: 500,
-        });
-
-        const savedProgress = await genProgressForLesson(course, lesson);
-        if (savedProgress?.progress) {
-          await sound.setPositionAsync(savedProgress.progress * 1000);
-        }
-
-        if (!mounted || cancelled) {
-          await sound.unloadAsync();
+        if (!mounted) {
           return;
         }
 
-        soundRef.current = sound;
+        pendingSeekRef.current = savedProgress?.progress ?? null;
+        setSource(uri);
       } catch (err) {
         if (mounted) {
           setError({ message: err instanceof Error ? err.message : 'Unable to load audio' });
@@ -128,33 +95,52 @@ export const useLessonAudio = (course: Course, lesson: number): LessonAudioContr
 
     return () => {
       mounted = false;
-      cancelled = true;
-      const sound = soundRef.current;
-      soundRef.current = null;
-      if (sound) {
-        sound.unloadAsync().catch(() => {});
-      }
     };
   }, [course, lesson]);
 
-  const play = useCallback(async () => {
-    if (!soundRef.current) {
+  useEffect(() => {
+    if (!status) {
       return;
     }
-    await soundRef.current.playAsync();
-  }, []);
+
+    setPosition(status.currentTime ?? 0);
+    if (status.duration) {
+      setDuration(status.duration);
+    }
+
+    if (pendingSeekRef.current != null && status.isLoaded) {
+      const target = pendingSeekRef.current;
+      pendingSeekRef.current = null;
+      player.seekTo(target).catch(() => {});
+      setPosition(target);
+    }
+
+    const now = Date.now();
+    if (status.playing && now - persistRef.current > 4000) {
+      persistRef.current = now;
+      genUpdateProgressForLesson(course, lesson, status.currentTime ?? 0);
+    }
+
+    if (status.didJustFinish) {
+      genMarkLessonFinished(course, lesson);
+    }
+  }, [status, player, course, lesson]);
+
+  const play = useCallback(async () => {
+    if (!status?.isLoaded) {
+      return;
+    }
+    player.play();
+  }, [player, status]);
 
   const pause = useCallback(async () => {
-    if (!soundRef.current) {
+    if (!status?.isLoaded) {
       return;
     }
-    await soundRef.current.pauseAsync();
-  }, []);
+    player.pause();
+  }, [player, status]);
 
   const toggle = useCallback(async () => {
-    if (!soundRef.current) {
-      return;
-    }
     const currentStatus = status;
     if (!currentStatus?.isLoaded) {
       return;
@@ -167,13 +153,13 @@ export const useLessonAudio = (course: Course, lesson: number): LessonAudioContr
   }, [pause, play, status]);
 
   const seekTo = useCallback(async (seconds: number) => {
-    if (!soundRef.current) {
+    if (!status?.isLoaded) {
       return;
     }
-    await soundRef.current.setPositionAsync(seconds * 1000);
+    await player.seekTo(seconds);
     setPosition(seconds);
     await genUpdateProgressForLesson(course, lesson, seconds);
-  }, [course, lesson]);
+  }, [course, lesson, player, status]);
 
   const skipBack = useCallback(
     async (seconds = 10) => {
