@@ -1,27 +1,36 @@
 import React, { useState } from "react";
+import type { ComponentProps } from "react";
 import {
   Linking,
   ScrollView,
   StyleSheet,
   Text,
   View,
-  Pressable,
   TouchableNativeFeedback,
 } from "react-native";
+import type { ViewStyle } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import Constants from "expo-constants";
+import { useRouter } from "expo-router";
 
 import { log } from "@/src/utils/log";
 
-type SectionKey = "Language Transfer" | "Privacy" | "LT App";
+type Section = "Language Transfer" | "Privacy" | "LT App";
+type IconName = ComponentProps<typeof FontAwesome5>["name"];
+
+const ICON_SIZE = 24;
+
+const Icon = ({ name, size = ICON_SIZE }: { name: IconName; size?: number }) => (
+  <FontAwesome5 name={name} size={size} />
+);
 
 const AboutScreen = () => {
-  const { navigate } = useNavigation<MainNavigationProp<"Licenses">>();
+  const router = useRouter();
 
-  const [sections, setSections] = useState<{ [key in Section]: boolean }>({
+  const [sections, setSections] = useState<Record<Section, boolean>>({
     "Language Transfer": true,
-    Privacy: false,
-    "LT App": false,
+    Privacy: true,
+    "LT App": true,
   });
 
   const shownSection = (title: Section): ViewStyle =>
@@ -39,12 +48,8 @@ const AboutScreen = () => {
       >
         <View style={styles.headerSection}>
           <Text style={styles.headerText}>{title}</Text>
-          {!sections[title] ? (
-            <Icon name="plus" type="font-awesome-5" size={24} />
-          ) : null}
-          {sections[title] ? (
-            <Icon name="minus" type="font-awesome-5" size={24} />
-          ) : null}
+          {!sections[title] ? <Icon name="plus" size={24} /> : null}
+          {sections[title] ? <Icon name="minus" size={24} /> : null}
         </View>
       </TouchableNativeFeedback>
     );
@@ -52,6 +57,8 @@ const AboutScreen = () => {
 
   // TODO: get this from the build environment
   const donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo = true;
+  const appVersion =
+    Constants.expoConfig?.version ?? Constants.manifest?.version ?? "unknown";
 
   return (
     <ScrollView style={styles.body} contentContainerStyle={styles.container}>
@@ -106,7 +113,7 @@ const AboutScreen = () => {
                     <Text style={styles.additionalButtonText}>
                       Contribute on Patreon
                     </Text>
-                    <Icon name="patreon" type="font-awesome-5" />
+                    <Icon name="patreon" />
                   </View>
                 </TouchableNativeFeedback>
               </View>
@@ -128,7 +135,7 @@ const AboutScreen = () => {
                     <Text style={styles.additionalButtonText}>
                       Make a one-time contribution to Language Transfer
                     </Text>
-                    <Icon name="donate" type="font-awesome-5" />
+                    <Icon name="donate" />
                   </View>
                 </TouchableNativeFeedback>
               </View>
@@ -150,7 +157,7 @@ const AboutScreen = () => {
                 <Text style={styles.additionalButtonText}>
                   Visit languagetransfer.org
                 </Text>
-                <Icon name="link" type="font-awesome-5" />
+                <Icon name="link" />
               </View>
             </TouchableNativeFeedback>
           </View>
@@ -170,7 +177,7 @@ const AboutScreen = () => {
                 <Text style={styles.additionalButtonText}>
                   Visit on Facebook
                 </Text>
-                <Icon name="facebook-f" type="font-awesome-5" />
+                <Icon name="facebook-f" />
               </View>
             </TouchableNativeFeedback>
           </View>
@@ -245,7 +252,7 @@ const AboutScreen = () => {
             >
               <View style={styles.additionalButtonInner}>
                 <Text style={styles.additionalButtonText}>Contact us</Text>
-                <Icon name="envelope" type="font-awesome-5" />
+                <Icon name="envelope" />
               </View>
             </TouchableNativeFeedback>
           </View>
@@ -272,18 +279,18 @@ const AboutScreen = () => {
             >
               <View style={styles.additionalButtonInner}>
                 <Text style={styles.additionalButtonText}>Visit on GitHub</Text>
-                <Icon name="github" type="font-awesome-5" />
+                <Icon name="github" />
               </View>
             </TouchableNativeFeedback>
           </View>
           <View style={[styles.additionalButton]}>
             <TouchableNativeFeedback
-              onPress={() => navigate("Licenses")}
+              onPress={() => router.push("/licenses")}
               useForeground={true}
             >
               <View style={styles.additionalButtonInner}>
                 <Text style={styles.additionalButtonText}>Licenses</Text>
-                <Icon name="osi" type="font-awesome-5" />
+                <Icon name="osi" />
               </View>
             </TouchableNativeFeedback>
           </View>
@@ -292,8 +299,7 @@ const AboutScreen = () => {
             The app’s core maintainers are Timothy J. Aveni and Josh Fayer.
           </Text>
           <Text style={styles.bodyText}>
-            This is version {DeviceInfo.getVersion()} of the Language Transfer
-            app.
+            This is version {appVersion} of the Language Transfer app.
           </Text>
         </View>
       </View>
