@@ -19,13 +19,13 @@ import type { Course } from "@/src/types";
 
 const SCREEN_HEIGHT = Dimensions.get("screen").height;
 const IMAGE_HEIGHT = 0.4 * SCREEN_HEIGHT;
-const CARDS_MARGIN_TOP = IMAGE_HEIGHT + 80 + 40;
+const CARDS_MARGIN_TOP = IMAGE_HEIGHT + 40;
 
 const LanguageSelector = () => {
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const router = useRouter();
-  useStatusBarStyle("white", "dark-content");
-  StatusBar.setTranslucent(true);
+  // useStatusBarStyle("white", "dark-content");
+  // StatusBar.setTranslucent(true);
 
   const goToCourse = (course: string) => {
     router.push({
@@ -41,14 +41,21 @@ const LanguageSelector = () => {
           style={[
             styles.headerImageWrapper,
             {
+              transform: [
+                {
+                  scale: scrollAnim.interpolate({
+                    inputRange: [0, IMAGE_HEIGHT / 1.5],
+                    outputRange: [1, 0.9],
+                    extrapolate: "clamp",
+                  }),
+                },
+              ],
               opacity: scrollAnim.interpolate({
-                inputRange: [0, CARDS_MARGIN_TOP / 1.5],
+                inputRange: [0, IMAGE_HEIGHT / 1.5],
                 outputRange: [1, 0],
+                extrapolate: "clamp",
               }),
-              height: scrollAnim.interpolate({
-                inputRange: [0, CARDS_MARGIN_TOP / 1.5],
-                outputRange: [IMAGE_HEIGHT, 0.9 * IMAGE_HEIGHT],
-              }),
+              height: IMAGE_HEIGHT,
             },
           ]}
         >
@@ -80,38 +87,44 @@ const LanguageSelector = () => {
             <View style={styles.sectionHeaderFirst}>
               <Text style={styles.sectionHeaderText}>Language courses</Text>
             </View>
-            {[
-              "spanish",
-              "arabic",
-              "turkish",
-              "german",
-              "greek",
-              "italian",
-              "swahili",
-              "french",
-            ].map((course) => (
-              <LanguageButton
-                key={course}
-                course={course as Course}
-                onPress={() => goToCourse(course)}
-              />
-            ))}
+            <View style={styles.courseGrid}>
+              {[
+                "spanish",
+                "arabic",
+                "turkish",
+                "german",
+                "greek",
+                "italian",
+                "swahili",
+                "french",
+              ].map((course) => (
+                <LanguageButton
+                  key={course}
+                  course={course as Course}
+                  onPress={() => goToCourse(course)}
+                />
+              ))}
+            </View>
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionHeaderText}>For Spanish speakers</Text>
             </View>
-            <LanguageButton
-              course="ingles"
-              onPress={() => goToCourse("ingles")}
-            />
+            <View style={styles.courseGrid}>
+              <LanguageButton
+                course="ingles"
+                onPress={() => goToCourse("ingles")}
+              />
+            </View>
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionHeaderText}>Other courses</Text>
             </View>
-            <LanguageButton
-              course="music"
-              onPress={() => goToCourse("music")}
-            />
+            <View style={styles.courseGrid}>
+              <LanguageButton
+                course="music"
+                onPress={() => goToCourse("music")}
+              />
+            </View>
 
             <View style={styles.aboutSectionHr} />
             <View style={styles.aboutSectionWrapper}>
@@ -134,8 +147,8 @@ const LanguageSelector = () => {
           </View>
         </Animated.ScrollView>
       </View>
-      <View style={styles.topTranslucent} />
-      <Animated.View
+      {/* <View style={styles.topTranslucent} /> */}
+      {/* <Animated.View
         style={[
           styles.scrollIndicator,
           {
@@ -148,13 +161,19 @@ const LanguageSelector = () => {
       >
         <Text style={styles.scrollIndicatorText}>scroll for more</Text>
         <FontAwesome5 name="angle-double-down" color="#999" size={14} />
-      </Animated.View>
+      </Animated.View> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {},
+  scrollView: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+  },
   screenWrapper: {
     width: "100%",
     height: "100%",
@@ -170,10 +189,10 @@ const styles = StyleSheet.create({
   headerImageWrapper: {
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 32,
+    paddingTop: 48,
   },
   headerImage: {
-    width: "80%",
+    width: "100%",
     height: "100%",
   },
   courseList: {
@@ -228,10 +247,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#222",
   },
-  topTranslucent: {
-    height: 120,
-    backgroundColor: "white",
-    opacity: 0.9,
+  courseGrid: {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
   scrollIndicator: {
     alignItems: "center",
