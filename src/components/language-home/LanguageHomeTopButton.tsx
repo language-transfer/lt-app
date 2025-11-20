@@ -10,9 +10,8 @@ import {
   genPreferenceRatingButtonDismissed,
   genProgressForLesson,
   genSetPreferenceRatingButtonDismissed,
-  Progress,
 } from '@/src/storage/persistence';
-import type { Course } from '@/src/types';
+import type { Course, Progress } from '@/src/types';
 import { log } from '@/src/utils/log';
 
 type Props = {

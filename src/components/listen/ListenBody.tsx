@@ -1,14 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Linking,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import formatDuration from 'format-duration';
+import { useRouter } from 'expo-router';
 
 import CourseData from '@/src/data/courseData';
 import ListenScrubber from '@/src/components/listen/ListenScrubber';
@@ -28,6 +30,7 @@ const ListenBody = ({ course, lesson }: Props) => {
   const controls = useLessonAudio(course, lesson);
   const downloaded = useIsLessonDownloaded(course, lesson);
   const [busyAction, setBusyAction] = useState<'download' | 'delete' | null>(null);
+  const router = useRouter();
 
   const lessonTitle = CourseData.getLessonTitle(course, lesson);
   const duration = CourseData.getLessonDuration(course, lesson);
@@ -53,11 +56,27 @@ const ListenBody = ({ course, lesson }: Props) => {
     setBusyAction(downloaded ? 'delete' : 'download');
     try {
       if (downloaded) {
+        log({
+          action: 'delete_download',
+          surface: 'listen_screen',
+          course,
+          lesson,
+        });
         await DownloadManager.genDeleteDownload(course, lesson);
       } else {
+        log({
+          action: 'download_lesson',
+          surface: 'listen_screen',
+          course,
+          lesson,
+        });
         await DownloadManager.startDownload(course, lesson);
       }
     } catch (err) {
+      Alert.alert(
+        downloaded ? 'Unable to delete download' : 'Unable to download lesson',
+        err instanceof Error ? err.message : 'Unknown error',
+      );
       log({
         action: downloaded ? 'delete_download_error' : 'download_error',
         course,
@@ -71,7 +90,15 @@ const ListenBody = ({ course, lesson }: Props) => {
   };
 
   const handleMarkFinished = async () => {
+    log({
+      action: 'mark_finished',
+      surface: 'listen_screen',
+      course,
+      lesson,
+      position: controls.position,
+    });
     await genMarkLessonFinished(course, lesson);
+    router.back();
   };
 
   if (controls.error) {
@@ -92,8 +119,11 @@ const ListenBody = ({ course, lesson }: Props) => {
       </View>
 
       <View style={styles.icons}>
-        <Pressable onPress={() => controls.skipBack()} android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: true }}>
-          <FontAwesome5 name="undo" size={42} color={colors.text} />
+        <Pressable
+          onPress={() => controls.skipBack()}
+          android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: true }}
+        >
+          <MaterialIcons name="replay-10" size={42} color={colors.text} />
         </Pressable>
 
         {controls.ready ? (
@@ -129,8 +159,12 @@ const ListenBody = ({ course, lesson }: Props) => {
       />
 
       <View style={styles.actionRow}>
-        <Pressable style={styles.actionButton} onPress={handleDownloadToggle} disabled={busyAction !== null}>
-          {busyAction ? (
+        <Pressable
+          style={styles.actionButton}
+          onPress={handleDownloadToggle}
+          disabled={busyAction !== null || downloaded === null}
+        >
+          {busyAction || downloaded === null ? (
             <ActivityIndicator size="small" color="#555" />
           ) : (
             <FontAwesome5 name={downloaded ? 'trash' : 'download'} size={18} color="#555" />

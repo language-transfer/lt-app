@@ -216,6 +216,7 @@ const DownloadManager = {
   },
 
   async genDeleteFinishedDownloadsForCourse(course: Course) {
+    await CourseData.genLoadCourseMetadata(course);
     const lessons = CourseData.getLessonIndices(course);
     await Promise.all(
       lessons.map(async (lesson) => {

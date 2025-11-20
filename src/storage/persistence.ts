@@ -94,6 +94,14 @@ export const genMarkLessonFinished = async (
     AsyncStorage.setItem(`${activityKey(course)}/most-recent-lesson`, lesson.toString()),
     AsyncStorage.setItem('@activity/most-recent-course', course),
   ]);
+
+  const autoDelete = (await AsyncStorage.getItem('@preferences/auto-delete-finished')) === 'true';
+  if (autoDelete) {
+    const { default: DownloadManager } = await import('@/src/services/downloadManager');
+    if (await DownloadManager.genIsDownloaded(course, lesson)) {
+      await DownloadManager.genDeleteDownload(course, lesson);
+    }
+  }
 };
 
 export const genDeleteProgressForCourse = async (course: Course): Promise<void> => {

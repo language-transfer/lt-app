@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 
 import CourseData from '@/src/data/courseData';
@@ -11,6 +12,7 @@ import {
 } from '@/src/storage/persistence';
 import type { Course } from '@/src/types';
 import type { AudioStatus } from 'expo-audio';
+import { log } from '@/src/utils/log';
 
 type AudioError = {
   message: string;
@@ -40,12 +42,13 @@ const AUDIO_MODE = {
 };
 
 export const useLessonAudio = (course: Course, lesson: number): LessonAudioControls => {
-  const [source, setSource] = useState<string | null>(null);
+  const [source, setSource] = useState<string | number | null>(null);
   const [error, setError] = useState<AudioError | null>(null);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
   const persistRef = useRef(0);
   const pendingSeekRef = useRef<number | null>(null);
+  const autoStartRef = useRef(false);
 
   const player = useAudioPlayer(source, { updateInterval: 500, keepAudioSessionActive: false });
   const status: AudioStatus | null = useAudioPlayerStatus(player);
@@ -55,6 +58,7 @@ export const useLessonAudio = (course: Course, lesson: number): LessonAudioContr
     setError(null);
     setPosition(0);
     setSource(null);
+    autoStartRef.current = false;
 
     async function load() {
       try {
@@ -74,9 +78,18 @@ export const useLessonAudio = (course: Course, lesson: number): LessonAudioContr
           genProgressForLesson(course, lesson),
         ]);
 
-        const uri = downloaded
-          ? DownloadManager.getDownloadSaveLocation(DownloadManager.getDownloadId(course, lesson))
-          : CourseData.getLessonUrl(course, lesson, quality);
+        let uri: string | number;
+        if (downloaded) {
+          uri = DownloadManager.getDownloadSaveLocation(
+            DownloadManager.getDownloadId(course, lesson),
+          );
+        } else {
+          const bundled =
+            lesson === 0 && Platform.OS === 'ios'
+              ? CourseData.getBundledFirstLesson(course)
+              : null;
+          uri = bundled ?? CourseData.getLessonUrl(course, lesson, quality);
+        }
 
         if (!mounted) {
           return;
@@ -111,8 +124,23 @@ export const useLessonAudio = (course: Course, lesson: number): LessonAudioContr
     if (pendingSeekRef.current != null && status.isLoaded) {
       const target = pendingSeekRef.current;
       pendingSeekRef.current = null;
-      player.seekTo(target).catch(() => {});
-      setPosition(target);
+      (async () => {
+        try {
+          await player.seekTo(target);
+          setPosition(target);
+        } catch {
+          // ignore seek errors
+        }
+      })();
+    }
+
+    if (status.isLoaded && !autoStartRef.current) {
+      autoStartRef.current = true;
+      try {
+        player.play();
+      } catch {
+        // ignore auto-play errors
+      }
     }
 
     const now = Date.now();
@@ -126,52 +154,74 @@ export const useLessonAudio = (course: Course, lesson: number): LessonAudioContr
     }
   }, [status, player, course, lesson]);
 
+  const logPlayerEvent = useCallback(
+    (action: string, positionOverride?: number) => {
+      log({
+        action,
+        surface: 'listen_screen',
+        course,
+        lesson,
+        position: positionOverride ?? status?.currentTime ?? 0,
+      });
+    },
+    [course, lesson, status?.currentTime],
+  );
+
   const play = useCallback(async () => {
     if (!status?.isLoaded) {
       return;
     }
     player.play();
-  }, [player, status]);
+    logPlayerEvent('play');
+  }, [player, status, logPlayerEvent]);
 
   const pause = useCallback(async () => {
     if (!status?.isLoaded) {
       return;
     }
     player.pause();
-  }, [player, status]);
+    logPlayerEvent('pause');
+  }, [player, status, logPlayerEvent]);
 
   const toggle = useCallback(async () => {
     const currentStatus = status;
     if (!currentStatus?.isLoaded) {
       return;
     }
-    if (currentStatus.isPlaying) {
+    if (currentStatus.playing) {
       await pause();
     } else {
       await play();
     }
   }, [pause, play, status]);
 
-  const seekTo = useCallback(async (seconds: number) => {
-    if (!status?.isLoaded) {
-      return;
-    }
-    await player.seekTo(seconds);
-    setPosition(seconds);
-    await genUpdateProgressForLesson(course, lesson, seconds);
-  }, [course, lesson, player, status]);
+  const seekTo = useCallback(
+    async (seconds: number, options?: { log?: boolean }) => {
+      if (!status?.isLoaded) {
+        return;
+      }
+      await player.seekTo(seconds);
+      setPosition(seconds);
+      await genUpdateProgressForLesson(course, lesson, seconds);
+      if (options?.log !== false) {
+        logPlayerEvent('change_position', seconds);
+      }
+    },
+    [course, lesson, player, status, logPlayerEvent],
+  );
 
   const skipBack = useCallback(
     async (seconds = 10) => {
       const newPosition = Math.max(0, position - seconds);
-      await seekTo(newPosition);
+      logPlayerEvent('jump_backward');
+      await seekTo(newPosition, { log: false });
     },
-    [position, seekTo],
+    [logPlayerEvent, position, seekTo],
   );
 
   return {
     ready: Boolean(status?.isLoaded),
-    playing: Boolean(status?.isLoaded && status.isPlaying),
+    playing: Boolean(status?.isLoaded && status.playing),
     buffering: Boolean(status?.isLoaded && status.isBuffering),
     duration,
     position,

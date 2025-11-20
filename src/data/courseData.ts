@@ -1,4 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy';
+import { Platform } from 'react-native';
 
 import {
   Course,
@@ -34,6 +35,27 @@ import inglesCoverWithText from '../../legacy/resources/ingles-cover-stylized-wi
 import musicCover from '../../legacy/resources/music-cover-stylized.png';
 import musicCoverWithText from '../../legacy/resources/music-cover-stylized-with-text.png';
 
+const spanishFirstLesson =
+  Platform.OS === 'ios' ? require('../../legacy/resources/courses/spanish1-lq.mp3') : null;
+const arabicFirstLesson =
+  Platform.OS === 'ios' ? require('../../legacy/resources/courses/arabic1-lq.mp3') : null;
+const turkishFirstLesson =
+  Platform.OS === 'ios' ? require('../../legacy/resources/courses/turkish1-lq.mp3') : null;
+const germanFirstLesson =
+  Platform.OS === 'ios' ? require('../../legacy/resources/courses/german1-lq.mp3') : null;
+const greekFirstLesson =
+  Platform.OS === 'ios' ? require('../../legacy/resources/courses/greek1-lq.mp3') : null;
+const italianFirstLesson =
+  Platform.OS === 'ios' ? require('../../legacy/resources/courses/italian1-lq.mp3') : null;
+const swahiliFirstLesson =
+  Platform.OS === 'ios' ? require('../../legacy/resources/courses/swahili1-lq.mp3') : null;
+const frenchFirstLesson =
+  Platform.OS === 'ios' ? require('../../legacy/resources/courses/french1-lq.mp3') : null;
+const inglesFirstLesson =
+  Platform.OS === 'ios' ? require('../../legacy/resources/courses/ingles1-lq.mp3') : null;
+const musicFirstLesson =
+  Platform.OS === 'ios' ? require('../../legacy/resources/courses/music1-lq.mp3') : null;
+
 const META_VERSIONS_URL = 'https://downloads.languagetransfer.org/course-versions.json';
 const DOCUMENT_DIRECTORY =
   (FileSystem as any).documentDirectory ?? (FileSystem as any).cacheDirectory ?? '';
@@ -56,6 +78,8 @@ const data: Record<Course, CourseInfo> = {
       text: 'white',
       backgroundAccent: '#516198',
     },
+    bundledFirstLesson: spanishFirstLesson,
+    bundledFirstLessonId: 'spanish/spanish1',
   },
   arabic: {
     image: arabicCover,
@@ -71,6 +95,8 @@ const data: Record<Course, CourseInfo> = {
       text: 'black',
       backgroundAccent: '#806006',
     },
+    bundledFirstLesson: arabicFirstLesson,
+    bundledFirstLessonId: 'arabic/arabic1',
   },
   turkish: {
     image: turkishCover,
@@ -86,6 +112,8 @@ const data: Record<Course, CourseInfo> = {
       text: 'white',
       backgroundAccent: '#760629',
     },
+    bundledFirstLesson: turkishFirstLesson,
+    bundledFirstLessonId: 'turkish/turkish1',
   },
   german: {
     image: germanCover,
@@ -101,6 +129,8 @@ const data: Record<Course, CourseInfo> = {
       text: 'white',
       backgroundAccent: '#006400',
     },
+    bundledFirstLesson: germanFirstLesson,
+    bundledFirstLessonId: 'german/german1',
   },
   greek: {
     image: greekCover,
@@ -116,6 +146,8 @@ const data: Record<Course, CourseInfo> = {
       text: 'white',
       backgroundAccent: '#9c5a20',
     },
+    bundledFirstLesson: greekFirstLesson,
+    bundledFirstLessonId: 'greek/greek1',
   },
   italian: {
     image: italianCover,
@@ -131,6 +163,8 @@ const data: Record<Course, CourseInfo> = {
       text: 'white',
       backgroundAccent: '#a7177f',
     },
+    bundledFirstLesson: italianFirstLesson,
+    bundledFirstLessonId: 'italian/italian1',
   },
   swahili: {
     image: swahiliCover,
@@ -146,6 +180,8 @@ const data: Record<Course, CourseInfo> = {
       text: 'black',
       backgroundAccent: '#0aaea2',
     },
+    bundledFirstLesson: swahiliFirstLesson,
+    bundledFirstLessonId: 'swahili/swahili1',
   },
   french: {
     image: frenchCover,
@@ -161,6 +197,8 @@ const data: Record<Course, CourseInfo> = {
       text: 'white',
       backgroundAccent: '#098abc',
     },
+    bundledFirstLesson: frenchFirstLesson,
+    bundledFirstLessonId: 'french/french1',
   },
   ingles: {
     image: inglesCover,
@@ -176,6 +214,8 @@ const data: Record<Course, CourseInfo> = {
       text: 'white',
       backgroundAccent: '#516198',
     },
+    bundledFirstLesson: inglesFirstLesson,
+    bundledFirstLessonId: 'ingles/ingles1',
   },
   music: {
     image: musicCover,
@@ -184,13 +224,15 @@ const data: Record<Course, CourseInfo> = {
     fullTitle: 'Introduction to Music Theory',
     courseType: 'intro',
     metaUrl: 'https://downloads.languagetransfer.org/music/music-meta.json',
-    fallbackLessonCount: '10+',
+    fallbackLessonCount: '30',
     uiColors: {
       background: '#f8eebc',
       softBackground: '#ffffff',
       text: 'black',
       backgroundAccent: '#786951',
     },
+    bundledFirstLesson: musicFirstLesson,
+    bundledFirstLessonId: 'music/music1',
   },
 };
 
@@ -242,6 +284,14 @@ const CourseData = {
 
   getCourseImageWithText(course: Course) {
     return data[course].imageWithText;
+  },
+
+  getBundledFirstLesson(course: Course) {
+    return data[course].bundledFirstLesson ?? null;
+  },
+
+  getBundledFirstLessonId(course: Course) {
+    return data[course].bundledFirstLessonId ?? null;
   },
 
   getCourseUIColors(course: Course): UIColors {

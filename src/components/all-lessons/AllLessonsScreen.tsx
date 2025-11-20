@@ -17,24 +17,57 @@ import LessonRow from '@/src/components/all-lessons/LessonRow';
 import DownloadManager from '@/src/services/downloadManager';
 import { usePreference } from '@/src/storage/persistence';
 import type { Course } from '@/src/types';
+import useStatusBarStyle from '@/src/hooks/useStatusBarStyle';
 
 const AllLessonsScreen = () => {
   const params = useLocalSearchParams<{ course: string }>();
   const course = (params.course ?? 'spanish') as Course;
-  const indices = useMemo(() => CourseData.getLessonIndices(course), [course]);
+  useStatusBarStyle('white', 'dark-content');
+  const [metadataReady, setMetadataReady] = useState(() =>
+    CourseData.isCourseMetadataLoaded(course),
+  );
+  const indices = useMemo(
+    () => (metadataReady ? CourseData.getLessonIndices(course) : []),
+    [course, metadataReady],
+  );
   const [downloadedCount, setDownloadedCount] = useState<number | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
   const [downloadAllLoading, setDownloadAllLoading] = useState(false);
   const downloadQuality = usePreference<'high' | 'low'>('download-quality', 'high');
 
+  useEffect(() => {
+    setDownloadedCount(null);
+  }, [course]);
+
+  useEffect(() => {
+    let active = true;
+    const ensureMetadata = async () => {
+      if (!CourseData.isCourseMetadataLoaded(course)) {
+        setMetadataReady(false);
+        await CourseData.genLoadCourseMetadata(course);
+      }
+      if (active) {
+        setMetadataReady(true);
+      }
+    };
+
+    ensureMetadata();
+    return () => {
+      active = false;
+    };
+  }, [course]);
+
   const refreshCounts = useCallback(async () => {
+    if (!metadataReady) {
+      return;
+    }
     const results = await Promise.all(
       indices.map((lesson) =>
         DownloadManager.genIsDownloadedForDownloadId(DownloadManager.getDownloadId(course, lesson)),
       ),
     );
     setDownloadedCount(results.filter(Boolean).length);
-  }, [course, indices]);
+  }, [course, indices, metadataReady]);
 
   useEffect(() => {
     refreshCounts();
@@ -47,7 +80,7 @@ const AllLessonsScreen = () => {
   );
 
   const handleDownloadAll = async () => {
-    if (!downloadQuality) {
+    if (!downloadQuality || !metadataReady) {
       return;
     }
 
@@ -88,8 +121,12 @@ const AllLessonsScreen = () => {
     });
   };
 
-  if (downloadQuality === null) {
-    return null;
+  if (!metadataReady || downloadQuality === null) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator />
+      </View>
+    );
   }
 
   return (
@@ -130,6 +167,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  loader: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   bottomBar: {
     flexDirection: 'row',

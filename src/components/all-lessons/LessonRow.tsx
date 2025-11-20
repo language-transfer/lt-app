@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import formatDuration from 'format-duration';
 import prettyBytes from 'pretty-bytes';
 
 import CourseData from '@/src/data/courseData';
 import DownloadManager, { useDownloadStatus } from '@/src/services/downloadManager';
-import { genProgressForLesson, Progress, usePreference } from '@/src/storage/persistence';
-import type { Course } from '@/src/types';
+import { genProgressForLesson, usePreference } from '@/src/storage/persistence';
+import type { Course, Progress } from '@/src/types';
 import { useRouter } from 'expo-router';
+import { log } from '@/src/utils/log';
 
 type Props = {
   course: Course;
@@ -22,6 +23,10 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
   const downloadState = useDownloadStatus(course, lesson);
   const downloadQuality = usePreference<'high' | 'low'>('download-quality', 'high');
   const router = useRouter();
+  const bundled = useMemo(
+    () => lesson === 0 && Boolean(CourseData.getBundledFirstLesson(course)),
+    [course, lesson],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -46,31 +51,76 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
     downloadState && downloadState.state === 'downloading' && !downloadState.errorMessage;
 
   const handleDownloadClick = async () => {
-    if (downloading) {
-      DownloadManager.stopDownload(DownloadManager.getDownloadId(course, lesson));
+    if (bundled || downloaded === null) {
       return;
     }
 
-    if (downloaded) {
-      await DownloadManager.genDeleteDownload(course, lesson);
+    if (downloading) {
+      log({
+        action: 'cancel_download',
+        surface: 'all_lessons',
+        course,
+        lesson,
+      });
+      DownloadManager.stopDownload(DownloadManager.getDownloadId(course, lesson));
       onDownloadStateChange();
       return;
     }
 
-    await DownloadManager.startDownload(course, lesson);
-    onDownloadStateChange();
+    if (downloaded) {
+      log({
+        action: 'delete_download',
+        surface: 'all_lessons',
+        course,
+        lesson,
+      });
+      await DownloadManager.genDeleteDownload(course, lesson);
+      setDownloaded(false);
+      onDownloadStateChange();
+      return;
+    }
+
+    log({
+      action: 'download_lesson',
+      surface: 'all_lessons',
+      course,
+      lesson,
+    });
+    try {
+      await DownloadManager.startDownload(course, lesson);
+      onDownloadStateChange();
+    } catch (err) {
+      log({
+        action: 'download_error',
+        surface: 'all_lessons',
+        course,
+        lesson,
+        message: err instanceof Error ? err.message : String(err),
+      });
+      Alert.alert('Unable to download lesson', err instanceof Error ? err.message : 'Unknown error');
+    }
   };
 
   const renderDownloadAccessory = () => {
+    if (bundled) {
+      return (
+        <>
+          <FontAwesome5 name="lock" size={16} color="#999" />
+          <Text style={styles.lessonSizeText}>Included</Text>
+        </>
+      );
+    }
+
     if (downloaded) {
       return <FontAwesome5 name="trash" size={18} color="#555" />;
     }
 
-    if (downloading && downloadState?.totalBytes) {
-      const percent = Math.round((downloadState.bytesWritten / downloadState.totalBytes) * 100);
-      return (
-        <Text style={styles.progressText}>{percent}%</Text>
-      );
+    if (downloading) {
+      if (downloadState?.totalBytes) {
+        const percent = Math.round((downloadState.bytesWritten / downloadState.totalBytes) * 100);
+        return <Text style={styles.progressText}>{percent}%</Text>;
+      }
+      return <ActivityIndicator size="small" color="#555" />;
     }
 
     if (downloadState?.errorMessage) {
@@ -81,6 +131,7 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
   };
 
   const finished = progress?.finished;
+  const ready = progress !== null && downloaded !== null;
 
   return (
     <View style={styles.row}>
@@ -108,15 +159,21 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
           </View>
         </View>
       </Pressable>
-      <Pressable style={styles.downloadBox} onPress={handleDownloadClick}>
-        {downloadQuality === null || downloaded === null ? (
+      <Pressable
+        style={[styles.downloadBox, bundled && styles.downloadBoxDisabled]}
+        onPress={handleDownloadClick}
+        disabled={bundled}
+      >
+        {downloadQuality === null || !ready ? (
           <ActivityIndicator size="small" color="#888" />
         ) : (
           <>
             {renderDownloadAccessory()}
-            <Text style={styles.lessonSizeText}>
-              {prettyBytes(CourseData.getLessonSizeInBytes(course, lesson, downloadQuality))}
-            </Text>
+            {!bundled ? (
+              <Text style={styles.lessonSizeText}>
+                {prettyBytes(CourseData.getLessonSizeInBytes(course, lesson, downloadQuality))}
+              </Text>
+            ) : null}
           </>
         )}
       </Pressable>
@@ -143,6 +200,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
+    paddingVertical: 8,
+    gap: 4,
+  },
+  downloadBoxDisabled: {
+    opacity: 0.5,
   },
   text: {
     flexDirection: 'row',

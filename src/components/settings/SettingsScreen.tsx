@@ -8,6 +8,7 @@ import {
   genPreferenceDownloadOnlyOnWifi,
   genPreferenceDownloadQuality,
   genPreferenceStreamQuality,
+  genDeleteMetricsToken,
   genSetPreferenceAllowDataCollection,
   genSetPreferenceAutoDeleteFinished,
   genSetPreferenceDownloadOnlyOnWifi,
@@ -119,9 +120,10 @@ const SettingsScreen = () => {
         description="Send anonymous usage data to help us improve the app."
         accessory={<Checkbox checked={settings.allowDataCollection} />}
         onPress={() =>
-          toggle('allowDataCollection', () =>
-            genSetPreferenceAllowDataCollection(!settings.allowDataCollection),
-          )
+          toggle('allowDataCollection', async () => {
+            await genSetPreferenceAllowDataCollection(!settings.allowDataCollection);
+            await genDeleteMetricsToken();
+          })
         }
       />
     </ScrollView>

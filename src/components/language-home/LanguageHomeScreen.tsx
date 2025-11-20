@@ -30,7 +30,7 @@ const LanguageHomeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       let active = true;
-      let timeout: NodeJS.Timeout;
+      let timeout: ReturnType<typeof setTimeout> | null = null;
 
       const load = async () => {
         setLoadingMetadata(true);
@@ -44,7 +44,9 @@ const LanguageHomeScreen = () => {
         try {
           await CourseData.genLoadCourseMetadata(course);
         } finally {
-          clearTimeout(timeout);
+          if (timeout !== null) {
+            clearTimeout(timeout);
+          }
           if (active) {
             setLoadingMetadata(false);
             setShowWarning(false);
@@ -56,7 +58,9 @@ const LanguageHomeScreen = () => {
 
       return () => {
         active = false;
-        clearTimeout(timeout);
+        if (timeout !== null) {
+          clearTimeout(timeout);
+        }
       };
     }, [course]),
   );
