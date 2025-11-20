@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef } from "react";
 import {
   Animated,
   Dimensions,
@@ -8,28 +8,28 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+} from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
-import logo from '../../../legacy/resources/LT-logo-text.png';
-import LanguageButton from '@/src/components/language-selector/LanguageButton';
-import useStatusBarStyle from '@/src/hooks/useStatusBarStyle';
-import type { Course } from '@/src/types';
+import logo from "../../../legacy/resources/LT-logo-text.png";
+import LanguageButton from "@/src/components/language-selector/LanguageButton";
+import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
+import type { Course } from "@/src/types";
 
-const SCREEN_HEIGHT = Dimensions.get('screen').height;
+const SCREEN_HEIGHT = Dimensions.get("screen").height;
 const IMAGE_HEIGHT = 0.4 * SCREEN_HEIGHT;
 const CARDS_MARGIN_TOP = IMAGE_HEIGHT + 80 + 40;
 
 const LanguageSelector = () => {
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const router = useRouter();
-  useStatusBarStyle('white', 'dark-content');
+  useStatusBarStyle("white", "dark-content");
   StatusBar.setTranslucent(true);
 
   const goToCourse = (course: string) => {
     router.push({
-      pathname: '/course/[course]',
+      pathname: "/course/[course]",
       params: { course },
     });
   };
@@ -52,7 +52,12 @@ const LanguageSelector = () => {
             },
           ]}
         >
-          <Image source={logo} style={styles.headerImage} resizeMode="contain" accessibilityLabel="Language Transfer" />
+          <Image
+            source={logo}
+            style={styles.headerImage}
+            resizeMode="contain"
+            accessibilityLabel="Language Transfer"
+          />
         </Animated.View>
 
         <Animated.ScrollView
@@ -67,50 +72,61 @@ const LanguageSelector = () => {
                 },
               },
             ],
-            { useNativeDriver: false },
+            { useNativeDriver: false }
           )}
           scrollEventThrottle={16}
         >
           <View style={styles.courseList}>
             <View style={styles.sectionHeaderFirst}>
-              <Text style={styles.sectionHeaderText}>New!</Text>
-            </View>
-            <LanguageButton course="music" onPress={() => goToCourse('music')} />
-
-            <View style={styles.sectionHeader}>
               <Text style={styles.sectionHeaderText}>Language courses</Text>
             </View>
             {[
-              'spanish',
-              'arabic',
-              'turkish',
-              'german',
-              'greek',
-              'italian',
-              'swahili',
-              'french',
+              "spanish",
+              "arabic",
+              "turkish",
+              "german",
+              "greek",
+              "italian",
+              "swahili",
+              "french",
             ].map((course) => (
-              <LanguageButton key={course} course={course as Course} onPress={() => goToCourse(course)} />
+              <LanguageButton
+                key={course}
+                course={course as Course}
+                onPress={() => goToCourse(course)}
+              />
             ))}
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionHeaderText}>For Spanish speakers</Text>
             </View>
-            <LanguageButton course="ingles" onPress={() => goToCourse('ingles')} />
+            <LanguageButton
+              course="ingles"
+              onPress={() => goToCourse("ingles")}
+            />
+
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionHeaderText}>Other courses</Text>
+            </View>
+            <LanguageButton
+              course="music"
+              onPress={() => goToCourse("music")}
+            />
 
             <View style={styles.aboutSectionHr} />
             <View style={styles.aboutSectionWrapper}>
               <View style={styles.aboutSection}>
                 <Text style={styles.aboutSectionText}>
-                  Language Transfer is the work of just one guy! Mihalis is trying to build a team of course writers.
-                  Find out more:
+                  Find out more about Language Transfer and the Thinking Method:
                 </Text>
                 <TouchableOpacity
                   style={styles.additionalButton}
-                  onPress={() => router.push('/about')}
+                  onPress={() => router.push("/about")}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.additionalButtonText}>About Language Transfer</Text>
+                  <Text style={styles.additionalButtonText}>
+                    About Language Transfer
+                  </Text>
                   <FontAwesome5 name="info-circle" size={20} color="#333" />
                 </TouchableOpacity>
               </View>
@@ -140,25 +156,25 @@ const LanguageSelector = () => {
 const styles = StyleSheet.create({
   scrollView: {},
   screenWrapper: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'space-between',
-    backgroundColor: 'white',
+    width: "100%",
+    height: "100%",
+    justifyContent: "space-between",
+    backgroundColor: "white",
   },
   pageWrapper: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
+    position: "absolute",
+    width: "100%",
+    height: "100%",
     top: 0,
   },
   headerImageWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingTop: 32,
   },
   headerImage: {
-    width: '80%',
-    height: '100%',
+    width: "80%",
+    height: "100%",
   },
   courseList: {
     paddingBottom: 40,
@@ -174,8 +190,8 @@ const styles = StyleSheet.create({
   },
   sectionHeaderText: {
     fontSize: 18,
-    textTransform: 'uppercase',
-    color: '#555',
+    textTransform: "uppercase",
+    color: "#555",
   },
   aboutSectionWrapper: {
     paddingHorizontal: 20,
@@ -184,45 +200,45 @@ const styles = StyleSheet.create({
   aboutSectionHr: {
     marginHorizontal: 20,
     marginTop: 30,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
     borderBottomWidth: 1,
   },
   aboutSection: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 20,
     elevation: 2,
   },
   aboutSectionText: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   additionalButton: {
     marginTop: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   additionalButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#222',
+    fontWeight: "600",
+    color: "#222",
   },
   topTranslucent: {
     height: 120,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     opacity: 0.9,
   },
   scrollIndicator: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingBottom: 24,
   },
   scrollIndicatorText: {
-    color: '#777',
+    color: "#777",
     marginBottom: 4,
   },
 });
