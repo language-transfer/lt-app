@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import type { ComponentProps } from "react";
+import React from "react";
+import type { ComponentProps, ReactNode } from "react";
 import {
   Linking,
   ScrollView,
@@ -8,7 +8,6 @@ import {
   View,
   TouchableNativeFeedback,
 } from "react-native";
-import type { ViewStyle } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
@@ -20,40 +19,29 @@ type IconName = ComponentProps<typeof FontAwesome5>["name"];
 
 const ICON_SIZE = 24;
 
-const Icon = ({ name, size = ICON_SIZE }: { name: IconName; size?: number }) => (
-  <FontAwesome5 name={name} size={size} />
+const Icon = ({
+  name,
+  size = ICON_SIZE,
+}: {
+  name: IconName;
+  size?: number;
+}) => <FontAwesome5 name={name} size={size} />;
+
+const SectionCard = ({
+  title,
+  children,
+}: {
+  title: Section;
+  children: ReactNode;
+}) => (
+  <View>
+    <Text style={styles.sectionTitle}>{title}</Text>
+    <View style={styles.sectionCard}>{children}</View>
+  </View>
 );
 
 const AboutScreen = () => {
   const router = useRouter();
-
-  const [sections, setSections] = useState<Record<Section, boolean>>({
-    "Language Transfer": true,
-    Privacy: true,
-    "LT App": true,
-  });
-
-  const shownSection = (title: Section): ViewStyle =>
-    sections[title] ? {} : { display: "none" };
-
-  const header = (title: Section) => {
-    return (
-      <TouchableNativeFeedback
-        onPress={() => {
-          setSections((prevSections) => ({
-            ...prevSections,
-            [title]: !prevSections[title],
-          }));
-        }}
-      >
-        <View style={styles.headerSection}>
-          <Text style={styles.headerText}>{title}</Text>
-          {!sections[title] ? <Icon name="plus" size={24} /> : null}
-          {sections[title] ? <Icon name="minus" size={24} /> : null}
-        </View>
-      </TouchableNativeFeedback>
-    );
-  };
 
   // TODO: get this from the build environment
   const donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo = true;
@@ -62,9 +50,8 @@ const AboutScreen = () => {
 
   return (
     <ScrollView style={styles.body} contentContainerStyle={styles.container}>
-      <View>
-        {header("Language Transfer")}
-        <View style={shownSection("Language Transfer")}>
+      <View style={styles.sectionStack}>
+        <SectionCard title="Language Transfer">
           <Text style={styles.bodyText}>
             Language Transfer audio courses capture real life learning
             experiences in which you can participate fully, wherever you are in
@@ -166,24 +153,22 @@ const AboutScreen = () => {
             <TouchableNativeFeedback
               onPress={() => {
                 log({
-                  action: "open_facebook",
+                  action: "open_substack",
                   surface: "about",
                 });
-                Linking.openURL("https://www.facebook.com/languagetransfer");
+                Linking.openURL("https://languagetransfer.substack.com/");
               }}
               useForeground={true}
             >
               <View style={styles.additionalButtonInner}>
-                <Text style={styles.additionalButtonText}>
-                  Visit on Facebook
-                </Text>
-                <Icon name="facebook-f" />
+                <Text style={styles.additionalButtonText}>Substack blog</Text>
+                <Icon name="blog" />
               </View>
             </TouchableNativeFeedback>
           </View>
-        </View>
-        {header("Privacy")}
-        <View style={shownSection("Privacy")}>
+        </SectionCard>
+
+        <SectionCard title="Privacy">
           <Text style={styles.bodyText}>
             We collect anonymous usage information so we can learn about how
             best to improve the app. You’re welcome to opt out of data
@@ -220,10 +205,9 @@ const AboutScreen = () => {
             we may retain any information you send to us indefinitely so that we
             can take action on your feedback.
           </Text>
-        </View>
+        </SectionCard>
 
-        {header("LT App")}
-        <View style={shownSection("LT App")}>
+        <SectionCard title="LT App">
           <Text style={styles.bodyText}>
             To help us understand where pauses occur in the course audio, we
             collect data about listening patterns. By using the Thinking Method,
@@ -296,12 +280,13 @@ const AboutScreen = () => {
           </View>
 
           <Text style={styles.bodyText}>
-            The app’s core maintainers are Timothy J. Aveni and Josh Fayer.
+            The app’s core maintainers are Timothy&nbsp;J.&nbsp;Aveni and
+            Josh&nbsp;Fayer.
           </Text>
           <Text style={styles.bodyText}>
             This is version {appVersion} of the Language Transfer app.
           </Text>
-        </View>
+        </SectionCard>
       </View>
     </ScrollView>
   );
@@ -310,57 +295,71 @@ const AboutScreen = () => {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#f7f7f7",
   },
   container: {
-    paddingBottom: 20,
+    paddingBottom: 32,
+    paddingHorizontal: 18,
+    paddingTop: 28,
   },
-  headerSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 20,
-    justifyContent: "space-between",
-    paddingHorizontal: 30,
+  sectionStack: {
+    gap: 24,
   },
-  headerText: {
-    fontSize: 32,
+  sectionCard: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    paddingVertical: 22,
+    paddingHorizontal: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 7,
+    elevation: 4,
+  },
+  sectionTitle: {
+    fontSize: 26,
     fontWeight: "bold",
+    marginBottom: 14,
   },
   bodyText: {
-    fontSize: 20,
-    marginVertical: 10,
-    paddingHorizontal: 30,
+    fontSize: 18,
+    lineHeight: 28,
+    marginBottom: 12,
   },
   bodyTextAboveButton: {
-    marginBottom: 24,
+    marginBottom: 18,
   },
 
   listElement: {
-    fontSize: 20,
-    marginLeft: 16 + 30,
-    marginRight: 30,
-    marginBottom: 12,
+    fontSize: 17,
+    marginLeft: 30,
+    marginRight: 10,
+    marginBottom: 10,
+    lineHeight: 24,
   },
 
   additionalButton: {
-    marginBottom: 25,
-    borderRadius: 10,
+    marginBottom: 20,
+    borderRadius: 12,
     backgroundColor: "white",
     overflow: "hidden",
-    elevation: 3,
-    marginHorizontal: 30,
+    elevation: 2,
+    borderColor: "#ececec",
+    borderWidth: StyleSheet.hairlineWidth,
+    alignSelf: "stretch",
   },
   additionalButtonExtraMargin: {
-    marginTop: 24,
+    marginTop: 14,
   },
   additionalButtonInner: {
-    padding: 25,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   additionalButtonText: {
-    fontSize: 20,
+    fontSize: 18,
     maxWidth: "90%",
   },
 });
