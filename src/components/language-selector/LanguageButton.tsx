@@ -12,6 +12,7 @@ type Props = {
 
 const LanguageButton = ({ course, onPress }: Props) => {
   const info = CourseData.getCourseData(course);
+
   return (
     <View style={styles.sectionWrapper}>
       <ImageBackground
@@ -50,11 +51,14 @@ const styles = StyleSheet.create({
     margin: 15,
   },
   sectionContainer: {
-    flex: 1,
+    display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center',
+    fontWeight: '600',
     paddingTop: 40,
     paddingBottom: 10,
+    width: '100%',
+    height: '100%',
   },
   imageBackground: {
     borderRadius: 10,
@@ -73,10 +77,13 @@ const styles = StyleSheet.create({
   },
   courseType: {
     fontSize: 14,
+    // color: 'rgba(0, 0, 0, 0.5)',
+    lineHeight: 14,
     textTransform: 'uppercase',
   },
   courseTitle: {
     fontSize: 28,
+    lineHeight: 32,
     fontWeight: 'bold',
     color: 'black',
     textAlign: 'center',
