@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -7,25 +7,24 @@ import {
   StyleSheet,
   Text,
   View,
-} from 'react-native';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { FontAwesome5 } from '@expo/vector-icons';
+} from "react-native";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { FontAwesome5 } from "@expo/vector-icons";
 
-import CourseData from '@/src/data/courseData';
-import LanguageHomeTopButton from '@/src/components/language-home/LanguageHomeTopButton';
-import useStatusBarStyle from '@/src/hooks/useStatusBarStyle';
-import type { Course } from '@/src/types';
-import { log } from '@/src/utils/log';
+import CourseData from "@/src/data/courseData";
+import LanguageHomeTopButton from "@/src/components/language-home/LanguageHomeTopButton";
+import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
+import type { Course } from "@/src/types";
+import { log } from "@/src/utils/log";
 
 const LanguageHomeScreen = () => {
-  const params = useLocalSearchParams<{ course: string }>();
-  const course = (params.course ?? 'spanish') as Course;
+  const { course } = useLocalSearchParams<{ course: Course }>();
   const router = useRouter();
   const [loadingMetadata, setLoadingMetadata] = useState(true);
   const [showWarning, setShowWarning] = useState(false);
   const metadataLoaded = CourseData.isCourseMetadataLoaded(course);
 
-  useStatusBarStyle('white', 'dark-content');
+  useStatusBarStyle("white", "dark-content");
 
   useFocusEffect(
     useCallback(() => {
@@ -36,7 +35,11 @@ const LanguageHomeScreen = () => {
         setLoadingMetadata(true);
         timeout = setTimeout(() => {
           if (active) {
-            log({ action: 'show_metadata_warning', surface: 'language_home', course });
+            log({
+              action: "show_metadata_warning",
+              surface: "language_home",
+              course,
+            });
             setShowWarning(true);
           }
         }, 5000);
@@ -62,7 +65,7 @@ const LanguageHomeScreen = () => {
           clearTimeout(timeout);
         }
       };
-    }, [course]),
+    }, [course])
   );
 
   if (loadingMetadata || !metadataLoaded) {
@@ -71,7 +74,8 @@ const LanguageHomeScreen = () => {
         <ActivityIndicator size="large" />
         {showWarning ? (
           <Text style={styles.warningText}>
-            If this screen does not load, check your Internet connection or try reinstalling the Language Transfer app.
+            If this screen does not load, check your Internet connection or try
+            reinstalling the Language Transfer app.
           </Text>
         ) : null}
       </View>
@@ -80,29 +84,29 @@ const LanguageHomeScreen = () => {
 
   const buttons = [
     {
-      label: 'All Lessons',
-      icon: 'list-ol',
+      label: "All Lessons",
+      icon: "list-ol",
       action: () =>
         router.push({
-          pathname: '/course/[course]/all-lessons',
+          pathname: "/course/[course]/all-lessons",
           params: { course },
         }),
     },
     {
-      label: 'Data Management',
-      icon: 'tools',
+      label: "Data Management",
+      icon: "tools",
       action: () =>
         router.push({
-          pathname: '/course/[course]/data',
+          pathname: "/course/[course]/data",
           params: { course },
         }),
     },
     {
-      label: 'Visit languagetransfer.org',
-      icon: 'link',
+      label: "Visit languagetransfer.org",
+      icon: "link",
       action: () => {
-        log({ action: 'visit_website', surface: 'language_home', course });
-        Linking.openURL('https://www.languagetransfer.org/');
+        log({ action: "visit_website", surface: "language_home", course });
+        Linking.openURL("https://www.languagetransfer.org/");
       },
     },
   ];
@@ -113,7 +117,7 @@ const LanguageHomeScreen = () => {
       {buttons.map((button) => (
         <Pressable
           key={button.label}
-          android_ripple={{ color: 'rgba(0,0,0,0.08)' }}
+          android_ripple={{ color: "rgba(0,0,0,0.08)" }}
           style={styles.additionalButton}
           onPress={button.action}
         >
@@ -128,32 +132,32 @@ const LanguageHomeScreen = () => {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    backgroundColor: '#eee',
+    backgroundColor: "#eee",
   },
   loaderContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 24,
   },
   warningText: {
     marginTop: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   additionalButton: {
     marginHorizontal: 25,
     marginBottom: 20,
     borderRadius: 12,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     elevation: 2,
     padding: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   additionalButtonText: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
 

@@ -14,7 +14,7 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="course/[course]/index" options={{ headerShown: false }} />
+          <Stack.Screen name="course/[course]/index" />
           <Stack.Screen name="course/[course]/listen/[lesson]" options={{ headerShown: false }} />
           <Stack.Screen name="course/[course]/all-lessons" options={{ title: 'All Lessons' }} />
           <Stack.Screen name="course/[course]/data" options={{ title: 'Data Management' }} />
