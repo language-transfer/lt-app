@@ -1,39 +1,56 @@
-# Language Transfer (Expo)
+<p align="center">
+  <img src="./resources/google-play-store/feature-graphic.png" alt="LT logo" width="720">
+</p>
 
-The current app is an Expo-managed React Native project that reimplements the core Language Transfer experience from the legacy native codebase. The historical React Native project is still available under `legacy/` for reference, but the new app lives at the repository root.
+## Language Transfer
 
-## Development
+[Language Transfer](https://www.languagetransfer.org/) is a project by Mihalis Eleftheriou, building audio courses for learning languages, completely free. At the moment, the following courses are available:
 
-```bash
-npm install         # install JS deps
-npm run start       # launch the Expo dev server (Metro bundler)
-npm run android     # open in Android emulator or device
-npm run ios         # open in iOS simulator (macOS only)
-npm run web         # run the web build
-```
+- Complete Spanish
+- Complete Greek
+- Complete Swahili
+- Complete German (unfinished)
+- Introduction to Arabic
+- Introduction to Turkish
+- Introduction to Italian
+- Introduction to French
+- Introducción a Inglés (para Hispanohablantes)
+- Introduction to Music Theory
 
-Only the open-source Expo CLI workflow is used—there are no Expo Application Services (EAS) configs or build hooks in this repository.
+You can find them on the [Language Transfer website](https://www.languagetransfer.org/courses).
 
-> `react-native-track-player` is a native module, so you need a development build (via [`expo run`](https://docs.expo.dev/workflow/expo-run) or an [Expo dev client build](https://docs.expo.dev/develop/development-builds/introduction/)) before playback will work. Expo Go does not include this module.
+## LT App
 
-## App features
+<p align="center">
+  <img src="./resources/google-play-store/screenshots/Screenshot_20200520-203515.png" alt="App screenshot: home page" width="216" height="384">
+  <img src="./resources/google-play-store/screenshots/Screenshot_20200520-203610.png" alt="App screenshot: listen page" width="216" height="384">
+  <img src="./resources/google-play-store/screenshots/Screenshot_20200520-203755.png" alt="App screenshot: language home page" width="216" height="384">
+</p>
 
-- Course browser with the familiar Language Transfer artwork pulled from the legacy assets.
-- Course home screen that resumes your last lesson, surfaces data management, and links out to Language Transfer resources.
-- Lesson player built on `react-native-track-player`, including seek scrubbing, skip-back, and offline download actions.
-- All-lessons list with progress indicators, download management, and “download all” support.
-- Data management panel mirroring the legacy options for clearing metadata, progress, and downloads.
-- Static About, Licenses (embedded web view), and Settings screens that map the previous preferences to Expo-compatible storage.
+This app is developed in React Native, and is designed to work with both iOS & Android platforms.
 
-## Project layout
+### Goals
 
-- `app/` – Expo Router entry points
-- `src/` – shared logic and UI
-  - `data/` – course metadata and fetch helpers
-  - `services/` – audio + download layers built on `react-native-track-player`/`expo-file-system`
-  - `components/` – screen components reused by the router routes
-  - `storage/` – AsyncStorage persistence helpers and preference APIs
-  - `hooks/` – view helpers (status bar, downloads, etc.)
-- `legacy/` – untouched archive of the previous bare React Native implementation
+The Language Transfer app should be:
 
-Modify the files inside `src/` when extending the modern app. The Expo router is already wired up to load the new screens, and the legacy folder can be referenced whenever you need additional UI or logic context.
+- 100% free, like the Language Transfer courses
+- Accessible and easy to use for the visually impaired
+- Considerate of users in areas with poor network quality, expensive Internet access, or low-end devices
+- Free of distractions and annoyances, like advertisements or superfluous notifications
+- Self-sustaining: maintainable and easy to build even in the absence of the original maintainers
+- Private by design, sharing only anonymous usage statistics
+
+## Contributions
+
+This app is largely in maintenance mode, so contributions are welcome but may not be addressed quickly by the maintainers.
+If you want to contribute, be sure to read the [contributing guidelines](./CONTRIBUTING.md) and the [code of conduct](./CODE_OF_CONDUCT.md) before engaging with the project.
+
+## License
+
+The code for the Language Transfer app is provided under the [GPLv2 license](./LICENSE).
+
+## Support
+
+Please consider supporting Language Transfer's Patreon campaign. This money directly funds Mihalis and the development of future language courses as well as other materials.
+
+<a href="https://www.patreon.com/languagetransfer"><img alt="Become a Patron" src="https://c5.patreon.com/external/logo/become_a_patron_button.png"></a>
