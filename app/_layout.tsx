@@ -23,6 +23,7 @@ export default function RootLayout() {
           <Stack.Screen name="about" options={{ title: 'About' }} />
           <Stack.Screen name="licenses" options={{ title: 'Licenses' }} />
           <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+          <Stack.Screen name="notification.click" options={{ headerShown: false, animation: 'none' }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
