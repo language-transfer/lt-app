@@ -74,6 +74,23 @@ type LessonTrack = AddTrack & {
 };
 
 let playerSetupPromise: Promise<void> | null = null;
+const LESSON_AUDIO_CANCELLED = Symbol("lesson_audio_cancelled");
+
+const stopPlayback = async () => {
+  try {
+    await TrackPlayer.stop();
+  } catch {
+    // Ignore stop errors when player is idle/uninitialized.
+  }
+
+  try {
+    await TrackPlayer.reset();
+  } catch {
+    // Ignore reset errors when player is not ready.
+  }
+};
+
+export const stopLessonAudio = () => stopPlayback();
 
 const ensurePlayer = async () => {
   if (!playerSetupPromise) {
@@ -117,14 +134,20 @@ const colorToInt = (hex: string): number | undefined => {
   return Number.isNaN(parsed) ? undefined : parsed;
 };
 
+type LessonAudioOptions = {
+  active?: boolean;
+};
+
 export const useLessonAudio = (
   course: Course,
-  lesson: number
+  lesson: number,
+  options?: LessonAudioOptions
 ): LessonAudioControls => {
   const [playerReady, setPlayerReady] = useState(false);
   const [duration, setDuration] = useState(0);
   const [loadError, setLoadError] = useState<AudioError | null>(null);
   const lastPersistTimeRef = useRef(0);
+  const { active = true } = options ?? {};
 
   const playbackState = usePlaybackState();
   const progress = useProgress(500);
@@ -135,29 +158,43 @@ export const useLessonAudio = (
 
   useEffect(() => {
     let cancelled = false;
+    const checkCancel = () => {
+      // throw if cancelled
+      if (cancelled) {
+        throw LESSON_AUDIO_CANCELLED;
+      }
+    };
     setPlayerReady(false);
     setLoadError(null);
     lastPersistTimeRef.current = 0;
 
+    if (!active) {
+      void stopPlayback();
+      return () => {
+        cancelled = true;
+      };
+    }
+
     const load = async () => {
       try {
         await CourseData.genLoadCourseMetadata(course);
+        checkCancel();
         const lessonDuration = CourseData.getLessonDuration(course, lesson);
-        if (!cancelled) {
-          setDuration(lessonDuration);
-        }
+        setDuration(lessonDuration);
 
         await ensurePlayer();
+        checkCancel();
+
         const existingTrack = (await TrackPlayer.getActiveTrack()) as
           | LessonTrack
           | undefined;
+        checkCancel();
+
         if (
           existingTrack &&
           trackMatchesLesson(existingTrack, course, lesson)
         ) {
-          if (!cancelled) {
-            setPlayerReady(true);
-          }
+          setPlayerReady(true);
           return;
         }
 
@@ -166,6 +203,7 @@ export const useLessonAudio = (
           DownloadManager.genIsDownloaded(course, lesson),
           genProgressForLesson(course, lesson),
         ]);
+        checkCancel();
 
         let uri: string | number;
         if (downloaded) {
@@ -181,6 +219,8 @@ export const useLessonAudio = (
         }
 
         await TrackPlayer.reset();
+        checkCancel();
+
         const colors = CourseData.getCourseUIColors(course);
         const color = colorToInt(colors.background);
         await TrackPlayer.updateOptions(
@@ -188,6 +228,7 @@ export const useLessonAudio = (
             ? { ...BASE_UPDATE_OPTIONS, color }
             : BASE_UPDATE_OPTIONS
         );
+        checkCancel();
 
         const track: LessonTrack = {
           id: CourseData.getLessonId(course, lesson),
@@ -203,22 +244,27 @@ export const useLessonAudio = (
         };
 
         await TrackPlayer.add(track);
+        checkCancel();
+
         const savedPosition =
           typeof savedProgress?.progress === "number"
             ? savedProgress.progress
             : null;
         if (savedPosition && savedPosition > 0) {
           await TrackPlayer.seekTo(savedPosition);
+          checkCancel();
           lastPersistTimeRef.current = Date.now();
         }
 
-        if (!cancelled) {
-          setPlayerReady(true);
-        }
+        setPlayerReady(true);
 
         await TrackPlayer.play().catch(() => {});
+        checkCancel();
       } catch (err) {
-        if (!cancelled) {
+        if (err === LESSON_AUDIO_CANCELLED) {
+          return;
+        }
+        if (!cancelled && err) {
           setLoadError({
             message:
               err instanceof Error ? err.message : "Unable to load audio",
@@ -231,8 +277,9 @@ export const useLessonAudio = (
 
     return () => {
       cancelled = true;
+      void stopPlayback();
     };
-  }, [course, lesson]);
+  }, [course, lesson, active]);
 
   useEffect(() => {
     if (!isCurrentLessonActive) {

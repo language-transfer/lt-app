@@ -24,10 +24,11 @@ import { log } from '@/src/utils/log';
 type Props = {
   course: Course;
   lesson: number;
+  isActive: boolean;
 };
 
-const ListenBody = ({ course, lesson }: Props) => {
-  const controls = useLessonAudio(course, lesson);
+const ListenBody = ({ course, lesson, isActive }: Props) => {
+  const controls = useLessonAudio(course, lesson, { active: isActive });
   const downloaded = useIsLessonDownloaded(course, lesson);
   const [busyAction, setBusyAction] = useState<'download' | 'delete' | null>(null);
   const router = useRouter();

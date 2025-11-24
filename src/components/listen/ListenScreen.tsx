@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { useIsFocused } from '@react-navigation/native';
 
 import CourseData from '@/src/data/courseData';
 import ListenBody from '@/src/components/listen/ListenBody';
@@ -14,6 +15,7 @@ const ListenScreen = () => {
   const lesson = Number(params.lesson ?? 0);
   const [ready, setReady] = useState(CourseData.isCourseMetadataLoaded(course));
   const setStatusBarStyle = useSetStatusBarStyle();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     setReady(CourseData.isCourseMetadataLoaded(course));
@@ -53,7 +55,7 @@ const ListenScreen = () => {
   return (
     <View style={{ flex: 1 }}>
       <ListenHeader course={course} />
-      <ListenBody course={course} lesson={lesson} />
+      <ListenBody course={course} lesson={lesson} isActive={Boolean(isFocused)} />
     </View>
   );
 };
