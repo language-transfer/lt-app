@@ -24,6 +24,7 @@ import {
 } from "@/src/storage/persistence";
 import type { Course } from "@/src/types";
 import { log } from "@/src/utils/log";
+import { PROGRESS_PERSIST_INTERVAL_MS } from "./trackPlayerService";
 
 type AudioError = {
   message: string;
@@ -123,11 +124,12 @@ export const useLessonAudio = (
   const [playerReady, setPlayerReady] = useState(false);
   const [duration, setDuration] = useState(0);
   const [loadError, setLoadError] = useState<AudioError | null>(null);
-  const persistRef = useRef(0);
+  const lastPersistTimeRef = useRef(0);
 
   const playbackState = usePlaybackState();
   const progress = useProgress(500);
   const activeTrack = useActiveTrack() as LessonTrack | undefined;
+  // not sure when isCurrentLessonActive is false -- looks like at the beginning, before RNTP has gotten the memo
   const isCurrentLessonActive = trackMatchesLesson(activeTrack, course, lesson);
   const playbackStatus = playbackState.state;
 
@@ -135,7 +137,7 @@ export const useLessonAudio = (
     let cancelled = false;
     setPlayerReady(false);
     setLoadError(null);
-    persistRef.current = 0;
+    lastPersistTimeRef.current = 0;
 
     const load = async () => {
       try {
@@ -207,7 +209,7 @@ export const useLessonAudio = (
             : null;
         if (savedPosition && savedPosition > 0) {
           await TrackPlayer.seekTo(savedPosition);
-          persistRef.current = Date.now();
+          lastPersistTimeRef.current = Date.now();
         }
 
         if (!cancelled) {
@@ -232,7 +234,6 @@ export const useLessonAudio = (
     };
   }, [course, lesson]);
 
-  // TODO: worried about frequent wakes here
   useEffect(() => {
     if (!isCurrentLessonActive) {
       return;
@@ -243,11 +244,11 @@ export const useLessonAudio = (
     }
 
     const now = Date.now();
-    if (now - persistRef.current < 4000) {
+    if (now - lastPersistTimeRef.current < PROGRESS_PERSIST_INTERVAL_MS) {
       return;
     }
 
-    persistRef.current = now;
+    lastPersistTimeRef.current = now;
     genUpdateProgressForLesson(course, lesson, progress.position).catch(
       () => {}
     );
@@ -330,7 +331,7 @@ export const useLessonAudio = (
         return;
       }
       await TrackPlayer.seekTo(seconds);
-      persistRef.current = Date.now();
+      lastPersistTimeRef.current = Date.now();
       await genUpdateProgressForLesson(course, lesson, seconds);
       if (options?.log !== false) {
         logPlayerEvent("change_position", seconds);

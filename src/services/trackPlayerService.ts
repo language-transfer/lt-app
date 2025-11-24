@@ -55,6 +55,8 @@ const persistProgress = async (context: LessonContext, position: number) => {
   await genUpdateProgressForLesson(context.course, context.lesson, position);
 };
 
+export const PROGRESS_PERSIST_INTERVAL_MS = 3000;
+
 let lastPersistTs = 0;
 
 const runSafe = <Args extends any[]>(fn: (...args: Args) => Promise<void>) => {
@@ -126,7 +128,7 @@ const trackPlayerService = async (): Promise<void> => {
     Event.PlaybackProgressUpdated,
     runSafe(async ({ position, track }) => {
       const now = Date.now();
-      if (now - lastPersistTs < 4000) {
+      if (now - lastPersistTs < PROGRESS_PERSIST_INTERVAL_MS) {
         return;
       }
 
