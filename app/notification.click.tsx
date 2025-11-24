@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import TrackPlayer from 'react-native-track-player';
-import { useNavigation } from '@react-navigation/native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 
 import type { Course } from '@/src/types';
 
@@ -10,36 +10,55 @@ type LessonTrackMetadata = {
   lesson?: number;
 };
 
+const LISTEN_ROUTE_NAME = 'course/[course]/listen/[lesson]';
+
 const NotificationClickScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
 
   useEffect(() => {
     const navigateToLesson = (course: Course, lesson: number) => {
-      const listenRoute = {
-        pathname: '/course/[course]/listen/[lesson]' as const,
-        params: { course, lesson: lesson.toString() },
-      };
-
       const state = navigation.getState();
-      const routes = state?.routes ?? [];
-      const hasPrevious = routes.length > 1;
-      const previousRoute = hasPrevious ? routes[routes.length - 2] : undefined;
-      const previousIsListen = previousRoute?.name === 'course/[course]/listen/[lesson]';
-
-      if (hasPrevious && navigation.canGoBack()) {
-        router.back();
-        setTimeout(() => {
-          if (previousIsListen) {
-            router.replace(listenRoute);
-          } else {
-            router.push(listenRoute);
-          }
-        }, 0);
+      if (!state || !state.routes?.length) {
+        router.replace({
+          pathname: '/course/[course]/listen/[lesson]',
+          params: { course, lesson: lesson.toString() },
+        });
         return;
       }
 
-      router.replace(listenRoute);
+      const nextRoutes = state.routes.slice(0, -1).map((route) => ({
+        name: route.name as string,
+        params: route.params,
+      }));
+
+      const listenRoute = {
+        name: LISTEN_ROUTE_NAME,
+        params: { course, lesson: lesson.toString() },
+      };
+
+      if (nextRoutes.length === 0) {
+        router.replace({
+          pathname: '/course/[course]/listen/[lesson]',
+          params: { course, lesson: lesson.toString() },
+        });
+        return;
+      }
+
+      const top = nextRoutes[nextRoutes.length - 1];
+      if (top.name === LISTEN_ROUTE_NAME) {
+        nextRoutes[nextRoutes.length - 1] = listenRoute;
+      } else {
+        nextRoutes.push(listenRoute);
+      }
+
+      navigation.dispatch(
+        CommonActions.reset({
+          ...state,
+          routes: nextRoutes,
+          index: nextRoutes.length - 1,
+        }),
+      );
     };
 
     const redirect = async () => {
@@ -54,12 +73,22 @@ const NotificationClickScreen = () => {
       }
 
       const state = navigation.getState();
-      if (state?.routes?.length > 1 && navigation.canGoBack()) {
-        router.back();
-        setTimeout(() => {
-          router.push('/');
-        }, 0);
-        return;
+      if (state?.routes?.length) {
+        const nextRoutes = state.routes.slice(0, -1).map((route) => ({
+          name: route.name as string,
+          params: route.params,
+        }));
+
+        if (nextRoutes.length > 0) {
+          navigation.dispatch(
+            CommonActions.reset({
+              ...state,
+              routes: nextRoutes,
+              index: nextRoutes.length - 1,
+            }),
+          );
+          return;
+        }
       }
 
       router.replace('/');
