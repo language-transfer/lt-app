@@ -22,7 +22,7 @@ import {
   genProgressForLesson,
   genUpdateProgressForLesson,
 } from "@/src/storage/persistence";
-import type { Course } from "@/src/types";
+import type { Course, Quality } from "@/src/types";
 import { log } from "@/src/utils/log";
 import { PROGRESS_PERSIST_INTERVAL_MS } from "./trackPlayerService";
 
@@ -47,13 +47,24 @@ export type LessonAudioControls = {
 const CAPABILITIES = [
   Capability.Play,
   Capability.Pause,
+  Capability.SkipToNext,
+  Capability.SkipToPrevious,
   Capability.JumpBackward,
   Capability.Stop,
 ];
 const COMPACT_CAPABILITIES = [
   Capability.Play,
   Capability.Pause,
+  Capability.SkipToNext,
+  Capability.SkipToPrevious,
+];
+const NOTIFICATION_CAPABILITIES = [
+  Capability.Play,
+  Capability.Pause,
+  Capability.SkipToNext,
+  Capability.SkipToPrevious,
   Capability.JumpBackward,
+  Capability.Stop,
 ];
 const BASE_UPDATE_OPTIONS = {
   android: {
@@ -63,7 +74,7 @@ const BASE_UPDATE_OPTIONS = {
   },
   capabilities: CAPABILITIES,
   compactCapabilities: COMPACT_CAPABILITIES,
-  notificationCapabilities: CAPABILITIES,
+  notificationCapabilities: NOTIFICATION_CAPABILITIES,
   backwardJumpInterval: 10,
   progressUpdateEventInterval: 2,
 };
@@ -134,6 +145,58 @@ const colorToInt = (hex: string): number | undefined => {
   return Number.isNaN(parsed) ? undefined : parsed;
 };
 
+const buildLessonQueue = async (
+  course: Course,
+  targetLesson: number,
+  quality: Quality
+): Promise<{ tracks: LessonTrack[]; targetIndex: number }> => {
+  const lessons = CourseData.getLessonIndices(course);
+  const targetIndex = lessons.indexOf(targetLesson);
+  if (targetIndex === -1) {
+    throw new Error(`Lesson ${targetLesson} is not available in ${course}`);
+  }
+
+  const downloads = await Promise.all(
+    lessons.map((lessonNumber) =>
+      DownloadManager.genIsDownloaded(course, lessonNumber)
+    )
+  );
+
+  const artwork = CourseData.getCourseImageWithText(
+    course
+  ) as LessonTrack["artwork"];
+
+  const tracks = lessons.map((lessonNumber, index) => {
+    let uri: string | number;
+    if (downloads[index]) {
+      uri = DownloadManager.getDownloadSaveLocation(
+        DownloadManager.getDownloadId(course, lessonNumber)
+      );
+    } else {
+      const bundled =
+        lessonNumber === 0 && Platform.OS === "ios"
+          ? CourseData.getBundledFirstLesson(course)
+          : null;
+      uri =
+        bundled ??
+        CourseData.getLessonUrl(course, lessonNumber, quality);
+    }
+
+    return {
+      id: CourseData.getLessonId(course, lessonNumber),
+      url: uri as LessonTrack["url"],
+      title: CourseData.getLessonTitle(course, lessonNumber),
+      artist: "Language Transfer",
+      artwork,
+      duration: CourseData.getLessonDuration(course, lessonNumber),
+      course,
+      lesson: lessonNumber,
+    };
+  });
+
+  return { tracks, targetIndex };
+};
+
 type LessonAudioOptions = {
   active?: boolean;
 };
@@ -198,25 +261,18 @@ export const useLessonAudio = (
           return;
         }
 
-        const [quality, downloaded, savedProgress] = await Promise.all([
+        const [quality, savedProgress] = await Promise.all([
           genPreferenceStreamQuality(),
-          DownloadManager.genIsDownloaded(course, lesson),
           genProgressForLesson(course, lesson),
         ]);
         checkCancel();
 
-        let uri: string | number;
-        if (downloaded) {
-          uri = DownloadManager.getDownloadSaveLocation(
-            DownloadManager.getDownloadId(course, lesson)
-          );
-        } else {
-          const bundled =
-            lesson === 0 && Platform.OS === "ios"
-              ? CourseData.getBundledFirstLesson(course)
-              : null;
-          uri = bundled ?? CourseData.getLessonUrl(course, lesson, quality);
-        }
+        const { tracks, targetIndex } = await buildLessonQueue(
+          course,
+          lesson,
+          quality
+        );
+        checkCancel();
 
         await TrackPlayer.reset();
         checkCancel();
@@ -230,21 +286,13 @@ export const useLessonAudio = (
         );
         checkCancel();
 
-        const track: LessonTrack = {
-          id: CourseData.getLessonId(course, lesson),
-          url: uri as LessonTrack["url"],
-          title: CourseData.getLessonTitle(course, lesson),
-          artist: "Language Transfer",
-          artwork: CourseData.getCourseImageWithText(
-            course
-          ) as LessonTrack["artwork"],
-          duration: lessonDuration,
-          course,
-          lesson,
-        };
-
-        await TrackPlayer.add(track);
+        await TrackPlayer.add(tracks);
         checkCancel();
+
+        if (targetIndex > 0) {
+          await TrackPlayer.skip(targetIndex);
+          checkCancel();
+        }
 
         const savedPosition =
           typeof savedProgress?.progress === "number"

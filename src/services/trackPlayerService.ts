@@ -113,6 +113,35 @@ const trackPlayerService = async (): Promise<void> => {
   );
 
   TrackPlayer.addEventListener(
+    Event.RemoteNext,
+    runSafe(async () => {
+      const [queue, activeIndex] = await Promise.all([
+        TrackPlayer.getQueue(),
+        TrackPlayer.getActiveTrackIndex(),
+      ]);
+      if (activeIndex == null || activeIndex >= queue.length - 1) {
+        return;
+      }
+
+      await TrackPlayer.skipToNext();
+      await logRemoteAction('skip_next', 0);
+    }),
+  );
+
+  TrackPlayer.addEventListener(
+    Event.RemotePrevious,
+    runSafe(async () => {
+      const activeIndex = await TrackPlayer.getActiveTrackIndex();
+      if (activeIndex == null || activeIndex <= 0) {
+        return;
+      }
+
+      await TrackPlayer.skipToPrevious();
+      await logRemoteAction('skip_previous', 0);
+    }),
+  );
+
+  TrackPlayer.addEventListener(
     Event.RemoteSeek,
     runSafe(async ({ position }) => {
       const context = await getLessonContextForTrack();
