@@ -95,8 +95,14 @@ const useListenNavigationSync = () => {
   }, [activeLesson, pathname, router]);
 
   useEffect(() => {
+    // Stop audio when navigating, unless we're staying on the listen page
+    // (it's okay if it's a different listen page -- this would happen because of a sync from the track player)
     const currentListenRoute = parseListenRoute(pathname);
     if (!currentListenRoute) {
+      if (pathname === '/notification.click') {
+        // we're about to handle this path and navigate to the listen page, so don't stop the audio
+        return;
+      }
       void stopLessonAudio();
     }
   }, [pathname]);
