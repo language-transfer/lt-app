@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'expo-router';
 import TrackPlayer, { Event } from 'react-native-track-player';
 
@@ -37,7 +37,6 @@ const useListenNavigationSync = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [activeLesson, setActiveLesson] = useState<LessonRoute | null>(null);
-  const previousListenRouteRef = useRef<LessonRoute | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -97,13 +96,9 @@ const useListenNavigationSync = () => {
 
   useEffect(() => {
     const currentListenRoute = parseListenRoute(pathname);
-    const previousListenRoute = previousListenRouteRef.current;
-
-    if (previousListenRoute && !currentListenRoute) {
+    if (!currentListenRoute) {
       void stopLessonAudio();
     }
-
-    previousListenRouteRef.current = currentListenRoute;
   }, [pathname]);
 };
 
