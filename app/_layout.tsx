@@ -5,9 +5,11 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import useListenNavigationSync from '@/src/hooks/useListenNavigationSync';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  useListenNavigationSync();
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

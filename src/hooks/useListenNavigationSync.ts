@@ -1,0 +1,110 @@
+import { useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'expo-router';
+import TrackPlayer, { Event } from 'react-native-track-player';
+
+import type { Course } from '@/src/types';
+import { stopLessonAudio } from '@/src/services/audioPlayer';
+
+type LessonTrackMetadata = {
+  course?: Course;
+  lesson?: number;
+};
+
+type LessonRoute = {
+  course: Course;
+  lesson: number;
+};
+
+const LISTEN_ROUTE_REGEX = /^\/course\/([^/]+)\/listen\/(\d+)$/;
+
+const parseListenRoute = (pathname: string | null): LessonRoute | null => {
+  if (!pathname) {
+    return null;
+  }
+
+  const match = pathname.match(LISTEN_ROUTE_REGEX);
+  if (!match) {
+    return null;
+  }
+
+  return {
+    course: match[1] as Course,
+    lesson: Number.parseInt(match[2], 10),
+  };
+};
+
+const useListenNavigationSync = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [activeLesson, setActiveLesson] = useState<LessonRoute | null>(null);
+  const previousListenRouteRef = useRef<LessonRoute | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const resolveActiveLesson = async () => {
+      try {
+        const track = (await TrackPlayer.getActiveTrack()) as LessonTrackMetadata | null;
+        if (!track?.course || typeof track.lesson !== 'number') {
+          setActiveLesson(null);
+          return;
+        }
+        if (cancelled) {
+          return;
+        }
+        setActiveLesson({ course: track.course, lesson: track.lesson });
+      } catch {
+        // Player might not be ready; ignore errors.
+      }
+    };
+
+    void resolveActiveLesson();
+    const subscription = TrackPlayer.addEventListener(
+      Event.PlaybackActiveTrackChanged,
+      resolveActiveLesson,
+    );
+
+    return () => {
+      cancelled = true;
+      subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!activeLesson) {
+      return;
+    }
+
+    const currentRoute = parseListenRoute(pathname);
+    if (!currentRoute) {
+      return;
+    }
+
+    if (
+      currentRoute.course === activeLesson.course &&
+      currentRoute.lesson === activeLesson.lesson
+    ) {
+      return;
+    }
+
+    router.replace({
+      pathname: '/course/[course]/listen/[lesson]',
+      params: {
+        course: activeLesson.course,
+        lesson: activeLesson.lesson.toString(),
+      },
+    });
+  }, [activeLesson, pathname, router]);
+
+  useEffect(() => {
+    const currentListenRoute = parseListenRoute(pathname);
+    const previousListenRoute = previousListenRouteRef.current;
+
+    if (previousListenRoute && !currentListenRoute) {
+      void stopLessonAudio();
+    }
+
+    previousListenRouteRef.current = currentListenRoute;
+  }, [pathname]);
+};
+
+export default useListenNavigationSync;

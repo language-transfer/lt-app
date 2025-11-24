@@ -197,20 +197,14 @@ const buildLessonQueue = async (
   return { tracks, targetIndex };
 };
 
-type LessonAudioOptions = {
-  active?: boolean;
-};
-
 export const useLessonAudio = (
   course: Course,
-  lesson: number,
-  options?: LessonAudioOptions
+  lesson: number
 ): LessonAudioControls => {
   const [playerReady, setPlayerReady] = useState(false);
   const [duration, setDuration] = useState(0);
   const [loadError, setLoadError] = useState<AudioError | null>(null);
   const lastPersistTimeRef = useRef(0);
-  const { active = true } = options ?? {};
 
   const playbackState = usePlaybackState();
   const progress = useProgress(500);
@@ -230,13 +224,6 @@ export const useLessonAudio = (
     setPlayerReady(false);
     setLoadError(null);
     lastPersistTimeRef.current = 0;
-
-    if (!active) {
-      void stopPlayback();
-      return () => {
-        cancelled = true;
-      };
-    }
 
     const load = async () => {
       try {
@@ -325,9 +312,8 @@ export const useLessonAudio = (
 
     return () => {
       cancelled = true;
-      void stopPlayback();
     };
-  }, [course, lesson, active]);
+  }, [course, lesson]);
 
   useEffect(() => {
     if (!isCurrentLessonActive) {
