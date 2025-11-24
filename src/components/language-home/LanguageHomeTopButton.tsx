@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: 'hidden',
     backgroundColor: '#ddd',
-    marginTop: 12,
+    marginTop: 36,
   },
   progressMade: {
     backgroundColor: '#2980b9',

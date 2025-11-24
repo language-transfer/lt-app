@@ -82,7 +82,7 @@ const LanguageHomeScreen = () => {
     );
   }
 
-  const buttons = [
+  const extraButtons = [
     {
       label: "All Lessons",
       icon: "list-ol",
@@ -114,7 +114,7 @@ const LanguageHomeScreen = () => {
   return (
     <ScrollView style={styles.body}>
       <LanguageHomeTopButton course={course} />
-      {buttons.map((button) => (
+      {extraButtons.map((button) => (
         <Pressable
           key={button.label}
           android_ripple={{ color: "rgba(0,0,0,0.08)" }}

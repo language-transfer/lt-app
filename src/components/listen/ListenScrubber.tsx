@@ -10,13 +10,14 @@ import formatDuration from 'format-duration';
 
 import CourseData from '@/src/data/courseData';
 import type { Course } from '@/src/types';
+import type { LessonAudioControls } from '@/src/services/audioPlayer';
 
 type Props = {
   course: Course;
   lesson: number;
   position: number;
   duration: number;
-  seekTo: (position: number) => void;
+  seekTo: LessonAudioControls['seekTo'];
 };
 
 const ListenScrubber = ({ course, lesson, position, duration, seekTo }: Props) => {

@@ -14,11 +14,13 @@ npm run web         # run the web build
 
 Only the open-source Expo CLI workflow is used—there are no Expo Application Services (EAS) configs or build hooks in this repository.
 
+> `react-native-track-player` is a native module, so you need a development build (via [`expo run`](https://docs.expo.dev/workflow/expo-run) or an [Expo dev client build](https://docs.expo.dev/develop/development-builds/introduction/)) before playback will work. Expo Go does not include this module.
+
 ## App features
 
 - Course browser with the familiar Language Transfer artwork pulled from the legacy assets.
 - Course home screen that resumes your last lesson, surfaces data management, and links out to Language Transfer resources.
-- Lesson player built on `expo-audio`, including seek scrubbing, skip-back, and offline download actions.
+- Lesson player built on `react-native-track-player`, including seek scrubbing, skip-back, and offline download actions.
 - All-lessons list with progress indicators, download management, and “download all” support.
 - Data management panel mirroring the legacy options for clearing metadata, progress, and downloads.
 - Static About, Licenses (embedded web view), and Settings screens that map the previous preferences to Expo-compatible storage.
@@ -28,7 +30,7 @@ Only the open-source Expo CLI workflow is used—there are no Expo Application S
 - `app/` – Expo Router entry points
 - `src/` – shared logic and UI
   - `data/` – course metadata and fetch helpers
-  - `services/` – audio + download layers built on `expo-audio`/`expo-file-system`
+  - `services/` – audio + download layers built on `react-native-track-player`/`expo-file-system`
   - `components/` – screen components reused by the router routes
   - `storage/` – AsyncStorage persistence helpers and preference APIs
   - `hooks/` – view helpers (status bar, downloads, etc.)

@@ -5,8 +5,8 @@ import { useFocusEffect } from '@react-navigation/native';
 export function useSetStatusBarStyle() {
   return useCallback((backgroundColor: string, style: StatusBarStyle) => {
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor(backgroundColor);
       StatusBar.setTranslucent(true);
+      StatusBar.setBackgroundColor(backgroundColor);
     }
 
     StatusBar.setBarStyle(style, true);

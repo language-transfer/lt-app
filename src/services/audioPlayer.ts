@@ -1,6 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
-import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import TrackPlayer, {
+  AppKilledPlaybackBehavior,
+  Capability,
+  IOSCategory,
+  IOSCategoryMode,
+  IOSCategoryOptions,
+  State,
+  type AddTrack,
+  useActiveTrack,
+  usePlaybackState,
+  useProgress,
+} from 'react-native-track-player';
 
 import CourseData from '@/src/data/courseData';
 import DownloadManager from '@/src/services/downloadManager';
@@ -11,7 +22,6 @@ import {
   genUpdateProgressForLesson,
 } from '@/src/storage/persistence';
 import type { Course } from '@/src/types';
-import type { AudioStatus } from 'expo-audio';
 import { log } from '@/src/utils/log';
 
 type AudioError = {
@@ -28,49 +38,97 @@ export type LessonAudioControls = {
   play: () => Promise<void>;
   pause: () => Promise<void>;
   toggle: () => Promise<void>;
-  seekTo: (seconds: number) => Promise<void>;
+  seekTo: (seconds: number, options?: { log?: boolean }) => Promise<void>;
   skipBack: (seconds?: number) => Promise<void>;
 };
 
-const AUDIO_MODE = {
-  playsInSilentMode: true,
-  allowsRecording: false,
-  shouldPlayInBackground: false,
-  interruptionMode: 'duckOthers' as const,
-  interruptionModeAndroid: 'duckOthers' as const,
-  shouldRouteThroughEarpiece: false,
+const CAPABILITIES = [Capability.Play, Capability.Pause, Capability.JumpBackward, Capability.Stop];
+const COMPACT_CAPABILITIES = [Capability.Play, Capability.Pause, Capability.JumpBackward];
+const BASE_UPDATE_OPTIONS = {
+  android: {
+    appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+    alwaysPauseOnInterruption: true,
+  },
+  capabilities: CAPABILITIES,
+  compactCapabilities: COMPACT_CAPABILITIES,
+  notificationCapabilities: CAPABILITIES,
+  backwardJumpInterval: 10,
+  progressUpdateEventInterval: 2,
+};
+
+type LessonTrack = AddTrack & {
+  course: Course;
+  lesson: number;
+};
+
+let playerSetupPromise: Promise<void> | null = null;
+
+const ensurePlayer = async () => {
+  if (!playerSetupPromise) {
+    playerSetupPromise = (async () => {
+      await TrackPlayer.setupPlayer({
+        iosCategory: IOSCategory.Playback,
+        iosCategoryMode: IOSCategoryMode.Default,
+        iosCategoryOptions: [
+          IOSCategoryOptions.AllowBluetooth,
+          IOSCategoryOptions.AllowBluetoothA2DP,
+          IOSCategoryOptions.DuckOthers,
+        ],
+        autoHandleInterruptions: true,
+      });
+      await TrackPlayer.updateOptions(BASE_UPDATE_OPTIONS);
+    })().catch((err) => {
+      playerSetupPromise = null;
+      throw err;
+    });
+  }
+
+  return playerSetupPromise;
+};
+
+const trackMatchesLesson = (track: LessonTrack | undefined, course: Course, lesson: number) => {
+  return track?.course === course && track?.lesson === lesson;
+};
+
+const colorToInt = (hex: string): number | undefined => {
+  const parsed = Number.parseInt(hex.replace('#', ''), 16);
+  return Number.isNaN(parsed) ? undefined : parsed;
 };
 
 export const useLessonAudio = (course: Course, lesson: number): LessonAudioControls => {
-  const [source, setSource] = useState<string | number | null>(null);
-  const [error, setError] = useState<AudioError | null>(null);
-  const [position, setPosition] = useState(0);
+  const [playerReady, setPlayerReady] = useState(false);
   const [duration, setDuration] = useState(0);
+  const [loadError, setLoadError] = useState<AudioError | null>(null);
   const persistRef = useRef(0);
-  const pendingSeekRef = useRef<number | null>(null);
-  const autoStartRef = useRef(false);
 
-  const player = useAudioPlayer(source, { updateInterval: 500, keepAudioSessionActive: false });
-  const status: AudioStatus | null = useAudioPlayerStatus(player);
+  const playbackState = usePlaybackState();
+  const progress = useProgress(500);
+  const activeTrack = useActiveTrack() as LessonTrack | undefined;
+  const isCurrentLessonActive = trackMatchesLesson(activeTrack, course, lesson);
+  const playbackStatus = playbackState.state;
 
   useEffect(() => {
-    let mounted = true;
-    setError(null);
-    setPosition(0);
-    setSource(null);
-    autoStartRef.current = false;
+    let cancelled = false;
+    setPlayerReady(false);
+    setLoadError(null);
+    persistRef.current = 0;
 
-    async function load() {
+    const load = async () => {
       try {
-        if (CourseData.isCourseMetadataLoaded(course)) {
-          setDuration(CourseData.getLessonDuration(course, lesson));
-        } else {
-          setDuration(0);
+        await CourseData.genLoadCourseMetadata(course);
+        const lessonDuration = CourseData.getLessonDuration(course, lesson);
+        if (!cancelled) {
+          setDuration(lessonDuration);
         }
 
-        await CourseData.genLoadCourseMetadata(course);
-        setDuration(CourseData.getLessonDuration(course, lesson));
-        await setAudioModeAsync(AUDIO_MODE);
+        await ensurePlayer();
+        const existingTrack = (await TrackPlayer.getActiveTrack()) as LessonTrack | undefined;
+        if (existingTrack && trackMatchesLesson(existingTrack, course, lesson)) {
+          if (!cancelled) {
+            setPlayerReady(true);
+          }
+          return;
+        }
 
         const [quality, downloaded, savedProgress] = await Promise.all([
           genPreferenceStreamQuality(),
@@ -91,68 +149,81 @@ export const useLessonAudio = (course: Course, lesson: number): LessonAudioContr
           uri = bundled ?? CourseData.getLessonUrl(course, lesson, quality);
         }
 
-        if (!mounted) {
-          return;
+        await TrackPlayer.reset();
+        const colors = CourseData.getCourseUIColors(course);
+        const color = colorToInt(colors.background);
+        await TrackPlayer.updateOptions(
+          color != null ? { ...BASE_UPDATE_OPTIONS, color } : BASE_UPDATE_OPTIONS,
+        );
+
+        const track: LessonTrack = {
+          id: CourseData.getLessonId(course, lesson),
+          url: uri as LessonTrack['url'],
+          title: CourseData.getLessonTitle(course, lesson),
+          artist: 'Language Transfer',
+          artwork: CourseData.getCourseImageWithText(course) as LessonTrack['artwork'],
+          duration: lessonDuration,
+          course,
+          lesson,
+        };
+
+        await TrackPlayer.add(track);
+        const savedPosition = typeof savedProgress?.progress === 'number' ? savedProgress.progress : null;
+        if (savedPosition && savedPosition > 0) {
+          await TrackPlayer.seekTo(savedPosition);
+          persistRef.current = Date.now();
         }
 
-        pendingSeekRef.current = savedProgress?.progress ?? null;
-        setSource(uri);
+        if (!cancelled) {
+          setPlayerReady(true);
+        }
+
+        await TrackPlayer.play().catch(() => {});
       } catch (err) {
-        if (mounted) {
-          setError({ message: err instanceof Error ? err.message : 'Unable to load audio' });
+        if (!cancelled) {
+          setLoadError({ message: err instanceof Error ? err.message : 'Unable to load audio' });
         }
       }
-    }
+    };
 
     load();
 
     return () => {
-      mounted = false;
+      cancelled = true;
     };
   }, [course, lesson]);
 
   useEffect(() => {
-    if (!status) {
+    if (!isCurrentLessonActive) {
       return;
     }
 
-    setPosition(status.currentTime ?? 0);
-    if (status.duration) {
-      setDuration(status.duration);
-    }
-
-    if (pendingSeekRef.current != null && status.isLoaded) {
-      const target = pendingSeekRef.current;
-      pendingSeekRef.current = null;
-      (async () => {
-        try {
-          await player.seekTo(target);
-          setPosition(target);
-        } catch {
-          // ignore seek errors
-        }
-      })();
-    }
-
-    if (status.isLoaded && !autoStartRef.current) {
-      autoStartRef.current = true;
-      try {
-        player.play();
-      } catch {
-        // ignore auto-play errors
-      }
+    if (playbackStatus !== State.Playing) {
+      return;
     }
 
     const now = Date.now();
-    if (status.playing && now - persistRef.current > 4000) {
-      persistRef.current = now;
-      genUpdateProgressForLesson(course, lesson, status.currentTime ?? 0);
+    if (now - persistRef.current < 4000) {
+      return;
     }
 
-    if (status.didJustFinish) {
-      genMarkLessonFinished(course, lesson);
+    persistRef.current = now;
+    genUpdateProgressForLesson(course, lesson, progress.position).catch(() => {});
+  }, [course, lesson, isCurrentLessonActive, playbackStatus, progress.position]);
+
+  useEffect(() => {
+    if (!isCurrentLessonActive) {
+      return;
     }
-  }, [status, player, course, lesson]);
+
+    if (playbackStatus !== State.Ended) {
+      return;
+    }
+
+    const finishedPosition = duration > 0 ? duration : progress.duration;
+    genMarkLessonFinished(course, lesson).catch(() => {});
+    genUpdateProgressForLesson(course, lesson, finishedPosition).catch(() => {});
+  }, [course, lesson, duration, isCurrentLessonActive, playbackStatus, progress.duration]);
 
   const logPlayerEvent = useCallback(
     (action: string, positionOverride?: number) => {
@@ -161,69 +232,78 @@ export const useLessonAudio = (course: Course, lesson: number): LessonAudioContr
         surface: 'listen_screen',
         course,
         lesson,
-        position: positionOverride ?? status?.currentTime ?? 0,
+        position: positionOverride ?? (isCurrentLessonActive ? progress.position : 0),
       });
     },
-    [course, lesson, status?.currentTime],
+    [course, lesson, isCurrentLessonActive, progress.position],
   );
 
   const play = useCallback(async () => {
-    if (!status?.isLoaded) {
+    if (!playerReady || !isCurrentLessonActive) {
       return;
     }
-    player.play();
+    await TrackPlayer.play();
     logPlayerEvent('play');
-  }, [player, status, logPlayerEvent]);
+  }, [isCurrentLessonActive, playerReady, logPlayerEvent]);
 
   const pause = useCallback(async () => {
-    if (!status?.isLoaded) {
+    if (!playerReady || !isCurrentLessonActive) {
       return;
     }
-    player.pause();
+    await TrackPlayer.pause();
     logPlayerEvent('pause');
-  }, [player, status, logPlayerEvent]);
+  }, [isCurrentLessonActive, playerReady, logPlayerEvent]);
 
   const toggle = useCallback(async () => {
-    const currentStatus = status;
-    if (!currentStatus?.isLoaded) {
+    if (!isCurrentLessonActive || !playerReady) {
       return;
     }
-    if (currentStatus.playing) {
+
+    if (playbackStatus === State.Playing) {
       await pause();
     } else {
       await play();
     }
-  }, [pause, play, status]);
+  }, [isCurrentLessonActive, pause, play, playbackStatus, playerReady]);
 
   const seekTo = useCallback(
     async (seconds: number, options?: { log?: boolean }) => {
-      if (!status?.isLoaded) {
+      if (!playerReady || !isCurrentLessonActive) {
         return;
       }
-      await player.seekTo(seconds);
-      setPosition(seconds);
+      await TrackPlayer.seekTo(seconds);
+      persistRef.current = Date.now();
       await genUpdateProgressForLesson(course, lesson, seconds);
       if (options?.log !== false) {
         logPlayerEvent('change_position', seconds);
       }
     },
-    [course, lesson, player, status, logPlayerEvent],
+    [course, lesson, isCurrentLessonActive, logPlayerEvent, playerReady],
   );
 
   const skipBack = useCallback(
     async (seconds = 10) => {
-      const newPosition = Math.max(0, position - seconds);
+      const currentPosition = isCurrentLessonActive ? progress.position : 0;
+      const newPosition = Math.max(0, currentPosition - seconds);
       logPlayerEvent('jump_backward');
       await seekTo(newPosition, { log: false });
     },
-    [logPlayerEvent, position, seekTo],
+    [isCurrentLessonActive, progress.position, seekTo, logPlayerEvent],
   );
 
+  const playbackError = playbackStatus === State.Error ? playbackState.error : null;
+  const error = loadError ?? (playbackError ? { message: playbackError.message } : null);
+
+  const position = isCurrentLessonActive ? progress.position : 0;
+  const resolvedDuration = duration > 0 ? duration : isCurrentLessonActive ? progress.duration : 0;
+
   return {
-    ready: Boolean(status?.isLoaded),
-    playing: Boolean(status?.isLoaded && status.playing),
-    buffering: Boolean(status?.isLoaded && status.isBuffering),
-    duration,
+    ready: Boolean(playerReady && isCurrentLessonActive && playbackStatus !== State.Loading && playbackStatus !== State.None),
+    playing: Boolean(isCurrentLessonActive && playbackStatus === State.Playing),
+    buffering: Boolean(
+      isCurrentLessonActive && (playbackStatus === State.Buffering || playbackStatus === State.Loading),
+    ),
+    duration: resolvedDuration,
     position,
     error,
     play,
