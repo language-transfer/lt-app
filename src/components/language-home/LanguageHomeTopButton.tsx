@@ -192,23 +192,23 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   ratingBanner: {
-    backgroundColor: '#f39c12',
+    backgroundColor: '#0289ee',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 6,
   },
   ratingPrompt: {
     color: '#fff',
     fontWeight: '600',
+    fontSize: 13,
     flex: 1,
   },
   ratingButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#e67e22',
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -216,6 +216,7 @@ const styles = StyleSheet.create({
   ratingButtonText: {
     color: '#fff',
     fontWeight: '600',
+    fontSize: 13,
   },
   dismissButton: {
     width: 24,
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    // backgroundColor: 'rgba(255,255,255,0.3)',
   },
 });
 
