@@ -209,12 +209,13 @@ const AboutScreen = () => {
 
         <SectionCard title="LT App">
           <Text style={styles.bodyText}>
-            To help us understand where pauses occur in the course audio, we
-            collect data about listening patterns. By using the Thinking Method,
-            you’re helping us learn about how real people engage with the
-            Language Transfer course audio. To learn more about what data we
-            collect (and about how you can turn off this data collection), see
-            the ‘Privacy’ section on this About page.
+            To help us understand where pauses occur in the course audio, we use
+            this app to collect data about listening patterns (for example,
+            where users are most likely to pause the course audio). By using the
+            Thinking Method, you’re helping us learn about how real people
+            engage with the Language Transfer course audio. To learn more about
+            what data we collect (and about how you can turn off this data
+            collection), see the ‘Privacy’ section on this About page.
           </Text>
 
           <Text style={[styles.bodyText, styles.bodyTextAboveButton]}>
