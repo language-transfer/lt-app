@@ -4,7 +4,7 @@
 - Expo Router app; entry `index.js` registers the track player service from `src/services/trackPlayerService`.
 - Screens live in `app/` (stack in `app/_layout.tsx`, course flows under `app/course/[course]/...`).
 - UI in `src/components/`, data in `src/data/`, logic in `src/hooks`, `src/services`, `src/storage`, `src/utils`, and shared typing in `src/types`.
-- `assets/` holds icons/splash art; `legacy/` keeps bundled first-lesson audio and legacy artwork—treat as read-only.
+- `assets/` holds icons/splash art; `legacy/` keeps bundled first-lesson audio and legacy artwork—treat as read-only. The `legacy/` folder currently houses an older version of the app that works well; the root project is a rewrite and we often port or re-implement legacy behaviors into the new skeleton.
 
 ## Build, Test, and Development Commands
 - `npm install`: install dependencies (runs `patch-package`).
