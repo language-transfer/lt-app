@@ -1,3 +1,4 @@
+import { DrawerToggleButton } from "@react-navigation/drawer";
 import { Stack, useLocalSearchParams } from "expo-router";
 
 import LanguageHomeScreen from "@/src/components/language-home/LanguageHomeScreen";
@@ -14,7 +15,12 @@ export default function CourseHome() {
 
   return (
     <>
-      <Stack.Screen options={{ title }} />
+      <Stack.Screen
+        options={{
+          title,
+          headerLeft: (props) => <DrawerToggleButton {...props} />,
+        }}
+      />
       <LanguageHomeScreen />
     </>
   );

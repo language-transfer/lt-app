@@ -5,17 +5,27 @@ import LanguageSelector from "@/src/components/language-selector/LanguageSelecto
 import CourseData from "@/src/data/courseData";
 import { genMostRecentListenedCourse } from "@/src/storage/persistence";
 
+let hasHandledInitialRedirect = false;
+
 export default function Index() {
-  const [checkingRecentCourse, setCheckingRecentCourse] = useState(true);
+  const [checkingRecentCourse, setCheckingRecentCourse] = useState(!hasHandledInitialRedirect);
   const router = useRouter();
 
   useEffect(() => {
     let cancelled = false;
 
+    if (hasHandledInitialRedirect) {
+      setCheckingRecentCourse(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
     const maybeRedirectToRecentCourse = async () => {
       try {
         const course = await genMostRecentListenedCourse();
         if (!cancelled && course && CourseData.courseExists(course)) {
+          hasHandledInitialRedirect = true;
           router.replace({
             pathname: "/course/[course]",
             params: { course },
@@ -27,6 +37,7 @@ export default function Index() {
       }
 
       if (!cancelled) {
+        hasHandledInitialRedirect = true;
         setCheckingRecentCourse(false);
       }
     };
