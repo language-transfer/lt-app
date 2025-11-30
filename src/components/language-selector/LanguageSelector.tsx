@@ -3,7 +3,6 @@ import {
   Animated,
   Dimensions,
   Image,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,7 +13,6 @@ import { useRouter } from "expo-router";
 
 import logo from "../../../legacy/resources/LT-logo-text.png";
 import LanguageButton from "@/src/components/language-selector/LanguageButton";
-import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
 import type { Course } from "@/src/types";
 
 const SCREEN_HEIGHT = Dimensions.get("screen").height;
@@ -24,8 +22,6 @@ const CARDS_MARGIN_TOP = IMAGE_HEIGHT + 40;
 const LanguageSelector = () => {
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const router = useRouter();
-  // useStatusBarStyle("white", "dark-content");
-  // StatusBar.setTranslucent(true);
 
   const goToCourse = (course: string) => {
     router.push({

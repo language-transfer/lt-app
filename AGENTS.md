@@ -21,7 +21,7 @@
 - Use the `@/` path alias for absolute imports; keep styles in nearby `StyleSheet.create` blocks.
 
 ## Testing Guidelines
-- No automated suite yet; always run `npm run typecheck` and `npm run lint` before a PR.
+- No automated suite yet; always run `npm run typecheck` and `npm run lint` after making changes and again before a PR.
 - Smoke-test on at least one platform (`npm run android` or `npm run ios`): verify course list, playback, downloads, and notification clicks.
 - Note manual test devices/OS versions and any regressions avoided in the PR description.
 

@@ -14,8 +14,10 @@ import logo from "../../../legacy/resources/LT-logo-text.png";
 const DrawerContent = (props: DrawerContentComponentProps) => {
   const router = useRouter();
 
+  type NavTarget = "/" | "/settings" | "/about";
+
   const navigateTo = useCallback(
-    (pathname: string) => {
+    (pathname: NavTarget) => {
       props.navigation.dispatch(DrawerActions.closeDrawer());
       router.navigate(pathname);
     },
