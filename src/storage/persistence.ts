@@ -78,6 +78,8 @@ export const genMarkLessonFinished = async (
   course: Course,
   lesson: number,
 ): Promise<void> => {
+  console.log('Marking lesson finished:', course, lesson);
+
   const progressObject = (await genProgressForLesson(course, lesson)) ?? {
     finished: false,
     progress: null,

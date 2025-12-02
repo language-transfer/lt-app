@@ -1,6 +1,5 @@
 import TrackPlayer, { Event } from 'react-native-track-player';
 
-import CourseData from '@/src/data/courseData';
 import { genMarkLessonFinished, genUpdateProgressForLesson } from '@/src/storage/persistence';
 import type { Course } from '@/src/types';
 import { log } from '@/src/utils/log';
@@ -8,9 +7,11 @@ import { log } from '@/src/utils/log';
 type LessonContext = {
   course: Course;
   lesson: number;
+  trackId?: string | number;
 };
 
 type LessonTrackMetadata = {
+  id?: string | number;
   course?: Course;
   lesson?: number;
 };
@@ -33,7 +34,7 @@ const getLessonContextForTrack = async (trackIndex?: number): Promise<LessonCont
     return null;
   }
 
-  return { course, lesson };
+  return { course, lesson, trackId: track?.id };
 };
 
 const logRemoteAction = async (action: string, positionOverride?: number) => {
@@ -56,8 +57,17 @@ const persistProgress = async (context: LessonContext, position: number) => {
 };
 
 export const PROGRESS_PERSIST_INTERVAL_MS = 3000;
+const FINISH_THRESHOLD_SECONDS = 5;
 
 let lastPersistTs = 0;
+let lastCompletedTrackId: string | number | null = null;
+let lastProgress:
+  | {
+      context: LessonContext;
+      position: number;
+      duration: number;
+    }
+  | null = null;
 
 const runSafe = <Args extends any[]>(fn: (...args: Args) => Promise<void>) => {
   return async (...args: Args) => {
@@ -155,14 +165,20 @@ const trackPlayerService = async (): Promise<void> => {
 
   TrackPlayer.addEventListener(
     Event.PlaybackProgressUpdated,
-    runSafe(async ({ position, track }) => {
-      const now = Date.now();
-      if (now - lastPersistTs < PROGRESS_PERSIST_INTERVAL_MS) {
+    runSafe(async ({ position, duration, track }) => {
+      const context = await getLessonContextForTrack(track);
+      if (!context) {
         return;
       }
 
-      const context = await getLessonContextForTrack(track);
-      if (!context) {
+      lastProgress = {
+        context,
+        position,
+        duration: typeof duration === 'number' ? duration : 0,
+      };
+
+      const now = Date.now();
+      if (now - lastPersistTs < PROGRESS_PERSIST_INTERVAL_MS) {
         return;
       }
 
@@ -172,17 +188,44 @@ const trackPlayerService = async (): Promise<void> => {
   );
 
   TrackPlayer.addEventListener(
-    Event.PlaybackQueueEnded,
-    runSafe(async ({ track, position }) => {
-      const context = await getLessonContextForTrack(track);
-      if (!context) {
+    Event.PlaybackActiveTrackChanged,
+    runSafe(async () => {
+      if (!lastProgress) {
         return;
       }
 
-      await genMarkLessonFinished(context.course, context.lesson);
-      const finishedPosition =
-        position || CourseData.getLessonDuration(context.course, context.lesson);
-      await persistProgress(context, finishedPosition);
+      const { context, position, duration } = lastProgress;
+      if (
+        duration > 0 &&
+        duration - position <= FINISH_THRESHOLD_SECONDS &&
+        context.trackId !== undefined &&
+        context.trackId !== lastCompletedTrackId
+      ) {
+        lastCompletedTrackId = context.trackId;
+        await genMarkLessonFinished(context.course, context.lesson);
+        await persistProgress(context, 0);
+      }
+    }),
+  );
+
+  TrackPlayer.addEventListener(
+    Event.PlaybackQueueEnded,
+    runSafe(async () => {
+      if (!lastProgress) {
+        return;
+      }
+
+      const { context, position, duration } = lastProgress;
+      if (
+        duration > 0 &&
+        duration - position <= FINISH_THRESHOLD_SECONDS &&
+        context.trackId !== undefined &&
+        context.trackId !== lastCompletedTrackId
+      ) {
+        lastCompletedTrackId = context.trackId;
+        await genMarkLessonFinished(context.course, context.lesson);
+        await persistProgress(context, 0);
+      }
     }),
   );
 };

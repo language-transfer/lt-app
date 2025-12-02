@@ -350,11 +350,8 @@ export const useLessonAudio = (
       return;
     }
 
-    const finishedPosition = duration > 0 ? duration : progress.duration;
     genMarkLessonFinished(course, lesson).catch(() => {});
-    genUpdateProgressForLesson(course, lesson, finishedPosition).catch(
-      () => {}
-    );
+    genUpdateProgressForLesson(course, lesson, 0).catch(() => {});
   }, [
     course,
     lesson,
