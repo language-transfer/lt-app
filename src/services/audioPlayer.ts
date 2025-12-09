@@ -125,6 +125,15 @@ const ensurePlayer = async () => {
       await TrackPlayer.updateOptions(BASE_UPDATE_OPTIONS);
     })().catch((err) => {
       playerSetupPromise = null;
+      // this is probably not a stable API but I'm pretty sure this only ever failed in dev mode / HMR
+      //   (because the setup promise gets reset, but not the track player state)
+      // so I don't mind if this starts breaking again in the future
+      if (
+        err.message ===
+        "The player has already been initialized via setupPlayer."
+      ) {
+        return;
+      }
       throw err;
     });
   }
@@ -177,9 +186,7 @@ const buildLessonQueue = async (
         lessonNumber === 0 && Platform.OS === "ios"
           ? CourseData.getBundledFirstLesson(course)
           : null;
-      uri =
-        bundled ??
-        CourseData.getLessonUrl(course, lessonNumber, quality);
+      uri = bundled ?? CourseData.getLessonUrl(course, lessonNumber, quality);
     }
 
     return {
