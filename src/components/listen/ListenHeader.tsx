@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -12,16 +12,20 @@ type Props = {
 
 const ListenHeader = ({ course }: Props) => {
   const router = useRouter();
+  const colors = CourseData.getCourseUIColors(course);
+
   return (
-    <View style={[styles.header, { backgroundColor: CourseData.getCourseUIColors(course).background }]}>
-      <View style={styles.backButtonContainer}>
-        <FontAwesome5.Button
-          name="arrow-left"
-          backgroundColor="transparent"
-          color={CourseData.getCourseUIColors(course).text}
-          onPress={() => router.back()}
-        />
-      </View>
+    <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <Pressable
+        accessibilityLabel="Go back"
+        accessibilityRole="button"
+        android_ripple={{ color: 'rgba(0, 0, 0, 0.08)', borderless: true }}
+        hitSlop={10}
+        onPress={() => router.back()}
+        style={styles.backButton}
+      >
+        <FontAwesome5 name="arrow-left" size={18} color={colors.text} />
+      </Pressable>
     </View>
   );
 };
@@ -31,8 +35,12 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingHorizontal: 16,
   },
-  backButtonContainer: {
+  backButton: {
     width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
