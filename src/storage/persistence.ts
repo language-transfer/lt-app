@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import "@/src/utils/polyfills";
 import { v4 as uuid } from "uuid";
 
 import type { Course, Preference, Progress, Quality } from "@/src/types";
