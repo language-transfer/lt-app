@@ -69,7 +69,7 @@ const sections: {
     action: async (course: Course, router: ReturnType<typeof useRouter>) => {
       DownloadManager.stopAllDownloadsForCourse(course);
       await Promise.all([
-        DownloadManager.genDeleteFullCourseFolder(course),
+        DownloadManager.genDeleteAllDownloadsForCourse(course),
         genDeleteProgressForCourse(course),
       ]);
       // genDeleteProgressForCourse depends on the metadata being present

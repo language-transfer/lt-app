@@ -234,11 +234,6 @@ const DownloadManager = {
     );
   },
 
-  async genDeleteFullCourseFolder(course: Course) {
-    await DownloadManager.genDeleteAllDownloadsForCourse(course);
-    await CourseData.clearCourseMetadata(course);
-  },
-
   stopDownload(downloadId: string) {
     const task = snapshots.get(downloadId);
     if (task) {
