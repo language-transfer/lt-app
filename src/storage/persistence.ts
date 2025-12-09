@@ -1,40 +1,45 @@
-import { useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import '@/src/utils/polyfills';
-import { v4 as uuid } from 'uuid';
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import "@/src/utils/polyfills";
+import { v4 as uuid } from "uuid";
 
-import type { Course, Preference, Progress, Quality } from '@/src/types';
+import type { Course, Preference, Progress, Quality } from "@/src/types";
+import { queryClient } from "../data/queryClient";
 
 const activityKey = (course: Course, lesson?: number) =>
-  lesson === undefined ? `@activity/${course}` : `@activity/${course}/${lesson}`;
+  lesson === undefined
+    ? `@activity/${course}`
+    : `@activity/${course}/${lesson}`;
 
-export const genAutopause = async (): Promise<
-  | {
-      type: 'off' | 'timed' | 'manual';
-      timedDelay?: number;
-    }
-> => {
-  const autopause = await AsyncStorage.getItem('@global-setting/autopause');
+export const genAutopause = async (): Promise<{
+  type: "off" | "timed" | "manual";
+  timedDelay?: number;
+}> => {
+  const autopause = await AsyncStorage.getItem("@global-setting/autopause");
   if (!autopause) {
-    return { type: 'off' };
+    return { type: "off" };
   }
   return JSON.parse(autopause);
 };
 
 export const genMostRecentListenedLessonForCourse = async (
-  course: Course,
+  course: Course
 ): Promise<number | null> => {
-  const value = await AsyncStorage.getItem(`${activityKey(course)}/most-recent-lesson`);
+  const value = await AsyncStorage.getItem(
+    `${activityKey(course)}/most-recent-lesson`
+  );
   return value === null ? null : Number.parseInt(value, 10);
 };
 
 export const genMostRecentListenedCourse = async (): Promise<Course | null> => {
-  return (await AsyncStorage.getItem('@activity/most-recent-course')) as Course | null;
+  return (await AsyncStorage.getItem(
+    "@activity/most-recent-course"
+  )) as Course | null;
 };
 
 export const genProgressForLesson = async (
   course: Course,
-  lesson: number | null,
+  lesson: number | null
 ): Promise<Progress | null> => {
   if (lesson === null) {
     return null;
@@ -54,7 +59,7 @@ export const genProgressForLesson = async (
 export const genUpdateProgressForLesson = async (
   course: Course,
   lesson: number,
-  progress: number,
+  progress: number
 ): Promise<void> => {
   const progressObject = (await genProgressForLesson(course, lesson)) ?? {
     finished: false,
@@ -67,18 +72,25 @@ export const genUpdateProgressForLesson = async (
       JSON.stringify({
         ...progressObject,
         progress,
-      }),
+      })
     ),
-    AsyncStorage.setItem(`${activityKey(course)}/most-recent-lesson`, lesson.toString()),
-    AsyncStorage.setItem('@activity/most-recent-course', course),
+    AsyncStorage.setItem(
+      `${activityKey(course)}/most-recent-lesson`,
+      lesson.toString()
+    ),
+    AsyncStorage.setItem("@activity/most-recent-course", course),
   ]);
+
+  queryClient.invalidateQueries({
+    queryKey: ["@local", "progress", course, lesson],
+  });
 };
 
 export const genMarkLessonFinished = async (
   course: Course,
-  lesson: number,
+  lesson: number
 ): Promise<void> => {
-  console.log('Marking lesson finished:', course, lesson);
+  console.log("Marking lesson finished:", course, lesson);
 
   const progressObject = (await genProgressForLesson(course, lesson)) ?? {
     finished: false,
@@ -91,50 +103,63 @@ export const genMarkLessonFinished = async (
       JSON.stringify({
         ...progressObject,
         finished: true,
-      }),
+      })
     ),
-    AsyncStorage.setItem(`${activityKey(course)}/most-recent-lesson`, lesson.toString()),
-    AsyncStorage.setItem('@activity/most-recent-course', course),
+    AsyncStorage.setItem(
+      `${activityKey(course)}/most-recent-lesson`,
+      lesson.toString()
+    ),
+    AsyncStorage.setItem("@activity/most-recent-course", course),
   ]);
 
-  const autoDelete = (await AsyncStorage.getItem('@preferences/auto-delete-finished')) === 'true';
+  queryClient.invalidateQueries({
+    queryKey: ["@local", "progress", course, lesson],
+  });
+
+  const autoDelete =
+    (await AsyncStorage.getItem("@preferences/auto-delete-finished")) ===
+    "true";
   if (autoDelete) {
-    const { default: DownloadManager } = await import('@/src/services/downloadManager');
+    const { default: DownloadManager } = await import(
+      "@/src/services/downloadManager"
+    );
     if (await DownloadManager.genIsDownloaded(course, lesson)) {
       await DownloadManager.genDeleteDownload(course, lesson);
     }
   }
 };
 
-export const genDeleteProgressForCourse = async (course: Course): Promise<void> => {
-  const { default: CourseData } = await import('@/src/data/courseData');
+export const genDeleteProgressForCourse = async (
+  course: Course
+): Promise<void> => {
+  const { default: CourseData } = await import("@/src/data/courseData");
   const shouldRemoveGlobalRecentCourse =
-    (await AsyncStorage.getItem('@activity/most-recent-course')) === course;
+    (await AsyncStorage.getItem("@activity/most-recent-course")) === course;
 
   await Promise.all([
     AsyncStorage.removeItem(`${activityKey(course)}/most-recent-lesson`),
     ...(shouldRemoveGlobalRecentCourse
-      ? [AsyncStorage.removeItem('@activity/most-recent-course')]
+      ? [AsyncStorage.removeItem("@activity/most-recent-course")]
       : []),
     ...CourseData.getLessonIndices(course).map((lesson) =>
-      AsyncStorage.removeItem(activityKey(course, lesson)),
+      AsyncStorage.removeItem(activityKey(course, lesson))
     ),
   ]);
 };
 
 export const genMetricsToken = async (): Promise<string> => {
-  const stored = await AsyncStorage.getItem('@metrics/user-token');
+  const stored = await AsyncStorage.getItem("@metrics/user-token");
   if (stored) {
     return stored;
   }
 
   const token = uuid();
-  await AsyncStorage.setItem('@metrics/user-token', token);
+  await AsyncStorage.setItem("@metrics/user-token", token);
   return token;
 };
 
 export const genDeleteMetricsToken = async (): Promise<void> => {
-  await AsyncStorage.removeItem('@metrics/user-token');
+  await AsyncStorage.removeItem("@metrics/user-token");
 };
 
 type PreferenceMethods = [() => Promise<any>, (val: any) => Promise<void>];
@@ -143,7 +168,7 @@ const preference = (
   name: Preference,
   defaultValue: any,
   fromString: (str: string) => any,
-  toString: (val: any) => string = (val) => String(val),
+  toString: (val: any) => string = (val) => String(val)
 ): PreferenceMethods => {
   return [
     async () => {
@@ -160,54 +185,44 @@ const preference = (
   ];
 };
 
-export const [genPreferenceAutoDeleteFinished, genSetPreferenceAutoDeleteFinished] = preference(
-  'auto-delete-finished',
-  false,
-  (b) => b === 'true',
-);
+export const [
+  genPreferenceAutoDeleteFinished,
+  genSetPreferenceAutoDeleteFinished,
+] = preference("auto-delete-finished", false, (b) => b === "true");
 
-export const [genPreferenceStreamQuality, genSetPreferenceStreamQuality] = preference(
-  'stream-quality',
-  'low',
-  (value) => value as Quality,
-);
+export const [genPreferenceStreamQuality, genSetPreferenceStreamQuality] =
+  preference("stream-quality", "low", (value) => value as Quality);
 
-export const [genPreferenceDownloadQuality, genSetPreferenceDownloadQuality] = preference(
-  'download-quality',
-  'high',
-  (value) => value as Quality,
-);
+export const [genPreferenceDownloadQuality, genSetPreferenceDownloadQuality] =
+  preference("download-quality", "high", (value) => value as Quality);
 
-export const [genPreferenceDownloadOnlyOnWifi, genSetPreferenceDownloadOnlyOnWifi] = preference(
-  'download-only-on-wifi',
-  true,
-  (b) => b === 'true',
-);
+export const [
+  genPreferenceDownloadOnlyOnWifi,
+  genSetPreferenceDownloadOnlyOnWifi,
+] = preference("download-only-on-wifi", true, (b) => b === "true");
 
-export const [genPreferenceAllowDataCollection, genSetPreferenceAllowDataCollection] = preference(
-  'allow-data-collection',
-  true,
-  (b) => b === 'true',
-);
+export const [
+  genPreferenceAllowDataCollection,
+  genSetPreferenceAllowDataCollection,
+] = preference("allow-data-collection", true, (b) => b === "true");
 
-export const [genPreferenceIsFirstLoad, genSetPreferenceIsFirstLoad] = preference(
-  'is-first-load',
-  true,
-  (b) => b === 'true',
-);
+export const [genPreferenceIsFirstLoad, genSetPreferenceIsFirstLoad] =
+  preference("is-first-load", true, (b) => b === "true");
 
-export const [genPreferenceRatingButtonDismissed, genSetPreferenceRatingButtonDismissed] =
-  preference(
-    'rating-button-dismissed',
-    { dismissed: false },
-    (o) => JSON.parse(o),
-    (val) => JSON.stringify(val),
-  );
+export const [
+  genPreferenceRatingButtonDismissed,
+  genSetPreferenceRatingButtonDismissed,
+] = preference(
+  "rating-button-dismissed",
+  { dismissed: false },
+  (o) => JSON.parse(o),
+  (val) => JSON.stringify(val)
+);
 
 export const [
   genPreferenceKillswitchCourseVersionV1,
   genSetPreferenceKillswitchCourseVersionV1,
-] = preference('killswitch-course-version-v1', false, (b) => b === 'true');
+] = preference("killswitch-course-version-v1", false, (b) => b === "true");
 
 export function usePreference<T>(key: Preference, defaultValue: any) {
   const [value, setValue] = useState<T | null>(null);

@@ -1,15 +1,26 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
-import formatDuration from 'format-duration';
-import prettyBytes from 'pretty-bytes';
+import { FontAwesome5 } from "@expo/vector-icons";
+import formatDuration from "format-duration";
+import prettyBytes from "pretty-bytes";
+import React, { useMemo } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-import CourseData from '@/src/data/courseData';
-import DownloadManager, { useDownloadStatus } from '@/src/services/downloadManager';
-import { genProgressForLesson, usePreference } from '@/src/storage/persistence';
-import type { Course, Progress } from '@/src/types';
-import { useRouter } from 'expo-router';
-import { log } from '@/src/utils/log';
+import CourseData from "@/src/data/courseData";
+import useIsLessonDownloaded from "@/src/hooks/useIsLessonDownloaded";
+import DownloadManager, {
+  useDownloadStatus,
+} from "@/src/services/downloadManager";
+import { genProgressForLesson, usePreference } from "@/src/storage/persistence";
+import type { Course } from "@/src/types";
+import { log } from "@/src/utils/log";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 
 type Props = {
   course: Course;
@@ -18,37 +29,26 @@ type Props = {
 };
 
 const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
-  const [progress, setProgress] = useState<Progress | null>(null);
-  const [downloaded, setDownloaded] = useState<boolean | null>(null);
+  const { data: progress } = useQuery({
+    queryKey: ["@local", "progress", course, lesson],
+    queryFn: () => genProgressForLesson(course, lesson),
+  });
+  const downloaded = useIsLessonDownloaded(course, lesson);
   const downloadState = useDownloadStatus(course, lesson);
-  const downloadQuality = usePreference<'high' | 'low'>('download-quality', 'high');
+  const downloadQuality = usePreference<"high" | "low">(
+    "download-quality",
+    "high"
+  );
   const router = useRouter();
   const bundled = useMemo(
     () => lesson === 0 && Boolean(CourseData.getBundledFirstLesson(course)),
-    [course, lesson],
+    [course, lesson]
   );
 
-  useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      const [progressResp, downloadedResp] = await Promise.all([
-        genProgressForLesson(course, lesson),
-        DownloadManager.genIsDownloaded(course, lesson),
-      ]);
-      if (mounted) {
-        setProgress(progressResp);
-        setDownloaded(downloadedResp);
-      }
-    };
-
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, [course, lesson, downloadState]);
-
   const downloading =
-    downloadState && downloadState.state === 'downloading' && !downloadState.errorMessage;
+    downloadState &&
+    downloadState.state === "downloading" &&
+    !downloadState.errorMessage;
 
   const handleDownloadClick = async () => {
     if (bundled || downloaded === null) {
@@ -57,32 +57,33 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
 
     if (downloading) {
       log({
-        action: 'cancel_download',
-        surface: 'all_lessons',
+        action: "cancel_download",
+        surface: "all_lessons",
         course,
         lesson,
       });
-      DownloadManager.stopDownload(DownloadManager.getDownloadId(course, lesson));
+      DownloadManager.stopDownload(
+        DownloadManager.getDownloadId(course, lesson)
+      );
       onDownloadStateChange();
       return;
     }
 
     if (downloaded) {
       log({
-        action: 'delete_download',
-        surface: 'all_lessons',
+        action: "delete_download",
+        surface: "all_lessons",
         course,
         lesson,
       });
       await DownloadManager.genDeleteDownload(course, lesson);
-      setDownloaded(false);
       onDownloadStateChange();
       return;
     }
 
     log({
-      action: 'download_lesson',
-      surface: 'all_lessons',
+      action: "download_lesson",
+      surface: "all_lessons",
       course,
       lesson,
     });
@@ -91,13 +92,16 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
       onDownloadStateChange();
     } catch (err) {
       log({
-        action: 'download_error',
-        surface: 'all_lessons',
+        action: "download_error",
+        surface: "all_lessons",
         course,
         lesson,
         message: err instanceof Error ? err.message : String(err),
       });
-      Alert.alert('Unable to download lesson', err instanceof Error ? err.message : 'Unknown error');
+      Alert.alert(
+        "Unable to download lesson",
+        err instanceof Error ? err.message : "Unknown error"
+      );
     }
   };
 
@@ -117,14 +121,18 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
 
     if (downloading) {
       if (downloadState?.totalBytes) {
-        const percent = Math.round((downloadState.bytesWritten / downloadState.totalBytes) * 100);
+        const percent = Math.round(
+          (downloadState.bytesWritten / downloadState.totalBytes) * 100
+        );
         return <Text style={styles.progressText}>{percent}%</Text>;
       }
       return <ActivityIndicator size="small" color="#555" />;
     }
 
     if (downloadState?.errorMessage) {
-      return <FontAwesome5 name="exclamation-triangle" size={18} color="#e74c3c" />;
+      return (
+        <FontAwesome5 name="exclamation-triangle" size={18} color="#e74c3c" />
+      );
     }
 
     return <FontAwesome5 name="download" size={18} color="#555" />;
@@ -139,7 +147,7 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
         style={styles.lessonBox}
         onPress={() =>
           router.push({
-            pathname: '/course/[course]/listen/[lesson]',
+            pathname: "/course/[course]/listen/[lesson]",
             params: { course, lesson: lesson.toString() },
           })
         }
@@ -152,9 +160,13 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
             style={[styles.finishedIcon, { opacity: finished ? 1 : 0 }]}
           />
           <View>
-            <Text style={styles.lessonTitleText}>{CourseData.getLessonTitle(course, lesson)}</Text>
+            <Text style={styles.lessonTitleText}>
+              {CourseData.getLessonTitle(course, lesson)}
+            </Text>
             <Text style={styles.lessonDurationText}>
-              {formatDuration(CourseData.getLessonDuration(course, lesson) * 1000)}
+              {formatDuration(
+                CourseData.getLessonDuration(course, lesson) * 1000
+              )}
             </Text>
           </View>
         </View>
@@ -171,7 +183,13 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
             {renderDownloadAccessory()}
             {!bundled ? (
               <Text style={styles.lessonSizeText}>
-                {prettyBytes(CourseData.getLessonSizeInBytes(course, lesson, downloadQuality))}
+                {prettyBytes(
+                  CourseData.getLessonSizeInBytes(
+                    course,
+                    lesson,
+                    downloadQuality
+                  )
+                )}
               </Text>
             ) : null}
           </>
@@ -183,23 +201,23 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   lessonBox: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: 'white',
-    borderBottomColor: '#ccc',
+    backgroundColor: "white",
+    borderBottomColor: "#ccc",
     borderBottomWidth: 1,
     flex: 1,
   },
   downloadBox: {
     width: 72,
-    borderBottomColor: '#ccc',
+    borderBottomColor: "#ccc",
     borderBottomWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
     paddingVertical: 8,
     gap: 4,
   },
@@ -207,21 +225,21 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   text: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
   },
   lessonTitleText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   lessonDurationText: {
     fontSize: 14,
-    color: '#555',
+    color: "#555",
   },
   lessonSizeText: {
     fontSize: 12,
-    color: '#888',
+    color: "#888",
     marginTop: 4,
   },
   finishedIcon: {
@@ -229,7 +247,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 16,
-    fontVariant: ['tabular-nums'],
+    fontVariant: ["tabular-nums"],
   },
 });
 

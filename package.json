@@ -9,6 +9,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
+    "format": "prettier --write \"app/**/*.{js,jsx,ts,tsx,json,md}\" \"src/**/*.{js,jsx,ts,tsx,json,md}\" \"components/**/*.{js,jsx,ts,tsx,json,md}\" \"hooks/**/*.{js,jsx,ts,tsx,json,md}\" \"constants/**/*.{js,jsx,ts,tsx,json,md}\" index.ts",
+    "format-check": "prettier --check \"app/**/*.{js,jsx,ts,tsx,json,md}\" \"src/**/*.{js,jsx,ts,tsx,json,md}\" \"components/**/*.{js,jsx,ts,tsx,json,md}\" \"hooks/**/*.{js,jsx,ts,tsx,json,md}\" \"constants/**/*.{js,jsx,ts,tsx,json,md}\" index.ts",
     "postinstall": "patch-package"
   },
   "dependencies": {
@@ -18,6 +20,7 @@
     "@react-navigation/drawer": "^7.7.5",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "@tanstack/react-query": "^5.90.11",
     "expo": "~54.0.25",
     "expo-constants": "~18.0.10",
     "expo-device": "~8.0.9",
