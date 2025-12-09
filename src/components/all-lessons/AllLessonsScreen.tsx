@@ -1,4 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
+import prettyBytes from "pretty-bytes";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -8,16 +11,15 @@ import {
   Text,
   View,
 } from "react-native";
-import { useFocusEffect, useLocalSearchParams } from "expo-router";
-import { FontAwesome5 } from "@expo/vector-icons";
-import prettyBytes from "pretty-bytes";
 
-import CourseData from "@/src/data/courseData";
 import LessonRow from "@/src/components/all-lessons/LessonRow";
-import DownloadManager from "@/src/services/downloadManager";
+import CourseData from "@/src/data/courseData";
+import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
+import DownloadManager, {
+  useDownloadCount,
+} from "@/src/services/downloadManager";
 import { usePreference } from "@/src/storage/persistence";
 import type { Course } from "@/src/types";
-import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
 
 const AllLessonsScreen = () => {
   const params = useLocalSearchParams<{ course: string }>();
@@ -30,17 +32,12 @@ const AllLessonsScreen = () => {
     () => (metadataReady ? CourseData.getLessonIndices(course) : []),
     [course, metadataReady]
   );
-  const [downloadedCount, setDownloadedCount] = useState<number | null>(null);
-  const [refreshToken, setRefreshToken] = useState(0);
+  const downloadedCount = useDownloadCount(course);
   const [downloadAllLoading, setDownloadAllLoading] = useState(false);
   const downloadQuality = usePreference<"high" | "low">(
     "download-quality",
     "high"
   );
-
-  useEffect(() => {
-    setDownloadedCount(null);
-  }, [course]);
 
   useEffect(() => {
     let active = true;
@@ -59,26 +56,6 @@ const AllLessonsScreen = () => {
       active = false;
     };
   }, [course]);
-
-  const refreshCounts = useCallback(async () => {
-    if (!metadataReady) {
-      return;
-    }
-    const results = await Promise.all(
-      indices.map((lesson) => DownloadManager.genIsDownloaded(course, lesson))
-    );
-    setDownloadedCount(results.filter(Boolean).length);
-  }, [course, indices, metadataReady]);
-
-  useEffect(() => {
-    refreshCounts();
-  }, [refreshCounts, refreshToken]);
-
-  useFocusEffect(
-    useCallback(() => {
-      refreshCounts();
-    }, [refreshCounts])
-  );
 
   const handleDownloadAll = async () => {
     if (!downloadQuality || !metadataReady) {
@@ -137,13 +114,7 @@ const AllLessonsScreen = () => {
       <FlatList
         data={indices}
         keyExtractor={(lesson) => String(lesson)}
-        renderItem={({ item }) => (
-          <LessonRow
-            course={course}
-            lesson={item}
-            onDownloadStateChange={() => setRefreshToken((token) => token + 1)}
-          />
-        )}
+        renderItem={({ item }) => <LessonRow course={course} lesson={item} />}
       />
       <View style={styles.bottomBar}>
         <Text style={styles.bottomLeftText}>

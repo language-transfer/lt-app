@@ -42,9 +42,14 @@ const ensureCourseDir = async (course: Course) => {
 //   subscriptions[downloadId]?.forEach((cb) => cb(snapshot));
 // };
 
+// TODO: maybe nest the query key? don't use download IDs?
 const invalidate = (downloadId: string) => {
   queryClient.invalidateQueries({
     queryKey: ["@local", "downloads", downloadId],
+  });
+  const [course] = getCourseAndLesson(downloadId);
+  queryClient.invalidateQueries({
+    queryKey: ["@local", "downloads", course, "count"],
   });
 };
 
@@ -280,5 +285,19 @@ export const useDownloadStatus = (course: Course, lesson: number) => {
   });
   return snapshot;
 };
+
+export function useDownloadCount(course: Course) {
+  const { data: count } = useQuery({
+    queryKey: ["@local", "downloads", course, "count"],
+    queryFn: async () => {
+      const lessons = CourseData.getLessonIndices(course);
+      const results = await Promise.all(
+        lessons.map((lesson) => DownloadManager.genIsDownloaded(course, lesson))
+      );
+      return results.filter((r) => r).length;
+    },
+  });
+  return count ?? 0;
+}
 
 export default DownloadManager;

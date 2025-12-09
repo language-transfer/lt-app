@@ -24,10 +24,9 @@ import { useRouter } from "expo-router";
 type Props = {
   course: Course;
   lesson: number;
-  onDownloadStateChange: () => void;
 };
 
-const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
+const LessonRow = ({ course, lesson }: Props) => {
   const progress = useLessonProgress(course, lesson);
   const downloaded = useIsLessonDownloaded(course, lesson);
   const downloadState = useDownloadStatus(course, lesson);
@@ -61,7 +60,6 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
       DownloadManager.stopDownload(
         DownloadManager.getDownloadId(course, lesson)
       );
-      onDownloadStateChange();
       return;
     }
 
@@ -73,7 +71,6 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
         lesson,
       });
       await DownloadManager.genDeleteDownload(course, lesson);
-      onDownloadStateChange();
       return;
     }
 
@@ -85,7 +82,6 @@ const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
     });
     try {
       await DownloadManager.startDownload(course, lesson);
-      onDownloadStateChange();
     } catch (err) {
       log({
         action: "download_error",
