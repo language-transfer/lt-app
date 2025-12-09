@@ -74,7 +74,6 @@ const sections: {
       ]);
       // genDeleteProgressForCourse depends on the metadata being present
       await CourseData.clearCourseMetadata(course);
-      // (after deleting metadata, I think we end up using fallback metadata..? in any case, TODO -- this action errors the second time)
       router.replace("/");
       Alert.alert("All course data deleted.");
     },
