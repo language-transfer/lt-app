@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -7,33 +7,36 @@ import {
   StyleSheet,
   Text,
   View,
-} from 'react-native';
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { FontAwesome5 } from '@expo/vector-icons';
-import prettyBytes from 'pretty-bytes';
+} from "react-native";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { FontAwesome5 } from "@expo/vector-icons";
+import prettyBytes from "pretty-bytes";
 
-import CourseData from '@/src/data/courseData';
-import LessonRow from '@/src/components/all-lessons/LessonRow';
-import DownloadManager from '@/src/services/downloadManager';
-import { usePreference } from '@/src/storage/persistence';
-import type { Course } from '@/src/types';
-import useStatusBarStyle from '@/src/hooks/useStatusBarStyle';
+import CourseData from "@/src/data/courseData";
+import LessonRow from "@/src/components/all-lessons/LessonRow";
+import DownloadManager from "@/src/services/downloadManager";
+import { usePreference } from "@/src/storage/persistence";
+import type { Course } from "@/src/types";
+import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
 
 const AllLessonsScreen = () => {
   const params = useLocalSearchParams<{ course: string }>();
-  const course = (params.course ?? 'spanish') as Course;
-  useStatusBarStyle('white', 'dark-content');
+  const course = (params.course ?? "spanish") as Course;
+  useStatusBarStyle("white", "dark-content");
   const [metadataReady, setMetadataReady] = useState(() =>
-    CourseData.isCourseMetadataLoaded(course),
+    CourseData.isCourseMetadataLoaded(course)
   );
   const indices = useMemo(
     () => (metadataReady ? CourseData.getLessonIndices(course) : []),
-    [course, metadataReady],
+    [course, metadataReady]
   );
   const [downloadedCount, setDownloadedCount] = useState<number | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
   const [downloadAllLoading, setDownloadAllLoading] = useState(false);
-  const downloadQuality = usePreference<'high' | 'low'>('download-quality', 'high');
+  const downloadQuality = usePreference<"high" | "low">(
+    "download-quality",
+    "high"
+  );
 
   useEffect(() => {
     setDownloadedCount(null);
@@ -62,9 +65,7 @@ const AllLessonsScreen = () => {
       return;
     }
     const results = await Promise.all(
-      indices.map((lesson) =>
-        DownloadManager.genIsDownloadedForDownloadId(DownloadManager.getDownloadId(course, lesson)),
-      ),
+      indices.map((lesson) => DownloadManager.genIsDownloaded(course, lesson))
     );
     setDownloadedCount(results.filter(Boolean).length);
   }, [course, indices, metadataReady]);
@@ -76,7 +77,7 @@ const AllLessonsScreen = () => {
   useFocusEffect(
     useCallback(() => {
       refreshCounts();
-    }, [refreshCounts]),
+    }, [refreshCounts])
   );
 
   const handleDownloadAll = async () => {
@@ -86,13 +87,13 @@ const AllLessonsScreen = () => {
 
     setDownloadAllLoading(true);
     const downloadedMask = await Promise.all(
-      indices.map((lesson) =>
-        DownloadManager.genIsDownloadedForDownloadId(DownloadManager.getDownloadId(course, lesson)),
-      ),
+      indices.map((lesson) => DownloadManager.genIsDownloaded(course, lesson))
     );
     const missing = indices.filter((_, idx) => !downloadedMask[idx]);
     const totalBytes = missing
-      .map((lesson) => CourseData.getLessonSizeInBytes(course, lesson, downloadQuality))
+      .map((lesson) =>
+        CourseData.getLessonSizeInBytes(course, lesson, downloadQuality)
+      )
       .reduce((acc, cur) => acc + cur, 0);
 
     setDownloadAllLoading(false);
@@ -103,12 +104,14 @@ const AllLessonsScreen = () => {
 
     const confirmed = await new Promise<boolean>((resolve) => {
       Alert.alert(
-        'Download all lessons?',
-        `This will download ${missing.length} lessons (${prettyBytes(totalBytes)}) for offline playback.`,
+        "Download all lessons?",
+        `This will download ${missing.length} lessons (${prettyBytes(
+          totalBytes
+        )}) for offline playback.`,
         [
-          { text: 'Cancel', style: 'cancel', onPress: () => resolve(false) },
-          { text: 'OK', onPress: () => resolve(true) },
-        ],
+          { text: "Cancel", style: "cancel", onPress: () => resolve(false) },
+          { text: "OK", onPress: () => resolve(true) },
+        ]
       );
     });
 
@@ -144,10 +147,13 @@ const AllLessonsScreen = () => {
       />
       <View style={styles.bottomBar}>
         <Text style={styles.bottomLeftText}>
-          {downloadedCount ?? '-'} / {indices.length} downloaded
+          {downloadedCount ?? "-"} / {indices.length} downloaded
         </Text>
         <Pressable
-          style={[styles.allButton, downloadedCount === indices.length && styles.allButtonDisabled]}
+          style={[
+            styles.allButton,
+            downloadedCount === indices.length && styles.allButtonDisabled,
+          ]}
           onPress={handleDownloadAll}
           disabled={downloadedCount === indices.length || downloadAllLoading}
         >
@@ -166,42 +172,42 @@ const AllLessonsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   loader: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   bottomBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 24,
     paddingVertical: 12,
-    backgroundColor: '#fff',
-    borderTopColor: '#eee',
+    backgroundColor: "#fff",
+    borderTopColor: "#eee",
     borderTopWidth: 1,
   },
   bottomLeftText: {
     fontSize: 16,
   },
   allButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#2980b9',
+    borderColor: "#2980b9",
   },
   allButtonDisabled: {
     opacity: 0.5,
   },
   allText: {
-    color: '#2980b9',
-    fontWeight: '600',
+    color: "#2980b9",
+    fontWeight: "600",
   },
 });
 

@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 
 import type { Course, Preference, Progress, Quality } from "@/src/types";
 import { queryClient } from "../data/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 const activityKey = (course: Course, lesson?: number) =>
   lesson === undefined
@@ -54,6 +55,14 @@ export const genProgressForLesson = async (
   }
 
   return JSON.parse(raw);
+};
+
+export const useLessonProgress = (course: Course, lesson: number) => {
+  const { data: progress } = useQuery({
+    queryKey: ["@local", "progress", course, lesson],
+    queryFn: () => genProgressForLesson(course, lesson),
+  });
+  return progress;
 };
 
 export const genUpdateProgressForLesson = async (

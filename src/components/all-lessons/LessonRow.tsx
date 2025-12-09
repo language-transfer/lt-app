@@ -12,14 +12,13 @@ import {
 } from "react-native";
 
 import CourseData from "@/src/data/courseData";
-import useIsLessonDownloaded from "@/src/hooks/useIsLessonDownloaded";
 import DownloadManager, {
   useDownloadStatus,
+  useIsLessonDownloaded,
 } from "@/src/services/downloadManager";
-import { genProgressForLesson, usePreference } from "@/src/storage/persistence";
+import { useLessonProgress, usePreference } from "@/src/storage/persistence";
 import type { Course } from "@/src/types";
 import { log } from "@/src/utils/log";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
 type Props = {
@@ -29,10 +28,7 @@ type Props = {
 };
 
 const LessonRow = ({ course, lesson, onDownloadStateChange }: Props) => {
-  const { data: progress } = useQuery({
-    queryKey: ["@local", "progress", course, lesson],
-    queryFn: () => genProgressForLesson(course, lesson),
-  });
+  const progress = useLessonProgress(course, lesson);
   const downloaded = useIsLessonDownloaded(course, lesson);
   const downloadState = useDownloadStatus(course, lesson);
   const downloadQuality = usePreference<"high" | "low">(

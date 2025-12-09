@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,19 +10,20 @@ import {
   StyleSheet,
   Text,
   View,
-} from 'react-native';
-import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
-import formatDuration from 'format-duration';
-import { useRouter } from 'expo-router';
+} from "react-native";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import formatDuration from "format-duration";
+import { useRouter } from "expo-router";
 
-import CourseData from '@/src/data/courseData';
-import ListenScrubber from '@/src/components/listen/ListenScrubber';
-import DownloadManager from '@/src/services/downloadManager';
-import { stopLessonAudio, useLessonAudio } from '@/src/services/audioPlayer';
-import { genMarkLessonFinished } from '@/src/storage/persistence';
-import type { Course } from '@/src/types';
-import useIsLessonDownloaded from '@/src/hooks/useIsLessonDownloaded';
-import { log } from '@/src/utils/log';
+import CourseData from "@/src/data/courseData";
+import ListenScrubber from "@/src/components/listen/ListenScrubber";
+import DownloadManager, {
+  useIsLessonDownloaded,
+} from "@/src/services/downloadManager";
+import { stopLessonAudio, useLessonAudio } from "@/src/services/audioPlayer";
+import { genMarkLessonFinished } from "@/src/storage/persistence";
+import type { Course } from "@/src/types";
+import { log } from "@/src/utils/log";
 
 type Props = {
   course: Course;
@@ -32,7 +33,9 @@ type Props = {
 const ListenBody = ({ course, lesson }: Props) => {
   const controls = useLessonAudio(course, lesson);
   const downloaded = useIsLessonDownloaded(course, lesson);
-  const [busyAction, setBusyAction] = useState<'download' | 'delete' | null>(null);
+  const [busyAction, setBusyAction] = useState<"download" | "delete" | null>(
+    null
+  );
   const [sheetOpen, setSheetOpen] = useState(false);
   const router = useRouter();
   const latestPositionRef = useRef(0);
@@ -48,12 +51,16 @@ const ListenBody = ({ course, lesson }: Props) => {
 
   const reportMailto = useMemo(() => {
     return (
-      'mailto:info@languagetransfer.org' +
-      `?subject=${encodeURIComponent(`Feedback about ${CourseData.getCourseFullTitle(course)}`)}` +
+      "mailto:info@languagetransfer.org" +
+      `?subject=${encodeURIComponent(
+        `Feedback about ${CourseData.getCourseFullTitle(course)}`
+      )}` +
       `&body=${encodeURIComponent(
-        `Hi! I found a problem with the ${CourseData.getCourseFullTitle(course)} course:\n\nLesson: ${lessonTitle}\nPosition: ${formatDuration(
-          controls.position * 1000,
-        )}`,
+        `Hi! I found a problem with the ${CourseData.getCourseFullTitle(
+          course
+        )} course:\n\nLesson: ${lessonTitle}\nPosition: ${formatDuration(
+          controls.position * 1000
+        )}`
       )}`
     );
   }, [controls.position, course, lessonTitle]);
@@ -63,8 +70,8 @@ const ListenBody = ({ course, lesson }: Props) => {
       return;
     }
     log({
-      action: 'open_bottom_sheet',
-      surface: 'listen_screen',
+      action: "open_bottom_sheet",
+      surface: "listen_screen",
       course,
       lesson,
       position: latestPositionRef.current,
@@ -86,8 +93,8 @@ const ListenBody = ({ course, lesson }: Props) => {
       return;
     }
     log({
-      action: 'close_bottom_sheet',
-      surface: 'listen_screen',
+      action: "close_bottom_sheet",
+      surface: "listen_screen",
       course,
       lesson,
       position: latestPositionRef.current,
@@ -109,12 +116,12 @@ const ListenBody = ({ course, lesson }: Props) => {
       return;
     }
 
-    setBusyAction(downloaded ? 'delete' : 'download');
+    setBusyAction(downloaded ? "delete" : "download");
     try {
       if (downloaded) {
         log({
-          action: 'delete_download',
-          surface: 'listen_screen',
+          action: "delete_download",
+          surface: "listen_screen",
           course,
           lesson,
         });
@@ -122,8 +129,8 @@ const ListenBody = ({ course, lesson }: Props) => {
         await DownloadManager.genDeleteDownload(course, lesson);
       } else {
         log({
-          action: 'download_lesson',
-          surface: 'listen_screen',
+          action: "download_lesson",
+          surface: "listen_screen",
           course,
           lesson,
         });
@@ -131,14 +138,14 @@ const ListenBody = ({ course, lesson }: Props) => {
       }
     } catch (err) {
       Alert.alert(
-        downloaded ? 'Unable to delete download' : 'Unable to download lesson',
-        err instanceof Error ? err.message : 'Unknown error',
+        downloaded ? "Unable to delete download" : "Unable to download lesson",
+        err instanceof Error ? err.message : "Unknown error"
       );
       log({
-        action: downloaded ? 'delete_download_error' : 'download_error',
+        action: downloaded ? "delete_download_error" : "download_error",
         course,
         lesson,
-        surface: 'listen_screen',
+        surface: "listen_screen",
         message: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -149,8 +156,8 @@ const ListenBody = ({ course, lesson }: Props) => {
   const handleMarkFinished = async () => {
     closeSheet();
     log({
-      action: 'mark_finished',
-      surface: 'listen_screen',
+      action: "mark_finished",
+      surface: "listen_screen",
       course,
       lesson,
       position: controls.position,
@@ -173,13 +180,15 @@ const ListenBody = ({ course, lesson }: Props) => {
         <Text style={[styles.courseTitle, { color: colors.text }]}>
           {CourseData.getCourseShortTitle(course)}
         </Text>
-        <Text style={[styles.lesson, { color: colors.text }]}>{lessonTitle}</Text>
+        <Text style={[styles.lesson, { color: colors.text }]}>
+          {lessonTitle}
+        </Text>
       </View>
 
       <View style={styles.icons}>
         <Pressable
           onPress={() => controls.skipBack()}
-          android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: true }}
+          android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
         >
           <MaterialIcons name="replay-10" size={42} color={colors.text} />
         </Pressable>
@@ -187,11 +196,14 @@ const ListenBody = ({ course, lesson }: Props) => {
         {controls.ready ? (
           <Pressable
             onPress={() => controls.toggle()}
-            android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: true }}
+            android_ripple={{
+              color: "rgba(255,255,255,0.2)",
+              borderless: true,
+            }}
             style={styles.playButton}
           >
             <FontAwesome5
-              name={controls.playing ? 'pause' : 'play'}
+              name={controls.playing ? "pause" : "play"}
               size={64}
               color={colors.text}
             />
@@ -202,7 +214,7 @@ const ListenBody = ({ course, lesson }: Props) => {
 
         <Pressable
           onPress={openSheet}
-          android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: true }}
+          android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
         >
           <MaterialIcons name="settings" size={42} color={colors.text} />
         </Pressable>
@@ -227,7 +239,12 @@ const ListenBody = ({ course, lesson }: Props) => {
             <Animated.View
               style={[
                 styles.sheetBackdrop,
-                { opacity: sheetAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.35] }) },
+                {
+                  opacity: sheetAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 0.35],
+                  }),
+                },
               ]}
             >
               <Pressable style={StyleSheet.absoluteFill} onPress={closeSheet} />
@@ -254,13 +271,13 @@ const ListenBody = ({ course, lesson }: Props) => {
                 onPress={handleMarkFinished}
               />
               <SheetRow
-                label={downloaded ? 'Delete download' : 'Download for offline'}
+                label={downloaded ? "Delete download" : "Download for offline"}
                 icon={
                   busyAction || downloaded === null ? (
                     <ActivityIndicator size="small" color="#555" />
                   ) : (
                     <FontAwesome5
-                      name={downloaded ? 'trash' : 'download'}
+                      name={downloaded ? "trash" : "download"}
                       size={18}
                       color="#222"
                     />
@@ -274,7 +291,13 @@ const ListenBody = ({ course, lesson }: Props) => {
               />
               <SheetRow
                 label="Report a problem"
-                icon={<FontAwesome5 name="exclamation-triangle" size={18} color="#222" />}
+                icon={
+                  <FontAwesome5
+                    name="exclamation-triangle"
+                    size={18}
+                    color="#222"
+                  />
+                }
                 onPress={() => {
                   Linking.openURL(reportMailto);
                   closeSheet();
@@ -300,7 +323,7 @@ const SheetRow = ({
   disabled?: boolean;
 }) => (
   <Pressable
-    android_ripple={{ color: 'rgba(0,0,0,0.08)' }}
+    android_ripple={{ color: "rgba(0,0,0,0.08)" }}
     onPress={onPress}
     disabled={disabled}
   >
@@ -314,48 +337,48 @@ const SheetRow = ({
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    alignItems: "center",
+    justifyContent: "space-around",
     paddingHorizontal: 24,
     paddingBottom: 32,
   },
   lessonName: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   courseTitle: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 48,
   },
   lesson: {
     fontSize: 32,
   },
   icons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
   },
   playButton: {
     paddingHorizontal: 20,
   },
   errorContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   errorText: {
-    color: '#fff',
+    color: "#fff",
   },
   sheetOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   sheetBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   sheetContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
     paddingVertical: 8,
@@ -364,17 +387,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   sheetHandle: {
-    alignSelf: 'center',
+    alignSelf: "center",
     width: 48,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
     marginVertical: 8,
   },
   sheetRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 14,
     paddingHorizontal: 20,
   },
@@ -383,12 +406,12 @@ const styles = StyleSheet.create({
   },
   sheetRowText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#111',
+    fontWeight: "600",
+    color: "#111",
   },
   sheetRowIcon: {
     width: 28,
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
 });
 
