@@ -31,11 +31,12 @@ export const genMostRecentListenedLessonForCourse = async (
   return value === null ? null : Number.parseInt(value, 10);
 };
 
-export const genMostRecentListenedCourse = async (): Promise<CourseName | null> => {
-  return (await AsyncStorage.getItem(
-    "@activity/most-recent-course"
-  )) as CourseName | null;
-};
+export const genMostRecentListenedCourse =
+  async (): Promise<CourseName | null> => {
+    return (await AsyncStorage.getItem(
+      "@activity/most-recent-course"
+    )) as CourseName | null;
+  };
 
 export const genProgressForLesson = async (
   course: CourseName,
@@ -161,7 +162,12 @@ export const genMetricsToken = async (): Promise<string> => {
     return stored;
   }
 
-  const token = uuid();
+  const token = uuid({
+    // do not need crypto random bytes here
+    random: Uint8Array.from({ length: 16 }, () =>
+      Math.floor(Math.random() * 256)
+    ),
+  });
   await AsyncStorage.setItem("@metrics/user-token", token);
   return token;
 };
