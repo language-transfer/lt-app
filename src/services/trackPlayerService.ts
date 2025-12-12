@@ -4,18 +4,18 @@ import {
   genMarkLessonFinished,
   genUpdateProgressForLesson,
 } from "@/src/storage/persistence";
-import type { Course } from "@/src/types";
+import type { CourseName } from "@/src/types";
 import { log } from "@/src/utils/log";
 
 type LessonContext = {
-  course: Course;
+  course: CourseName;
   lesson: number;
   trackId?: string | number;
 };
 
 type LessonTrackMetadata = {
   id?: string | number;
-  course?: Course;
+  course?: CourseName;
   lesson?: number;
 };
 

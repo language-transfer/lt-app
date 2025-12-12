@@ -19,11 +19,11 @@ import DownloadManager, {
   useDownloadCount,
 } from "@/src/services/downloadManager";
 import { usePreference } from "@/src/storage/persistence";
-import type { Course } from "@/src/types";
+import type { CourseName } from "@/src/types";
 
 const AllLessonsScreen = () => {
   const params = useLocalSearchParams<{ course: string }>();
-  const course = (params.course ?? "spanish") as Course;
+  const course = (params.course ?? "spanish") as CourseName;
   useStatusBarStyle("white", "dark-content");
   const [metadataReady, setMetadataReady] = useState(() =>
     CourseData.isCourseMetadataLoaded(course)
@@ -44,7 +44,7 @@ const AllLessonsScreen = () => {
     const ensureMetadata = async () => {
       if (!CourseData.isCourseMetadataLoaded(course)) {
         setMetadataReady(false);
-        await CourseData.genLoadCourseMetadata(course);
+        await CourseData.loadCourseMetadata(course);
       }
       if (active) {
         setMetadataReady(true);

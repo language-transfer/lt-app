@@ -22,7 +22,7 @@ import {
   genProgressForLesson,
   genUpdateProgressForLesson,
 } from "@/src/storage/persistence";
-import type { Course, Quality } from "@/src/types";
+import type { CourseName, Quality } from "@/src/types";
 import { log } from "@/src/utils/log";
 import { PROGRESS_PERSIST_INTERVAL_MS } from "./trackPlayerService";
 
@@ -80,7 +80,7 @@ const BASE_UPDATE_OPTIONS = {
 };
 
 type LessonTrack = AddTrack & {
-  course: Course;
+  course: CourseName;
   lesson: number;
 };
 
@@ -143,7 +143,7 @@ const ensurePlayer = async () => {
 
 const trackMatchesLesson = (
   track: LessonTrack | undefined,
-  course: Course,
+  course: CourseName,
   lesson: number
 ) => {
   return track?.course === course && track?.lesson === lesson;
@@ -155,7 +155,7 @@ const colorToInt = (hex: string): number | undefined => {
 };
 
 const buildLessonQueue = async (
-  course: Course,
+  course: CourseName,
   targetLesson: number,
   quality: Quality
 ): Promise<{ tracks: LessonTrack[]; targetIndex: number }> => {
@@ -175,37 +175,46 @@ const buildLessonQueue = async (
     course
   ) as LessonTrack["artwork"];
 
-  const tracks = lessons.map((lessonNumber, index) => {
-    let uri: string | number;
-    if (downloads[index]) {
-      uri = DownloadManager.getDownloadSaveLocation(
-        DownloadManager.getDownloadId(course, lessonNumber)
-      );
-    } else {
-      const bundled =
-        lessonNumber === 0 && Platform.OS === "ios"
-          ? CourseData.getBundledFirstLesson(course)
-          : null;
-      uri = bundled ?? CourseData.getLessonUrl(course, lessonNumber, quality);
-    }
+  const tracks = await Promise.all(
+    lessons.map(async (lessonNumber, index) => {
+      let uri: string | number;
+      if (downloads[index]) {
+        uri = DownloadManager.getDownloadSaveLocation(
+          DownloadManager.getDownloadId(course, lessonNumber)
+        );
+      } else {
+        const bundled =
+          lessonNumber === 0 && Platform.OS === "ios"
+            ? CourseData.getBundledFirstLesson(course)
+            : null;
+        uri =
+          bundled ??
+          (await CourseData.getLessonUrl(course, lessonNumber, quality));
+      }
 
-    return {
-      id: CourseData.getLessonId(course, lessonNumber),
-      url: uri as LessonTrack["url"],
-      title: CourseData.getLessonTitle(course, lessonNumber),
-      artist: "Language Transfer",
-      artwork,
-      duration: CourseData.getLessonDuration(course, lessonNumber),
-      course,
-      lesson: lessonNumber,
-    };
-  });
+      return {
+        id: CourseData.getLessonId(course, lessonNumber),
+        url: uri as LessonTrack["url"],
+        contentType: CourseData.getLessonMimeType(
+          course,
+          lessonNumber,
+          quality
+        ),
+        title: CourseData.getLessonTitle(course, lessonNumber),
+        artist: "Language Transfer",
+        artwork,
+        duration: CourseData.getLessonDuration(course, lessonNumber),
+        course,
+        lesson: lessonNumber,
+      };
+    })
+  );
 
   return { tracks, targetIndex };
 };
 
 export const useLessonAudio = (
-  course: Course,
+  course: CourseName,
   lesson: number
 ): LessonAudioControls => {
   const [playerReady, setPlayerReady] = useState(false);
@@ -234,7 +243,7 @@ export const useLessonAudio = (
 
     const load = async () => {
       try {
-        await CourseData.genLoadCourseMetadata(course);
+        await CourseData.loadCourseMetadata(course);
         checkCancel();
         const lessonDuration = CourseData.getLessonDuration(course, lesson);
         setDuration(lessonDuration);

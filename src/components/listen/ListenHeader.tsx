@@ -4,10 +4,10 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 import CourseData from '@/src/data/courseData';
-import type { Course } from '@/src/types';
+import type { CourseName } from '@/src/types';
 
 type Props = {
-  course: Course;
+  course: CourseName;
 };
 
 const ListenHeader = ({ course }: Props) => {

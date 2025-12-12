@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { v4 as uuid } from "uuid";
 
-import type { Course, Preference, Progress, Quality } from "@/src/types";
+import type { CourseName, Preference, Progress, Quality } from "@/src/types";
 import { queryClient } from "../data/queryClient";
 import { useQuery } from "@tanstack/react-query";
 
-const activityKey = (course: Course, lesson?: number) =>
+const activityKey = (course: CourseName, lesson?: number) =>
   lesson === undefined
     ? `@activity/${course}`
     : `@activity/${course}/${lesson}`;
@@ -23,7 +23,7 @@ export const genAutopause = async (): Promise<{
 };
 
 export const genMostRecentListenedLessonForCourse = async (
-  course: Course
+  course: CourseName
 ): Promise<number | null> => {
   const value = await AsyncStorage.getItem(
     `${activityKey(course)}/most-recent-lesson`
@@ -31,14 +31,14 @@ export const genMostRecentListenedLessonForCourse = async (
   return value === null ? null : Number.parseInt(value, 10);
 };
 
-export const genMostRecentListenedCourse = async (): Promise<Course | null> => {
+export const genMostRecentListenedCourse = async (): Promise<CourseName | null> => {
   return (await AsyncStorage.getItem(
     "@activity/most-recent-course"
-  )) as Course | null;
+  )) as CourseName | null;
 };
 
 export const genProgressForLesson = async (
-  course: Course,
+  course: CourseName,
   lesson: number | null
 ): Promise<Progress | null> => {
   if (lesson === null) {
@@ -56,7 +56,7 @@ export const genProgressForLesson = async (
   return JSON.parse(raw);
 };
 
-export const useLessonProgress = (course: Course, lesson: number) => {
+export const useLessonProgress = (course: CourseName, lesson: number) => {
   const { data: progress } = useQuery({
     queryKey: ["@local", "progress", course, lesson],
     queryFn: () => genProgressForLesson(course, lesson),
@@ -65,7 +65,7 @@ export const useLessonProgress = (course: Course, lesson: number) => {
 };
 
 export const genUpdateProgressForLesson = async (
-  course: Course,
+  course: CourseName,
   lesson: number,
   progress: number
 ): Promise<void> => {
@@ -95,7 +95,7 @@ export const genUpdateProgressForLesson = async (
 };
 
 export const genMarkLessonFinished = async (
-  course: Course,
+  course: CourseName,
   lesson: number
 ): Promise<void> => {
   console.log("Marking lesson finished:", course, lesson);
@@ -138,7 +138,7 @@ export const genMarkLessonFinished = async (
 };
 
 export const genDeleteProgressForCourse = async (
-  course: Course
+  course: CourseName
 ): Promise<void> => {
   const { default: CourseData } = await import("@/src/data/courseData");
   const shouldRemoveGlobalRecentCourse =

@@ -11,12 +11,9 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": [
-          "audio",
-          "audio"
-        ]
+        "UIBackgroundModes": ["audio", "audio"]
       },
-      "bundleIdentifier": "com.anonymous.languagetransfer"
+      "bundleIdentifier": "org.languagetransfer"
     },
     "android": {
       "adaptiveIcon": {
@@ -27,11 +24,11 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.languagetransfer"
+      "package": "org.languagetransfer"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       "expo-router",

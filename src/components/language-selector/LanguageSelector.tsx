@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 
 import logo from "../../../legacy/resources/LT-logo-text.png";
 import LanguageButton from "@/src/components/language-selector/LanguageButton";
-import type { Course } from "@/src/types";
+import type { CourseName } from "@/src/types";
 
 const SCREEN_HEIGHT = Dimensions.get("screen").height;
 const IMAGE_HEIGHT = 0.4 * SCREEN_HEIGHT;
@@ -96,7 +96,7 @@ const LanguageSelector = () => {
               ].map((course) => (
                 <LanguageButton
                   key={course}
-                  course={course as Course}
+                  course={course as CourseName}
                   onPress={() => goToCourse(course)}
                 />
               ))}

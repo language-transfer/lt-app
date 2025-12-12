@@ -9,11 +9,11 @@ import {
 import formatDuration from 'format-duration';
 
 import CourseData from '@/src/data/courseData';
-import type { Course } from '@/src/types';
+import type { CourseName } from '@/src/types';
 import type { LessonAudioControls } from '@/src/services/audioPlayer';
 
 type Props = {
-  course: Course;
+  course: CourseName;
   lesson: number;
   position: number;
   duration: number;

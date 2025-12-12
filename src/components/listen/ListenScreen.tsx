@@ -5,12 +5,12 @@ import { useLocalSearchParams } from 'expo-router';
 import CourseData from '@/src/data/courseData';
 import ListenBody from '@/src/components/listen/ListenBody';
 import ListenHeader from '@/src/components/listen/ListenHeader';
-import type { Course } from '@/src/types';
+import type { CourseName } from '@/src/types';
 import { useSetStatusBarStyle } from '@/src/hooks/useStatusBarStyle';
 
 const ListenScreen = () => {
   const params = useLocalSearchParams<{ course: string; lesson: string }>();
-  const course = (params.course ?? 'spanish') as Course;
+  const course = (params.course ?? 'spanish') as CourseName;
   const lesson = Number(params.lesson ?? 0);
   const [ready, setReady] = useState(CourseData.isCourseMetadataLoaded(course));
   const setStatusBarStyle = useSetStatusBarStyle();
@@ -22,7 +22,7 @@ const ListenScreen = () => {
   useEffect(() => {
     let mounted = true;
     if (!ready) {
-      CourseData.genLoadCourseMetadata(course).then(() => {
+      CourseData.loadCourseMetadata(course).then(() => {
         if (mounted) {
           setReady(true);
         }

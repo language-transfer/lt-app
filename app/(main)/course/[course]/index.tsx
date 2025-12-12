@@ -3,10 +3,10 @@ import { Stack, useLocalSearchParams } from "expo-router";
 
 import LanguageHomeScreen from "@/src/components/language-home/LanguageHomeScreen";
 import CourseData from "@/src/data/courseData";
-import type { Course } from "@/src/types";
+import type { CourseName } from "@/src/types";
 
 export default function CourseHome() {
-  const { course } = useLocalSearchParams<{ course?: Course }>();
+  const { course } = useLocalSearchParams<{ course?: CourseName }>();
   if (!course) {
     throw new Error("Course parameter is missing");
   }

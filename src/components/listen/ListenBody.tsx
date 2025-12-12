@@ -22,11 +22,11 @@ import DownloadManager, {
 } from "@/src/services/downloadManager";
 import { stopLessonAudio, useLessonAudio } from "@/src/services/audioPlayer";
 import { genMarkLessonFinished } from "@/src/storage/persistence";
-import type { Course } from "@/src/types";
+import type { CourseName } from "@/src/types";
 import { log } from "@/src/utils/log";
 
 type Props = {
-  course: Course;
+  course: CourseName;
   lesson: number;
 };
 

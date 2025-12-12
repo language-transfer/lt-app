@@ -1,252 +1,415 @@
-import * as FileSystem from 'expo-file-system/legacy';
-import { Platform } from 'react-native';
+import { Buffer } from "buffer";
+import * as FileSystem from "expo-file-system/legacy";
+import { Platform } from "react-native";
 
 import {
-  Course,
-  CourseInfo,
-  CourseMetaData,
-  LessonData,
-  Quality,
-  UIColors,
-} from '@/src/types';
-import {
-  genPreferenceKillswitchCourseVersionV1,
-  genSetPreferenceKillswitchCourseVersionV1,
-} from '@/src/storage/persistence';
+  allCoursesSchema,
+  CourseMetadata,
+  courseMetaSchema,
+  type CourseIndex,
+  type FilePointer,
+  type LessonData,
+} from "@/src/data/courseSchemas";
+import { CourseInfo, CourseName, Quality, UIColors } from "@/src/types";
 
-import spanishCover from '../../legacy/resources/spanish-cover-stylized.png';
-import spanishCoverWithText from '../../legacy/resources/spanish-cover-stylized-with-text.png';
-import arabicCover from '../../legacy/resources/arabic-cover-stylized.png';
-import arabicCoverWithText from '../../legacy/resources/arabic-cover-stylized-with-text.png';
-import turkishCover from '../../legacy/resources/turkish-cover-stylized.png';
-import turkishCoverWithText from '../../legacy/resources/turkish-cover-stylized-with-text.png';
-import germanCover from '../../legacy/resources/german-cover-stylized.png';
-import germanCoverWithText from '../../legacy/resources/german-cover-stylized-with-text.png';
-import greekCover from '../../legacy/resources/greek-cover-stylized.png';
-import greekCoverWithText from '../../legacy/resources/greek-cover-stylized-with-text.png';
-import italianCover from '../../legacy/resources/italian-cover-stylized.png';
-import italianCoverWithText from '../../legacy/resources/italian-cover-stylized-with-text.png';
-import swahiliCover from '../../legacy/resources/swahili-cover-stylized.png';
-import swahiliCoverWithText from '../../legacy/resources/swahili-cover-stylized-with-text.png';
-import frenchCover from '../../legacy/resources/french-cover-stylized.png';
-import frenchCoverWithText from '../../legacy/resources/french-cover-stylized-with-text.png';
-import inglesCover from '../../legacy/resources/ingles-cover-stylized.png';
-import inglesCoverWithText from '../../legacy/resources/ingles-cover-stylized-with-text.png';
-import musicCover from '../../legacy/resources/music-cover-stylized.png';
-import musicCoverWithText from '../../legacy/resources/music-cover-stylized-with-text.png';
+import arabicCoverWithText from "@/assets/courses/images/arabic-cover-stylized-with-text.png";
+import arabicCover from "@/assets/courses/images/arabic-cover-stylized.png";
+import frenchCoverWithText from "@/assets/courses/images/french-cover-stylized-with-text.png";
+import frenchCover from "@/assets/courses/images/french-cover-stylized.png";
+import germanCoverWithText from "@/assets/courses/images/german-cover-stylized-with-text.png";
+import germanCover from "@/assets/courses/images/german-cover-stylized.png";
+import greekCoverWithText from "@/assets/courses/images/greek-cover-stylized-with-text.png";
+import greekCover from "@/assets/courses/images/greek-cover-stylized.png";
+import inglesCoverWithText from "@/assets/courses/images/ingles-cover-stylized-with-text.png";
+import inglesCover from "@/assets/courses/images/ingles-cover-stylized.png";
+import italianCoverWithText from "@/assets/courses/images/italian-cover-stylized-with-text.png";
+import italianCover from "@/assets/courses/images/italian-cover-stylized.png";
+import musicCoverWithText from "@/assets/courses/images/music-cover-stylized-with-text.png";
+import musicCover from "@/assets/courses/images/music-cover-stylized.png";
+import spanishCoverWithText from "@/assets/courses/images/spanish-cover-stylized-with-text.png";
+import spanishCover from "@/assets/courses/images/spanish-cover-stylized.png";
+import swahiliCoverWithText from "@/assets/courses/images/swahili-cover-stylized-with-text.png";
+import swahiliCover from "@/assets/courses/images/swahili-cover-stylized.png";
+import turkishCoverWithText from "@/assets/courses/images/turkish-cover-stylized-with-text.png";
+import turkishCover from "@/assets/courses/images/turkish-cover-stylized.png";
 
 const spanishFirstLesson =
-  Platform.OS === 'ios' ? require('../../legacy/resources/courses/spanish1-lq.mp3') : null;
+  Platform.OS === "ios"
+    ? require("@/assets/courses/audio/spanish1-lq.mp3")
+    : null;
 const arabicFirstLesson =
-  Platform.OS === 'ios' ? require('../../legacy/resources/courses/arabic1-lq.mp3') : null;
+  Platform.OS === "ios"
+    ? require("@/assets/courses/audio/arabic1-lq.mp3")
+    : null;
 const turkishFirstLesson =
-  Platform.OS === 'ios' ? require('../../legacy/resources/courses/turkish1-lq.mp3') : null;
+  Platform.OS === "ios"
+    ? require("@/assets/courses/audio/turkish1-lq.mp3")
+    : null;
 const germanFirstLesson =
-  Platform.OS === 'ios' ? require('../../legacy/resources/courses/german1-lq.mp3') : null;
+  Platform.OS === "ios"
+    ? require("@/assets/courses/audio/german1-lq.mp3")
+    : null;
 const greekFirstLesson =
-  Platform.OS === 'ios' ? require('../../legacy/resources/courses/greek1-lq.mp3') : null;
+  Platform.OS === "ios"
+    ? require("@/assets/courses/audio/greek1-lq.mp3")
+    : null;
 const italianFirstLesson =
-  Platform.OS === 'ios' ? require('../../legacy/resources/courses/italian1-lq.mp3') : null;
+  Platform.OS === "ios"
+    ? require("@/assets/courses/audio/italian1-lq.mp3")
+    : null;
 const swahiliFirstLesson =
-  Platform.OS === 'ios' ? require('../../legacy/resources/courses/swahili1-lq.mp3') : null;
+  Platform.OS === "ios"
+    ? require("@/assets/courses/audio/swahili1-lq.mp3")
+    : null;
 const frenchFirstLesson =
-  Platform.OS === 'ios' ? require('../../legacy/resources/courses/french1-lq.mp3') : null;
+  Platform.OS === "ios"
+    ? require("@/assets/courses/audio/french1-lq.mp3")
+    : null;
 const inglesFirstLesson =
-  Platform.OS === 'ios' ? require('../../legacy/resources/courses/ingles1-lq.mp3') : null;
+  Platform.OS === "ios"
+    ? require("@/assets/courses/audio/ingles1-lq.mp3")
+    : null;
 const musicFirstLesson =
-  Platform.OS === 'ios' ? require('../../legacy/resources/courses/music1-lq.mp3') : null;
+  Platform.OS === "ios"
+    ? require("@/assets/courses/audio/music1-lq.mp3")
+    : null;
 
-const META_VERSIONS_URL = 'https://downloads.languagetransfer.org/course-versions.json';
+const COURSE_INDEX_URL =
+  "https://downloads.languagetransfer.org/all-courses.json";
 const DOCUMENT_DIRECTORY =
-  (FileSystem as any).documentDirectory ?? (FileSystem as any).cacheDirectory ?? '';
-const META_STORAGE_DIR = `${DOCUMENT_DIRECTORY}course-meta`;
+  (FileSystem as any).documentDirectory ??
+  (FileSystem as any).cacheDirectory ??
+  "";
+const OBJECT_STORAGE_DIR = `${DOCUMENT_DIRECTORY}objects`;
 
-const courseMeta: Partial<Record<Course, CourseMetaData>> = {};
+console.log({OBJECT_STORAGE_DIR})
 
-const data: Record<Course, CourseInfo> = {
+const courseInfoData: Record<CourseName, CourseInfo> = {
   spanish: {
     image: spanishCover,
     imageWithText: spanishCoverWithText,
-    shortTitle: 'Spanish',
-    fullTitle: 'Complete Spanish',
-    courseType: 'complete',
-    metaUrl: 'https://downloads.languagetransfer.org/spanish/spanish-meta.json',
-    fallbackLessonCount: '90',
+    shortTitle: "Spanish",
+    fullTitle: "Complete Spanish",
+    courseType: "complete",
+    fallbackLessonCount: "90",
     uiColors: {
-      background: '#7186d0',
-      softBackground: '#d5d9ee',
-      text: 'white',
-      backgroundAccent: '#516198',
+      background: "#7186d0",
+      softBackground: "#d5d9ee",
+      text: "white",
+      backgroundAccent: "#516198",
     },
     bundledFirstLesson: spanishFirstLesson,
-    bundledFirstLessonId: 'spanish/spanish1',
+    bundledFirstLessonId: "spanish/spanish1",
   },
   arabic: {
     image: arabicCover,
     imageWithText: arabicCoverWithText,
-    shortTitle: 'Arabic',
-    fullTitle: 'Introduction to Arabic',
-    courseType: 'intro',
-    metaUrl: 'https://downloads.languagetransfer.org/arabic/arabic-meta.json',
-    fallbackLessonCount: '38',
+    shortTitle: "Arabic",
+    fullTitle: "Introduction to Arabic",
+    courseType: "intro",
+    fallbackLessonCount: "38",
     uiColors: {
-      background: '#c2930f',
-      softBackground: '#e9dccc',
-      text: 'black',
-      backgroundAccent: '#806006',
+      background: "#c2930f",
+      softBackground: "#e9dccc",
+      text: "black",
+      backgroundAccent: "#806006",
     },
     bundledFirstLesson: arabicFirstLesson,
-    bundledFirstLessonId: 'arabic/arabic1',
+    bundledFirstLessonId: "arabic/arabic1",
   },
   turkish: {
     image: turkishCover,
     imageWithText: turkishCoverWithText,
-    shortTitle: 'Turkish',
-    fullTitle: 'Introduction to Turkish',
-    courseType: 'intro',
-    metaUrl: 'https://downloads.languagetransfer.org/turkish/turkish-meta.json',
-    fallbackLessonCount: '44',
+    shortTitle: "Turkish",
+    fullTitle: "Introduction to Turkish",
+    courseType: "intro",
+    fallbackLessonCount: "44",
     uiColors: {
-      background: '#a20b3b',
-      softBackground: '#e0ccce',
-      text: 'white',
-      backgroundAccent: '#760629',
+      background: "#a20b3b",
+      softBackground: "#e0ccce",
+      text: "white",
+      backgroundAccent: "#760629",
     },
     bundledFirstLesson: turkishFirstLesson,
-    bundledFirstLessonId: 'turkish/turkish1',
+    bundledFirstLessonId: "turkish/turkish1",
   },
   german: {
     image: germanCover,
     imageWithText: germanCoverWithText,
-    shortTitle: 'German',
-    fullTitle: 'Complete German',
-    courseType: 'complete',
-    metaUrl: 'https://downloads.languagetransfer.org/german/german-meta.json',
-    fallbackLessonCount: '50',
+    shortTitle: "German",
+    fullTitle: "Complete German",
+    courseType: "complete",
+    fallbackLessonCount: "50",
     uiColors: {
-      background: '#009900',
-      softBackground: '#cbdecb',
-      text: 'white',
-      backgroundAccent: '#006400',
+      background: "#009900",
+      softBackground: "#cbdecb",
+      text: "white",
+      backgroundAccent: "#006400",
     },
     bundledFirstLesson: germanFirstLesson,
-    bundledFirstLessonId: 'german/german1',
+    bundledFirstLessonId: "german/german1",
   },
   greek: {
     image: greekCover,
     imageWithText: greekCoverWithText,
-    shortTitle: 'Greek',
-    fullTitle: 'Complete Greek',
-    courseType: 'complete',
-    metaUrl: 'https://downloads.languagetransfer.org/greek/greek-meta.json',
-    fallbackLessonCount: '120',
+    shortTitle: "Greek",
+    fullTitle: "Complete Greek",
+    courseType: "complete",
+    fallbackLessonCount: "120",
     uiColors: {
-      background: '#d57d2f',
-      softBackground: '#efd7cd',
-      text: 'white',
-      backgroundAccent: '#9c5a20',
+      background: "#d57d2f",
+      softBackground: "#efd7cd",
+      text: "white",
+      backgroundAccent: "#9c5a20",
     },
     bundledFirstLesson: greekFirstLesson,
-    bundledFirstLessonId: 'greek/greek1',
+    bundledFirstLessonId: "greek/greek1",
   },
   italian: {
     image: italianCover,
     imageWithText: italianCoverWithText,
-    shortTitle: 'Italian',
-    fullTitle: 'Introduction to Italian',
-    courseType: 'intro',
-    metaUrl: 'https://downloads.languagetransfer.org/italian/italian-meta.json',
-    fallbackLessonCount: '45',
+    shortTitle: "Italian",
+    fullTitle: "Introduction to Italian",
+    courseType: "intro",
+    fallbackLessonCount: "45",
     uiColors: {
-      background: '#e423ae',
-      softBackground: '#f5cce3',
-      text: 'white',
-      backgroundAccent: '#a7177f',
+      background: "#e423ae",
+      softBackground: "#f5cce3",
+      text: "white",
+      backgroundAccent: "#a7177f",
     },
     bundledFirstLesson: italianFirstLesson,
-    bundledFirstLessonId: 'italian/italian1',
+    bundledFirstLessonId: "italian/italian1",
   },
   swahili: {
     image: swahiliCover,
     imageWithText: swahiliCoverWithText,
-    shortTitle: 'Swahili',
-    fullTitle: 'Complete Swahili',
-    courseType: 'complete',
-    metaUrl: 'https://downloads.languagetransfer.org/swahili/swahili-meta.json',
-    fallbackLessonCount: '110',
+    shortTitle: "Swahili",
+    fullTitle: "Complete Swahili",
+    courseType: "complete",
+    fallbackLessonCount: "110",
     uiColors: {
-      background: '#12eddd',
-      softBackground: '#ccf8f2',
-      text: 'black',
-      backgroundAccent: '#0aaea2',
+      background: "#12eddd",
+      softBackground: "#ccf8f2",
+      text: "black",
+      backgroundAccent: "#0aaea2",
     },
     bundledFirstLesson: swahiliFirstLesson,
-    bundledFirstLessonId: 'swahili/swahili1',
+    bundledFirstLessonId: "swahili/swahili1",
   },
   french: {
     image: frenchCover,
     imageWithText: frenchCoverWithText,
-    shortTitle: 'French',
-    fullTitle: 'Introduction to French',
-    courseType: 'intro',
-    metaUrl: 'https://downloads.languagetransfer.org/french/french-meta.json',
-    fallbackLessonCount: '40',
+    shortTitle: "French",
+    fullTitle: "Introduction to French",
+    courseType: "intro",
+    fallbackLessonCount: "40",
     uiColors: {
-      background: '#10bdff',
-      softBackground: '#cce8ff',
-      text: 'white',
-      backgroundAccent: '#098abc',
+      background: "#10bdff",
+      softBackground: "#cce8ff",
+      text: "white",
+      backgroundAccent: "#098abc",
     },
     bundledFirstLesson: frenchFirstLesson,
-    bundledFirstLessonId: 'french/french1',
+    bundledFirstLessonId: "french/french1",
   },
   ingles: {
     image: inglesCover,
     imageWithText: inglesCoverWithText,
-    shortTitle: 'Inglés',
-    fullTitle: 'Introducción a Inglés',
-    courseType: 'intro',
-    metaUrl: 'https://downloads.languagetransfer.org/ingles/ingles-meta.json',
-    fallbackLessonCount: '40',
+    shortTitle: "Inglés",
+    fullTitle: "Introducción a Inglés",
+    courseType: "intro",
+    fallbackLessonCount: "40",
     uiColors: {
-      background: '#7186d0',
-      softBackground: '#d5daee',
-      text: 'white',
-      backgroundAccent: '#516198',
+      background: "#7186d0",
+      softBackground: "#d5daee",
+      text: "white",
+      backgroundAccent: "#516198",
     },
     bundledFirstLesson: inglesFirstLesson,
-    bundledFirstLessonId: 'ingles/ingles1',
+    bundledFirstLessonId: "ingles/ingles1",
   },
   music: {
     image: musicCover,
     imageWithText: musicCoverWithText,
-    shortTitle: 'Music Theory',
-    fullTitle: 'Introduction to Music Theory',
-    courseType: 'intro',
-    metaUrl: 'https://downloads.languagetransfer.org/music/music-meta.json',
-    fallbackLessonCount: '30',
+    shortTitle: "Music Theory",
+    fullTitle: "Introduction to Music Theory",
+    courseType: "intro",
+    fallbackLessonCount: "30",
     uiColors: {
-      background: '#f8eebc',
-      softBackground: '#ffffff',
-      text: 'black',
-      backgroundAccent: '#786951',
+      background: "#f8eebc",
+      softBackground: "#ffffff",
+      text: "black",
+      backgroundAccent: "#786951",
     },
     bundledFirstLesson: musicFirstLesson,
-    bundledFirstLessonId: 'music/music1',
+    bundledFirstLessonId: "music/music1",
   },
 };
 
-const ensureMetaDir = async () => {
-  const info = await FileSystem.getInfoAsync(META_STORAGE_DIR);
+const loadedInMemoryCourseMeta: Partial<Record<CourseName, CourseMetadata>> =
+  {};
+
+const COURSE_INDEX_CACHE_PATH = `${OBJECT_STORAGE_DIR}/all-courses.json`;
+let cachedCourseIndex: CourseIndex | null = null;
+
+const normalizeCasBaseURL = (base: string) => base.replace(/\/$/, "");
+
+const ensureObjectDir = async () => {
+  const info = await FileSystem.getInfoAsync(OBJECT_STORAGE_DIR);
   if (!info.exists) {
-    await FileSystem.makeDirectoryAsync(META_STORAGE_DIR, { intermediates: true });
+    await FileSystem.makeDirectoryAsync(OBJECT_STORAGE_DIR, {
+      intermediates: true,
+    });
   }
 };
 
-const getLocalMetaPath = (course: Course) => `${META_STORAGE_DIR}/${course}.json`;
+const validateIndex = (raw: any): CourseIndex | null => {
+  const parsed = allCoursesSchema.safeParse(raw);
+  if (!parsed.success) {
+    return null;
+  }
 
-const requireMeta = (course: Course): CourseMetaData => {
-  const meta = courseMeta[course];
+  return {
+    ...parsed.data,
+    casBaseURL: normalizeCasBaseURL(parsed.data.casBaseURL),
+  };
+};
+
+const readCachedCourseIndex = async (): Promise<CourseIndex | null> => {
+  const info = await FileSystem.getInfoAsync(COURSE_INDEX_CACHE_PATH);
+  if (!info.exists) {
+    return null;
+  }
+
+  try {
+    const contents = await FileSystem.readAsStringAsync(
+      COURSE_INDEX_CACHE_PATH
+    );
+    const parsed = validateIndex(JSON.parse(contents));
+    return parsed ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedCourseIndex = async (index: CourseIndex): Promise<void> => {
+  await FileSystem.writeAsStringAsync(
+    COURSE_INDEX_CACHE_PATH,
+    JSON.stringify(index)
+  );
+};
+
+const ensureCourseIndex = async (forceRemote = false): Promise<CourseIndex> => {
+  if (!forceRemote && cachedCourseIndex) {
+    return cachedCourseIndex;
+  }
+
+  await ensureObjectDir();
+
+  if (!forceRemote) {
+    const cached = await readCachedCourseIndex();
+    if (cached) {
+      cachedCourseIndex = cached;
+      return cached;
+    }
+  }
+
+  const response = await fetch(COURSE_INDEX_URL);
+  if (!response.ok) {
+    throw new Error("Failed to fetch course index");
+  }
+
+  const json = (await response.json()) as CourseIndex;
+  const validated = validateIndex(json);
+  if (!validated) {
+    throw new Error("Invalid course index payload");
+  }
+
+  await writeCachedCourseIndex(validated);
+
+  return validated;
+};
+
+export const getCASBaseURL = async (): Promise<string> => {
+  const index = await ensureCourseIndex();
+  return index.casBaseURL;
+};
+
+export const getCASObjectURL = async (
+  pointer: FilePointer
+): Promise<string> => {
+  const baseURL = await getCASBaseURL();
+  return `${baseURL}/${pointer.object}`;
+};
+
+export const _getLocalObjectPath = (pointer: FilePointer): string => {
+  const objectHash = pointer.object;
+  const prefix = objectHash.substring(0, 2);
+  const rest = objectHash.substring(2);
+
+  return `${OBJECT_STORAGE_DIR}/${prefix}/${rest}`;
+};
+
+const _saveLocalObject = async (
+  pointer: FilePointer,
+  data: Uint8Array
+): Promise<void> => {
+  const localPath = _getLocalObjectPath(pointer);
+  const dirPath = localPath.substring(0, localPath.lastIndexOf("/"));
+  await FileSystem.makeDirectoryAsync(dirPath, { intermediates: true });
+  await FileSystem.writeAsStringAsync(
+    localPath,
+    // bizarre
+    Buffer.from(data).toString("base64"),
+    { encoding: FileSystem.EncodingType.Base64 }
+  );
+};
+
+export const readObject = async (
+  pointer: FilePointer,
+  // no need for forceRemote because it's content-addressed
+  { save = true }: { save?: boolean } = {}
+): Promise<Uint8Array | null> => {
+  let data: Uint8Array | null = null;
+
+  const localPath = _getLocalObjectPath(pointer);
+  console.log({localPath})
+  const info = await FileSystem.getInfoAsync(localPath);
+  if (info.exists) {
+    const contents = await FileSystem.readAsStringAsync(localPath, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    data = Uint8Array.from(Buffer.from(contents, "base64"));
+  } else {
+    const url = await getCASObjectURL(pointer);
+    const response = await fetch(url);
+    if (!response.ok) {
+      return null;
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    data = new Uint8Array(arrayBuffer);
+  }
+
+  if (save) {
+    await _saveLocalObject(pointer, data);
+  }
+
+  return data;
+};
+
+const parseCourseMeta = (raw: any): CourseMetadata | null => {
+  const parsed = courseMetaSchema.safeParse(raw);
+  if (!parsed.success) {
+    return null;
+  }
+
+  return parsed.data;
+};
+
+const requireMeta = (course: CourseName): CourseMetadata => {
+  const meta = loadedInMemoryCourseMeta[course];
   if (!meta) {
     throw new Error(`Course metadata missing for ${course}`);
   }
@@ -254,182 +417,165 @@ const requireMeta = (course: Course): CourseMetaData => {
 };
 
 const CourseData = {
-  courseExists(course: Course): boolean {
-    return Boolean(data[course]);
+  courseExists(course: CourseName): boolean {
+    return Boolean(courseInfoData[course]);
   },
 
-  getCourseData(course: Course): CourseInfo {
-    return data[course];
+  getCourseData(course: CourseName): CourseInfo {
+    return courseInfoData[course];
   },
 
-  getCourseList(): Course[] {
-    return Object.keys(data) as Course[];
+  getCourseList(): CourseName[] {
+    return Object.keys(courseInfoData) as CourseName[];
   },
 
-  getCourseShortTitle(course: Course): string {
-    return data[course].shortTitle;
+  getCourseShortTitle(course: CourseName): string {
+    return courseInfoData[course].shortTitle;
   },
 
-  getCourseFullTitle(course: Course): string {
-    return data[course].fullTitle;
+  getCourseFullTitle(course: CourseName): string {
+    return courseInfoData[course].fullTitle;
   },
 
-  getCourseType(course: Course): string {
-    return data[course].courseType;
+  getCourseType(course: CourseName): string {
+    return courseInfoData[course].courseType;
   },
 
-  getCourseImage(course: Course) {
-    return data[course].image;
+  getCourseImage(course: CourseName) {
+    return courseInfoData[course].image;
   },
 
-  getCourseImageWithText(course: Course) {
-    return data[course].imageWithText;
+  getCourseImageWithText(course: CourseName) {
+    return courseInfoData[course].imageWithText;
   },
 
-  getBundledFirstLesson(course: Course) {
-    return data[course].bundledFirstLesson ?? null;
+  getBundledFirstLesson(course: CourseName) {
+    return courseInfoData[course].bundledFirstLesson ?? null;
   },
 
-  getBundledFirstLessonId(course: Course) {
-    return data[course].bundledFirstLessonId ?? null;
+  getBundledFirstLessonId(course: CourseName) {
+    return courseInfoData[course].bundledFirstLessonId ?? null;
   },
 
-  getCourseUIColors(course: Course): UIColors {
-    return data[course].uiColors;
+  getCourseUIColors(course: CourseName): UIColors {
+    return courseInfoData[course].uiColors;
   },
 
-  getFallbackLessonCount(course: Course): string {
-    return data[course].fallbackLessonCount;
+  getFallbackLessonCount(course: CourseName): string {
+    return courseInfoData[course].fallbackLessonCount;
   },
 
-  isCourseMetadataLoaded(course: Course): boolean {
-    return Boolean(courseMeta[course]);
+  isCourseMetadataLoaded(course: CourseName): boolean {
+    return Boolean(loadedInMemoryCourseMeta[course]);
   },
 
-  getMetadataVersion(course: Course): number | null {
-    return courseMeta[course]?.version ?? null;
+  getMetadataVersion(course: CourseName): number | null {
+    return loadedInMemoryCourseMeta[course]?.buildVersion ?? null;
   },
 
-  async genLoadCourseMetadata(course: Course, forceRemote = false): Promise<void> {
-    if (!forceRemote && courseMeta[course]) {
+  async loadCourseMetadata(course: CourseName): Promise<void> {
+    if (CourseData.isCourseMetadataLoaded(course)) {
       return;
     }
 
-    await ensureMetaDir();
-    const localPath = getLocalMetaPath(course);
+    const courseIndex = await ensureCourseIndex();
+    const courseIndexEntry = courseIndex.courses.find(
+      (entry) => entry.id === course
+    );
 
-    if (!forceRemote) {
-      const info = await FileSystem.getInfoAsync(localPath);
-      if (info.exists) {
-        try {
-          const contents = await FileSystem.readAsStringAsync(localPath);
-          courseMeta[course] = JSON.parse(contents);
-          return;
-        } catch {
-          // fall back to remote fetch
-        }
-      }
+    if (!courseIndexEntry) {
+      throw new Error(`Course ${course} not found in index`);
     }
 
-    const response = await fetch(data[course].metaUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch metadata for ${course}`);
+    await ensureObjectDir();
+
+    const metadataFilePointer = courseIndexEntry.meta;
+    // if the index changes and THEN we lose internet access, this fails, without the fallback we used to have
+    // but I can live with this
+    const metadataFile = await readObject(metadataFilePointer);
+    const metadataString = metadataFile
+      ? Buffer.from(metadataFile).toString("utf-8")
+      : null;
+
+    if (!metadataString) {
+      throw new Error(`Failed to read metadata for course ${course}`);
     }
 
-    const json = (await response.json()) as CourseMetaData;
-    json.downloaded = Date.now();
-    courseMeta[course] = json;
+    const parsedMeta = parseCourseMeta(JSON.parse(metadataString));
 
-    await FileSystem.writeAsStringAsync(localPath, JSON.stringify(json));
-
-    if (!forceRemote) {
-      // Kick off background version check but don't await it.
-      CourseData.genGentlyCheckForMetadataUpdates().catch(() => {});
+    if (!parsedMeta) {
+      throw new Error(`Invalid metadata for course ${course}`);
     }
+
+    loadedInMemoryCourseMeta[course] = parsedMeta;
   },
 
-  async genGentlyCheckForMetadataUpdates(): Promise<void> {
-    try {
-      const killswitched = await genPreferenceKillswitchCourseVersionV1();
-      if (killswitched) {
-        return;
-      }
-
-      const response = await fetch(META_VERSIONS_URL);
-      if (!response.ok) {
-        return;
-      }
-      const json = await response.json();
-      if (json.killswitch) {
-        await genSetPreferenceKillswitchCourseVersionV1(true);
-        return;
-      }
-
-      const courses = CourseData.getCourseList();
-      for (const course of courses) {
-        const localMeta = courseMeta[course];
-        if (localMeta?.version && json.courseVersions?.[course]) {
-          if (localMeta.version !== json.courseVersions[course]) {
-            await CourseData.genLoadCourseMetadata(course, true);
-          }
-        }
-      }
-    } catch {
-      // best-effort; swallow errors
-    }
-  },
-
-  async clearCourseMetadata(course: Course): Promise<void> {
-    delete courseMeta[course];
-    const localPath = getLocalMetaPath(course);
-    const info = await FileSystem.getInfoAsync(localPath);
-    if (info.exists) {
-      await FileSystem.deleteAsync(localPath, { idempotent: true });
-    }
-  },
-
-  getLessonData(course: Course, lesson: number): LessonData {
+  getLessonData(course: CourseName, lesson: number): LessonData {
     return requireMeta(course).lessons[lesson];
   },
 
-  getLessonId(course: Course, lesson: number): string {
+  getLessonId(course: CourseName, lesson: number): string {
     return CourseData.getLessonData(course, lesson).id;
   },
 
-  getLessonNumberForId(course: Course, lessonId: string): number | null {
+  getLessonNumberForId(course: CourseName, lessonId: string): number | null {
     const meta = requireMeta(course);
     const index = meta.lessons.findIndex((l) => l.id === lessonId);
     return index === -1 ? null : index;
   },
 
-  getLessonUrl(course: Course, lesson: number, quality: Quality): string {
-    const urls = CourseData.getLessonData(course, lesson).urls;
-    return quality === 'high' ? urls[urls.length - 1] : urls[0];
+  getLessonPointer(
+    course: CourseName,
+    lesson: number,
+    quality: Quality
+  ): FilePointer {
+    const variants = CourseData.getLessonData(course, lesson).variants;
+    return quality === "high" ? variants.hq : variants.lq;
   },
 
-  getLessonIndices(course: Course): number[] {
+  async getLessonUrl(
+    course: CourseName,
+    lesson: number,
+    quality: Quality
+  ): Promise<string> {
+    const pointer = CourseData.getLessonPointer(course, lesson, quality);
+    return await getCASObjectURL(pointer);
+  },
+
+  getLessonIndices(course: CourseName): number[] {
     return requireMeta(course).lessons.map((_, idx) => idx);
   },
 
-  getLessonTitle(course: Course, lesson: number): string {
+  getLessonTitle(course: CourseName, lesson: number): string {
     return CourseData.getLessonData(course, lesson).title;
   },
 
-  getLessonDuration(course: Course, lesson: number): number {
+  getLessonDuration(course: CourseName, lesson: number): number {
     return CourseData.getLessonData(course, lesson).duration;
   },
 
-  getLessonSizeInBytes(course: Course, lesson: number, quality: Quality): number {
-    const url = CourseData.getLessonUrl(course, lesson, quality);
-    return CourseData.getLessonData(course, lesson).filesizes[url];
+  getLessonSizeInBytes(
+    course: CourseName,
+    lesson: number,
+    quality: Quality
+  ): number {
+    return CourseData.getLessonPointer(course, lesson, quality).filesize;
   },
 
-  getNextLesson(course: Course, lesson: number): number | null {
+  getLessonMimeType(
+    course: CourseName,
+    lesson: number,
+    quality: Quality
+  ): string {
+    return CourseData.getLessonPointer(course, lesson, quality).mimeType;
+  },
+
+  getNextLesson(course: CourseName, lesson: number): number | null {
     const meta = requireMeta(course);
     return lesson + 1 < meta.lessons.length ? lesson + 1 : null;
   },
 
-  getPreviousLesson(_: Course, lesson: number): number | null {
+  getPreviousLesson(_: CourseName, lesson: number): number | null {
     return lesson - 1 >= 0 ? lesson - 1 : null;
   },
 };

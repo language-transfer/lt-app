@@ -11,14 +11,14 @@ import {
   genProgressForLesson,
   genSetPreferenceRatingButtonDismissed,
 } from '@/src/storage/persistence';
-import type { Course, Progress } from '@/src/types';
+import type { CourseName, Progress } from '@/src/types';
 import { log } from '@/src/utils/log';
 
 type Props = {
-  course: Course;
+  course: CourseName;
 };
 
-const getNextLesson = (course: Course, lastLesson: number | null, progress: Progress | null) => {
+const getNextLesson = (course: CourseName, lastLesson: number | null, progress: Progress | null) => {
   if (lastLesson === null || progress === null) {
     return 0;
   }

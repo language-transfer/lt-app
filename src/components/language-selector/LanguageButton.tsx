@@ -3,10 +3,10 @@ import { ImageBackground, StyleSheet, Text, View } from 'react-native';
 import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 
 import CourseData from '@/src/data/courseData';
-import type { Course } from '@/src/types';
+import type { CourseName } from '@/src/types';
 
 type Props = {
-  course: Course;
+  course: CourseName;
   onPress: () => void;
 };
 

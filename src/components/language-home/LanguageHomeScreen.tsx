@@ -14,11 +14,11 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import CourseData from "@/src/data/courseData";
 import LanguageHomeTopButton from "@/src/components/language-home/LanguageHomeTopButton";
 import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
-import type { Course } from "@/src/types";
+import type { CourseName } from "@/src/types";
 import { log } from "@/src/utils/log";
 
 const LanguageHomeScreen = () => {
-  const { course } = useLocalSearchParams<{ course: Course }>();
+  const { course } = useLocalSearchParams<{ course: CourseName }>();
   const router = useRouter();
   const [loadingMetadata, setLoadingMetadata] = useState(true);
   const [showWarning, setShowWarning] = useState(false);
@@ -45,7 +45,7 @@ const LanguageHomeScreen = () => {
         }, 5000);
 
         try {
-          await CourseData.genLoadCourseMetadata(course);
+          await CourseData.loadCourseMetadata(course);
         } finally {
           if (timeout !== null) {
             clearTimeout(timeout);

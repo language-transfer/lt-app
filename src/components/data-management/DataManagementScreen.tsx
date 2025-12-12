@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import CourseData from "@/src/data/courseData";
 import DownloadManager from "@/src/services/downloadManager";
 import { genDeleteProgressForCourse } from "@/src/storage/persistence";
-import type { Course } from "@/src/types";
+import type { CourseName } from "@/src/types";
 import { Pressable } from "react-native-gesture-handler";
 
 const sections: {
@@ -13,7 +13,7 @@ const sections: {
   title: (courseTitle: string) => string;
   description: string;
   action: (
-    course: Course,
+    course: CourseName,
     router: ReturnType<typeof useRouter>
   ) => Promise<void>;
   destructive: boolean;
@@ -23,8 +23,8 @@ const sections: {
     title: (courseTitle: string) => `Refresh ${courseTitle} metadata`,
     description:
       "Reload the lesson list in case new tracks have been published.",
-    action: async (course: Course) => {
-      await CourseData.genLoadCourseMetadata(course, true);
+    action: async (course: CourseName) => {
+      await CourseData.loadCourseMetadata(course);
       Alert.alert("Metadata refreshed");
     },
     destructive: false,
@@ -34,7 +34,7 @@ const sections: {
     title: (courseTitle: string) => `Delete ${courseTitle} progress`,
     description:
       "Marks every lesson as unfinished and forgets where you left off.",
-    action: async (course: Course) => {
+    action: async (course: CourseName) => {
       await genDeleteProgressForCourse(course);
       Alert.alert("Progress deleted.");
     },
@@ -44,7 +44,7 @@ const sections: {
     key: "finished-downloads",
     title: (courseTitle: string) => `Delete finished ${courseTitle} downloads`,
     description: "Removes downloaded lessons you have marked as finished.",
-    action: async (course: Course) => {
+    action: async (course: CourseName) => {
       await DownloadManager.genDeleteFinishedDownloadsForCourse(course);
       Alert.alert("Finished downloads deleted.");
     },
@@ -54,7 +54,7 @@ const sections: {
     key: "all-downloads",
     title: (courseTitle: string) => `Delete all ${courseTitle} downloads`,
     description: "Removes every downloaded lesson for this course.",
-    action: async (course: Course) => {
+    action: async (course: CourseName) => {
       DownloadManager.stopAllDownloadsForCourse(course);
       await DownloadManager.genDeleteAllDownloadsForCourse(course);
       Alert.alert("All downloads deleted.");
@@ -66,14 +66,15 @@ const sections: {
     title: (courseTitle: string) => `Delete all ${courseTitle} data`,
     description:
       "Deletes downloads, metadata, and progress. You will return to the course picker afterwards.",
-    action: async (course: Course, router: ReturnType<typeof useRouter>) => {
+    action: async (
+      course: CourseName,
+      router: ReturnType<typeof useRouter>
+    ) => {
       DownloadManager.stopAllDownloadsForCourse(course);
       await Promise.all([
         DownloadManager.genDeleteAllDownloadsForCourse(course),
         genDeleteProgressForCourse(course),
       ]);
-      // genDeleteProgressForCourse depends on the metadata being present
-      await CourseData.clearCourseMetadata(course);
       router.replace("/");
       Alert.alert("All course data deleted.");
     },
@@ -83,7 +84,7 @@ const sections: {
 
 const DataManagementScreen = () => {
   const params = useLocalSearchParams<{ course: string }>();
-  const course = (params.course ?? "spanish") as Course;
+  const course = (params.course ?? "spanish") as CourseName;
   const router = useRouter();
   const title = CourseData.getCourseShortTitle(course);
 

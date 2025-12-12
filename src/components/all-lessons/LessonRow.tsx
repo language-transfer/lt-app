@@ -17,12 +17,12 @@ import DownloadManager, {
   useIsLessonDownloaded,
 } from "@/src/services/downloadManager";
 import { useLessonProgress, usePreference } from "@/src/storage/persistence";
-import type { Course } from "@/src/types";
+import type { CourseName } from "@/src/types";
 import { log } from "@/src/utils/log";
 import { useRouter } from "expo-router";
 
 type Props = {
-  course: Course;
+  course: CourseName;
   lesson: number;
 };
 

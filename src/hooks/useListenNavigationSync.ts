@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'expo-router';
 import TrackPlayer, { Event } from 'react-native-track-player';
 
-import type { Course } from '@/src/types';
+import type { CourseName } from '@/src/types';
 import { stopLessonAudio } from '@/src/services/audioPlayer';
 
 type LessonTrackMetadata = {
-  course?: Course;
+  course?: CourseName;
   lesson?: number;
 };
 
 type LessonRoute = {
-  course: Course;
+  course: CourseName;
   lesson: number;
 };
 
@@ -28,7 +28,7 @@ const parseListenRoute = (pathname: string | null): LessonRoute | null => {
   }
 
   return {
-    course: match[1] as Course,
+    course: match[1] as CourseName,
     lesson: Number.parseInt(match[2], 10),
   };
 };

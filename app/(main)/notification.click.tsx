@@ -3,10 +3,10 @@ import { useRouter } from 'expo-router';
 import TrackPlayer from 'react-native-track-player';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 
-import type { Course } from '@/src/types';
+import type { CourseName } from '@/src/types';
 
 type LessonTrackMetadata = {
-  course?: Course;
+  course?: CourseName;
   lesson?: number;
 };
 
@@ -17,7 +17,7 @@ const NotificationClickScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const navigateToLesson = (course: Course, lesson: number) => {
+    const navigateToLesson = (course: CourseName, lesson: number) => {
       const state = navigation.getState();
       if (!state || !state.routes?.length) {
         router.replace({
