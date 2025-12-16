@@ -195,6 +195,9 @@ const preference = (
     },
     async (val: any) => {
       await AsyncStorage.setItem(`@preferences/${name}`, toString(val));
+      queryClient.invalidateQueries({
+        queryKey: ["@local", "preference", name],
+      });
     },
   ];
 };
@@ -259,4 +262,14 @@ export function usePreference<T>(key: Preference, defaultValue: any) {
   }, [key, defaultValue]);
 
   return value;
+}
+
+export function usePreferenceQuery<T>(key: Preference, defaultValue: any) {
+  return useQuery({
+    queryKey: ["@local", "preference", key],
+    queryFn: async () => {
+      const [loadFn] = preference(key, defaultValue, (v) => v);
+      return loadFn() as Promise<T>;
+    },
+  });
 }

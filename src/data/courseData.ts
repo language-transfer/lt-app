@@ -1,5 +1,5 @@
-import { Buffer } from "buffer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Buffer } from "buffer";
 import * as FileSystem from "expo-file-system/legacy";
 import { Platform } from "react-native";
 
@@ -7,13 +7,19 @@ import {
   allCoursesSchema,
   CourseMetadata,
   courseMetaSchema,
+  storedAllCoursesSchema,
   type CourseIndex,
   type FilePointer,
   type LessonData,
-  storedAllCoursesSchema,
   type StoredCourseIndex,
 } from "@/src/data/courseSchemas";
 import { CourseInfo, CourseName, Quality, UIColors } from "@/src/types";
+import {
+  ensureObjectDir,
+  ensureRootObjectDir,
+  getLocalObjectPath,
+  OBJECT_STORAGE_DIR,
+} from "../services/downloadManager";
 
 import arabicCoverWithText from "@/assets/courses/images/arabic-cover-stylized-with-text.png";
 import arabicCover from "@/assets/courses/images/arabic-cover-stylized.png";
@@ -81,12 +87,6 @@ const COURSE_INDEX_URL =
   "https://downloads.languagetransfer.org/all-courses.json";
 const COURSE_INDEX_STORAGE_KEY = "@course-index/all";
 const COURSE_INDEX_TTL_MS = 1000 * 60 * 60 * 24 * 7;
-
-const DOCUMENT_DIRECTORY =
-  (FileSystem as any).documentDirectory ??
-  (FileSystem as any).cacheDirectory ??
-  "";
-const OBJECT_STORAGE_DIR = `${DOCUMENT_DIRECTORY}objects`;
 
 const courseInfoData: Record<CourseName, CourseInfo> = {
   spanish: {
@@ -259,15 +259,6 @@ let cachedInMemoryCourseIndex: CourseIndex | null = null;
 
 const normalizeCasBaseURL = (base: string) => base.replace(/\/$/, "");
 
-const ensureObjectDir = async () => {
-  const info = await FileSystem.getInfoAsync(OBJECT_STORAGE_DIR);
-  if (!info.exists) {
-    await FileSystem.makeDirectoryAsync(OBJECT_STORAGE_DIR, {
-      intermediates: true,
-    });
-  }
-};
-
 const validateIndex = (raw: any): CourseIndex | null => {
   const parsed = allCoursesSchema.safeParse(raw);
   if (!parsed.success) {
@@ -375,21 +366,13 @@ export const getCASObjectURL = async (
   return `${baseURL}/${pointer.object}`;
 };
 
-export const _getLocalObjectPath = (pointer: FilePointer): string => {
-  const objectHash = pointer.object;
-  const prefix = objectHash.substring(0, 2);
-  const rest = objectHash.substring(2);
-
-  return `${OBJECT_STORAGE_DIR}/${prefix}/${rest}`;
-};
-
 const _saveLocalObject = async (
   pointer: FilePointer,
   data: Uint8Array
 ): Promise<void> => {
-  const localPath = _getLocalObjectPath(pointer);
-  const dirPath = localPath.substring(0, localPath.lastIndexOf("/"));
-  await FileSystem.makeDirectoryAsync(dirPath, { intermediates: true });
+  // TODO move this to download manager
+  await ensureObjectDir(pointer);
+  const localPath = getLocalObjectPath(pointer);
   await FileSystem.writeAsStringAsync(
     localPath,
     // bizarre
@@ -405,8 +388,8 @@ export const readObject = async (
 ): Promise<Uint8Array | null> => {
   let data: Uint8Array | null = null;
 
-  const localPath = _getLocalObjectPath(pointer);
-  console.log({localPath})
+  const localPath = getLocalObjectPath(pointer);
+  console.log({ localPath });
   const info = await FileSystem.getInfoAsync(localPath);
   if (info.exists) {
     const contents = await FileSystem.readAsStringAsync(localPath, {
@@ -519,7 +502,7 @@ const CourseData = {
       throw new Error(`Course ${course} not found in index`);
     }
 
-    await ensureObjectDir();
+    await ensureRootObjectDir();
 
     const metadataFilePointer = courseIndexEntry.meta;
     // if the index changes and THEN we lose internet access, this fails, without the fallback we used to have

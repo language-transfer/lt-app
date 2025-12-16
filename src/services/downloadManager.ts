@@ -1,21 +1,24 @@
-import * as FileSystem from "expo-file-system/legacy";
+// import * as FileSystem from "expo-file-system/legacy";
+import { File } from "expo-file-system";
 import * as Network from "expo-network";
 
-import CourseData from "@/src/data/courseData";
+import CourseData, { getCASObjectURL } from "@/src/data/courseData";
 import {
   genPreferenceDownloadOnlyOnWifi,
   genPreferenceDownloadQuality,
-  genProgressForLesson,
+  usePreferenceQuery,
 } from "@/src/storage/persistence";
-import type { CourseName, DownloadSnapshot, Quality } from "@/src/types";
-import { useQuery } from "@tanstack/react-query";
+import type {
+  CourseName,
+  DownloadSnapshot,
+  FilePointer,
+  Quality,
+} from "@/src/types";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { queryClient } from "../data/queryClient";
+import { createAsyncStorage } from "@react-native-async-storage/async-storage";
 
-const DOCUMENT_DIRECTORY =
-  (FileSystem as any).documentDirectory ??
-  (FileSystem as any).cacheDirectory ??
-  "";
-const DOWNLOAD_ROOT = `${DOCUMENT_DIRECTORY}downloads`;
+const downloadIntentAsyncStorage = createAsyncStorage("@download-intent");
 
 type InternalDownload = DownloadSnapshot & {
   resumable?: FileSystem.DownloadResumable;
@@ -23,78 +26,53 @@ type InternalDownload = DownloadSnapshot & {
 };
 
 const downloads: Record<string, InternalDownload> = {};
-// const subscriptions: Record<string, Set<(download: DownloadSnapshot | null) => void>> = {};
+
+const DOCUMENT_DIRECTORY =
+  (FileSystem as any).documentDirectory ??
+  (FileSystem as any).cacheDirectory ??
+  "";
+export const OBJECT_STORAGE_DIR = `${DOCUMENT_DIRECTORY}objects`;
+const STAGING_DIR = `${DOCUMENT_DIRECTORY}staging`;
+
+// sweep: remove STAGING_DIR if saved async not found
+// remove all objects not referenced recursively by the index
 
 const resolvedDownloadPaths: Record<string, string | undefined> = {};
 
-const ensureDir = async (path: string) => {
-  const info = await FileSystem.getInfoAsync(path);
-  if (!info.exists) {
-    await FileSystem.makeDirectoryAsync(path, { intermediates: true });
-  }
-};
+// const resolveDownloadPath = async (
+//   downloadId: string
+// ): Promise<{ path: string; exists: boolean }> => {
+//   const primary = downloadPath(downloadId);
+//   const primaryInfo = await FileSystem.getInfoAsync(primary);
+//   if (primaryInfo.exists) {
+//     resolvedDownloadPaths[downloadId] = primary;
+//     return { path: primary, exists: true };
+//   }
 
-const ensureCourseDir = async (course: CourseName) => {
-  await ensureDir(DOWNLOAD_ROOT);
-  await ensureDir(`${DOWNLOAD_ROOT}/${course}`);
-};
-
-const resolveDownloadPath = async (
-  downloadId: string
-): Promise<{ path: string; exists: boolean }> => {
-  const primary = downloadPath(downloadId);
-  const primaryInfo = await FileSystem.getInfoAsync(primary);
-  if (primaryInfo.exists) {
-    resolvedDownloadPaths[downloadId] = primary;
-    return { path: primary, exists: true };
-  }
-
-  const legacy = legacyDownloadPath(downloadId);
-  const legacyInfo = await FileSystem.getInfoAsync(legacy);
-  if (legacyInfo.exists) {
-    resolvedDownloadPaths[downloadId] = legacy;
-    return { path: legacy, exists: true };
-  }
-
-  resolvedDownloadPaths[downloadId] = primary;
-  return { path: primary, exists: false };
-};
-
-// const emit = (downloadId: string) => {
-//   const snapshot = downloads[downloadId] ?? null;
-//   subscriptions[downloadId]?.forEach((cb) => cb(snapshot));
+//   resolvedDownloadPaths[downloadId] = primary;
+//   return { path: primary, exists: false };
 // };
 
+// TODO consider replacing this with a 'status' that consumers need to think about
+const isDownloaded = async (filePointer: FilePointer): Promise<boolean> => {
+  const downloadPath = getLocalObjectPath(filePointer);
+  const fileInfo = await FileSystem.getInfoAsync(downloadPath);
+  return fileInfo.exists;
+};
+
 // TODO: maybe nest the query key? don't use download IDs?
-const invalidate = (downloadId: string) => {
+const invalidate = (filePointer: FilePointer) => {
   queryClient.invalidateQueries({
-    queryKey: ["@local", "downloads", downloadId],
+    queryKey: ["@local", "downloads", filePointer],
   });
-  const [course] = getCourseAndLesson(downloadId);
-  queryClient.invalidateQueries({
-    queryKey: ["@local", "downloads", course, "count"],
-  });
+  // const [course] = getCourseAndLesson(downloadId);
+  // queryClient.invalidateQueries({
+  //   queryKey: ["@local", "downloads", course, "count"],
+  // });
 };
 
-const toDownloadId = (course: CourseName, lesson: number) =>
-  `${course}/${CourseData.getLessonId(course, lesson)}`;
-
-const getCourseAndLesson = (downloadId: string): [CourseName, string] => {
-  const [course, lessonId] = downloadId.split("/");
-  return [course as CourseName, lessonId];
-};
-
-const downloadPath = (downloadId: string) => {
-  const [course, lessonId] = getCourseAndLesson(downloadId);
-  return `${DOWNLOAD_ROOT}/${course}/${lessonId}.mp4`;
-};
-
-const legacyDownloadPath = (downloadId: string) => {
-  const [course, lessonId] = getCourseAndLesson(downloadId);
-  return `${DOWNLOAD_ROOT}/${course}/${lessonId}.mp3`;
-};
-
-const stagingPath = (downloadId: string) => `${downloadPath(downloadId)}.download`;
+const stagingPath = (filePointer: FilePointer) =>
+  `${STAGING_DIR}/${filePointer.object}.download`;
 
 const snapshotFor = (downloadId: string): InternalDownload => {
   if (!downloads[downloadId]) {
@@ -135,49 +113,56 @@ const handleError = (downloadId: string, error: Error) => {
   invalidate(downloadId);
 };
 
-const snapshots = new Map<string, FileSystem.DownloadResumable>();
+// const snapshots = new Map<string, FileSystem.DownloadResumable>();
 
-const startResumableDownload = async (
-  downloadId: string,
-  url: string
-): Promise<FileSystem.DownloadResumable> => {
-  await ensureCourseDir(getCourseAndLesson(downloadId)[0]);
-  const destination = stagingPath(downloadId);
-
-  const resumable = FileSystem.createDownloadResumable(
-    url,
-    destination,
-    {},
-    (progress) => {
-      const total = progress.totalBytesExpectedToWrite ?? 0;
-      trackProgress(downloadId, total, progress.totalBytesWritten);
-    }
-  );
-
-  return resumable;
+const syncDownloadIntent = async () => {
+  const allIntents = await downloadIntentAsyncStorage.getAllKeys();
 };
 
-const startDownloadInternal = async (
-  course: CourseName,
-  lesson: number,
-  quality: Quality
-) => {
-  await CourseData.loadCourseMetadata(course);
-  const downloadId = DownloadManager.getDownloadId(course, lesson);
-  const url = await CourseData.getLessonUrl(course, lesson, quality);
+const startResumableDownload = async (
+  filePointer: FilePointer
+): Promise<FileSystem.DownloadResumable> => {
+  const destination = stagingPath(filePointer);
+  const url = await getCASObjectURL(filePointer);
 
-  const existing = snapshots.get(downloadId);
-  if (existing) {
-    return existing;
-  }
+  const filePromise = File.downloadFileAsync(url, new File(destination), {
+    idempotent: true,
+  })
+    .catch((err) => {
+      handleError(filePointer, err as Error);
+      throw err;
+    })
+    .then((result) => {
+      if (result.status !== 200) {
+        const error = new Error(
+          `Download failed with status code ${result.status}`
+        );
+        handleError(filePointer, error);
+        throw error;
+      }
+      return result;
+    });
+  // , (progress) => {
+  //   const total = progress.totalBytesExpectedToWrite ?? 0;
+  //   trackProgress(downloadId, total, progress.totalBytesWritten);
+  // });
 
-  const resumable = await startResumableDownload(downloadId, url);
-  snapshots.set(downloadId, resumable);
+  return filePromise;
+};
+
+const startDownloadInternal = async (filePointer: FilePointer) => {
+  // const existing = snapshots.get(downloadId);
+  // if (existing) {
+  //   return existing;
+  // }
+
+  const resumable = await startResumableDownload(filePointer);
+  // snapshots.set(downloadId, resumable);
   const snap = snapshotFor(downloadId);
   snap.state = "downloading";
   snap.requested = true;
   snap.stagingPath = stagingPath(downloadId);
-  invalidate(downloadId);
+  invalidate(filePointer);
 
   resumable
     .downloadAsync()
@@ -198,24 +183,33 @@ const startDownloadInternal = async (
   return resumable;
 };
 
+export const getLocalObjectPath = (pointer: FilePointer): string => {
+  const objectHash = pointer.object;
+  const prefix = objectHash.substring(0, 2);
+  const rest = objectHash.substring(2);
+
+  return `${OBJECT_STORAGE_DIR}/${prefix}/${rest}`;
+};
+
+export const ensureRootObjectDir = async () => {
+  const info = await FileSystem.getInfoAsync(OBJECT_STORAGE_DIR);
+  if (!info.exists) {
+    await FileSystem.makeDirectoryAsync(OBJECT_STORAGE_DIR, {
+      intermediates: true,
+    });
+  }
+};
+
+export const ensureObjectDir = async (pointer: FilePointer): Promise<void> => {
+  await ensureRootObjectDir();
+  const localPath = getLocalObjectPath(pointer);
+  const dirPath = localPath.substring(0, localPath.lastIndexOf("/"));
+  await FileSystem.makeDirectoryAsync(dirPath, { intermediates: true });
+};
+
 const DownloadManager = {
-  getDownloadFolderForCourse(course: CourseName) {
-    return `${DOWNLOAD_ROOT}/${course}`;
-  },
-
-  getDownloadSaveLocation(downloadId: string) {
-    return resolvedDownloadPaths[downloadId] ?? downloadPath(downloadId);
-  },
-
-  getDownloadId(course: CourseName, lesson: number) {
-    return toDownloadId(course, lesson);
-  },
-
-  async startDownload(course: CourseName, lesson: number) {
-    const [quality, wifiOnly] = await Promise.all([
-      genPreferenceDownloadQuality(),
-      genPreferenceDownloadOnlyOnWifi(),
-    ]);
+  async startDownload(filePointer: FilePointer) {
+    const wifiOnly = await genPreferenceDownloadOnlyOnWifi();
 
     if (wifiOnly) {
       const net = await Network.getNetworkStateAsync();
@@ -224,13 +218,7 @@ const DownloadManager = {
       }
     }
 
-    await startDownloadInternal(course, lesson, quality);
-  },
-
-  async genIsDownloaded(course: CourseName, lesson: number): Promise<boolean> {
-    const downloadId = DownloadManager.getDownloadId(course, lesson);
-    const { exists } = await resolveDownloadPath(downloadId);
-    return exists;
+    await startDownloadInternal(filePointer);
   },
 
   async genDeleteDownload(course: CourseName, lesson: number) {
@@ -247,38 +235,38 @@ const DownloadManager = {
     }
   },
 
-  async genDeleteAllDownloadsForCourse(course: CourseName) {
-    const folder = DownloadManager.getDownloadFolderForCourse(course);
-    const info = await FileSystem.getInfoAsync(folder);
-    if (info.exists) {
-      await FileSystem.deleteAsync(folder, { idempotent: true });
-      Object.keys(resolvedDownloadPaths).forEach((downloadId) => {
-        if (downloadId.startsWith(`${course}/`)) {
-          delete resolvedDownloadPaths[downloadId];
-        }
-      });
-    }
-  },
+  // async genDeleteAllDownloadsForCourse(course: CourseName) {
+  //   const folder = DownloadManager.getDownloadFolderForCourse(course);
+  //   const info = await FileSystem.getInfoAsync(folder);
+  //   if (info.exists) {
+  //     await FileSystem.deleteAsync(folder, { idempotent: true });
+  //     Object.keys(resolvedDownloadPaths).forEach((downloadId) => {
+  //       if (downloadId.startsWith(`${course}/`)) {
+  //         delete resolvedDownloadPaths[downloadId];
+  //       }
+  //     });
+  //   }
+  // },
 
-  async genDeleteFinishedDownloadsForCourse(course: CourseName) {
-    await CourseData.loadCourseMetadata(course);
-    const lessons = CourseData.getLessonIndices(course);
-    await Promise.all(
-      lessons.map(async (lesson) => {
-        const progress = await genProgressForLesson(course, lesson);
-        if (progress?.finished) {
-          await DownloadManager.genDeleteDownload(course, lesson);
-        }
-      })
-    );
-  },
+  // async genDeleteFinishedDownloadsForCourse(course: CourseName) {
+  //   await CourseData.loadCourseMetadata(course);
+  //   const lessons = CourseData.getLessonIndices(course);
+  //   await Promise.all(
+  //     lessons.map(async (lesson) => {
+  //       const progress = await genProgressForLesson(course, lesson);
+  //       if (progress?.finished) {
+  //         await DownloadManager.genDeleteDownload(course, lesson);
+  //       }
+  //     })
+  //   );
+  // },
 
-  stopDownload(downloadId: string) {
-    const task = snapshots.get(downloadId);
-    if (task) {
-      task.pauseAsync().catch(() => {});
-      snapshots.delete(downloadId);
-    }
+  stopDownload(filePointer: FilePointer) {
+    // const task = snapshots.get(downloadId);
+    // if (task) {
+    //   task.pauseAsync().catch(() => {});
+    //   snapshots.delete(downloadId);
+    // }
 
     const snap = snapshotFor(downloadId);
     snap.state = "idle";
@@ -291,13 +279,13 @@ const DownloadManager = {
     );
   },
 
-  stopAllDownloadsForCourse(course: CourseName) {
-    Object.keys(downloads).forEach((downloadId) => {
-      if (downloadId.startsWith(`${course}/`)) {
-        DownloadManager.stopDownload(downloadId);
-      }
-    });
-  },
+  // stopAllDownloadsForCourse(course: CourseName) {
+  //   Object.keys(downloads).forEach((downloadId) => {
+  //     if (downloadId.startsWith(`${course}/`)) {
+  //       DownloadManager.stopDownload(downloadId);
+  //     }
+  //   });
+  // },
 };
 
 export function useIsLessonDownloaded(course: CourseName, lesson: number) {
@@ -320,18 +308,80 @@ export const useDownloadStatus = (course: CourseName, lesson: number) => {
   return snapshot;
 };
 
-export function useDownloadCount(course: CourseName) {
-  const { data: count } = useQuery({
-    queryKey: ["@local", "downloads", course, "count"],
+const getLessonIndicesAsync = async (course: CourseName): Promise<number[]> => {
+  // future proofing our hook for when this function gets colored
+  return CourseData.getLessonIndices(course);
+};
+
+const getLessonPointerAsync = async (
+  course: CourseName,
+  lesson: number,
+  quality: Quality
+): Promise<FilePointer> => {
+  return CourseData.getLessonPointer(course, lesson, quality);
+};
+
+const useLessonObjectPointersForCourse = (course: CourseName) => {
+  const downloadQualityQuery = usePreferenceQuery<"high" | "low">(
+    "download-quality",
+    "high"
+  );
+
+  return useQuery({
+    queryKey: [
+      "@local",
+      "downloads",
+      course,
+      "lesson-pointers",
+      downloadQualityQuery,
+    ],
     queryFn: async () => {
-      const lessons = CourseData.getLessonIndices(course);
-      const results = await Promise.all(
-        lessons.map((lesson) => DownloadManager.genIsDownloaded(course, lesson))
+      const { data: downloadQuality } = downloadQualityQuery;
+
+      if (downloadQuality === null) {
+        return null;
+      }
+
+      // TODO possibly extract this into a hook
+      const lessonIndices = await getLessonIndicesAsync(course);
+
+      return await Promise.all(
+        lessonIndices.map((lesson) =>
+          getLessonPointerAsync(course, lesson, downloadQuality!)
+        )
       );
-      return results.filter((r) => r).length;
     },
   });
-  return count ?? 0;
+};
+
+export function useDownloadCount(course: CourseName) {
+  const lessonPointers = useLessonObjectPointersForCourse(course);
+  const queries = useQueries({
+    queries: (lessonPointers.data ?? []).map((pointer) => ({
+      queryKey: ["@local", "downloads", pointer.object, "is-downloaded"],
+      queryFn: async () => {
+        const exists = await isDownloaded(pointer);
+        return exists;
+      },
+    })),
+  });
+
+  const allComplete =
+    lessonPointers.data !== null && queries.every((q) => q.isSuccess);
+  if (!allComplete) {
+    return null;
+  }
+
+  return queries.filter((q) => q.data).length;
 }
+
+export const CourseDownloadManager = {
+  async startDownload(course: CourseName, lesson: number) {
+    const quality = await genPreferenceDownloadQuality();
+    const pointer = CourseData.getLessonPointer(course, lesson, quality);
+
+    return await DownloadManager.startDownload(pointer);
+  },
+};
 
 export default DownloadManager;

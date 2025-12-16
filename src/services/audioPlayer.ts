@@ -15,7 +15,9 @@ import TrackPlayer, {
 } from "react-native-track-player";
 
 import CourseData from "@/src/data/courseData";
-import DownloadManager from "@/src/services/downloadManager";
+import DownloadManager, {
+  getLocalObjectPath,
+} from "@/src/services/downloadManager";
 import {
   genMarkLessonFinished,
   genPreferenceStreamQuality,
@@ -165,12 +167,6 @@ const buildLessonQueue = async (
     throw new Error(`Lesson ${targetLesson} is not available in ${course}`);
   }
 
-  const downloads = await Promise.all(
-    lessons.map((lessonNumber) =>
-      DownloadManager.genIsDownloaded(course, lessonNumber)
-    )
-  );
-
   const artwork = CourseData.getCourseImageWithText(
     course
   ) as LessonTrack["artwork"];
@@ -178,9 +174,14 @@ const buildLessonQueue = async (
   const tracks = await Promise.all(
     lessons.map(async (lessonNumber, index) => {
       let uri: string | number;
-      if (downloads[index]) {
-        uri = DownloadManager.getDownloadSaveLocation(
-          DownloadManager.getDownloadId(course, lessonNumber)
+      const isDownloaded = await DownloadManager.genIsDownloaded(
+        course,
+        lessonNumber
+      );
+
+      if (isDownloaded) {
+        uri = getLocalObjectPath(
+          CourseData.getLessonPointer(course, lessonNumber, quality)
         );
       } else {
         const bundled =
