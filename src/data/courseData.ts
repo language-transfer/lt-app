@@ -18,7 +18,6 @@ import {
   ensureObjectDir,
   ensureRootObjectDir,
   getLocalObjectPath,
-  OBJECT_STORAGE_DIR,
 } from "../services/downloadManager";
 
 import arabicCoverWithText from "@/assets/courses/images/arabic-cover-stylized-with-text.png";
@@ -254,6 +253,18 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
 const loadedInMemoryCourseMeta: Partial<Record<CourseName, CourseMetadata>> =
   {};
 
+const loadedObjectMetadataLookup: Record<
+  string,
+  {
+    pointer: FilePointer; // for mime type, filesize
+
+    // don't love this structure -- maybe better to have a generic pointer? idk, pros and cons
+    course: CourseName;
+    lessonIndex: number;
+    quality: Quality;
+  }
+> = {};
+
 // best avoid reloading while the app is open -- keep things consistent
 let cachedInMemoryCourseIndex: CourseIndex | null = null;
 
@@ -431,6 +442,24 @@ const requireMeta = (course: CourseName): CourseMetadata => {
   return meta;
 };
 
+const indexObjects = (course: CourseName, meta: CourseMetadata): void => {
+  for (let lessonIndex = 0; lessonIndex < meta.lessons.length; lessonIndex++) {
+    const lesson = meta.lessons[lessonIndex];
+    loadedObjectMetadataLookup[lesson.variants.lq.object] = {
+      pointer: lesson.variants.lq,
+      course,
+      lessonIndex,
+      quality: "low",
+    };
+    loadedObjectMetadataLookup[lesson.variants.hq.object] = {
+      pointer: lesson.variants.hq,
+      course,
+      lessonIndex,
+      quality: "high",
+    };
+  }
+};
+
 const CourseData = {
   courseExists(course: CourseName): boolean {
     return Boolean(courseInfoData[course]);
@@ -522,6 +551,8 @@ const CourseData = {
       throw new Error(`Invalid metadata for course ${course}`);
     }
 
+    indexObjects(course, parsedMeta);
+
     loadedInMemoryCourseMeta[course] = parsedMeta;
   },
 
@@ -592,6 +623,22 @@ const CourseData = {
 
   getPreviousLesson(_: CourseName, lesson: number): number | null {
     return lesson - 1 >= 0 ? lesson - 1 : null;
+  },
+
+  getLoadedObjectMetadata(objectId: string): {
+    pointer: FilePointer;
+    course: CourseName;
+    lessonIndex: number;
+    quality: Quality;
+  } {
+    if (!(objectId in loadedObjectMetadataLookup)) {
+      throw new Error(`Object metadata not found for ${objectId}`);
+    }
+    return loadedObjectMetadataLookup[objectId];
+  },
+
+  getAllLoadedObjectIds(): string[] {
+    return Object.keys(loadedObjectMetadataLookup);
   },
 };
 

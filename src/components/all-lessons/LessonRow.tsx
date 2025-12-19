@@ -12,9 +12,9 @@ import {
 } from "react-native";
 
 import CourseData from "@/src/data/courseData";
-import DownloadManager, {
-  useDownloadStatus,
-  useIsLessonDownloaded,
+import {
+  CourseDownloadManager,
+  useLessonDownloadStatus,
 } from "@/src/services/downloadManager";
 import { useLessonProgress, usePreference } from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
@@ -28,8 +28,7 @@ type Props = {
 
 const LessonRow = ({ course, lesson }: Props) => {
   const progress = useLessonProgress(course, lesson);
-  const downloaded = useIsLessonDownloaded(course, lesson);
-  const downloadState = useDownloadStatus(course, lesson);
+  const downloadStatus = useLessonDownloadStatus(course, lesson);
   const downloadQuality = usePreference<"high" | "low">(
     "download-quality",
     "high"
@@ -40,13 +39,11 @@ const LessonRow = ({ course, lesson }: Props) => {
     [course, lesson]
   );
 
-  const downloading =
-    downloadState &&
-    downloadState.state === "downloading" &&
-    !downloadState.errorMessage;
+  const downloaded = downloadStatus === "downloaded";
+  const downloading = downloadStatus === "downloading";
 
   const handleDownloadClick = async () => {
-    if (bundled || downloaded === null) {
+    if (bundled || downloadStatus === undefined) {
       return;
     }
 
@@ -57,9 +54,8 @@ const LessonRow = ({ course, lesson }: Props) => {
         course,
         lesson,
       });
-      DownloadManager.stopDownload(
-        DownloadManager.getDownloadId(course, lesson)
-      );
+      // TODO: test
+      CourseDownloadManager.unrequestDownload(course, lesson);
       return;
     }
 
@@ -70,7 +66,7 @@ const LessonRow = ({ course, lesson }: Props) => {
         course,
         lesson,
       });
-      await DownloadManager.genDeleteDownload(course, lesson);
+      await CourseDownloadManager.unrequestDownload(course, lesson);
       return;
     }
 
@@ -81,7 +77,8 @@ const LessonRow = ({ course, lesson }: Props) => {
       lesson,
     });
     try {
-      await DownloadManager.startDownload(course, lesson);
+      console.log("requesting download", course, lesson);
+      await CourseDownloadManager.requestDownload(course, lesson);
     } catch (err) {
       log({
         action: "download_error",
@@ -112,20 +109,21 @@ const LessonRow = ({ course, lesson }: Props) => {
     }
 
     if (downloading) {
-      if (downloadState?.totalBytes) {
-        const percent = Math.round(
-          (downloadState.bytesWritten / downloadState.totalBytes) * 100
-        );
-        return <Text style={styles.progressText}>{percent}%</Text>;
-      }
+      // TODO maybe we can do this idk
+      // if (downloadStatus?.totalBytes) {
+      //   const percent = Math.round(
+      //     (downloadState.bytesWritten / downloadState.totalBytes) * 100
+      //   );
+      //   return <Text style={styles.progressText}>{percent}%</Text>;
+      // }
       return <ActivityIndicator size="small" color="#555" />;
     }
 
-    if (downloadState?.errorMessage) {
-      return (
-        <FontAwesome5 name="exclamation-triangle" size={18} color="#e74c3c" />
-      );
-    }
+    // if (downloadState?.errorMessage) {
+    //   return (
+    //     <FontAwesome5 name="exclamation-triangle" size={18} color="#e74c3c" />
+    //   );
+    // }
 
     return <FontAwesome5 name="download" size={18} color="#555" />;
   };

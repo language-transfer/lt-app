@@ -40,6 +40,7 @@ export const storedAllCoursesSchema = z.object({
 });
 
 export type FilePointer = z.infer<typeof filePointerSchema>;
+export type ObjectPointer = Pick<FilePointer, "object">;
 export type LessonVariants = z.infer<typeof lessonSchema>["variants"];
 export type LessonData = z.infer<typeof lessonSchema>;
 export type CourseMetadata = z.infer<typeof courseMetaSchema>;

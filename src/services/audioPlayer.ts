@@ -1,21 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
 import TrackPlayer, {
+  AndroidAudioContentType,
   AppKilledPlaybackBehavior,
   Capability,
   IOSCategory,
   IOSCategoryMode,
   IOSCategoryOptions,
   State,
-  type AddTrack,
   useActiveTrack,
   usePlaybackState,
   useProgress,
-  AndroidAudioContentType,
+  type AddTrack,
 } from "react-native-track-player";
 
 import CourseData from "@/src/data/courseData";
-import DownloadManager, {
+import {
+  CourseDownloadManager,
   getLocalObjectPath,
 } from "@/src/services/downloadManager";
 import {
@@ -174,10 +175,11 @@ const buildLessonQueue = async (
   const tracks = await Promise.all(
     lessons.map(async (lessonNumber, index) => {
       let uri: string | number;
-      const isDownloaded = await DownloadManager.genIsDownloaded(
+      const downloadStatus = await CourseDownloadManager.getDownloadStatus(
         course,
         lessonNumber
       );
+      const isDownloaded = downloadStatus === "downloaded";
 
       if (isDownloaded) {
         uri = getLocalObjectPath(

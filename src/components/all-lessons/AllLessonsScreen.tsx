@@ -15,7 +15,8 @@ import {
 import LessonRow from "@/src/components/all-lessons/LessonRow";
 import CourseData from "@/src/data/courseData";
 import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
-import DownloadManager, {
+import {
+  CourseDownloadManager,
   useDownloadCount,
 } from "@/src/services/downloadManager";
 import { usePreference } from "@/src/storage/persistence";
@@ -64,7 +65,11 @@ const AllLessonsScreen = () => {
 
     setDownloadAllLoading(true);
     const downloadedMask = await Promise.all(
-      indices.map((lesson) => DownloadManager.genIsDownloaded(course, lesson))
+      indices.map((lesson) =>
+        CourseDownloadManager.getDownloadStatus(course, lesson).then(
+          (status) => status === "downloaded"
+        )
+      )
     );
     const missing = indices.filter((_, idx) => !downloadedMask[idx]);
     const totalBytes = missing
@@ -97,7 +102,7 @@ const AllLessonsScreen = () => {
     }
 
     missing.forEach((lesson) => {
-      DownloadManager.startDownload(course, lesson).catch(() => {});
+      CourseDownloadManager.requestDownload(course, lesson).catch(() => {});
     });
   };
 

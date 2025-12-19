@@ -1,3 +1,6 @@
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import formatDuration from "format-duration";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -11,16 +14,14 @@ import {
   Text,
   View,
 } from "react-native";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import formatDuration from "format-duration";
-import { useRouter } from "expo-router";
 
-import CourseData from "@/src/data/courseData";
 import ListenScrubber from "@/src/components/listen/ListenScrubber";
-import DownloadManager, {
-  useIsLessonDownloaded,
-} from "@/src/services/downloadManager";
+import CourseData from "@/src/data/courseData";
 import { stopLessonAudio, useLessonAudio } from "@/src/services/audioPlayer";
+import {
+  CourseDownloadManager,
+  useLessonDownloadStatus,
+} from "@/src/services/downloadManager";
 import { genMarkLessonFinished } from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
 import { log } from "@/src/utils/log";
@@ -32,7 +33,8 @@ type Props = {
 
 const ListenBody = ({ course, lesson }: Props) => {
   const controls = useLessonAudio(course, lesson);
-  const downloaded = useIsLessonDownloaded(course, lesson);
+  const downloadStatus = useLessonDownloadStatus(course, lesson);
+  const downloaded = downloadStatus === "downloaded";
   const [busyAction, setBusyAction] = useState<"download" | "delete" | null>(
     null
   );
@@ -126,7 +128,7 @@ const ListenBody = ({ course, lesson }: Props) => {
           lesson,
         });
         await stopLessonAudio();
-        await DownloadManager.genDeleteDownload(course, lesson);
+        await CourseDownloadManager.unrequestDownload(course, lesson);
       } else {
         log({
           action: "download_lesson",
@@ -134,7 +136,7 @@ const ListenBody = ({ course, lesson }: Props) => {
           course,
           lesson,
         });
-        await DownloadManager.startDownload(course, lesson);
+        await CourseDownloadManager.requestDownload(course, lesson);
       }
     } catch (err) {
       Alert.alert(

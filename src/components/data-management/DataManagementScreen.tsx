@@ -1,9 +1,8 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
 
 import CourseData from "@/src/data/courseData";
-import DownloadManager from "@/src/services/downloadManager";
 import { genDeleteProgressForCourse } from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
 import { Pressable } from "react-native-gesture-handler";
@@ -40,27 +39,28 @@ const sections: {
     },
     destructive: true,
   },
-  {
-    key: "finished-downloads",
-    title: (courseTitle: string) => `Delete finished ${courseTitle} downloads`,
-    description: "Removes downloaded lessons you have marked as finished.",
-    action: async (course: CourseName) => {
-      await DownloadManager.genDeleteFinishedDownloadsForCourse(course);
-      Alert.alert("Finished downloads deleted.");
-    },
-    destructive: false, // lil bit
-  },
-  {
-    key: "all-downloads",
-    title: (courseTitle: string) => `Delete all ${courseTitle} downloads`,
-    description: "Removes every downloaded lesson for this course.",
-    action: async (course: CourseName) => {
-      DownloadManager.stopAllDownloadsForCourse(course);
-      await DownloadManager.genDeleteAllDownloadsForCourse(course);
-      Alert.alert("All downloads deleted.");
-    },
-    destructive: true,
-  },
+  // TODO
+  // {
+  //   key: "finished-downloads",
+  //   title: (courseTitle: string) => `Delete finished ${courseTitle} downloads`,
+  //   description: "Removes downloaded lessons you have marked as finished.",
+  //   action: async (course: CourseName) => {
+  //     await DownloadManager.genDeleteFinishedDownloadsForCourse(course);
+  //     Alert.alert("Finished downloads deleted.");
+  //   },
+  //   destructive: false, // lil bit
+  // },
+  // {
+  //   key: "all-downloads",
+  //   title: (courseTitle: string) => `Delete all ${courseTitle} downloads`,
+  //   description: "Removes every downloaded lesson for this course.",
+  //   action: async (course: CourseName) => {
+  //     DownloadManager.stopAllDownloadsForCourse(course);
+  //     await DownloadManager.genDeleteAllDownloadsForCourse(course);
+  //     Alert.alert("All downloads deleted.");
+  //   },
+  //   destructive: true,
+  // },
   {
     key: "all-data",
     title: (courseTitle: string) => `Delete all ${courseTitle} data`,
@@ -70,9 +70,10 @@ const sections: {
       course: CourseName,
       router: ReturnType<typeof useRouter>
     ) => {
-      DownloadManager.stopAllDownloadsForCourse(course);
+      // TODO
+      // DownloadManager.stopAllDownloadsForCourse(course);
       await Promise.all([
-        DownloadManager.genDeleteAllDownloadsForCourse(course),
+        // DownloadManager.genDeleteAllDownloadsForCourse(course),
         genDeleteProgressForCourse(course),
       ]);
       router.replace("/");

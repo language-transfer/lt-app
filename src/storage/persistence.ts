@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
 
+import { CourseDownloadManager } from "@/src/services/downloadManager";
 import type { CourseName, Preference, Progress, Quality } from "@/src/types";
-import { queryClient } from "../data/queryClient";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "../data/queryClient";
 
 const activityKey = (course: CourseName, lesson?: number) =>
   lesson === undefined
@@ -132,8 +133,12 @@ export const genMarkLessonFinished = async (
     const { default: DownloadManager } = await import(
       "@/src/services/downloadManager"
     );
-    if (await DownloadManager.genIsDownloaded(course, lesson)) {
-      await DownloadManager.genDeleteDownload(course, lesson);
+    const downloadStatus = await CourseDownloadManager.getDownloadStatus(
+      course,
+      lesson
+    );
+    if (downloadStatus === "downloaded") {
+      await CourseDownloadManager.unrequestDownload(course, lesson);
     }
   }
 };

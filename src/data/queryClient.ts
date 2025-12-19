@@ -5,4 +5,10 @@ import { QueryClient } from "@tanstack/react-query";
 //   this is not typically something the react client would be able to get a notification of, but here we
 //   can do it, so why not? better than polling
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      networkMode: "always",
+    },
+  },
+});
