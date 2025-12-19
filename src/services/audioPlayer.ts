@@ -183,7 +183,7 @@ const buildLessonQueue = async (
 
       if (isDownloaded) {
         uri = getLocalObjectPath(
-          CourseData.getLessonPointer(course, lessonNumber, quality)
+          await CourseDownloadManager.getLessonPointer(course, lessonNumber)
         );
       } else {
         const bundled =
@@ -212,6 +212,8 @@ const buildLessonQueue = async (
       };
     })
   );
+
+  console.log(tracks);
 
   return { tracks, targetIndex };
 };

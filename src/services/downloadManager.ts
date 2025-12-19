@@ -423,6 +423,14 @@ export const CourseDownloadManager = {
 
     return await DownloadManager.downloadStatus(pointer);
   },
+
+  async getLessonPointer(
+    course: CourseName,
+    lesson: number
+  ): Promise<FilePointer> {
+    const quality = await genPreferenceDownloadQuality();
+    return CourseData.getLessonPointer(course, lesson, quality);
+  }
 };
 
 export default DownloadManager;
