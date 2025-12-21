@@ -116,11 +116,13 @@ const AllLessonsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={indices}
-        keyExtractor={(lesson) => String(lesson)}
-        renderItem={({ item }) => <LessonRow course={course} lesson={item} />}
-      />
+      <View style={styles.listContainer}>
+        <FlatList
+          data={indices}
+          keyExtractor={(lesson) => String(lesson)}
+          renderItem={({ item }) => <LessonRow course={course} lesson={item} />}
+        />
+      </View>
       <View style={styles.bottomBar}>
         <Text style={styles.bottomLeftText}>
           {downloadedCount ?? "-"} / {indices.length} downloaded
@@ -154,6 +156,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  listContainer: {
+    flex: 1,
   },
   bottomBar: {
     flexDirection: "row",

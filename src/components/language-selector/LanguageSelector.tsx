@@ -1,3 +1,5 @@
+import { FontAwesome5 } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useRef } from "react";
 import {
   Animated,
@@ -8,12 +10,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 
-import logo from "../../../legacy/resources/LT-logo-text.png";
 import LanguageButton from "@/src/components/language-selector/LanguageButton";
 import type { CourseName } from "@/src/types";
+import { SafeAreaView } from "react-native-safe-area-context";
+import logo from "../../../legacy/resources/LT-logo-text.png";
 
 const SCREEN_HEIGHT = Dimensions.get("screen").height;
 const IMAGE_HEIGHT = 0.4 * SCREEN_HEIGHT;
@@ -31,120 +32,124 @@ const LanguageSelector = () => {
   };
 
   return (
-    <View style={styles.screenWrapper}>
-      <View style={styles.pageWrapper}>
-        <Animated.View
-          style={[
-            styles.headerImageWrapper,
-            {
-              transform: [
-                {
-                  scale: scrollAnim.interpolate({
-                    inputRange: [0, IMAGE_HEIGHT / 1.5],
-                    outputRange: [1, 0.9],
-                    extrapolate: "clamp",
-                  }),
-                },
-              ],
-              opacity: scrollAnim.interpolate({
-                inputRange: [0, IMAGE_HEIGHT / 1.5],
-                outputRange: [1, 0],
-                extrapolate: "clamp",
-              }),
-              height: IMAGE_HEIGHT,
-            },
-          ]}
-        >
-          <Image
-            source={logo}
-            style={styles.headerImage}
-            resizeMode="contain"
-            accessibilityLabel="Language Transfer"
-          />
-        </Animated.View>
-
-        <Animated.ScrollView
-          style={styles.scrollView}
-          onScroll={Animated.event(
-            [
+    <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+      <View style={styles.screenWrapper}>
+        <View style={styles.pageWrapper}>
+          <Animated.View
+            style={[
+              styles.headerImageWrapper,
               {
-                nativeEvent: {
-                  contentOffset: {
-                    y: scrollAnim,
+                transform: [
+                  {
+                    scale: scrollAnim.interpolate({
+                      inputRange: [0, IMAGE_HEIGHT / 1.5],
+                      outputRange: [1, 0.9],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                ],
+                opacity: scrollAnim.interpolate({
+                  inputRange: [0, IMAGE_HEIGHT / 1.5],
+                  outputRange: [1, 0],
+                  extrapolate: "clamp",
+                }),
+                height: IMAGE_HEIGHT,
+              },
+            ]}
+          >
+            <Image
+              source={logo}
+              style={styles.headerImage}
+              resizeMode="contain"
+              accessibilityLabel="Language Transfer"
+            />
+          </Animated.View>
+
+          <Animated.ScrollView
+            style={styles.scrollView}
+            onScroll={Animated.event(
+              [
+                {
+                  nativeEvent: {
+                    contentOffset: {
+                      y: scrollAnim,
+                    },
                   },
                 },
-              },
-            ],
-            { useNativeDriver: false }
-          )}
-          scrollEventThrottle={16}
-        >
-          <View style={styles.courseList}>
-            <View style={styles.sectionHeaderFirst}>
-              <Text style={styles.sectionHeaderText}>Language courses</Text>
-            </View>
-            <View style={styles.courseGrid}>
-              {[
-                "spanish",
-                "arabic",
-                "turkish",
-                "german",
-                "greek",
-                "italian",
-                "swahili",
-                "french",
-              ].map((course) => (
-                <LanguageButton
-                  key={course}
-                  course={course as CourseName}
-                  onPress={() => goToCourse(course)}
-                />
-              ))}
-            </View>
+              ],
+              { useNativeDriver: false }
+            )}
+            scrollEventThrottle={16}
+          >
+            <View style={styles.courseList}>
+              <View style={styles.sectionHeaderFirst}>
+                <Text style={styles.sectionHeaderText}>Language courses</Text>
+              </View>
+              <View style={styles.courseGrid}>
+                {[
+                  "spanish",
+                  "arabic",
+                  "turkish",
+                  "german",
+                  "greek",
+                  "italian",
+                  "swahili",
+                  "french",
+                ].map((course) => (
+                  <LanguageButton
+                    key={course}
+                    course={course as CourseName}
+                    onPress={() => goToCourse(course)}
+                  />
+                ))}
+              </View>
 
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>For Spanish speakers</Text>
-            </View>
-            <View style={styles.courseGrid}>
-              <LanguageButton
-                course="ingles"
-                onPress={() => goToCourse("ingles")}
-              />
-            </View>
-
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>Other courses</Text>
-            </View>
-            <View style={styles.courseGrid}>
-              <LanguageButton
-                course="music"
-                onPress={() => goToCourse("music")}
-              />
-            </View>
-
-            <View style={styles.aboutSectionHr} />
-            <View style={styles.aboutSectionWrapper}>
-              <View style={styles.aboutSection}>
-                <Text style={styles.aboutSectionText}>
-                  Find out more about Language Transfer and the Thinking Method:
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionHeaderText}>
+                  For Spanish speakers
                 </Text>
-                <TouchableOpacity
-                  style={styles.additionalButton}
-                  onPress={() => router.push("/about")}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.additionalButtonText}>
-                    About Language Transfer
+              </View>
+              <View style={styles.courseGrid}>
+                <LanguageButton
+                  course="ingles"
+                  onPress={() => goToCourse("ingles")}
+                />
+              </View>
+
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionHeaderText}>Other courses</Text>
+              </View>
+              <View style={styles.courseGrid}>
+                <LanguageButton
+                  course="music"
+                  onPress={() => goToCourse("music")}
+                />
+              </View>
+
+              <View style={styles.aboutSectionHr} />
+              <View style={styles.aboutSectionWrapper}>
+                <View style={styles.aboutSection}>
+                  <Text style={styles.aboutSectionText}>
+                    Find out more about Language Transfer and the Thinking
+                    Method:
                   </Text>
-                  <FontAwesome5 name="info-circle" size={20} color="#333" />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.additionalButton}
+                    onPress={() => router.push("/about")}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.additionalButtonText}>
+                      About Language Transfer
+                    </Text>
+                    <FontAwesome5 name="info-circle" size={20} color="#333" />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </Animated.ScrollView>
-      </View>
-      {/* <View style={styles.topTranslucent} /> */}
-      {/* <Animated.View
+          </Animated.ScrollView>
+        </View>
+        {/* <View style={styles.topTranslucent} /> */}
+        {/* <Animated.View
         style={[
           styles.scrollIndicator,
           {
@@ -158,7 +163,8 @@ const LanguageSelector = () => {
         <Text style={styles.scrollIndicatorText}>scroll for more</Text>
         <FontAwesome5 name="angle-double-down" color="#999" size={14} />
       </Animated.View> */}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -185,7 +191,7 @@ const styles = StyleSheet.create({
   headerImageWrapper: {
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 48,
+    paddingTop: 24,
   },
   headerImage: {
     width: "100%",

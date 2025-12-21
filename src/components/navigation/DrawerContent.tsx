@@ -1,14 +1,15 @@
-import React, { useCallback } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
   DrawerItem,
 } from "@react-navigation/drawer";
 import { DrawerActions } from "@react-navigation/native";
-import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import React, { useCallback } from "react";
+import { Image, StyleSheet, Text, View } from "react-native";
 
+import { SafeAreaView } from "react-native-safe-area-context";
 import logo from "../../../legacy/resources/LT-logo-text.png";
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
@@ -25,62 +26,64 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
   );
 
   return (
-    <DrawerContentScrollView
-      {...props}
-      contentContainerStyle={styles.container}
-    >
-      <View style={styles.headerContainer}>
-        <Image
-          source={logo}
-          style={styles.headerImage}
-          resizeMode="contain"
-          accessibilityLabel="Language Transfer"
-        />
-      </View>
+    <SafeAreaView style={{ flex: 1 }}>
+      <DrawerContentScrollView
+        {...props}
+        contentContainerStyle={styles.container}
+      >
+        <View style={styles.headerContainer}>
+          <Image
+            source={logo}
+            style={styles.headerImage}
+            resizeMode="contain"
+            accessibilityLabel="Language Transfer"
+          />
+        </View>
 
-      <DrawerItem
-        label={() => (
-          <View style={styles.menuItemContainer}>
-            <FontAwesome5
-              name="home"
-              size={18}
-              color="#555"
-              style={styles.menuItemIcon}
-            />
-            <Text style={styles.menuItemText}>All Languages</Text>
-          </View>
-        )}
-        onPress={() => navigateTo("/")}
-      />
-      <DrawerItem
-        label={() => (
-          <View style={styles.menuItemContainer}>
-            <FontAwesome5
-              name="cog"
-              size={18}
-              color="#555"
-              style={styles.menuItemIcon}
-            />
-            <Text style={styles.menuItemText}>Settings</Text>
-          </View>
-        )}
-        onPress={() => navigateTo("/settings")}
-      />
-      <DrawerItem
-        label={() => (
-          <View style={styles.menuItemContainer}>
-            <FontAwesome5
-              name="info-circle"
-              size={18}
-              color="#555"
-              style={styles.menuItemIcon}
-            />
-            <Text style={styles.menuItemText}>About</Text>
-          </View>
-        )}
-        onPress={() => navigateTo("/about")}
-      />
-    </DrawerContentScrollView>
+        <DrawerItem
+          label={() => (
+            <View style={styles.menuItemContainer}>
+              <FontAwesome5
+                name="home"
+                size={18}
+                color="#555"
+                style={styles.menuItemIcon}
+              />
+              <Text style={styles.menuItemText}>All Languages</Text>
+            </View>
+          )}
+          onPress={() => navigateTo("/")}
+        />
+        <DrawerItem
+          label={() => (
+            <View style={styles.menuItemContainer}>
+              <FontAwesome5
+                name="cog"
+                size={18}
+                color="#555"
+                style={styles.menuItemIcon}
+              />
+              <Text style={styles.menuItemText}>Settings</Text>
+            </View>
+          )}
+          onPress={() => navigateTo("/settings")}
+        />
+        <DrawerItem
+          label={() => (
+            <View style={styles.menuItemContainer}>
+              <FontAwesome5
+                name="info-circle"
+                size={18}
+                color="#555"
+                style={styles.menuItemIcon}
+              />
+              <Text style={styles.menuItemText}>About</Text>
+            </View>
+          )}
+          onPress={() => navigateTo("/about")}
+        />
+      </DrawerContentScrollView>
+    </SafeAreaView>
   );
 };
 

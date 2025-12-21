@@ -1,3 +1,5 @@
+import { FontAwesome5 } from "@expo/vector-icons";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -8,11 +10,9 @@ import {
   Text,
   View,
 } from "react-native";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5 } from "@expo/vector-icons";
 
-import CourseData from "@/src/data/courseData";
 import LanguageHomeTopButton from "@/src/components/language-home/LanguageHomeTopButton";
+import CourseData from "@/src/data/courseData";
 import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
 import type { CourseName } from "@/src/types";
 import { log } from "@/src/utils/log";
