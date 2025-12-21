@@ -78,7 +78,7 @@ import com.android.build.OutputFile
  */
 
 project.ext.react = [
-    enableHermes: true,
+    enableHermes: false,
     entryFile: './index.js',
 ]
 
@@ -120,7 +120,7 @@ def jscFlavor = 'org.webkit:android-jsc:+'
  * on project.ext.react, JavaScript will not be compiled to Hermes Bytecode
  * and the benefits of using Hermes will therefore be sharply reduced.
  */
-def enableHermes = project.ext.react.get("enableHermes", false);
+def enableHermes = false;
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -182,6 +182,10 @@ android {
         pickFirst "lib/arm64-v8a/libc++_shared.so"
         pickFirst "lib/x86/libc++_shared.so"
         pickFirst "lib/x86_64/libc++_shared.so"
+        pickFirst "lib/armeabi-v7a/libfbjni.so"
+        pickFirst "lib/arm64-v8a/libfbjni.so"
+        pickFirst "lib/x86/libfbjni.so"
+        pickFirst "lib/x86_64/libfbjni.so"
     }
 
     // applicationVariants are e.g. debug, release
@@ -206,6 +210,7 @@ dependencies {
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+    implementation "androidx.core:core:1.6.0"
 
     implementation project(':react-native-navigation-bar-color')
 

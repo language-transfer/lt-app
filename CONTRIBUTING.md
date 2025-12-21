@@ -2,6 +2,37 @@ Welcome to the Language Transfer app! Thanks for your interest in contributing :
 
 ## How to build and run the app
 
+### Prerequisites
+
+**Required Software:**
+- **Node.js**: v16+ (tested with v22.18.0)
+- **npm**: v8+ (tested with v10.9.3)
+- **Java Development Kit (JDK)**: Java 11 (required for Gradle 6.2 compatibility)
+  - Install: `sudo apt install openjdk-11-jdk`
+  - Set as default: `sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java`
+  - Verify with: `java --version` (should show version 11.x.x)
+- **Android Studio**: Latest version with Android SDK
+
+**For Android Development:**
+- Android Studio with Android SDK
+- Android Virtual Device (AVD) or physical Android device
+- Environment variables (add to ~/.bashrc):
+  ```bash
+  export ANDROID_HOME=$HOME/Android/Sdk
+  export PATH=$PATH:$ANDROID_HOME/emulator
+  export PATH=$PATH:$ANDROID_HOME/platform-tools
+  ```
+
+Run:
+
+```bash
+emulator -avd Medium_Phone_API_36.1
+npm start
+npm run android
+```
+
+### Setup Instructions
+
 Follow the instructions on the [React Native website](https://reactnative.dev/docs/environment-setup) on setting up a fresh environment, up to the "Creating a new application" section.
 
 Then, clone and install dependencies for the repository.
