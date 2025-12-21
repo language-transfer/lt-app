@@ -38,6 +38,7 @@
     "expo-web-browser": "~15.0.9",
     "format-duration": "^3.0.2",
     "lodash": "^4.17.21",
+    "p-queue": "^9.0.1",
     "patch-package": "^8.0.1",
     "pretty-bytes": "^7.1.0",
     "react": "19.1.0",

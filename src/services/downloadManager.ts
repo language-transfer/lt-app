@@ -2,7 +2,10 @@
 import { Directory, File, Paths } from "expo-file-system";
 import * as Network from "expo-network";
 
-import CourseData, { getCASObjectURL } from "@/src/data/courseData";
+import CourseData, {
+  getCASObjectURL,
+  LoadedObjectMetadata,
+} from "@/src/data/courseData";
 import {
   genPreferenceDownloadOnlyOnWifi,
   genPreferenceDownloadQuality,
@@ -11,6 +14,7 @@ import {
 import type { CourseName, FilePointer, Quality } from "@/src/types";
 import { createAsyncStorage } from "@react-native-async-storage/async-storage";
 import { useQueries, useQuery } from "@tanstack/react-query";
+import PQueue from "p-queue";
 import { ObjectPointer } from "../data/courseSchemas";
 import { queryClient } from "../data/queryClient";
 
@@ -24,6 +28,8 @@ const STAGING_DIR = `${DOCUMENT_DIRECTORY}staging`;
 // remove all objects not referenced recursively by the index
 
 const resolvedDownloadPaths: Record<string, string | undefined> = {};
+
+const downloadQueue = new PQueue({ concurrency: 3 });
 
 // const resolveDownloadPath = async (
 //   downloadId: string
@@ -82,33 +88,57 @@ const hasObject = (filePointer: ObjectPointer): boolean => {
   return file.exists;
 };
 
-const syncDownloadIntent = async () => {
-  const allIntents = await downloadIntentAsyncStorage.getAllKeys();
+// this has to happen after we've filtered down to loaded objects
+// -- we can't just return 0 for non-loaded objects because the comparator
+// would be intransitive
+const sortFilteredIntents = async (objects: LoadedObjectMetadata[]) => {
+  return objects.sort((a, b) => {
+    try {
+      // sigh, i dunno, this is a little awkward. the idea was to avoid requiring course mata info in this file
+      // which is why we use object pointers everywhere. but here it seems to make sense..
+      // ultimately the sorting is a convenience feature, not a correctness feature, so maybe breaking the abstraction
+      // boundary is fine.
+      return a.lessonIndex - b.lessonIndex;
+    } catch (e) {
+      console.warn("Error sorting download intents", a, b, e);
+      return 0;
+    }
+  });
+};
 
-  const needsStart = allIntents
-    .filter((object) => {
+const syncDownloadIntent = async () => {
+  const allObjectIds = await downloadIntentAsyncStorage.getAllKeys();
+
+  const needsStart = allObjectIds
+    .filter((objectId) => {
       // hm, possible race condition here? not async though. mv should be atomic
-      return !hasObject({ object }) && !isObjectDownloading({ object });
+      return (
+        !hasObject({ object: objectId }) &&
+        !isObjectDownloading({ object: objectId })
+      );
     })
-    .map((object) => {
+    .map((objectId) => {
       try {
-        return CourseData.getLoadedObjectMetadata(object);
+        return CourseData.getLoadedObjectMetadata(objectId);
       } catch (e) {
-        console.warn("Error loading metadata for object", object, e);
+        console.warn("Error loading metadata for object", objectId, e);
         return null;
       }
     })
     .filter((object) => object !== null);
 
-  // console.log({ needsStart });
+  sortFilteredIntents(needsStart);
 
-  await Promise.all(
-    needsStart.map((metadata) => {
-      return _enqueueDownload(metadata.pointer);
-    })
-  );
+  console.log({ needsStart });
 
-  await scrubDownloads();
+  for (const metadata of needsStart) {
+    downloadQueue.add(() => _download(metadata.pointer));
+  }
+
+  downloadQueue.onIdle().then(async () => {
+    // TODO - schedule this idempotently? maybe a race if it's running while a new track gets enqueued?
+    await scrubDownloads();
+  });
 };
 
 // scrub downloads that are known (i.e., in the local index) but not
@@ -145,7 +175,7 @@ const scrubObjects = async () => {};
 // todo check what happens if cleanup happens while downloading
 
 // todo -- for now we just download right away. enqueue instead!
-const _enqueueDownload = async (filePointer: FilePointer) => {
+const _download = async (filePointer: FilePointer) => {
   inMemoryPendingDownloads.add(filePointer.object);
 
   invalidate(filePointer);
@@ -189,7 +219,7 @@ const _enqueueDownload = async (filePointer: FilePointer) => {
   //   trackProgress(downloadId, total, progress.totalBytesWritten);
   // });
 
-  return filePromise;
+  return await filePromise;
 };
 
 const getLocalObjectContainingDir = (pointer: ObjectPointer): string => {

@@ -469,6 +469,13 @@ const indexObjects = (course: CourseName, meta: CourseMetadata): void => {
   }
 };
 
+export type LoadedObjectMetadata = {
+  pointer: FilePointer;
+  course: CourseName;
+  lessonIndex: number;
+  quality: Quality;
+};
+
 const CourseData = {
   courseExists(course: CourseName): boolean {
     return Boolean(courseInfoData[course]);
@@ -644,12 +651,7 @@ const CourseData = {
     return lesson - 1 >= 0 ? lesson - 1 : null;
   },
 
-  getLoadedObjectMetadata(objectId: string): {
-    pointer: FilePointer;
-    course: CourseName;
-    lessonIndex: number;
-    quality: Quality;
-  } {
+  getLoadedObjectMetadata(objectId: string): LoadedObjectMetadata {
     if (!(objectId in loadedObjectMetadataLookup)) {
       throw new Error(`Object metadata not found for ${objectId}`);
     }
