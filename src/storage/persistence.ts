@@ -130,9 +130,6 @@ export const genMarkLessonFinished = async (
     (await AsyncStorage.getItem("@preferences/auto-delete-finished")) ===
     "true";
   if (autoDelete) {
-    const { default: DownloadManager } = await import(
-      "@/src/services/downloadManager"
-    );
     const downloadStatus = await CourseDownloadManager.getDownloadStatus(
       course,
       lesson

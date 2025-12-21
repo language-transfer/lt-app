@@ -24,7 +24,7 @@ const sections: {
     description:
       "Reload the lesson list in case new tracks have been published.",
     action: async (course: CourseName) => {
-      await CourseData.loadCourseMetadata(course);
+      await CourseData.loadCourseMetadata(course, true);
       Alert.alert("Metadata refreshed");
     },
     destructive: false,

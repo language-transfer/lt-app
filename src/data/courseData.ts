@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Buffer } from "buffer";
 import * as FileSystem from "expo-file-system/legacy";
-import { Platform } from "react-native";
 
 import {
   allCoursesSchema,
@@ -41,46 +40,46 @@ import swahiliCover from "@/assets/courses/images/swahili-cover-stylized.png";
 import turkishCoverWithText from "@/assets/courses/images/turkish-cover-stylized-with-text.png";
 import turkishCover from "@/assets/courses/images/turkish-cover-stylized.png";
 
-const spanishFirstLesson =
-  Platform.OS === "ios"
-    ? require("@/assets/courses/audio/spanish1-lq.mp3")
-    : null;
-const arabicFirstLesson =
-  Platform.OS === "ios"
-    ? require("@/assets/courses/audio/arabic1-lq.mp3")
-    : null;
-const turkishFirstLesson =
-  Platform.OS === "ios"
-    ? require("@/assets/courses/audio/turkish1-lq.mp3")
-    : null;
-const germanFirstLesson =
-  Platform.OS === "ios"
-    ? require("@/assets/courses/audio/german1-lq.mp3")
-    : null;
-const greekFirstLesson =
-  Platform.OS === "ios"
-    ? require("@/assets/courses/audio/greek1-lq.mp3")
-    : null;
-const italianFirstLesson =
-  Platform.OS === "ios"
-    ? require("@/assets/courses/audio/italian1-lq.mp3")
-    : null;
-const swahiliFirstLesson =
-  Platform.OS === "ios"
-    ? require("@/assets/courses/audio/swahili1-lq.mp3")
-    : null;
-const frenchFirstLesson =
-  Platform.OS === "ios"
-    ? require("@/assets/courses/audio/french1-lq.mp3")
-    : null;
-const inglesFirstLesson =
-  Platform.OS === "ios"
-    ? require("@/assets/courses/audio/ingles1-lq.mp3")
-    : null;
-const musicFirstLesson =
-  Platform.OS === "ios"
-    ? require("@/assets/courses/audio/music1-lq.mp3")
-    : null;
+// const spanishFirstLesson =
+//   Platform.OS === "ios"
+//     ? require("@/assets/courses/audio/spanish1-lq.mp3")
+//     : null;
+// const arabicFirstLesson =
+//   Platform.OS === "ios"
+//     ? require("@/assets/courses/audio/arabic1-lq.mp3")
+//     : null;
+// const turkishFirstLesson =
+//   Platform.OS === "ios"
+//     ? require("@/assets/courses/audio/turkish1-lq.mp3")
+//     : null;
+// const germanFirstLesson =
+//   Platform.OS === "ios"
+//     ? require("@/assets/courses/audio/german1-lq.mp3")
+//     : null;
+// const greekFirstLesson =
+//   Platform.OS === "ios"
+//     ? require("@/assets/courses/audio/greek1-lq.mp3")
+//     : null;
+// const italianFirstLesson =
+//   Platform.OS === "ios"
+//     ? require("@/assets/courses/audio/italian1-lq.mp3")
+//     : null;
+// const swahiliFirstLesson =
+//   Platform.OS === "ios"
+//     ? require("@/assets/courses/audio/swahili1-lq.mp3")
+//     : null;
+// const frenchFirstLesson =
+//   Platform.OS === "ios"
+//     ? require("@/assets/courses/audio/french1-lq.mp3")
+//     : null;
+// const inglesFirstLesson =
+//   Platform.OS === "ios"
+//     ? require("@/assets/courses/audio/ingles1-lq.mp3")
+//     : null;
+// const musicFirstLesson =
+//   Platform.OS === "ios"
+//     ? require("@/assets/courses/audio/music1-lq.mp3")
+//     : null;
 
 const COURSE_INDEX_URL =
   "https://downloads.languagetransfer.org/all-courses.json";
@@ -101,7 +100,8 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#516198",
     },
-    bundledFirstLesson: spanishFirstLesson,
+    // bundledFirstLesson: spanishFirstLesson,
+    bundledFirstLesson: null,
     bundledFirstLessonId: "spanish/spanish1",
   },
   arabic: {
@@ -117,7 +117,8 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "black",
       backgroundAccent: "#806006",
     },
-    bundledFirstLesson: arabicFirstLesson,
+    // bundledFirstLesson:arabicFirstLesson,
+    // bundledFirstLesson: null,
     bundledFirstLessonId: "arabic/arabic1",
   },
   turkish: {
@@ -133,7 +134,8 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#760629",
     },
-    bundledFirstLesson: turkishFirstLesson,
+    // bundledFirstLesson: turkishFirstLesson,
+    bundledFirstLesson: null,
     bundledFirstLessonId: "turkish/turkish1",
   },
   german: {
@@ -149,7 +151,8 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#006400",
     },
-    bundledFirstLesson: germanFirstLesson,
+    // bundledFirstLesson: germanFirstLesson,
+    bundledFirstLesson: null,
     bundledFirstLessonId: "german/german1",
   },
   greek: {
@@ -165,7 +168,8 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#9c5a20",
     },
-    bundledFirstLesson: greekFirstLesson,
+    // bundledFirstLesson: greekFirstLesson,
+    bundledFirstLesson: null,
     bundledFirstLessonId: "greek/greek1",
   },
   italian: {
@@ -181,7 +185,8 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#a7177f",
     },
-    bundledFirstLesson: italianFirstLesson,
+    // bundledFirstLesson: italianFirstLesson,
+    bundledFirstLesson: null,
     bundledFirstLessonId: "italian/italian1",
   },
   swahili: {
@@ -197,7 +202,8 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "black",
       backgroundAccent: "#0aaea2",
     },
-    bundledFirstLesson: swahiliFirstLesson,
+    // bundledFirstLesson: swahiliFirstLesson,
+    bundledFirstLesson: null,
     bundledFirstLessonId: "swahili/swahili1",
   },
   french: {
@@ -213,7 +219,8 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#098abc",
     },
-    bundledFirstLesson: frenchFirstLesson,
+    // bundledFirstLesson: frenchFirstLesson,
+    bundledFirstLesson: null,
     bundledFirstLessonId: "french/french1",
   },
   ingles: {
@@ -229,7 +236,8 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#516198",
     },
-    bundledFirstLesson: inglesFirstLesson,
+    // bundledFirstLesson: inglesFirstLesson,
+    bundledFirstLesson: null,
     bundledFirstLessonId: "ingles/ingles1",
   },
   music: {
@@ -245,7 +253,8 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "black",
       backgroundAccent: "#786951",
     },
-    bundledFirstLesson: musicFirstLesson,
+    // bundledFirstLesson: musicFirstLesson,
+    bundledFirstLesson: null,
     bundledFirstLessonId: "music/music1",
   },
 };
@@ -517,12 +526,15 @@ const CourseData = {
     return loadedInMemoryCourseMeta[course]?.buildVersion ?? null;
   },
 
-  async loadCourseMetadata(course: CourseName): Promise<void> {
+  async loadCourseMetadata(
+    course: CourseName,
+    forceRemote: boolean = false
+  ): Promise<void> {
     if (CourseData.isCourseMetadataLoaded(course)) {
       return;
     }
 
-    const courseIndex = await ensureCourseIndex();
+    const courseIndex = await ensureCourseIndex(forceRemote);
     const courseIndexEntry = courseIndex.courses.find(
       (entry) => entry.id === course
     );
