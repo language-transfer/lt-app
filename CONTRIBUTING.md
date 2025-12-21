@@ -2,26 +2,36 @@ Welcome to the Language Transfer app! Thanks for your interest in contributing :
 
 ## How to build and run the app
 
+The app uses React Native 0.68.2: https://reactnative-archive-august-2023.netlify.app/docs/0.68/getting-started
+
 ### Prerequisites
 
 **Required Software:**
 - **Node.js**: v16+ (tested with v22.18.0)
 - **npm**: v8+ (tested with v10.9.3)
+
+**For Android Development:**
 - **Java Development Kit (JDK)**: Java 11 (required for Gradle 6.2 compatibility)
   - Install: `sudo apt install openjdk-11-jdk`
   - Set as default: `sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java`
   - Verify with: `java --version` (should show version 11.x.x)
-- **Android Studio**: Latest version with Android SDK
-
-**For Android Development:**
-- Android Studio with Android SDK
-- Android Virtual Device (AVD) or physical Android device
+- **Android Studio**: (tested with 2025.2.2) with Android SDK
 - Environment variables (add to ~/.bashrc):
   ```bash
   export ANDROID_HOME=$HOME/Android/Sdk
   export PATH=$PATH:$ANDROID_HOME/emulator
   export PATH=$PATH:$ANDROID_HOME/platform-tools
   ```
+
+### Setup Instructions
+
+Then, clone and install dependencies for the repository.
+
+1. `git clone https://github.com/language-transfer/lt-app.git`
+2. `cd lt-app`
+3. `npm install --legacy-peer-deps`
+
+#### Android
 
 Run:
 
@@ -31,25 +41,42 @@ npm start
 npm run android
 ```
 
-### Setup Instructions
+For some reason, I've had issues with gradle being able to access Node from Volta, so I have to run:
 
-Follow the instructions on the [React Native website](https://reactnative.dev/docs/environment-setup) on setting up a fresh environment, up to the "Creating a new application" section.
+```bash
+export PATH="/home/rv/.volta/tools/image/node/22.18.0/bin:$PATH"
+```
 
-Then, clone and install dependencies for the repository.
+Build app:
 
-1. `git clone https://github.com/language-transfer/lt-app.git`
-2. `cd lt-app`
-3. `npm install`
+```bash
+cd android
+./gradlew assembleDebug
+```
 
-When developing for iOS, you'll also need to install native dependencies by running:
+Cannot use release build because I need to sign it?
 
-4. `cd ios && pod install`
+Install to device:
+
+```bash
+adb devices
+adb -s {device-id} install android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+#### iOS
+
+Install native dependencies by running:
+
+```bash
+cd ios
+pod install
+```
 
 When you're ready to run the app, run:
 
-    npx react-native run-android
-    # or, for ios:
-    npx react-native run-ios
+```bash
+npx react-native run-ios
+```
 
 To build a production-ready release, add on the `--variant=release` flag:
 
