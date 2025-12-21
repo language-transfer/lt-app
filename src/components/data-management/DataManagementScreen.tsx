@@ -3,6 +3,7 @@ import React from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import CourseData from "@/src/data/courseData";
+import { CourseDownloadManager } from "@/src/services/downloadManager";
 import { genDeleteProgressForCourse } from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
 import { Pressable } from "react-native-gesture-handler";
@@ -50,17 +51,17 @@ const sections: {
   //   },
   //   destructive: false, // lil bit
   // },
-  // {
-  //   key: "all-downloads",
-  //   title: (courseTitle: string) => `Delete all ${courseTitle} downloads`,
-  //   description: "Removes every downloaded lesson for this course.",
-  //   action: async (course: CourseName) => {
-  //     DownloadManager.stopAllDownloadsForCourse(course);
-  //     await DownloadManager.genDeleteAllDownloadsForCourse(course);
-  //     Alert.alert("All downloads deleted.");
-  //   },
-  //   destructive: true,
-  // },
+  {
+    key: "all-downloads",
+    title: (courseTitle: string) => `Delete all ${courseTitle} downloads`,
+    description: "Removes every downloaded lesson for this course.",
+    action: async (course: CourseName) => {
+      // TODO: this probably ought to cancel in-progress downloads too
+      await CourseDownloadManager.unrequestAllDownloadsForCourse(course);
+      Alert.alert("All downloads deleted.");
+    },
+    destructive: true,
+  },
   {
     key: "all-data",
     title: (courseTitle: string) => `Delete all ${courseTitle} data`,

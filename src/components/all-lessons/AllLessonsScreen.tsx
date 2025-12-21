@@ -101,9 +101,7 @@ const AllLessonsScreen = () => {
       return;
     }
 
-    missing.forEach((lesson) => {
-      CourseDownloadManager.requestDownload(course, lesson).catch(() => {});
-    });
+    CourseDownloadManager.requestDownloads(course, missing).catch(() => {});
   };
 
   if (!metadataReady || downloadQuality === null) {

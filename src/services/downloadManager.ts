@@ -163,7 +163,7 @@ const _enqueueDownload = async (filePointer: FilePointer) => {
       // idempotent: true, // nah we should probably throw
     }
   )
-    .catch((err) => {
+    .catch(async (err) => {
       // TODO
       console.warn("Download failed for", filePointer.object, err);
       const stagingFile = new File(stagingDestination);
@@ -171,6 +171,7 @@ const _enqueueDownload = async (filePointer: FilePointer) => {
         stagingFile.delete();
       }
       inMemoryPendingDownloads.delete(filePointer.object);
+      await DownloadManager.unrequestDownload(filePointer);
       invalidate(filePointer);
       throw err;
     })
@@ -218,7 +219,7 @@ export const ensureObjectDir = async (pointer: FilePointer): Promise<void> => {
 };
 
 const DownloadManager = {
-  async requestDownload(filePointer: FilePointer) {
+  async requestDownloads(filePointers: FilePointer[]) {
     // console.log("Requesting download for", filePointer.object);
 
     // TODO: move this logic to the enqueue
@@ -231,13 +232,29 @@ const DownloadManager = {
       }
     }
 
-    // TODO: avoid n^2
-    await downloadIntentAsyncStorage.setItem(filePointer.object, "1");
+    await Promise.all(
+      filePointers.map(async (pointer) => {
+        await downloadIntentAsyncStorage.setItem(pointer.object, "1");
+      })
+    );
+
     await syncDownloadIntent();
   },
 
+  async requestDownload(filePointer: FilePointer) {
+    return await DownloadManager.requestDownloads([filePointer]);
+  },
+
   async unrequestDownload(filePointer: FilePointer) {
-    await downloadIntentAsyncStorage.removeItem(filePointer.object);
+    await DownloadManager.unrequestDownloads([filePointer]);
+  },
+
+  async unrequestDownloads(filePointers: FilePointer[]) {
+    await Promise.all(
+      filePointers.map((pointer) =>
+        downloadIntentAsyncStorage.removeItem(pointer.object)
+      )
+    );
     await syncDownloadIntent();
   },
 
@@ -399,11 +416,17 @@ export function useDownloadCount(course: CourseName) {
 }
 
 export const CourseDownloadManager = {
-  async requestDownload(course: CourseName, lesson: number) {
+  async requestDownloads(course: CourseName, lessons: number[]) {
     const quality = await genPreferenceDownloadQuality();
-    const pointer = CourseData.getLessonPointer(course, lesson, quality);
+    const pointers = lessons.map((lesson) =>
+      CourseData.getLessonPointer(course, lesson, quality)
+    );
 
-    return await DownloadManager.requestDownload(pointer);
+    return await DownloadManager.requestDownloads(pointers);
+  },
+
+  async requestDownload(course: CourseName, lesson: number) {
+    return await CourseDownloadManager.requestDownloads(course, [lesson]);
   },
 
   async unrequestDownload(course: CourseName, lesson: number) {
@@ -430,7 +453,18 @@ export const CourseDownloadManager = {
   ): Promise<FilePointer> {
     const quality = await genPreferenceDownloadQuality();
     return CourseData.getLessonPointer(course, lesson, quality);
-  }
+  },
+
+  async unrequestAllDownloadsForCourse(course: CourseName) {
+    const lessonIndices = CourseData.getLessonIndices(course);
+
+    const allPointers = lessonIndices.flatMap((lesson) =>
+      CourseData.getLessonPointersAllVariants(course, lesson)
+    );
+    if (allPointers.length > 0) {
+      await DownloadManager.unrequestDownloads(allPointers);
+    }
+  },
 };
 
 export default DownloadManager;

@@ -579,6 +579,13 @@ const CourseData = {
     return quality === "high" ? variants.hq : variants.lq;
   },
 
+  getLessonPointersAllVariants(
+    course: CourseName,
+    lesson: number
+  ): FilePointer[] {
+    return Object.values(CourseData.getLessonData(course, lesson).variants);
+  },
+
   async getLessonUrl(
     course: CourseName,
     lesson: number,
