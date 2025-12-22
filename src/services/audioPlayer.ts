@@ -307,7 +307,12 @@ export const useLessonAudio = (
             ? savedProgress.progress
             : null;
         if (savedPosition && savedPosition > 0) {
-          await TrackPlayer.seekTo(savedPosition);
+          // annoying if it saves you right at the end of the lesson and doesn't
+          //   finish/reset to 0. let the user come back in at n-10s -- enough time
+          //   to pause/scrub
+          const latestPermittedSeek = Math.max(0, lessonDuration - 10);
+          const seekPosition = Math.min(savedPosition, latestPermittedSeek);
+          await TrackPlayer.seekTo(seekPosition);
           checkCancel();
           lastPersistTimeRef.current = Date.now();
         }
