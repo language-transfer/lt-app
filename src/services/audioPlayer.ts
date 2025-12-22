@@ -8,6 +8,7 @@ import TrackPlayer, {
   IOSCategoryMode,
   IOSCategoryOptions,
   State,
+  UpdateOptions,
   useActiveTrack,
   usePlaybackState,
   useProgress,
@@ -47,7 +48,7 @@ export type LessonAudioControls = {
   skipBack: (seconds?: number) => Promise<void>;
 };
 
-const CAPABILITIES = [
+const CAPABILITIES: Capability[] = [
   Capability.Play,
   Capability.Pause,
   Capability.SkipToNext,
@@ -55,13 +56,8 @@ const CAPABILITIES = [
   Capability.JumpBackward,
   Capability.Stop,
 ];
-const COMPACT_CAPABILITIES = [
-  Capability.Play,
-  Capability.Pause,
-  Capability.SkipToNext,
-  Capability.SkipToPrevious,
-];
-const NOTIFICATION_CAPABILITIES = [
+
+const NOTIFICATION_CAPABILITIES: Capability[] = [
   Capability.Play,
   Capability.Pause,
   Capability.SkipToNext,
@@ -69,14 +65,13 @@ const NOTIFICATION_CAPABILITIES = [
   Capability.JumpBackward,
   Capability.Stop,
 ];
-const BASE_UPDATE_OPTIONS = {
+const BASE_UPDATE_OPTIONS: UpdateOptions = {
   android: {
     appKilledPlaybackBehavior:
       AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
     alwaysPauseOnInterruption: true,
   },
   capabilities: CAPABILITIES,
-  compactCapabilities: COMPACT_CAPABILITIES,
   notificationCapabilities: NOTIFICATION_CAPABILITIES,
   backwardJumpInterval: 10,
   progressUpdateEventInterval: 2,
@@ -126,7 +121,7 @@ const ensurePlayer = async () => {
         backBuffer: 15,
       });
       await TrackPlayer.updateOptions(BASE_UPDATE_OPTIONS);
-    })().catch((err) => {
+    })().catch(async (err) => {
       playerSetupPromise = null;
       // this is probably not a stable API but I'm pretty sure this only ever failed in dev mode / HMR
       //   (because the setup promise gets reset, but not the track player state)
@@ -135,6 +130,7 @@ const ensurePlayer = async () => {
         err.message ===
         "The player has already been initialized via setupPlayer."
       ) {
+        await TrackPlayer.updateOptions(BASE_UPDATE_OPTIONS);
         return;
       }
       throw err;
