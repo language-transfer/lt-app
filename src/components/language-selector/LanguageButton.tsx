@@ -1,27 +1,41 @@
-import React from 'react';
-import { ImageBackground, StyleSheet, Text, View } from 'react-native';
-import { TouchableNativeFeedback } from 'react-native-gesture-handler';
+import React from "react";
+import { ImageBackground, StyleSheet, Text, View } from "react-native";
+import { TouchableNativeFeedback } from "react-native-gesture-handler";
 
-import CourseData from '@/src/data/courseData';
-import type { CourseName } from '@/src/types';
+import CourseData from "@/src/data/courseData";
+import type { CourseName } from "@/src/types";
 
 type Props = {
   course: CourseName;
+  width: number;
   onPress: () => void;
 };
 
-const LanguageButton = ({ course, onPress }: Props) => {
+const BUTTON_IMAGE_PADDING = 5;
+
+const LanguageButton = ({ course, width, onPress }: Props) => {
+  const imageSize = width - 2 * BUTTON_IMAGE_PADDING;
+
   const info = CourseData.getCourseData(course);
 
   return (
-    <View style={styles.sectionWrapper}>
+    <View style={[styles.sectionWrapper, { width, height: width + 50 }]}>
       <ImageBackground
         source={info.image}
         style={[
           styles.imageBackground,
-          { backgroundColor: CourseData.getCourseUIColors(course).softBackground },
+          {
+            backgroundColor:
+              CourseData.getCourseUIColors(course).softBackground,
+          },
         ]}
-        imageStyle={styles.image}
+        imageStyle={[
+          styles.image,
+          {
+            width: imageSize,
+            height: imageSize,
+          },
+        ]}
       >
         <View style={styles.rippleWrapper}>
           <TouchableNativeFeedback onPress={onPress} useForeground>
@@ -29,13 +43,18 @@ const LanguageButton = ({ course, onPress }: Props) => {
               <Text
                 style={[
                   styles.courseType,
-                  { color: CourseData.getCourseUIColors(course).backgroundAccent },
+                  {
+                    color:
+                      CourseData.getCourseUIColors(course).backgroundAccent,
+                  },
                 ]}
               >
                 {info.courseType}
               </Text>
               <Text style={styles.courseTitle}>{info.shortTitle}</Text>
-              <Text style={styles.courseDetails}>{info.fallbackLessonCount} lessons</Text>
+              <Text style={styles.courseDetails}>
+                {info.fallbackLessonCount} lessons
+              </Text>
             </View>
           </TouchableNativeFeedback>
         </View>
@@ -45,52 +64,46 @@ const LanguageButton = ({ course, onPress }: Props) => {
 };
 
 const styles = StyleSheet.create({
-  sectionWrapper: {
-    width: 150,
-    height: 200,
-    margin: 15,
-  },
+  sectionWrapper: {},
   sectionContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    fontWeight: '600',
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    fontWeight: "600",
     paddingTop: 40,
     paddingBottom: 10,
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   imageBackground: {
     borderRadius: 10,
     elevation: 3,
   },
   rippleWrapper: {
-    overflow: 'hidden',
+    overflow: "hidden",
     borderRadius: 10,
   },
   image: {
     borderRadius: 10,
-    width: 140,
-    height: 140,
-    top: 5,
-    left: 5,
+    top: BUTTON_IMAGE_PADDING,
+    left: BUTTON_IMAGE_PADDING,
   },
   courseType: {
     fontSize: 14,
     // color: 'rgba(0, 0, 0, 0.5)',
     lineHeight: 14,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   courseTitle: {
     fontSize: 28,
     lineHeight: 32,
-    fontWeight: 'bold',
-    color: 'black',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "black",
+    textAlign: "center",
   },
   courseDetails: {
     fontSize: 16,
-    color: 'black',
+    color: "black",
   },
 });
 

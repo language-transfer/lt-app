@@ -13,14 +13,28 @@ import {
 
 import LanguageButton from "@/src/components/language-selector/LanguageButton";
 import type { CourseName } from "@/src/types";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaFrame } from "react-native-safe-area-context";
 import logo from "../../../legacy/resources/LT-logo-text.png";
 
 const SCREEN_HEIGHT = Dimensions.get("screen").height;
-const IMAGE_HEIGHT = 0.4 * SCREEN_HEIGHT;
-const CARDS_MARGIN_TOP = IMAGE_HEIGHT + 40;
+const HEADER_IMAGE_HEIGHT = 0.4 * SCREEN_HEIGHT;
+const CARDS_MARGIN_TOP = HEADER_IMAGE_HEIGHT + 40;
+
+const MIN_BUTTON_SIZE = 130;
+const MAX_BUTTON_SIZE = 250;
+
+const BUTTON_GAP = 20;
+const SIDE_MARGIN = 30;
 
 const LanguageSelector = () => {
+  const { width: screenWidth } = useSafeAreaFrame();
+  const gridViewWidth = screenWidth - SIDE_MARGIN * 2;
+  const numGridColumns = Math.floor(gridViewWidth / MIN_BUTTON_SIZE) || 1;
+  const buttonWidth = Math.min(
+    MAX_BUTTON_SIZE,
+    (gridViewWidth - BUTTON_GAP * (numGridColumns - 1)) / numGridColumns
+  );
+
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const router = useRouter();
 
@@ -42,18 +56,18 @@ const LanguageSelector = () => {
                 transform: [
                   {
                     scale: scrollAnim.interpolate({
-                      inputRange: [0, IMAGE_HEIGHT / 1.5],
+                      inputRange: [0, HEADER_IMAGE_HEIGHT / 1.5],
                       outputRange: [1, 0.9],
                       extrapolate: "clamp",
                     }),
                   },
                 ],
                 opacity: scrollAnim.interpolate({
-                  inputRange: [0, IMAGE_HEIGHT / 1.5],
+                  inputRange: [0, HEADER_IMAGE_HEIGHT / 1.5],
                   outputRange: [1, 0],
                   extrapolate: "clamp",
                 }),
-                height: IMAGE_HEIGHT,
+                height: HEADER_IMAGE_HEIGHT,
               },
             ]}
           >
@@ -98,6 +112,7 @@ const LanguageSelector = () => {
                 ].map((course) => (
                   <LanguageButton
                     key={course}
+                    width={buttonWidth}
                     course={course as CourseName}
                     onPress={() => goToCourse(course)}
                   />
@@ -112,6 +127,7 @@ const LanguageSelector = () => {
               <View style={styles.courseGrid}>
                 <LanguageButton
                   course="ingles"
+                  width={buttonWidth}
                   onPress={() => goToCourse("ingles")}
                 />
               </View>
@@ -122,6 +138,7 @@ const LanguageSelector = () => {
               <View style={styles.courseGrid}>
                 <LanguageButton
                   course="music"
+                  width={buttonWidth}
                   onPress={() => goToCourse("music")}
                 />
               </View>
@@ -254,7 +271,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    gap: BUTTON_GAP,
+    paddingHorizontal: SIDE_MARGIN,
+    paddingVertical: 20,
   },
   scrollIndicator: {
     alignItems: "center",
