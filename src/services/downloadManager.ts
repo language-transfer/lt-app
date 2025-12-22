@@ -31,6 +31,7 @@ const STAGING_DIR = `${DOCUMENT_DIRECTORY}staging`;
 const resolvedDownloadPaths: Record<string, string | undefined> = {};
 
 const downloadQueue = new PQueue({ concurrency: 3 });
+const pendingSet = new Set<string>();
 
 // const resolveDownloadPath = async (
 //   downloadId: string
@@ -50,7 +51,6 @@ const invalidate = (filePointer: ObjectPointer) => {
   // console.log("Invalidating:", ["@local", "downloads", filePointer.object]);
   queryClient.invalidateQueries({
     queryKey: ["@local", "downloads", filePointer.object],
-    refetchType: "all",
   });
 };
 
@@ -60,7 +60,7 @@ const stagingPath = (filePointer: ObjectPointer) =>
 // const snapshots = new Map<string, FileSystem.DownloadResumable>();
 
 // TODO see if we can get away with just using staging for this
-const inMemoryPendingDownloads = new Set<string>();
+const inMemoryInProgressDownloads = new Set<string>();
 let stagingDirCleaned = false;
 
 const cleanUpStagingDir = async () => {
@@ -80,7 +80,7 @@ const cleanUpStagingDir = async () => {
 cleanUpStagingDir();
 
 const isObjectDownloading = (filePointer: ObjectPointer): boolean => {
-  return inMemoryPendingDownloads.has(filePointer.object);
+  return inMemoryInProgressDownloads.has(filePointer.object);
 };
 
 const hasObject = (filePointer: ObjectPointer): boolean => {
@@ -95,7 +95,7 @@ const hasObject = (filePointer: ObjectPointer): boolean => {
 const sortFilteredIntents = async (objects: LoadedObjectMetadata[]) => {
   return objects.sort((a, b) => {
     try {
-      // sigh, i dunno, this is a little awkward. the idea was to avoid requiring course mata info in this file
+      // sigh, i dunno, this is a little awkward. the idea was to avoid requiring course meta info in this file
       // which is why we use object pointers everywhere. but here it seems to make sense..
       // ultimately the sorting is a convenience feature, not a correctness feature, so maybe breaking the abstraction
       // boundary is fine.
@@ -133,14 +133,27 @@ const syncDownloadIntent = async () => {
   // console.log({ needsStart });
 
   for (const metadata of needsStart) {
-    downloadQueue.add(() => _download(metadata.pointer));
+    // only enqueue if we haven't already..!
+    if (!pendingSet.has(metadata.pointer.object)) {
+      pendingSet.add(metadata.pointer.object);
+      downloadQueue.add(() => _download(metadata.pointer));
+    }
   }
+
+  needsStart.forEach((metadata) => {
+    // status is now enqueued (or possibly just immediately downloading?)
+    invalidate(metadata.pointer);
+  });
 
   downloadQueue.onIdle().then(async () => {
     // TODO - schedule this idempotently? maybe a race if it's running while a new track gets enqueued?
     await scrubDownloads();
   });
 };
+
+CourseData.loadAllLocallyDownloadedCourseMetadata()
+  .then(() => syncDownloadIntent())
+  .then();
 
 // scrub downloads that are known (i.e., in the local index) but not
 // in the download intent list
@@ -173,11 +186,23 @@ const scrubDownloads = async () => {
 // TODO also scrub intent entries that don't correspond to known objects
 const scrubObjects = async () => {};
 
+const isObjectRequested = async (filePointer: FilePointer) => {
+  const intended = await downloadIntentAsyncStorage.getItem(filePointer.object);
+  return Boolean(intended);
+};
+
 // todo check what happens if cleanup happens while downloading
 
-// todo -- for now we just download right away. enqueue instead!
 const _download = async (filePointer: FilePointer) => {
-  inMemoryPendingDownloads.add(filePointer.object);
+  const deleted = pendingSet.delete(filePointer.object);
+  inMemoryInProgressDownloads.add(filePointer.object);
+  if (!(await isObjectRequested(filePointer))) {
+    // we add before the async call to prevent a race with invalidation
+    inMemoryInProgressDownloads.delete(filePointer.object);
+    return;
+  }
+
+  console.log(filePointer, { deleted });
 
   invalidate(filePointer);
 
@@ -187,13 +212,11 @@ const _download = async (filePointer: FilePointer) => {
     getLocalObjectContainingDir(filePointer)
   );
 
-  const filePromise = File.downloadFileAsync(
-    url,
-    new File(stagingDestination),
-    {
-      // idempotent: true, // nah we should probably throw
-    }
-  )
+  // await new Promise((resolve) => setTimeout(resolve, 60_000));
+
+  return await File.downloadFileAsync(url, new File(stagingDestination), {
+    // idempotent: true, // nah we should probably throw
+  })
     .catch(async (err) => {
       // TODO
       console.warn("Download failed for", filePointer.object, err);
@@ -201,26 +224,26 @@ const _download = async (filePointer: FilePointer) => {
       if (stagingFile.exists) {
         stagingFile.delete();
       }
-      inMemoryPendingDownloads.delete(filePointer.object);
+      inMemoryInProgressDownloads.delete(filePointer.object);
       await DownloadManager.unrequestDownload(filePointer);
       invalidate(filePointer);
       throw err;
     })
-    .then(() => {
+    .then(async () => {
       const stagingFile = new File(stagingDestination);
       // console.log("Download complete for", filePointer.object);
 
       destinationDir.create({ intermediates: true, idempotent: true });
       stagingFile.move(new File(getLocalObjectPath(filePointer)));
-      inMemoryPendingDownloads.delete(filePointer.object);
+      inMemoryInProgressDownloads.delete(filePointer.object);
       invalidate(filePointer);
-    });
-  // , (progress) => {
-  //   const total = progress.totalBytesExpectedToWrite ?? 0;
-  //   trackProgress(downloadId, total, progress.totalBytesWritten);
-  // });
 
-  return await filePromise;
+      if (!(await isObjectRequested(filePointer))) {
+        // there's probably a race condition somewhere still, but this will
+        // help sync in case the object was unrequested while downloading
+        syncDownloadIntent().then();
+      }
+    });
 };
 
 const getLocalObjectContainingDir = (pointer: ObjectPointer): string => {
@@ -249,11 +272,18 @@ export const ensureObjectDir = async (pointer: FilePointer): Promise<void> => {
   dir.create({ idempotent: true, intermediates: true });
 };
 
+export type DownloadStatus =
+  | "not-downloaded"
+  | "enqueued"
+  | "downloading"
+  | "downloaded";
+
 const DownloadManager = {
   async requestDownloads(filePointers: FilePointer[]) {
     // console.log("Requesting download for", filePointer.object);
 
-    // TODO: move this logic to the enqueue
+    // TODO: move this logic to the enqueue, add a warning if we have enqueued downloads
+    // and this setting is blocking
     const wifiOnly = await genPreferenceDownloadOnlyOnWifi();
 
     if (wifiOnly) {
@@ -289,9 +319,8 @@ const DownloadManager = {
     await syncDownloadIntent();
   },
 
-  async downloadStatus(
-    filePointer: FilePointer
-  ): Promise<"not-downloaded" | "downloading" | "downloaded"> {
+  async getDownloadStatus(filePointer: FilePointer): Promise<DownloadStatus> {
+    const isEnqueued = pendingSet.has(filePointer.object);
     const isDownloading = isObjectDownloading(filePointer);
     const has = hasObject(filePointer);
 
@@ -299,36 +328,12 @@ const DownloadManager = {
       return "downloaded";
     } else if (isDownloading) {
       return "downloading";
+    } else if (isEnqueued) {
+      return "enqueued";
     } else {
       return "not-downloaded";
     }
   },
-
-  // async genDeleteAllDownloadsForCourse(course: CourseName) {
-  //   const folder = DownloadManager.getDownloadFolderForCourse(course);
-  //   const info = await FileSystem.getInfoAsync(folder);
-  //   if (info.exists) {
-  //     await FileSystem.deleteAsync(folder, { idempotent: true });
-  //     Object.keys(resolvedDownloadPaths).forEach((downloadId) => {
-  //       if (downloadId.startsWith(`${course}/`)) {
-  //         delete resolvedDownloadPaths[downloadId];
-  //       }
-  //     });
-  //   }
-  // },
-
-  // async genDeleteFinishedDownloadsForCourse(course: CourseName) {
-  //   await CourseData.loadCourseMetadata(course);
-  //   const lessons = CourseData.getLessonIndices(course);
-  //   await Promise.all(
-  //     lessons.map(async (lesson) => {
-  //       const progress = await genProgressForLesson(course, lesson);
-  //       if (progress?.finished) {
-  //         await DownloadManager.genDeleteDownload(course, lesson);
-  //       }
-  //     })
-  //   );
-  // },
 };
 
 const getLessonIndicesAsync = async (course: CourseName): Promise<number[]> => {
@@ -419,7 +424,7 @@ export function useLessonDownloadStatus(course: CourseName, lesson: number) {
         return "not-downloaded";
       }
       // console.log("Fetching download status for pointer", objectPointer);
-      return await DownloadManager.downloadStatus(objectPointer);
+      return await DownloadManager.getDownloadStatus(objectPointer);
     },
   });
   return query.data;
@@ -431,7 +436,7 @@ export function useDownloadCount(course: CourseName) {
     queries: (lessonPointers.data ?? []).map((pointer) => ({
       queryKey: ["@local", "downloads", pointer.object, "is-downloaded"],
       queryFn: async () => {
-        const status = await DownloadManager.downloadStatus(pointer);
+        const status = await DownloadManager.getDownloadStatus(pointer);
         return status === "downloaded";
       },
     })),
@@ -471,11 +476,11 @@ export const CourseDownloadManager = {
   async getDownloadStatus(
     course: CourseName,
     lesson: number
-  ): Promise<"not-downloaded" | "downloading" | "downloaded"> {
+  ): Promise<DownloadStatus> {
     const quality = await genPreferenceDownloadQuality();
     const pointer = CourseData.getLessonPointer(course, lesson, quality);
 
-    return await DownloadManager.downloadStatus(pointer);
+    return await DownloadManager.getDownloadStatus(pointer);
   },
 
   async getLessonPointer(

@@ -12,7 +12,13 @@ import {
   type LessonData,
   type StoredCourseIndex,
 } from "@/src/data/courseSchemas";
-import { CourseInfo, CourseName, Quality, UIColors } from "@/src/types";
+import {
+  CourseInfo,
+  CourseName,
+  CourseNameSchema,
+  Quality,
+  UIColors,
+} from "@/src/types";
 import {
   ensureObjectDir,
   ensureRootObjectDir,
@@ -401,32 +407,40 @@ const _saveLocalObject = async (
   );
 };
 
-export const readObject = async (
-  pointer: FilePointer,
-  // no need for forceRemote because it's content-addressed
-  { save = true }: { save?: boolean } = {}
+const readLocalObjectOrNull = async (
+  pointer: FilePointer
 ): Promise<Uint8Array | null> => {
-  let data: Uint8Array | null = null;
-
   const localPath = getLocalObjectPath(pointer);
-  console.log({ localPath });
+  // console.log({ localPath });
   const info = await FileSystem.getInfoAsync(localPath);
   if (info.exists) {
     const contents = await FileSystem.readAsStringAsync(localPath, {
       encoding: FileSystem.EncodingType.Base64,
     });
-    data = Uint8Array.from(Buffer.from(contents, "base64"));
+    return Uint8Array.from(Buffer.from(contents, "base64"));
   } else {
-    const url = await getCASObjectURL(pointer);
-    const response = await fetch(url);
-    if (!response.ok) {
-      return null;
-    }
+    return null;
+  }
+};
 
-    const arrayBuffer = await response.arrayBuffer();
-    data = new Uint8Array(arrayBuffer);
+export const readObject = async (
+  pointer: FilePointer,
+  // no need for forceRemote because it's content-addressed
+  { save = true }: { save?: boolean } = {}
+): Promise<Uint8Array | null> => {
+  const localData = await readLocalObjectOrNull(pointer);
+  if (localData) {
+    return localData;
   }
 
+  const url = await getCASObjectURL(pointer);
+  const response = await fetch(url);
+  if (!response.ok) {
+    return null;
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  const data = new Uint8Array(arrayBuffer);
   if (save) {
     await _saveLocalObject(pointer, data);
   }
@@ -533,12 +547,12 @@ const CourseData = {
     return loadedInMemoryCourseMeta[course]?.buildVersion ?? null;
   },
 
-  async loadCourseMetadata(
+  async loadCourseMetadataIfDownloaded(
     course: CourseName,
     forceRemote: boolean = false
-  ): Promise<void> {
+  ): Promise<CourseMetadata | null> {
     if (CourseData.isCourseMetadataLoaded(course)) {
-      return;
+      return loadedInMemoryCourseMeta[course]!;
     }
 
     const courseIndex = await ensureCourseIndex(forceRemote);
@@ -555,14 +569,13 @@ const CourseData = {
     const metadataFilePointer = courseIndexEntry.meta;
     // if the index changes and THEN we lose internet access, this fails, without the fallback we used to have
     // but I can live with this
-    const metadataFile = await readObject(metadataFilePointer);
-    const metadataString = metadataFile
-      ? Buffer.from(metadataFile).toString("utf-8")
-      : null;
+    const metadataFile = await readLocalObjectOrNull(metadataFilePointer);
 
-    if (!metadataString) {
-      throw new Error(`Failed to read metadata for course ${course}`);
+    if (!metadataFile) {
+      return null;
     }
+
+    const metadataString = Buffer.from(metadataFile).toString("utf-8");
 
     const parsedMeta = parseCourseMeta(JSON.parse(metadataString));
 
@@ -573,6 +586,53 @@ const CourseData = {
     indexObjects(course, parsedMeta);
 
     loadedInMemoryCourseMeta[course] = parsedMeta;
+
+    return parsedMeta;
+  },
+
+  async loadCourseMetadata(
+    course: CourseName,
+    forceRemote: boolean = false
+  ): Promise<CourseMetadata | null> {
+    const meta = await CourseData.loadCourseMetadataIfDownloaded(
+      course,
+      forceRemote
+    );
+
+    if (meta) {
+      return meta;
+    }
+
+    const courseIndex = await ensureCourseIndex(forceRemote);
+    const courseIndexEntry = courseIndex.courses.find(
+      (entry) => entry.id === course
+    );
+
+    if (!courseIndexEntry) {
+      throw new Error(`Course ${course} not found in index`);
+    }
+
+    const metadataFilePointer = courseIndexEntry.meta;
+    await readObject(metadataFilePointer, {
+      save: true,
+    });
+
+    return await CourseData.loadCourseMetadataIfDownloaded(course, false);
+  },
+
+  async loadAllLocallyDownloadedCourseMetadata(): Promise<void> {
+    const courseIndex = await ensureCourseIndex();
+
+    await Promise.all(
+      courseIndex.courses.map(async (entry) => {
+        // new courses could be in the remote
+        const courseId = CourseNameSchema.safeParse(entry.id);
+        if (!courseId.success) {
+          return;
+        }
+        await CourseData.loadCourseMetadataIfDownloaded(courseId.data);
+      })
+    );
   },
 
   getLessonData(course: CourseName, lesson: number): LessonData {

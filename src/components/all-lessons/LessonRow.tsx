@@ -40,7 +40,7 @@ const LessonRow = ({ course, lesson }: Props) => {
   );
 
   const downloaded = downloadStatus === "downloaded";
-  const downloading = downloadStatus === "downloading";
+  const downloading = downloadStatus === "downloading" || downloadStatus === "enqueued";
 
   const handleDownloadClick = async () => {
     if (bundled || downloadStatus === undefined) {

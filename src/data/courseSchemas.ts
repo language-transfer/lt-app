@@ -23,6 +23,8 @@ export const courseMetaSchema = z.object({
 });
 
 export const courseIndexEntrySchema = z.object({
+  // this id is NOT CourseNameSchema -- we don't want to reject if the remote
+  //   has added courses our app version hasn't heard of
   id: z.string(),
   meta: filePointerSchema,
   lessons: z.number(),
