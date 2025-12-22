@@ -67,18 +67,11 @@
           # Put common Android tools on PATH
           export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 
-          # Prefer side-by-side NDK path if present; fall back if layout differs.
-          if [ -d "$ANDROID_HOME/ndk/${ndkVersion}" ]; then
-            export ANDROID_NDK_ROOT="$ANDROID_HOME/ndk/${ndkVersion}"
-          elif [ -d "$ANDROID_HOME/ndk-bundle" ]; then
-            export ANDROID_NDK_ROOT="$ANDROID_HOME/ndk-bundle"
-          fi
-
           # Make Gradle/AGP deterministic about SDK/NDK location.
           mkdir -p android
           cat > android/local.properties <<EOF
 sdk.dir=$ANDROID_HOME
-ndk.dir=$ANDROID_NDK_ROOT
+android.ndkVersion=${ndkVersion}
 cmake.dir=$ANDROID_HOME/cmake/${cmakeVersion}
 EOF
 
