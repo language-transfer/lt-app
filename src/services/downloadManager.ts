@@ -9,6 +9,7 @@ import CourseData, {
 import {
   genPreferenceDownloadOnlyOnWifi,
   genPreferenceDownloadQuality,
+  genProgressForLesson,
   usePreferenceQuery,
 } from "@/src/storage/persistence";
 import type { CourseName, FilePointer, Quality } from "@/src/types";
@@ -129,7 +130,7 @@ const syncDownloadIntent = async () => {
 
   sortFilteredIntents(needsStart);
 
-  console.log({ needsStart });
+  // console.log({ needsStart });
 
   for (const metadata of needsStart) {
     downloadQueue.add(() => _download(metadata.pointer));
@@ -493,6 +494,27 @@ export const CourseDownloadManager = {
     );
     if (allPointers.length > 0) {
       await DownloadManager.unrequestDownloads(allPointers);
+    }
+  },
+
+  async unrequestAllFinishedDownloadsForCourse(course: CourseName) {
+    await CourseData.loadCourseMetadata(course);
+    const lessons = CourseData.getLessonIndices(course);
+    const finishedPointers: FilePointer[] = [];
+    await Promise.all(
+      lessons.map(async (lesson) => {
+        const progress = await genProgressForLesson(course, lesson);
+        if (progress?.finished) {
+          const pointers = CourseData.getLessonPointersAllVariants(
+            course,
+            lesson
+          );
+          finishedPointers.push(...pointers);
+        }
+      })
+    );
+    if (finishedPointers.length > 0) {
+      await DownloadManager.unrequestDownloads(finishedPointers);
     }
   },
 };

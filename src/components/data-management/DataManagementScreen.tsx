@@ -31,7 +31,7 @@ const sections: {
   },
   {
     key: "progress",
-    title: (courseTitle: string) => `Delete ${courseTitle} progress`,
+    title: (courseTitle: string) => `Clear ${courseTitle} progress`,
     description:
       "Marks every lesson as unfinished and forgets where you left off.",
     action: async (course: CourseName) => {
@@ -40,17 +40,18 @@ const sections: {
     },
     destructive: true,
   },
-  // TODO
-  // {
-  //   key: "finished-downloads",
-  //   title: (courseTitle: string) => `Delete finished ${courseTitle} downloads`,
-  //   description: "Removes downloaded lessons you have marked as finished.",
-  //   action: async (course: CourseName) => {
-  //     await DownloadManager.genDeleteFinishedDownloadsForCourse(course);
-  //     Alert.alert("Finished downloads deleted.");
-  //   },
-  //   destructive: false, // lil bit
-  // },
+  {
+    key: "finished-downloads",
+    title: (courseTitle: string) => `Delete finished ${courseTitle} downloads`,
+    description: "Removes downloaded lessons you have marked as finished.",
+    action: async (course: CourseName) => {
+      await CourseDownloadManager.unrequestAllFinishedDownloadsForCourse(
+        course
+      );
+      Alert.alert("Finished downloads deleted.");
+    },
+    destructive: false, // lil bit
+  },
   {
     key: "all-downloads",
     title: (courseTitle: string) => `Delete all ${courseTitle} downloads`,
@@ -76,7 +77,9 @@ const sections: {
       await Promise.all([
         // DownloadManager.genDeleteAllDownloadsForCourse(course),
         genDeleteProgressForCourse(course),
+        CourseDownloadManager.unrequestAllDownloadsForCourse(course),
       ]);
+      await CourseData.loadCourseMetadata(course, true);
       router.replace("/");
       Alert.alert("All course data deleted.");
     },
