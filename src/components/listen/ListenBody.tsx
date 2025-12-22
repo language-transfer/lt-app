@@ -25,6 +25,7 @@ import {
 import { genMarkLessonFinished } from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
 import { log } from "@/src/utils/log";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = {
   course: CourseName;
@@ -237,76 +238,83 @@ const ListenBody = ({ course, lesson }: Props) => {
           visible={sheetOpen}
           onRequestClose={closeSheet}
         >
-          <View style={styles.sheetOverlay}>
-            <Animated.View
-              style={[
-                styles.sheetBackdrop,
-                {
-                  opacity: sheetAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 0.35],
-                  }),
-                },
-              ]}
-            >
-              <Pressable style={StyleSheet.absoluteFill} onPress={closeSheet} />
-            </Animated.View>
-            <Animated.View
-              style={[
-                styles.sheetContainer,
-                {
-                  transform: [
-                    {
-                      translateY: sheetAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [400, 0],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              <View style={styles.sheetHandle} />
-              <SheetRow
-                label="Mark as finished"
-                icon={<FontAwesome5 name="check" size={20} color="#222" />}
-                onPress={handleMarkFinished}
-              />
-              <SheetRow
-                label={downloaded ? "Delete download" : "Download for offline"}
-                icon={
-                  busyAction || downloaded === null ? (
-                    <ActivityIndicator size="small" color="#555" />
-                  ) : (
+          <SafeAreaView style={{ flex: 1 }}>
+            <View style={styles.sheetOverlay}>
+              <Animated.View
+                style={[
+                  styles.sheetBackdrop,
+                  {
+                    opacity: sheetAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 0.35],
+                    }),
+                  },
+                ]}
+              >
+                <Pressable
+                  style={StyleSheet.absoluteFill}
+                  onPress={closeSheet}
+                />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.sheetContainer,
+                  {
+                    transform: [
+                      {
+                        translateY: sheetAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [400, 0],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                <View style={styles.sheetHandle} />
+                <SheetRow
+                  label="Mark as finished"
+                  icon={<FontAwesome5 name="check" size={20} color="#222" />}
+                  onPress={handleMarkFinished}
+                />
+                <SheetRow
+                  label={
+                    downloaded ? "Delete download" : "Download for offline"
+                  }
+                  icon={
+                    busyAction || downloaded === null ? (
+                      <ActivityIndicator size="small" color="#555" />
+                    ) : (
+                      <FontAwesome5
+                        name={downloaded ? "trash" : "download"}
+                        size={18}
+                        color="#222"
+                      />
+                    )
+                  }
+                  disabled={busyAction !== null || downloaded === null}
+                  onPress={async () => {
+                    await handleDownloadToggle();
+                    closeSheet();
+                  }}
+                />
+                <SheetRow
+                  label="Report a problem"
+                  icon={
                     <FontAwesome5
-                      name={downloaded ? "trash" : "download"}
+                      name="exclamation-triangle"
                       size={18}
                       color="#222"
                     />
-                  )
-                }
-                disabled={busyAction !== null || downloaded === null}
-                onPress={async () => {
-                  await handleDownloadToggle();
-                  closeSheet();
-                }}
-              />
-              <SheetRow
-                label="Report a problem"
-                icon={
-                  <FontAwesome5
-                    name="exclamation-triangle"
-                    size={18}
-                    color="#222"
-                  />
-                }
-                onPress={() => {
-                  Linking.openURL(reportMailto);
-                  closeSheet();
-                }}
-              />
-            </Animated.View>
-          </View>
+                  }
+                  onPress={() => {
+                    Linking.openURL(reportMailto);
+                    closeSheet();
+                  }}
+                />
+              </Animated.View>
+            </View>
+          </SafeAreaView>
         </Modal>
       ) : null}
     </View>
