@@ -1,5 +1,6 @@
+import { useCourseColors } from "@/src/hooks/useCourseLessonData";
 import { DrawerToggleButton } from "@react-navigation/drawer";
-import { Stack } from "expo-router";
+import { Stack, useSegments } from "expo-router";
 import "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -7,14 +8,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 //   for statusbar overlay on home screen, for example, and make
 //   sure there's sufficient padding
 const StackLayout = () => {
+  const courseColors = useCourseColors();
+  const segments = useSegments();
+
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["bottom", "left", "right"]}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor:
+          segments.join("/") === "(main)/course/[course]/listen/[lesson]"
+            ? courseColors.background
+            : undefined,
+      }}
+      edges={["bottom", "left", "right"]}
+    >
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="course/[course]/index"
-          options={{  }}
-        />
+        <Stack.Screen name="course/[course]/index" />
         <Stack.Screen
           name="course/[course]/listen/[lesson]"
           // Keep drawer/back gestures off; horizontal swipes here conflict with the scrubber drag.
