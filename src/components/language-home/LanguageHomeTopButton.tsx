@@ -146,15 +146,26 @@ const LanguageHomeTopButton = ({ course }: Props) => {
           <Pressable
             style={styles.ratingButton}
             onPress={() => {
+              const time = Date.now();
               log({
                 action: "open_google_play",
                 surface: "rate_button",
-              });
+              }).then();
               genSetPreferenceRatingButtonDismissed({
                 dismissed: true,
                 surface: "LanguageHomeTopButton",
                 explicit: false,
-                time: Date.now(),
+                time,
+              }).then();
+              log({
+                action: "set_preference",
+                surface: "rating-button-dismissed",
+                setting_value: {
+                  dismissed: true,
+                  surface: "LanguageHomeTopButton",
+                  explicit: false,
+                  time,
+                },
               }).then();
               setRatingDismissed(true);
               Linking.openURL(
@@ -167,12 +178,27 @@ const LanguageHomeTopButton = ({ course }: Props) => {
           </Pressable>
           <Pressable
             style={styles.dismissButton}
-            onPress={async () => {
-              await genSetPreferenceRatingButtonDismissed({
+            onPress={() => {
+              const time = Date.now();
+              log({
+                action: "dismiss_rating_button",
+                surface: "rate_button",
+              }).then();
+              genSetPreferenceRatingButtonDismissed({
                 dismissed: true,
                 surface: "LanguageHomeTopButton",
                 explicit: true,
-                time: Date.now(),
+                time,
+              }).then();
+              log({
+                action: "set_preference",
+                surface: "rating-button-dismissed",
+                setting_value: {
+                  dismissed: true,
+                  surface: "LanguageHomeTopButton",
+                  explicit: true,
+                  time,
+                },
               });
               setRatingDismissed(true);
             }}

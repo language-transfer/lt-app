@@ -50,13 +50,13 @@ const logRemoteAction = async (action: string, positionOverride?: number) => {
     TrackPlayer.getProgress(),
   ]);
 
-  await log({
+  log({
     action,
     surface: "remote",
     course: context?.course,
     lesson: context?.lesson,
     position: positionOverride ?? progress.position,
-  });
+  }).then();
 };
 
 const persistProgress = async (context: LessonContext, position: number) => {
@@ -68,6 +68,7 @@ const FINISH_THRESHOLD_SECONDS = 5;
 
 let lastPersistTs = 0;
 let lastCompletedTrackId: string | number | null = null;
+let lastActiveTrackId: string | number | null = null;
 let lastProgress: {
   context: LessonContext;
   position: number;
@@ -91,7 +92,7 @@ const trackPlayerService = async (): Promise<void> => {
     Event.RemotePlay,
     runSafe(async () => {
       await TrackPlayer.play();
-      await logRemoteAction("play");
+      logRemoteAction("play").then();
     })
   );
 
@@ -99,14 +100,14 @@ const trackPlayerService = async (): Promise<void> => {
     Event.RemotePause,
     runSafe(async () => {
       await TrackPlayer.pause();
-      await logRemoteAction("pause");
+      logRemoteAction("pause").then();
     })
   );
 
   TrackPlayer.addEventListener(
     Event.RemoteStop,
     runSafe(async () => {
-      await logRemoteAction("stop");
+      logRemoteAction("stop").then();
       await TrackPlayer.stop();
       await TrackPlayer.reset();
     })
@@ -122,7 +123,7 @@ const trackPlayerService = async (): Promise<void> => {
 
       const nextPosition = Math.max(0, progress.position - interval);
       await TrackPlayer.seekTo(nextPosition);
-      await logRemoteAction("jump_backward", nextPosition);
+      logRemoteAction("jump_backward", nextPosition).then();
       if (context) {
         await persistProgress(context, nextPosition);
       }
@@ -141,7 +142,7 @@ const trackPlayerService = async (): Promise<void> => {
       }
 
       await TrackPlayer.skipToNext();
-      await logRemoteAction("skip_next", 0);
+      logRemoteAction("skip_next", 0).then();
     })
   );
 
@@ -154,7 +155,7 @@ const trackPlayerService = async (): Promise<void> => {
       }
 
       await TrackPlayer.skipToPrevious();
-      await logRemoteAction("skip_previous", 0);
+      logRemoteAction("skip_previous", 0).then();
     })
   );
 
@@ -163,7 +164,7 @@ const trackPlayerService = async (): Promise<void> => {
     runSafe(async ({ position }) => {
       const context = await getLessonContextForTrack();
       await TrackPlayer.seekTo(position);
-      await logRemoteAction("change_position", position);
+      logRemoteAction("change_position", position).then();
       if (context) {
         await persistProgress(context, position);
       }
@@ -201,6 +202,22 @@ const trackPlayerService = async (): Promise<void> => {
         return;
       }
 
+      const currentContext = await getLessonContextForTrack();
+      if (
+        currentContext?.trackId !== undefined &&
+        lastProgress.context.trackId !== undefined &&
+        currentContext.trackId !== lastProgress.context.trackId &&
+        lastProgress.context.trackId !== lastActiveTrackId
+      ) {
+        log({
+          action: "track_changed",
+          course: lastProgress.context.course,
+          lesson: lastProgress.context.lesson,
+          position: lastProgress.position,
+        }).then();
+      }
+      lastActiveTrackId = currentContext?.trackId ?? null;
+
       const { context, position, duration } = lastProgress;
       if (
         duration > 0 &&
@@ -209,6 +226,11 @@ const trackPlayerService = async (): Promise<void> => {
         context.trackId !== lastCompletedTrackId
       ) {
         lastCompletedTrackId = context.trackId;
+        log({
+          action: "finish_lesson",
+          course: context.course,
+          lesson: context.lesson,
+        }).then();
         await genMarkLessonFinished(context.course, context.lesson);
         await persistProgress(context, 0);
       }
@@ -230,6 +252,11 @@ const trackPlayerService = async (): Promise<void> => {
         context.trackId !== lastCompletedTrackId
       ) {
         lastCompletedTrackId = context.trackId;
+        log({
+          action: "finish_lesson",
+          course: context.course,
+          lesson: context.lesson,
+        }).then();
         await genMarkLessonFinished(context.course, context.lesson);
         await persistProgress(context, 0);
       }

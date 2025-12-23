@@ -7,6 +7,7 @@ import { CourseDownloadManager } from "@/src/services/downloadManager";
 import { genDeleteProgressForCourse } from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
 import { Pressable } from "react-native-gesture-handler";
+import { log } from "@/src/utils/log";
 
 const sections: {
   key: string;
@@ -17,6 +18,9 @@ const sections: {
     router: ReturnType<typeof useRouter>
   ) => Promise<void>;
   destructive: boolean;
+  logAction: string;
+  confirmAction?: string;
+  dismissAction?: string;
 }[] = [
   {
     key: "refresh",
@@ -27,7 +31,8 @@ const sections: {
       await CourseData.loadCourseMetadata(course, true);
       Alert.alert("Metadata refreshed");
     },
-    destructive: false,
+    destructive: false, // lil bit
+    logAction: "refresh_course_metadata",
   },
   {
     key: "progress",
@@ -39,6 +44,9 @@ const sections: {
       Alert.alert("Progress deleted.");
     },
     destructive: true,
+    logAction: "delete_course_progress",
+    confirmAction: "delete_course_progress_confirm",
+    dismissAction: "delete_course_progress_explicit_dismiss",
   },
   {
     key: "finished-downloads",
@@ -50,7 +58,10 @@ const sections: {
       );
       Alert.alert("Finished downloads deleted.");
     },
-    destructive: false, // lil bit
+    destructive: false,
+    logAction: "delete_finished_course_downloads",
+    confirmAction: "delete_finished_course_downloads_confirm",
+    dismissAction: "delete_finished_course_downloads_explicit_dismiss",
   },
   {
     key: "all-downloads",
@@ -62,6 +73,9 @@ const sections: {
       Alert.alert("All downloads deleted.");
     },
     destructive: true,
+    logAction: "delete_course_downloads",
+    confirmAction: "delete_course_downloads_confirm",
+    dismissAction: "delete_course_downloads_explicit_dismiss",
   },
   {
     key: "all-data",
@@ -83,6 +97,9 @@ const sections: {
       Alert.alert("All course data deleted.");
     },
     destructive: true,
+    logAction: "delete_all_course_data",
+    confirmAction: "delete_all_course_data_confirm",
+    dismissAction: "delete_all_course_data_explicit_dismiss",
   },
 ];
 
@@ -117,11 +134,30 @@ const DataManagementScreen = () => {
             key={section.key}
             style={styles.card}
             onPress={async () => {
-              if (
-                section.destructive &&
-                !(await confirm(section.title(title)))
-              ) {
-                return;
+              log({
+                action: section.logAction,
+                surface: "data_management",
+                course,
+              }).then();
+              if (section.destructive) {
+                const confirmed = await confirm(section.title(title));
+                if (!confirmed) {
+                  if (section.dismissAction) {
+                    log({
+                      action: section.dismissAction,
+                      surface: "data_management",
+                      course,
+                    }).then();
+                  }
+                  return;
+                }
+                if (section.confirmAction) {
+                  log({
+                    action: section.confirmAction,
+                    surface: "data_management",
+                    course,
+                  }).then();
+                }
               }
               await section.action(course, router);
             }}

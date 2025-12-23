@@ -6,6 +6,7 @@ import CourseData, {
   getCASObjectURL,
   LoadedObjectMetadata,
 } from "@/src/data/courseData";
+import { log } from "@/src/utils/log";
 import {
   genPreferenceDownloadOnlyOnWifi,
   genPreferenceDownloadQuality,
@@ -218,6 +219,17 @@ const _download = async (filePointer: FilePointer) => {
     // idempotent: true, // nah we should probably throw
   })
     .catch(async (err) => {
+      try {
+        const metadata = CourseData.getLoadedObjectMetadata(filePointer.object);
+        log({
+          action: "fail_download",
+          surface: "download_manager",
+          course: metadata.course,
+          lesson: metadata.lessonIndex,
+        }).then();
+      } catch {
+        // ignore missing metadata
+      }
       // TODO
       console.warn("Download failed for", filePointer.object, err);
       const stagingFile = new File(stagingDestination);
@@ -237,6 +249,18 @@ const _download = async (filePointer: FilePointer) => {
       stagingFile.move(new File(getLocalObjectPath(filePointer)));
       inMemoryInProgressDownloads.delete(filePointer.object);
       invalidate(filePointer);
+
+      try {
+        const metadata = CourseData.getLoadedObjectMetadata(filePointer.object);
+        log({
+          action: "finish_download",
+          surface: "download_manager",
+          course: metadata.course,
+          lesson: metadata.lessonIndex,
+        }).then();
+      } catch {
+        // ignore missing metadata
+      }
 
       if (!(await isObjectRequested(filePointer))) {
         // there's probably a race condition somewhere still, but this will
@@ -457,6 +481,15 @@ export const CourseDownloadManager = {
     const pointers = lessons.map((lesson) =>
       CourseData.getLessonPointer(course, lesson, quality)
     );
+
+    lessons.forEach((lesson) => {
+      log({
+        action: "start_download",
+        surface: "download_manager",
+        course,
+        lesson,
+      }).then();
+    });
 
     return await DownloadManager.requestDownloads(pointers);
   },

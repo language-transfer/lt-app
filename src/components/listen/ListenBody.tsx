@@ -125,7 +125,7 @@ const ListenBody = () => {
       if (downloaded) {
         log({
           action: "delete_download",
-          surface: "listen_screen",
+          surface: "listen_bottom_sheet",
           course,
           lesson,
         });
@@ -134,7 +134,7 @@ const ListenBody = () => {
       } else {
         log({
           action: "download_lesson",
-          surface: "listen_screen",
+          surface: "listen_bottom_sheet",
           course,
           lesson,
         });
@@ -149,7 +149,7 @@ const ListenBody = () => {
         action: downloaded ? "delete_download_error" : "download_error",
         course,
         lesson,
-        surface: "listen_screen",
+        surface: "listen_bottom_sheet",
         message: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -161,7 +161,7 @@ const ListenBody = () => {
     closeSheet();
     log({
       action: "mark_finished",
-      surface: "listen_screen",
+      surface: "listen_bottom_sheet",
       course,
       lesson,
       position: controls.position,

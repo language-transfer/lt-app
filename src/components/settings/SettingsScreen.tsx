@@ -15,6 +15,7 @@ import {
   genSetPreferenceDownloadQuality,
   genSetPreferenceStreamQuality,
 } from '@/src/storage/persistence';
+import { log } from '@/src/utils/log';
 
 type SettingsState = {
   autoDeleteFinished: boolean;
@@ -81,7 +82,14 @@ const SettingsScreen = () => {
         }
         onPress={() =>
           toggle('autoDeleteFinished', () =>
-            genSetPreferenceAutoDeleteFinished(!settings.autoDeleteFinished),
+            genSetPreferenceAutoDeleteFinished(!settings.autoDeleteFinished).then(
+              () =>
+                log({
+                  action: 'set_preference',
+                  surface: 'auto-delete-finished',
+                  setting_value: !settings.autoDeleteFinished,
+                }).then(),
+            ),
           )
         }
       />
@@ -91,7 +99,14 @@ const SettingsScreen = () => {
         accessory={<Checkbox checked={settings.downloadOnlyOnWifi} />}
         onPress={() =>
           toggle('downloadOnlyOnWifi', () =>
-            genSetPreferenceDownloadOnlyOnWifi(!settings.downloadOnlyOnWifi),
+            genSetPreferenceDownloadOnlyOnWifi(!settings.downloadOnlyOnWifi).then(
+              () =>
+                log({
+                  action: 'set_preference',
+                  surface: 'download-only-on-wifi',
+                  setting_value: !settings.downloadOnlyOnWifi,
+                }).then(),
+            ),
           )
         }
       />
@@ -101,7 +116,14 @@ const SettingsScreen = () => {
         accessory={<Text style={styles.valueText}>{settings.streamQuality}</Text>}
         onPress={() =>
           toggle('streamQuality', () =>
-            genSetPreferenceStreamQuality(settings.streamQuality === 'high' ? 'low' : 'high'),
+            genSetPreferenceStreamQuality(settings.streamQuality === 'high' ? 'low' : 'high').then(
+              () =>
+                log({
+                  action: 'set_preference',
+                  surface: 'stream-quality',
+                  setting_value: settings.streamQuality === 'high' ? 'low' : 'high',
+                }).then(),
+            ),
           )
         }
       />
@@ -111,7 +133,14 @@ const SettingsScreen = () => {
         accessory={<Text style={styles.valueText}>{settings.downloadQuality}</Text>}
         onPress={() =>
           toggle('downloadQuality', () =>
-            genSetPreferenceDownloadQuality(settings.downloadQuality === 'high' ? 'low' : 'high'),
+            genSetPreferenceDownloadQuality(settings.downloadQuality === 'high' ? 'low' : 'high').then(
+              () =>
+                log({
+                  action: 'set_preference',
+                  surface: 'download-quality',
+                  setting_value: settings.downloadQuality === 'high' ? 'low' : 'high',
+                }).then(),
+            ),
           )
         }
       />
@@ -122,6 +151,11 @@ const SettingsScreen = () => {
         onPress={() =>
           toggle('allowDataCollection', async () => {
             await genSetPreferenceAllowDataCollection(!settings.allowDataCollection);
+            log({
+              action: 'set_preference',
+              surface: 'allow-data-collection',
+              setting_value: !settings.allowDataCollection,
+            }).then();
             await genDeleteMetricsToken();
           })
         }
