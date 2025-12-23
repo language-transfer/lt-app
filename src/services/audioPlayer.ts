@@ -21,10 +21,10 @@ import {
   getLocalObjectPath,
 } from "@/src/services/downloadManager";
 import {
-  genMarkLessonFinished,
-  genPreferenceStreamQuality,
-  genProgressForLesson,
-  genUpdateProgressForLesson,
+  getPreferenceStreamQuality,
+  getProgressForLesson,
+  markLessonFinished,
+  updateProgressForLesson,
 } from "@/src/storage/persistence";
 import type { CourseName, Quality } from "@/src/types";
 import { log } from "@/src/utils/log";
@@ -266,8 +266,8 @@ export const useLessonAudio = (
         }
 
         const [quality, savedProgress] = await Promise.all([
-          genPreferenceStreamQuality(),
-          genProgressForLesson(course, lesson),
+          getPreferenceStreamQuality(),
+          getProgressForLesson(course, lesson),
         ]);
         checkCancel();
 
@@ -352,7 +352,7 @@ export const useLessonAudio = (
     }
 
     lastPersistTimeRef.current = now;
-    genUpdateProgressForLesson(course, lesson, progress.position).catch(
+    updateProgressForLesson(course, lesson, progress.position).catch(
       () => {}
     );
   }, [
@@ -372,8 +372,8 @@ export const useLessonAudio = (
       return;
     }
 
-    genMarkLessonFinished(course, lesson).catch(() => {});
-    genUpdateProgressForLesson(course, lesson, 0).catch(() => {});
+    markLessonFinished(course, lesson).catch(() => {});
+    updateProgressForLesson(course, lesson, 0).catch(() => {});
   }, [
     course,
     lesson,
@@ -432,7 +432,7 @@ export const useLessonAudio = (
       }
       await TrackPlayer.seekTo(seconds);
       lastPersistTimeRef.current = Date.now();
-      await genUpdateProgressForLesson(course, lesson, seconds);
+      await updateProgressForLesson(course, lesson, seconds);
       if (options?.log !== false) {
         logPlayerEvent("change_position", seconds);
       }

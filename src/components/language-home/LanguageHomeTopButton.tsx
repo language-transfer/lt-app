@@ -14,9 +14,9 @@ import {
 import CourseData from "@/src/data/courseData";
 import { useCurrentCourseColors } from "@/src/hooks/useCourseLessonData";
 import {
-  genMostRecentListenedLessonForCourse,
-  genProgressForLesson,
-  genSetPreferenceRatingButtonDismissed,
+  getMostRecentListenedLessonForCourse,
+  getProgressForLesson,
+  setPreferenceRatingButtonDismissed,
   usePreferenceRatingButtonDismissed,
 } from "@/src/storage/persistence";
 import type { CourseName, Progress } from "@/src/types";
@@ -57,8 +57,8 @@ const LanguageHomeTopButton = ({ course }: Props) => {
     useCallback(() => {
       let mounted = true;
       const load = async () => {
-        const lesson = await genMostRecentListenedLessonForCourse(course);
-        const progressValue = await genProgressForLesson(course, lesson);
+        const lesson = await getMostRecentListenedLessonForCourse(course);
+        const progressValue = await getProgressForLesson(course, lesson);
 
         if (!mounted) {
           return;
@@ -151,7 +151,7 @@ const LanguageHomeTopButton = ({ course }: Props) => {
                 action: "open_google_play",
                 surface: "rate_button",
               }).then();
-              genSetPreferenceRatingButtonDismissed({
+              setPreferenceRatingButtonDismissed({
                 dismissed: true,
                 surface: "LanguageHomeTopButton",
                 explicit: false,
@@ -183,7 +183,7 @@ const LanguageHomeTopButton = ({ course }: Props) => {
                 action: "dismiss_rating_button",
                 surface: "rate_button",
               }).then();
-              genSetPreferenceRatingButtonDismissed({
+              setPreferenceRatingButtonDismissed({
                 dismissed: true,
                 surface: "LanguageHomeTopButton",
                 explicit: true,

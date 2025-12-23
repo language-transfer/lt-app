@@ -11,18 +11,7 @@ const activityKey = (course: CourseName, lesson?: number) =>
     ? `@activity/${course}`
     : `@activity/${course}/${lesson}`;
 
-export const genAutopause = async (): Promise<{
-  type: "off" | "timed" | "manual";
-  timedDelay?: number;
-}> => {
-  const autopause = await AsyncStorage.getItem("@global-setting/autopause");
-  if (!autopause) {
-    return { type: "off" };
-  }
-  return JSON.parse(autopause);
-};
-
-export const genMostRecentListenedLessonForCourse = async (
+export const getMostRecentListenedLessonForCourse = async (
   course: CourseName
 ): Promise<number | null> => {
   const value = await AsyncStorage.getItem(
@@ -31,14 +20,14 @@ export const genMostRecentListenedLessonForCourse = async (
   return value === null ? null : Number.parseInt(value, 10);
 };
 
-export const genMostRecentListenedCourse =
+export const getMostRecentListenedCourse =
   async (): Promise<CourseName | null> => {
     return (await AsyncStorage.getItem(
       "@activity/most-recent-course"
     )) as CourseName | null;
   };
 
-export const genProgressForLesson = async (
+export const getProgressForLesson = async (
   course: CourseName,
   lesson: number | null
 ): Promise<Progress | null> => {
@@ -60,17 +49,17 @@ export const genProgressForLesson = async (
 export const useLessonProgress = (course: CourseName, lesson: number) => {
   const { data: progress } = useQuery({
     queryKey: ["@local", "progress", course, lesson],
-    queryFn: () => genProgressForLesson(course, lesson),
+    queryFn: () => getProgressForLesson(course, lesson),
   });
   return progress;
 };
 
-export const genUpdateProgressForLesson = async (
+export const updateProgressForLesson = async (
   course: CourseName,
   lesson: number,
   progress: number
 ): Promise<void> => {
-  const progressObject = (await genProgressForLesson(course, lesson)) ?? {
+  const progressObject = (await getProgressForLesson(course, lesson)) ?? {
     finished: false,
     progress: null,
   };
@@ -95,13 +84,13 @@ export const genUpdateProgressForLesson = async (
   });
 };
 
-export const genMarkLessonFinished = async (
+export const markLessonFinished = async (
   course: CourseName,
   lesson: number
 ): Promise<void> => {
   console.log("Marking lesson finished:", course, lesson);
 
-  const progressObject = (await genProgressForLesson(course, lesson)) ?? {
+  const progressObject = (await getProgressForLesson(course, lesson)) ?? {
     finished: false,
     progress: null,
   };
@@ -139,7 +128,7 @@ export const genMarkLessonFinished = async (
   }
 };
 
-export const genDeleteProgressForCourse = async (
+export const deleteProgressForCourse = async (
   course: CourseName
 ): Promise<void> => {
   const { default: CourseData } = await import("@/src/data/courseData");
@@ -157,7 +146,7 @@ export const genDeleteProgressForCourse = async (
   ]);
 };
 
-export const genMetricsToken = async (): Promise<string> => {
+export const getMetricsToken = async (): Promise<string> => {
   const stored = await AsyncStorage.getItem("@metrics/user-token");
   if (stored) {
     return stored;
@@ -173,7 +162,7 @@ export const genMetricsToken = async (): Promise<string> => {
   return token;
 };
 
-export const genDeleteMetricsToken = async (): Promise<void> => {
+export const deleteMetricsToken = async (): Promise<void> => {
   await AsyncStorage.removeItem("@metrics/user-token");
 };
 
@@ -225,44 +214,44 @@ const preference = <T>(
 // todo - replace this with runtime type stuff w/ zod
 
 export const [
-  genPreferenceAutoDeleteFinished,
-  genSetPreferenceAutoDeleteFinished,
+  getPreferenceAutoDeleteFinished,
+  setPreferenceAutoDeleteFinished,
   usePreferenceAutoDeleteFinished,
 ] = preference("auto-delete-finished", false, (b) => b === "true");
 
 export const [
-  genPreferenceStreamQuality,
-  genSetPreferenceStreamQuality,
+  getPreferenceStreamQuality,
+  setPreferenceStreamQuality,
   usePreferenceStreamQuality,
 ] = preference("stream-quality", "low", (value) => value as Quality);
 
 export const [
-  genPreferenceDownloadQuality,
-  genSetPreferenceDownloadQuality,
+  getPreferenceDownloadQuality,
+  setPreferenceDownloadQuality,
   usePreferenceDownloadQuality,
 ] = preference("download-quality", "high", (value) => value as Quality);
 
 export const [
-  genPreferenceDownloadOnlyOnWifi,
-  genSetPreferenceDownloadOnlyOnWifi,
+  getPreferenceDownloadOnlyOnWifi,
+  setPreferenceDownloadOnlyOnWifi,
   usePreferenceDownloadOnlyOnWifi,
 ] = preference("download-only-on-wifi", true, (b) => b === "true");
 
 export const [
-  genPreferenceAllowDataCollection,
-  genSetPreferenceAllowDataCollection,
+  getPreferenceAllowDataCollection,
+  setPreferenceAllowDataCollection,
   usePreferenceAllowDataCollection,
 ] = preference("allow-data-collection", true, (b) => b === "true");
 
 export const [
-  genPreferenceIsFirstLoad,
-  genSetPreferenceIsFirstLoad,
+  getPreferenceIsFirstLoad,
+  setPreferenceIsFirstLoad,
   usePreferenceIsFirstLoad,
 ] = preference("is-first-load", true, (b) => b === "true");
 
 export const [
-  genPreferenceRatingButtonDismissed,
-  genSetPreferenceRatingButtonDismissed,
+  getPreferenceRatingButtonDismissed,
+  setPreferenceRatingButtonDismissed,
   usePreferenceRatingButtonDismissed,
 ] = preference<{
   dismissed: boolean;
@@ -277,8 +266,8 @@ export const [
 );
 
 export const [
-  genPreferenceKillswitchCourseVersionV1,
-  genSetPreferenceKillswitchCourseVersionV1,
+  getPreferenceKillswitchCourseVersionV1,
+  setPreferenceKillswitchCourseVersionV1,
   usePreferenceKillswitchCourseVersionV1,
 ] = preference("killswitch-course-version-v1", false, (b) => b === "true");
 

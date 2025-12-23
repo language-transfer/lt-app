@@ -27,7 +27,7 @@ import {
   CourseDownloadManager,
   useLessonDownloadStatus,
 } from "@/src/services/downloadManager";
-import { genMarkLessonFinished } from "@/src/storage/persistence";
+import { markLessonFinished } from "@/src/storage/persistence";
 import { useLogger } from "@/src/utils/log";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -155,7 +155,7 @@ const ListenBody = () => {
       surface: "listen_bottom_sheet",
       position: controls.position,
     });
-    await genMarkLessonFinished(course, lesson);
+    await markLessonFinished(course, lesson);
     router.back();
   };
 

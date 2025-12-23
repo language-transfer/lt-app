@@ -10,12 +10,12 @@ import {
 } from "react-native";
 
 import {
-  genDeleteMetricsToken,
-  genSetPreferenceAllowDataCollection,
-  genSetPreferenceAutoDeleteFinished,
-  genSetPreferenceDownloadOnlyOnWifi,
-  genSetPreferenceDownloadQuality,
-  genSetPreferenceStreamQuality,
+  deleteMetricsToken,
+  setPreferenceAllowDataCollection,
+  setPreferenceAutoDeleteFinished,
+  setPreferenceDownloadOnlyOnWifi,
+  setPreferenceDownloadQuality,
+  setPreferenceStreamQuality,
   usePreferenceAllowDataCollection,
   usePreferenceAutoDeleteFinished,
   usePreferenceDownloadOnlyOnWifi,
@@ -82,9 +82,7 @@ const SettingsScreen = () => {
         description="Delete downloaded lessons when you mark them finished."
         accessory={<Checkbox checked={settings.autoDeleteFinished} />}
         onPress={async () => {
-          await genSetPreferenceAutoDeleteFinished(
-            !settings.autoDeleteFinished
-          );
+          await setPreferenceAutoDeleteFinished(!settings.autoDeleteFinished);
 
           log({
             action: "set_preference",
@@ -98,9 +96,7 @@ const SettingsScreen = () => {
         description="When enabled, track downloads will only start on Wi‑Fi connections."
         accessory={<Checkbox checked={settings.downloadOnlyOnWifi} />}
         onPress={async () => {
-          await genSetPreferenceDownloadOnlyOnWifi(
-            !settings.downloadOnlyOnWifi
-          );
+          await setPreferenceDownloadOnlyOnWifi(!settings.downloadOnlyOnWifi);
 
           log({
             action: "set_preference",
@@ -117,7 +113,7 @@ const SettingsScreen = () => {
         }
         onPress={async () => {
           const newValue = settings.streamQuality === "high" ? "low" : "high";
-          await genSetPreferenceStreamQuality(newValue);
+          await setPreferenceStreamQuality(newValue);
 
           log({
             action: "set_preference",
@@ -134,7 +130,7 @@ const SettingsScreen = () => {
         }
         onPress={async () => {
           const newValue = settings.downloadQuality === "high" ? "low" : "high";
-          await genSetPreferenceDownloadQuality(newValue);
+          await setPreferenceDownloadQuality(newValue);
 
           log({
             action: "set_preference",
@@ -148,9 +144,7 @@ const SettingsScreen = () => {
         description="Send anonymous usage data to help us improve the app."
         accessory={<Checkbox checked={settings.allowDataCollection} />}
         onPress={async () => {
-          await genSetPreferenceAllowDataCollection(
-            !settings.allowDataCollection
-          );
+          await setPreferenceAllowDataCollection(!settings.allowDataCollection);
 
           log({
             action: "set_preference",
@@ -158,7 +152,7 @@ const SettingsScreen = () => {
             setting_value: !settings.allowDataCollection,
           }).then();
 
-          await genDeleteMetricsToken();
+          await deleteMetricsToken();
         }}
       />
     </ScrollView>

@@ -4,7 +4,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import CourseData from "@/src/data/courseData";
 import { CourseDownloadManager } from "@/src/services/downloadManager";
-import { genDeleteProgressForCourse } from "@/src/storage/persistence";
+import { deleteProgressForCourse } from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
 import { useLogger } from "@/src/utils/log";
 import { Pressable } from "react-native-gesture-handler";
@@ -40,7 +40,7 @@ const sections: {
     description:
       "Marks every lesson as unfinished and forgets where you left off.",
     action: async (course: CourseName) => {
-      await genDeleteProgressForCourse(course);
+      await deleteProgressForCourse(course);
       Alert.alert("Progress deleted.");
     },
     destructive: true,
@@ -89,7 +89,7 @@ const sections: {
       // TODO
       // DownloadManager.stopAllDownloadsForCourse(course);
       await Promise.all([
-        genDeleteProgressForCourse(course),
+        deleteProgressForCourse(course),
         CourseDownloadManager.unrequestAllDownloadsForCourse(course),
       ]);
       await CourseData.loadCourseMetadata(course, true);

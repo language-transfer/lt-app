@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 
 import LanguageSelector from "@/src/components/language-selector/LanguageSelector";
 import CourseData from "@/src/data/courseData";
-import { genMostRecentListenedCourse } from "@/src/storage/persistence";
+import { getMostRecentListenedCourse } from "@/src/storage/persistence";
 
 let hasHandledInitialRedirect = false;
 
@@ -23,7 +23,7 @@ export default function Index() {
 
     const maybeRedirectToRecentCourse = async () => {
       try {
-        const course = await genMostRecentListenedCourse();
+        const course = await getMostRecentListenedCourse();
         if (!cancelled && course && CourseData.courseExists(course)) {
           hasHandledInitialRedirect = true;
           router.replace({

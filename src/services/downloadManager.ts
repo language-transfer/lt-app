@@ -7,9 +7,9 @@ import CourseData, {
   LoadedObjectMetadata,
 } from "@/src/data/courseData";
 import {
-  genPreferenceDownloadOnlyOnWifi,
-  genPreferenceDownloadQuality,
-  genProgressForLesson,
+  getPreferenceDownloadOnlyOnWifi,
+  getPreferenceDownloadQuality,
+  getProgressForLesson,
   usePreferenceDownloadQuality,
 } from "@/src/storage/persistence";
 import type { CourseName, FilePointer, Quality } from "@/src/types";
@@ -308,7 +308,7 @@ const DownloadManager = {
 
     // TODO: move this logic to the enqueue, add a warning if we have enqueued downloads
     // and this setting is blocking
-    const wifiOnly = await genPreferenceDownloadOnlyOnWifi();
+    const wifiOnly = await getPreferenceDownloadOnlyOnWifi();
 
     if (wifiOnly) {
       const net = await Network.getNetworkStateAsync();
@@ -469,7 +469,7 @@ export function useDownloadCount(course: CourseName) {
 
 export const CourseDownloadManager = {
   async requestDownloads(course: CourseName, lessons: number[]) {
-    const quality = await genPreferenceDownloadQuality();
+    const quality = await getPreferenceDownloadQuality();
     const pointers = lessons.map((lesson) =>
       CourseData.getLessonPointer(course, lesson, quality)
     );
@@ -491,7 +491,7 @@ export const CourseDownloadManager = {
   },
 
   async unrequestDownload(course: CourseName, lesson: number) {
-    const quality = await genPreferenceDownloadQuality();
+    const quality = await getPreferenceDownloadQuality();
     // TODO: all quality? TODO: what do when change request quality? maybe keep the old intents?
     const pointer = CourseData.getLessonPointer(course, lesson, quality);
 
@@ -502,7 +502,7 @@ export const CourseDownloadManager = {
     course: CourseName,
     lesson: number
   ): Promise<DownloadStatus> {
-    const quality = await genPreferenceDownloadQuality();
+    const quality = await getPreferenceDownloadQuality();
     const pointer = CourseData.getLessonPointer(course, lesson, quality);
 
     return await DownloadManager.getDownloadStatus(pointer);
@@ -512,7 +512,7 @@ export const CourseDownloadManager = {
     course: CourseName,
     lesson: number
   ): Promise<FilePointer> {
-    const quality = await genPreferenceDownloadQuality();
+    const quality = await getPreferenceDownloadQuality();
     return CourseData.getLessonPointer(course, lesson, quality);
   },
 
@@ -533,7 +533,7 @@ export const CourseDownloadManager = {
     const finishedPointers: FilePointer[] = [];
     await Promise.all(
       lessons.map(async (lesson) => {
-        const progress = await genProgressForLesson(course, lesson);
+        const progress = await getProgressForLesson(course, lesson);
         if (progress?.finished) {
           const pointers = CourseData.getLessonPointersAllVariants(
             course,

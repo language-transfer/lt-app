@@ -1,8 +1,8 @@
 import TrackPlayer, { Event } from "react-native-track-player";
 
 import {
-  genMarkLessonFinished,
-  genUpdateProgressForLesson,
+  markLessonFinished,
+  updateProgressForLesson,
 } from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
 import { log } from "@/src/utils/log";
@@ -60,7 +60,7 @@ const logRemoteAction = async (action: string, positionOverride?: number) => {
 };
 
 const persistProgress = async (context: LessonContext, position: number) => {
-  await genUpdateProgressForLesson(context.course, context.lesson, position);
+  await updateProgressForLesson(context.course, context.lesson, position);
 };
 
 export const PROGRESS_PERSIST_INTERVAL_MS = 3000;
@@ -231,7 +231,7 @@ const trackPlayerService = async (): Promise<void> => {
           course: context.course,
           lesson: context.lesson,
         }).then();
-        await genMarkLessonFinished(context.course, context.lesson);
+        await markLessonFinished(context.course, context.lesson);
         await persistProgress(context, 0);
       }
     })
@@ -257,7 +257,7 @@ const trackPlayerService = async (): Promise<void> => {
           course: context.course,
           lesson: context.lesson,
         }).then();
-        await genMarkLessonFinished(context.course, context.lesson);
+        await markLessonFinished(context.course, context.lesson);
         await persistProgress(context, 0);
       }
     })
