@@ -729,7 +729,7 @@ export const useCourseMetadata = (
 ): CourseMetadata | null => {
   return (
     useQuery({
-      queryKey: ["@course-data", "metadata", course],
+      queryKey: ["@local", "course-data", "metadata", course],
       queryFn: async () => {
         return await CourseData.loadCourseMetadata(course);
       },

@@ -15,9 +15,9 @@ import CourseData from "@/src/data/courseData";
 import { useCurrentCourseColors } from "@/src/hooks/useCourseLessonData";
 import {
   genMostRecentListenedLessonForCourse,
-  genPreferenceRatingButtonDismissed,
   genProgressForLesson,
   genSetPreferenceRatingButtonDismissed,
+  usePreferenceRatingButtonDismissed,
 } from "@/src/storage/persistence";
 import type { CourseName, Progress } from "@/src/types";
 import { useLogger } from "@/src/utils/log";
@@ -49,7 +49,7 @@ const LanguageHomeTopButton = ({ course }: Props) => {
     nextLesson: number;
     progressForThisLesson: number;
   } | null>(null);
-  const [ratingDismissed, setRatingDismissed] = useState<boolean | null>(null);
+  const ratingPref = usePreferenceRatingButtonDismissed();
   const colors = useCurrentCourseColors();
   const log = useLogger();
 
@@ -58,10 +58,7 @@ const LanguageHomeTopButton = ({ course }: Props) => {
       let mounted = true;
       const load = async () => {
         const lesson = await genMostRecentListenedLessonForCourse(course);
-        const [progressValue, ratingPref] = await Promise.all([
-          genProgressForLesson(course, lesson),
-          genPreferenceRatingButtonDismissed(),
-        ]);
+        const progressValue = await genProgressForLesson(course, lesson);
 
         if (!mounted) {
           return;
@@ -76,7 +73,6 @@ const LanguageHomeTopButton = ({ course }: Props) => {
           nextLesson: targetLesson ?? 0,
           progressForThisLesson: progressForLesson,
         });
-        setRatingDismissed(Boolean(ratingPref.dismissed));
       };
 
       load();
@@ -86,14 +82,17 @@ const LanguageHomeTopButton = ({ course }: Props) => {
     }, [course])
   );
 
-  if (!state || ratingDismissed === null) {
+  if (!state) {
     return <View style={[styles.lessonPlayBox, styles.invisible]} />;
   }
 
   const nextLessonTitle = CourseData.getLessonTitle(course, state.nextLesson);
   const lessonDuration = CourseData.getLessonDuration(course, state.nextLesson);
   const hasPrompt =
-    Platform.OS === "android" && state.nextLesson + 1 >= 10 && !ratingDismissed;
+    Platform.OS === "android" &&
+    state.nextLesson + 1 >= 10 &&
+    ratingPref !== null &&
+    !ratingPref.dismissed;
 
   return (
     <View style={styles.lessonPlayBox}>
@@ -168,7 +167,6 @@ const LanguageHomeTopButton = ({ course }: Props) => {
                   time,
                 },
               }).then();
-              setRatingDismissed(true);
               Linking.openURL(
                 "https://play.google.com/store/apps/details?id=org.languagetransfer"
               );
@@ -201,7 +199,6 @@ const LanguageHomeTopButton = ({ course }: Props) => {
                   time,
                 },
               });
-              setRatingDismissed(true);
             }}
           >
             <FontAwesome5 name="times" size={12} color="#fff" />

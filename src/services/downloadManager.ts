@@ -6,14 +6,14 @@ import CourseData, {
   getCASObjectURL,
   LoadedObjectMetadata,
 } from "@/src/data/courseData";
-import { log } from "@/src/utils/log";
 import {
   genPreferenceDownloadOnlyOnWifi,
   genPreferenceDownloadQuality,
   genProgressForLesson,
-  usePreferenceQuery,
+  usePreferenceDownloadQuality,
 } from "@/src/storage/persistence";
 import type { CourseName, FilePointer, Quality } from "@/src/types";
+import { log } from "@/src/utils/log";
 import { createAsyncStorage } from "@react-native-async-storage/async-storage";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import PQueue from "p-queue";
@@ -374,11 +374,7 @@ const getLessonPointerAsync = async (
 };
 
 const useLessonObjectPointersForCourse = (course: CourseName) => {
-  const downloadQualityQuery = usePreferenceQuery<"high" | "low">(
-    "download-quality",
-    "high"
-  );
-  const downloadQuality = downloadQualityQuery.data;
+  const downloadQuality = usePreferenceDownloadQuality();
 
   return useQuery({
     queryKey: [
@@ -406,11 +402,7 @@ const useLessonObjectPointersForCourse = (course: CourseName) => {
 };
 
 const useLessonObjectPointer = (course: CourseName, lesson: number) => {
-  const downloadQualityQuery = usePreferenceQuery<"high" | "low">(
-    "download-quality",
-    "high"
-  );
-  const downloadQuality = downloadQualityQuery.data;
+  const downloadQuality = usePreferenceDownloadQuality();
 
   return useQuery({
     queryKey: [

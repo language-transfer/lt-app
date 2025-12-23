@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 import { CourseDownloadManager } from "@/src/services/downloadManager";
@@ -178,60 +177,99 @@ export const genDeleteMetricsToken = async (): Promise<void> => {
   await AsyncStorage.removeItem("@metrics/user-token");
 };
 
-type PreferenceMethods = [() => Promise<any>, (val: any) => Promise<void>];
+type PreferenceMethods<T> = [
+  () => Promise<T>,
+  (val: T) => Promise<void>,
+  () => T | null
+];
 
-const preference = (
+const getPreferenceOrDefault = async <T>(
   name: Preference,
-  defaultValue: any,
-  fromString: (str: string) => any,
-  toString: (val: any) => string = (val) => String(val)
-): PreferenceMethods => {
-  return [
-    async () => {
-      const val = await AsyncStorage.getItem(`@preferences/${name}`);
-      if (val === null) {
-        return defaultValue;
-      }
+  defaultValue: T,
+  fromString: (str: string) => T
+): Promise<T> => {
+  const val = await AsyncStorage.getItem(`@preferences/${name}`);
+  if (val === null) {
+    return defaultValue;
+  }
 
-      return fromString(val);
-    },
-    async (val: any) => {
-      await AsyncStorage.setItem(`@preferences/${name}`, toString(val));
-      queryClient.invalidateQueries({
-        queryKey: ["@local", "preference", name],
-      });
+  return fromString(val);
+};
+
+const setPreference = async <T>(
+  name: Preference,
+  val: T,
+  toString: (v: T) => string = (v) => String(v)
+): Promise<void> => {
+  await AsyncStorage.setItem(`@preferences/${name}`, toString(val));
+  queryClient.invalidateQueries({
+    queryKey: ["@local", "preference", name],
+  });
+};
+
+const preference = <T>(
+  name: Preference,
+  defaultValue: T,
+  fromString: (str: string) => T,
+  toString: (val: T) => string = (val) => String(val)
+): PreferenceMethods<T> => {
+  return [
+    () => getPreferenceOrDefault<T>(name, defaultValue, fromString),
+    (val: T) => setPreference<T>(name, val, toString),
+    () => {
+      return usePreference<T>(name, defaultValue, fromString);
     },
   ];
 };
 
+// todo - replace this with runtime type stuff w/ zod
+
 export const [
   genPreferenceAutoDeleteFinished,
   genSetPreferenceAutoDeleteFinished,
+  usePreferenceAutoDeleteFinished,
 ] = preference("auto-delete-finished", false, (b) => b === "true");
 
-export const [genPreferenceStreamQuality, genSetPreferenceStreamQuality] =
-  preference("stream-quality", "low", (value) => value as Quality);
+export const [
+  genPreferenceStreamQuality,
+  genSetPreferenceStreamQuality,
+  usePreferenceStreamQuality,
+] = preference("stream-quality", "low", (value) => value as Quality);
 
-export const [genPreferenceDownloadQuality, genSetPreferenceDownloadQuality] =
-  preference("download-quality", "high", (value) => value as Quality);
+export const [
+  genPreferenceDownloadQuality,
+  genSetPreferenceDownloadQuality,
+  usePreferenceDownloadQuality,
+] = preference("download-quality", "high", (value) => value as Quality);
 
 export const [
   genPreferenceDownloadOnlyOnWifi,
   genSetPreferenceDownloadOnlyOnWifi,
+  usePreferenceDownloadOnlyOnWifi,
 ] = preference("download-only-on-wifi", true, (b) => b === "true");
 
 export const [
   genPreferenceAllowDataCollection,
   genSetPreferenceAllowDataCollection,
+  usePreferenceAllowDataCollection,
 ] = preference("allow-data-collection", true, (b) => b === "true");
 
-export const [genPreferenceIsFirstLoad, genSetPreferenceIsFirstLoad] =
-  preference("is-first-load", true, (b) => b === "true");
+export const [
+  genPreferenceIsFirstLoad,
+  genSetPreferenceIsFirstLoad,
+  usePreferenceIsFirstLoad,
+] = preference("is-first-load", true, (b) => b === "true");
 
 export const [
   genPreferenceRatingButtonDismissed,
   genSetPreferenceRatingButtonDismissed,
-] = preference(
+  usePreferenceRatingButtonDismissed,
+] = preference<{
+  dismissed: boolean;
+  surface?: "LanguageHomeTopButton";
+  explicit?: boolean;
+  time?: number;
+}>(
   "rating-button-dismissed",
   { dismissed: false },
   (o) => JSON.parse(o),
@@ -241,37 +279,27 @@ export const [
 export const [
   genPreferenceKillswitchCourseVersionV1,
   genSetPreferenceKillswitchCourseVersionV1,
+  usePreferenceKillswitchCourseVersionV1,
 ] = preference("killswitch-course-version-v1", false, (b) => b === "true");
 
-export function usePreference<T>(key: Preference, defaultValue: any) {
-  const [value, setValue] = useState<T | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      const [loadFn] = preference(key, defaultValue, (v) => v);
-      const result = await loadFn();
-      if (mounted) {
-        setValue(result);
-      }
-    };
-
-    load();
-
-    return () => {
-      mounted = false;
-    };
-  }, [key, defaultValue]);
-
-  return value;
-}
-
-export function usePreferenceQuery<T>(key: Preference, defaultValue: any) {
-  return useQuery({
+export function usePreference<T>(
+  key: Preference,
+  defaultValue: T,
+  fromString: (str: string) => T
+): T | null {
+  const query = useQuery({
     queryKey: ["@local", "preference", key],
     queryFn: async () => {
-      const [loadFn] = preference(key, defaultValue, (v) => v);
-      return loadFn() as Promise<T>;
+      const value = await getPreferenceOrDefault<T>(
+        key,
+        defaultValue,
+        fromString
+      );
+      return value;
     },
   });
+
+  // need a default value, because null is reserved for not-yet-loaded
+  // (we _could_ return the query object here, I suppose...)
+  return query.isSuccess ? query.data : null;
 }
