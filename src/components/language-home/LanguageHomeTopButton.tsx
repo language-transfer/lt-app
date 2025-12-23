@@ -2,7 +2,14 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import formatDuration from "format-duration";
 import React, { useCallback, useState } from "react";
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Linking,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import CourseData from "@/src/data/courseData";
 import { useCurrentCourseColors } from "@/src/hooks/useCourseLessonData";
@@ -84,7 +91,8 @@ const LanguageHomeTopButton = ({ course }: Props) => {
 
   const nextLessonTitle = CourseData.getLessonTitle(course, state.nextLesson);
   const lessonDuration = CourseData.getLessonDuration(course, state.nextLesson);
-  const hasPrompt = state.nextLesson + 1 >= 10 && !ratingDismissed;
+  const hasPrompt =
+    Platform.OS === "android" && state.nextLesson + 1 >= 10 && !ratingDismissed;
 
   return (
     <View style={styles.lessonPlayBox}>
@@ -142,6 +150,13 @@ const LanguageHomeTopButton = ({ course }: Props) => {
                 action: "open_google_play",
                 surface: "rate_button",
               });
+              genSetPreferenceRatingButtonDismissed({
+                dismissed: true,
+                surface: "LanguageHomeTopButton",
+                explicit: false,
+                time: Date.now(),
+              }).then();
+              setRatingDismissed(true);
               Linking.openURL(
                 "https://play.google.com/store/apps/details?id=org.languagetransfer"
               );
