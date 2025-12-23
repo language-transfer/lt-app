@@ -28,7 +28,7 @@ import {
   useLessonDownloadStatus,
 } from "@/src/services/downloadManager";
 import { genMarkLessonFinished } from "@/src/storage/persistence";
-import { log } from "@/src/utils/log";
+import { useLogger } from "@/src/utils/log";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const ListenBody = () => {
@@ -48,6 +48,9 @@ const ListenBody = () => {
   const lessonTitle = CourseData.getLessonTitle(course, lesson);
   const duration = CourseData.getLessonDuration(course, lesson);
   const colors = useCurrentCourseColors();
+  const log = useLogger({
+    surface: "listen_screen",
+  });
 
   useEffect(() => {
     latestPositionRef.current = controls.position;
@@ -75,9 +78,6 @@ const ListenBody = () => {
     }
     log({
       action: "open_bottom_sheet",
-      surface: "listen_screen",
-      course,
-      lesson,
       position: latestPositionRef.current,
     });
     sheetAnim.setValue(0);
@@ -98,9 +98,6 @@ const ListenBody = () => {
     }
     log({
       action: "close_bottom_sheet",
-      surface: "listen_screen",
-      course,
-      lesson,
       position: latestPositionRef.current,
     });
     Animated.timing(sheetAnim, {
@@ -126,8 +123,6 @@ const ListenBody = () => {
         log({
           action: "delete_download",
           surface: "listen_bottom_sheet",
-          course,
-          lesson,
         });
         await stopLessonAudio();
         await CourseDownloadManager.unrequestDownload(course, lesson);
@@ -135,8 +130,6 @@ const ListenBody = () => {
         log({
           action: "download_lesson",
           surface: "listen_bottom_sheet",
-          course,
-          lesson,
         });
         await CourseDownloadManager.requestDownload(course, lesson);
       }
@@ -147,8 +140,6 @@ const ListenBody = () => {
       );
       log({
         action: downloaded ? "delete_download_error" : "download_error",
-        course,
-        lesson,
         surface: "listen_bottom_sheet",
         message: err instanceof Error ? err.message : String(err),
       });
@@ -162,8 +153,6 @@ const ListenBody = () => {
     log({
       action: "mark_finished",
       surface: "listen_bottom_sheet",
-      course,
-      lesson,
       position: controls.position,
     });
     await genMarkLessonFinished(course, lesson);

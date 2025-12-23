@@ -1,23 +1,23 @@
-import React, {useState, useCallback, useEffect} from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import prettyBytes from 'pretty-bytes';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableNativeFeedback,
-  Alert,
   ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableNativeFeedback,
+  View,
 } from 'react-native';
-import {useFocusEffect} from '@react-navigation/native';
-import {FlatList} from 'react-native-gesture-handler';
-import LessonRow, {LESSON_ROW_HEIGHT} from './LessonRow.react';
-import useStatusBarStyle from '../../hooks/useStatusBarStyle';
+import { Icon } from 'react-native-elements';
+import { FlatList } from 'react-native-gesture-handler';
 import CourseData from '../../course-data';
 import DownloadManager from '../../download-manager';
-import prettyBytes from 'pretty-bytes';
-import {usePreference} from '../../persistence';
-import {Icon} from 'react-native-elements';
+import useStatusBarStyle from '../../hooks/useStatusBarStyle';
+import { usePreference } from '../../persistence';
+import LessonRow, { LESSON_ROW_HEIGHT } from './LessonRow.react';
 
-import {throttle} from 'lodash';
+import { throttle } from 'lodash';
 
 const AllLessons = ({route}: {route: any}) => {
   useStatusBarStyle('white', 'dark-content');

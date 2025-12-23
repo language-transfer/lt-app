@@ -1,18 +1,17 @@
-import React from "react";
+import { useLogger } from "@/src/utils/log";
+import { FontAwesome5 } from "@expo/vector-icons";
+import Constants from "expo-constants";
+import { useRouter } from "expo-router";
 import type { ComponentProps, ReactNode } from "react";
+import React from "react";
 import {
   Linking,
   ScrollView,
   StyleSheet,
   Text,
-  View,
   TouchableNativeFeedback,
+  View,
 } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
-import Constants from "expo-constants";
-import { useRouter } from "expo-router";
-
-import { log } from "@/src/utils/log";
 
 type Section = "Language Transfer" | "Privacy" | "LT App";
 type IconName = ComponentProps<typeof FontAwesome5>["name"];
@@ -42,6 +41,9 @@ const SectionCard = ({
 
 const AboutScreen = () => {
   const router = useRouter();
+  const log = useLogger({
+    surface: "about",
+  });
 
   // TODO: get this from the build environment
   const donationLinksNotAllowedBecauseGooglePlayIsAStinkyPooPoo = true;
@@ -90,7 +92,6 @@ const AboutScreen = () => {
                   onPress={() => {
                     log({
                       action: "open_patreon",
-                      surface: "about",
                     });
                     Linking.openURL("https://www.patreon.com/languagetransfer");
                   }}
@@ -110,7 +111,6 @@ const AboutScreen = () => {
                   onPress={() => {
                     log({
                       action: "visit_donate_page",
-                      surface: "about",
                     });
                     Linking.openURL(
                       "https://www.languagetransfer.org/donations"
@@ -134,7 +134,6 @@ const AboutScreen = () => {
               onPress={() => {
                 log({
                   action: "visit_website",
-                  surface: "about",
                 });
                 Linking.openURL("https://www.languagetransfer.org/about");
               }}
@@ -154,7 +153,6 @@ const AboutScreen = () => {
               onPress={() => {
                 log({
                   action: "open_substack",
-                  surface: "about",
                 });
                 Linking.openURL("https://languagetransfer.substack.com/");
               }}
@@ -256,7 +254,6 @@ const AboutScreen = () => {
               onPress={() => {
                 log({
                   action: "open_github",
-                  surface: "about",
                 });
                 Linking.openURL("https://www.github.com/language-transfer");
               }}

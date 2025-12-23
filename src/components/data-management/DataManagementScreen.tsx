@@ -6,8 +6,8 @@ import CourseData from "@/src/data/courseData";
 import { CourseDownloadManager } from "@/src/services/downloadManager";
 import { genDeleteProgressForCourse } from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
+import { useLogger } from "@/src/utils/log";
 import { Pressable } from "react-native-gesture-handler";
-import { log } from "@/src/utils/log";
 
 const sections: {
   key: string;
@@ -108,6 +108,9 @@ const DataManagementScreen = () => {
   const course = (params.course ?? "spanish") as CourseName;
   const router = useRouter();
   const title = CourseData.getCourseShortTitle(course);
+  const log = useLogger({
+    surface: "data_management",
+  });
 
   const confirm = (messageTitle: string) =>
     new Promise((done) =>
@@ -136,8 +139,6 @@ const DataManagementScreen = () => {
             onPress={async () => {
               log({
                 action: section.logAction,
-                surface: "data_management",
-                course,
               }).then();
               if (section.destructive) {
                 const confirmed = await confirm(section.title(title));
@@ -145,8 +146,6 @@ const DataManagementScreen = () => {
                   if (section.dismissAction) {
                     log({
                       action: section.dismissAction,
-                      surface: "data_management",
-                      course,
                     }).then();
                   }
                   return;
@@ -154,8 +153,6 @@ const DataManagementScreen = () => {
                 if (section.confirmAction) {
                   log({
                     action: section.confirmAction,
-                    surface: "data_management",
-                    course,
                   }).then();
                 }
               }

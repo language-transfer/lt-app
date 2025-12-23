@@ -1,9 +1,17 @@
-import * as Device from 'expo-device';
+import * as Device from "expo-device";
 
-import CourseData from '@/src/data/courseData';
-import { genMetricsToken, genPreferenceAllowDataCollection } from '@/src/storage/persistence';
+import CourseData from "@/src/data/courseData";
+import {
+  genMetricsToken,
+  genPreferenceAllowDataCollection,
+} from "@/src/storage/persistence";
+import { useCallback, useMemo } from "react";
+import {
+  useCurrentCourseIfPresent,
+  useCurrentLessonIfPresent,
+} from "../hooks/useCourseLessonData";
 
-const LOG_ENDPOINT = 'https://metrics.languagetransfer.org/log';
+const LOG_ENDPOINT = "https://metrics.languagetransfer.org/log";
 
 export const log = async (data: Record<string, any>): Promise<void> => {
   const [allowed, user_token] = await Promise.all([
@@ -21,9 +29,9 @@ export const log = async (data: Record<string, any>): Promise<void> => {
 
   try {
     await fetch(LOG_ENDPOINT, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         local_time: Date.now(),
@@ -37,4 +45,29 @@ export const log = async (data: Record<string, any>): Promise<void> => {
   } catch {
     // best-effort logging
   }
+};
+
+export const useLogger = (defaultData: Record<string, any> = {}) => {
+  const currentCourse = useCurrentCourseIfPresent();
+  const currentLesson = useCurrentLessonIfPresent();
+
+  // TODO: if defaultData is not a stable ref then this will not memoize
+
+  const defaultDataWithContext = useMemo(
+    () => ({
+      ...(currentCourse !== null ? { course: currentCourse } : {}),
+      ...(currentLesson !== null ? { lesson: currentLesson } : {}),
+      ...defaultData,
+    }),
+    [currentCourse, currentLesson, defaultData]
+  );
+
+  const logWithContext = useCallback(
+    (data: Record<string, any>) => {
+      return log({ ...defaultDataWithContext, ...data }).then();
+    },
+    [defaultDataWithContext]
+  );
+
+  return logWithContext;
 };

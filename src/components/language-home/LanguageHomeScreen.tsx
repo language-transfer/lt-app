@@ -1,5 +1,5 @@
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,16 +13,19 @@ import {
 
 import LanguageHomeTopButton from "@/src/components/language-home/LanguageHomeTopButton";
 import CourseData from "@/src/data/courseData";
+import { useCurrentCourse } from "@/src/hooks/useCourseLessonData";
 import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
-import type { CourseName } from "@/src/types";
-import { log } from "@/src/utils/log";
+import { useLogger } from "@/src/utils/log";
 
 const LanguageHomeScreen = () => {
-  const { course } = useLocalSearchParams<{ course: CourseName }>();
+  const course = useCurrentCourse();
   const router = useRouter();
   const [loadingMetadata, setLoadingMetadata] = useState(true);
   const [showWarning, setShowWarning] = useState(false);
   const metadataLoaded = CourseData.isCourseMetadataLoaded(course);
+  const log = useLogger({
+    surface: "language_home",
+  });
 
   useStatusBarStyle("white", "dark-content");
 
@@ -37,8 +40,6 @@ const LanguageHomeScreen = () => {
           if (active) {
             log({
               action: "show_metadata_warning",
-              surface: "language_home",
-              course,
             });
             setShowWarning(true);
           }
@@ -105,7 +106,7 @@ const LanguageHomeScreen = () => {
       label: "Visit languagetransfer.org",
       icon: "link",
       action: () => {
-        log({ action: "visit_website", surface: "language_home", course });
+        log({ action: "visit_website" });
         Linking.openURL("https://www.languagetransfer.org/");
       },
     },

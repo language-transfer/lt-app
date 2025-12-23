@@ -12,21 +12,21 @@ import {
 } from "react-native";
 
 import CourseData from "@/src/data/courseData";
+import { useCurrentCourse } from "@/src/hooks/useCourseLessonData";
 import {
   CourseDownloadManager,
   useLessonDownloadStatus,
 } from "@/src/services/downloadManager";
 import { useLessonProgress, usePreference } from "@/src/storage/persistence";
-import type { CourseName } from "@/src/types";
-import { log } from "@/src/utils/log";
+import { useLogger } from "@/src/utils/log";
 import { useRouter } from "expo-router";
 
 type Props = {
-  course: CourseName;
   lesson: number;
 };
 
-const LessonRow = ({ course, lesson }: Props) => {
+const LessonRow = ({ lesson }: Props) => {
+  const course = useCurrentCourse();
   const progress = useLessonProgress(course, lesson);
   const downloadStatus = useLessonDownloadStatus(course, lesson);
   const downloadQuality = usePreference<"high" | "low">(
@@ -38,9 +38,14 @@ const LessonRow = ({ course, lesson }: Props) => {
     () => lesson === 0 && Boolean(CourseData.getBundledFirstLesson(course)),
     [course, lesson]
   );
+  const log = useLogger({
+    surface: "all_lessons",
+    lesson,
+  });
 
   const downloaded = downloadStatus === "downloaded";
-  const downloading = downloadStatus === "downloading" || downloadStatus === "enqueued";
+  const downloading =
+    downloadStatus === "downloading" || downloadStatus === "enqueued";
 
   const handleDownloadClick = async () => {
     if (bundled || downloadStatus === undefined) {
@@ -50,9 +55,6 @@ const LessonRow = ({ course, lesson }: Props) => {
     if (downloading) {
       log({
         action: "cancel_download",
-        surface: "all_lessons",
-        course,
-        lesson,
       });
       // TODO: test
       CourseDownloadManager.unrequestDownload(course, lesson);
@@ -62,9 +64,6 @@ const LessonRow = ({ course, lesson }: Props) => {
     if (downloaded) {
       log({
         action: "delete_download",
-        surface: "all_lessons",
-        course,
-        lesson,
       });
       await CourseDownloadManager.unrequestDownload(course, lesson);
       return;
@@ -72,9 +71,6 @@ const LessonRow = ({ course, lesson }: Props) => {
 
     log({
       action: "download_lesson",
-      surface: "all_lessons",
-      course,
-      lesson,
     });
     try {
       console.log("requesting download", course, lesson);
@@ -82,9 +78,6 @@ const LessonRow = ({ course, lesson }: Props) => {
     } catch (err) {
       log({
         action: "download_error",
-        surface: "all_lessons",
-        course,
-        lesson,
         message: err instanceof Error ? err.message : String(err),
       });
       Alert.alert(

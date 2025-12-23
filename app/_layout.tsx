@@ -1,16 +1,16 @@
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useGlobalSearchParams, usePathname } from "expo-router";
 import { Drawer } from "expo-router/drawer";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef } from "react";
 import { AppState, AppStateStatus } from "react-native";
-import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
 import DrawerContent from "@/src/components/navigation/DrawerContent";
 import { queryClient } from "@/src/data/queryClient";
 import useListenNavigationSync from "@/src/hooks/useListenNavigationSync";
-import { log } from "@/src/utils/log";
+import { useLogger } from "@/src/utils/log";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -20,13 +20,14 @@ export default function RootLayout() {
   const pathname = usePathname();
   const params = useGlobalSearchParams();
   const lastNavigationRef = useRef<string | null>(null);
+  const log = useLogger();
 
   useEffect(() => {
     const handleAppState = (state: AppStateStatus) => {
       log({
         action: "app_state_change",
         surface: state,
-      }).then();
+      });
     };
 
     const subscription = AppState.addEventListener("change", handleAppState);
@@ -56,7 +57,7 @@ export default function RootLayout() {
       surface: pathname,
       course,
       lesson: normalizedLesson,
-    }).then();
+    });
   }, [params.course, params.lesson, pathname]);
 
   return (

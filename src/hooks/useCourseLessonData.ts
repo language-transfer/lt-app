@@ -2,28 +2,47 @@ import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
 import CourseData from "../data/courseData";
 import { CourseName, CourseNameSchema, UIColors } from "../types";
 
-export const useCurrentCourse = (): CourseName => {
-  const params = useLocalSearchParams<{ course: string }>();
+export const useCurrentCourseIfPresent = (): CourseName | null => {
+  const params = useLocalSearchParams<{ course?: string }>();
 
   const course = CourseNameSchema.safeParse(params.course);
   if (!course.success) {
-    throw new Error("No course in this route");
+    return null;
   }
 
   return course.data;
 };
 
-export const useCurrentLesson = (): number => {
-  const params = useLocalSearchParams<{ lesson: string }>();
+export const useCurrentCourse = (): CourseName => {
+  const course = useCurrentCourseIfPresent();
+
+  if (course === null) {
+    throw new Error("No course in this route");
+  }
+
+  return course;
+};
+
+export const useCurrentLessonIfPresent = (): number | null => {
+  const params = useLocalSearchParams<{ lesson?: string }>();
 
   if (params.lesson === undefined) {
-    throw new Error("No lesson in this route");
+    return null;
   }
 
   const lesson = Number(params.lesson);
-
   if (Number.isNaN(lesson)) {
-    throw new Error("Lesson is not a number");
+    return null;
+  }
+
+  return lesson;
+};
+
+export const useCurrentLesson = (): number => {
+  const lesson = useCurrentLessonIfPresent();
+
+  if (lesson === null) {
+    throw new Error("No lesson in this route");
   }
 
   return lesson;

@@ -118,7 +118,7 @@ const AllLessonsScreen = () => {
         <FlatList
           data={indices}
           keyExtractor={(lesson) => String(lesson)}
-          renderItem={({ item }) => <LessonRow course={course} lesson={item} />}
+          renderItem={({ item }) => <LessonRow lesson={item} />}
         />
       </View>
       <View style={styles.bottomBar}>

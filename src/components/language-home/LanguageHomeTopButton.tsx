@@ -20,7 +20,7 @@ import {
   genSetPreferenceRatingButtonDismissed,
 } from "@/src/storage/persistence";
 import type { CourseName, Progress } from "@/src/types";
-import { log } from "@/src/utils/log";
+import { useLogger } from "@/src/utils/log";
 
 type Props = {
   course: CourseName;
@@ -51,6 +51,7 @@ const LanguageHomeTopButton = ({ course }: Props) => {
   } | null>(null);
   const [ratingDismissed, setRatingDismissed] = useState<boolean | null>(null);
   const colors = useCurrentCourseColors();
+  const log = useLogger();
 
   useFocusEffect(
     useCallback(() => {
