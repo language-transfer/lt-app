@@ -49,14 +49,7 @@ export const log = async (data: Record<string, any>): Promise<void> => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        local_time: Date.now(),
-        timezone_offset: new Date().getTimezoneOffset(),
-        user_token,
-        device_os: Device.osName,
-        device_os_version: Device.osVersion,
-        ...data,
-      }),
+      body: JSON.stringify(withContext),
     });
   } catch {
     // best-effort logging
