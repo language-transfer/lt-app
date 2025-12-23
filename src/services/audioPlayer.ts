@@ -209,7 +209,7 @@ const buildLessonQueue = async (
     })
   );
 
-  console.log(tracks);
+  // console.log(tracks);
 
   return { tracks, targetIndex };
 };

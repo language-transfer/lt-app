@@ -27,6 +27,8 @@ export const log = async (data: Record<string, any>): Promise<void> => {
     data.metadata_version = CourseData.getMetadataVersion(data.course);
   }
 
+  console.log('LOG', data);
+
   try {
     await fetch(LOG_ENDPOINT, {
       method: "POST",
