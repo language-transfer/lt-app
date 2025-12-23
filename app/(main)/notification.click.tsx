@@ -17,8 +17,6 @@ const NotificationClickScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    console.log(1)
-
     const navigateToLesson = (course: CourseName, lesson: number) => {
       const state = navigation.getState();
       if (!state || !state.routes?.length) {

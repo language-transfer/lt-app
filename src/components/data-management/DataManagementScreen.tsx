@@ -75,7 +75,6 @@ const sections: {
       // TODO
       // DownloadManager.stopAllDownloadsForCourse(course);
       await Promise.all([
-        // DownloadManager.genDeleteAllDownloadsForCourse(course),
         genDeleteProgressForCourse(course),
         CourseDownloadManager.unrequestAllDownloadsForCourse(course),
       ]);
