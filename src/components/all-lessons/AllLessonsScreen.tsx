@@ -19,7 +19,10 @@ import {
   CourseDownloadManager,
   useDownloadCount,
 } from "@/src/services/downloadManager";
-import { usePreferenceDownloadQuality } from "@/src/storage/persistence";
+import {
+  PreferenceDownloadQuality,
+  usePreference,
+} from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
 
 const AllLessonsScreen = () => {
@@ -35,7 +38,7 @@ const AllLessonsScreen = () => {
   );
   const downloadedCount = useDownloadCount(course);
   const [downloadAllLoading, setDownloadAllLoading] = useState(false);
-  const downloadQuality = usePreferenceDownloadQuality();
+  const downloadQuality = usePreference(PreferenceDownloadQuality);
 
   useEffect(() => {
     let active = true;

@@ -7,10 +7,11 @@ import CourseData, {
   LoadedObjectMetadata,
 } from "@/src/data/courseData";
 import {
-  getPreferenceDownloadOnlyOnWifi,
-  getPreferenceDownloadQuality,
+  getPreferenceWithDefault,
   getProgressForLesson,
-  usePreferenceDownloadQuality,
+  PreferenceDownloadOnlyOnWifi,
+  PreferenceDownloadQuality,
+  usePreference,
 } from "@/src/storage/persistence";
 import type { CourseName, FilePointer, Quality } from "@/src/types";
 import { log } from "@/src/utils/log";
@@ -308,7 +309,9 @@ const DownloadManager = {
 
     // TODO: move this logic to the enqueue, add a warning if we have enqueued downloads
     // and this setting is blocking
-    const wifiOnly = await getPreferenceDownloadOnlyOnWifi();
+    const wifiOnly = await getPreferenceWithDefault(
+      PreferenceDownloadOnlyOnWifi
+    );
 
     if (wifiOnly) {
       const net = await Network.getNetworkStateAsync();
@@ -374,7 +377,7 @@ const getLessonPointerAsync = async (
 };
 
 const useLessonObjectPointersForCourse = (course: CourseName) => {
-  const downloadQuality = usePreferenceDownloadQuality();
+  const downloadQuality = usePreference(PreferenceDownloadQuality);
 
   return useQuery({
     queryKey: [
@@ -402,7 +405,7 @@ const useLessonObjectPointersForCourse = (course: CourseName) => {
 };
 
 const useLessonObjectPointer = (course: CourseName, lesson: number) => {
-  const downloadQuality = usePreferenceDownloadQuality();
+  const downloadQuality = usePreference(PreferenceDownloadQuality);
 
   return useQuery({
     queryKey: [
@@ -469,7 +472,7 @@ export function useDownloadCount(course: CourseName) {
 
 export const CourseDownloadManager = {
   async requestDownloads(course: CourseName, lessons: number[]) {
-    const quality = await getPreferenceDownloadQuality();
+    const quality = await getPreferenceWithDefault(PreferenceDownloadQuality);
     const pointers = lessons.map((lesson) =>
       CourseData.getLessonPointer(course, lesson, quality)
     );
@@ -491,7 +494,7 @@ export const CourseDownloadManager = {
   },
 
   async unrequestDownload(course: CourseName, lesson: number) {
-    const quality = await getPreferenceDownloadQuality();
+    const quality = await getPreferenceWithDefault(PreferenceDownloadQuality);
     // TODO: all quality? TODO: what do when change request quality? maybe keep the old intents?
     const pointer = CourseData.getLessonPointer(course, lesson, quality);
 
@@ -502,7 +505,7 @@ export const CourseDownloadManager = {
     course: CourseName,
     lesson: number
   ): Promise<DownloadStatus> {
-    const quality = await getPreferenceDownloadQuality();
+    const quality = await getPreferenceWithDefault(PreferenceDownloadQuality);
     const pointer = CourseData.getLessonPointer(course, lesson, quality);
 
     return await DownloadManager.getDownloadStatus(pointer);
@@ -512,7 +515,7 @@ export const CourseDownloadManager = {
     course: CourseName,
     lesson: number
   ): Promise<FilePointer> {
-    const quality = await getPreferenceDownloadQuality();
+    const quality = await getPreferenceWithDefault(PreferenceDownloadQuality);
     return CourseData.getLessonPointer(course, lesson, quality);
   },
 

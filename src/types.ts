@@ -40,27 +40,13 @@ export interface CourseInfo {
 }
 
 export type {
-  FilePointer,
-  LessonVariants,
-  LessonData,
-  CourseIndexEntry,
-  CourseIndex as AllCoursesIndex,
+  CourseIndex as AllCoursesIndex, CourseIndexEntry, FilePointer, LessonData, LessonVariants
 } from "@/src/data/courseSchemas";
 
 export interface Progress {
   finished: boolean;
   progress: number | null;
 }
-
-export type Preference =
-  | "auto-delete-finished"
-  | "stream-quality"
-  | "download-quality"
-  | "download-only-on-wifi"
-  | "allow-data-collection"
-  | "is-first-load"
-  | "rating-button-dismissed"
-  | "killswitch-course-version-v1";
 
 export interface DownloadSnapshot {
   id: string;

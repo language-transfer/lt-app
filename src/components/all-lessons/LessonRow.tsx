@@ -18,8 +18,9 @@ import {
   useLessonDownloadStatus,
 } from "@/src/services/downloadManager";
 import {
+  PreferenceDownloadQuality,
   useLessonProgress,
-  usePreferenceDownloadQuality,
+  usePreference,
 } from "@/src/storage/persistence";
 import { useLogger } from "@/src/utils/log";
 import { useRouter } from "expo-router";
@@ -32,7 +33,7 @@ const LessonRow = ({ lesson }: Props) => {
   const course = useCurrentCourse();
   const progress = useLessonProgress(course, lesson);
   const downloadStatus = useLessonDownloadStatus(course, lesson);
-  const downloadQuality = usePreferenceDownloadQuality();
+  const downloadQuality = usePreference(PreferenceDownloadQuality);
   const router = useRouter();
   const bundled = useMemo(
     () => lesson === 0 && Boolean(CourseData.getBundledFirstLesson(course)),

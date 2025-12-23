@@ -3,7 +3,8 @@ import * as Device from "expo-device";
 import CourseData from "@/src/data/courseData";
 import {
   getMetricsToken,
-  getPreferenceAllowDataCollection,
+  getPreferenceWithDefault,
+  PreferenceAllowDataCollection,
 } from "@/src/storage/persistence";
 import { useCallback, useMemo } from "react";
 import { Platform } from "react-native";
@@ -18,7 +19,7 @@ const LOG_ENDPOINT = "https://metrics.languagetransfer.org/log";
 
 export const log = async (data: Record<string, any>): Promise<void> => {
   const [allowed, user_token] = await Promise.all([
-    getPreferenceAllowDataCollection(),
+    getPreferenceWithDefault(PreferenceAllowDataCollection),
     getMetricsToken(),
   ]);
 

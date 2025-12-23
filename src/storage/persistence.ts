@@ -2,9 +2,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { v4 as uuid } from "uuid";
 
 import { CourseDownloadManager } from "@/src/services/downloadManager";
-import type { CourseName, Preference, Progress, Quality } from "@/src/types";
+import type { CourseName, Progress } from "@/src/types";
 import { useQuery } from "@tanstack/react-query";
+import z from "zod";
 import { queryClient } from "../data/queryClient";
+import { log } from "../utils/log";
+import { migratePreference } from "./migrations";
 
 const activityKey = (course: CourseName, lesson?: number) =>
   lesson === undefined
@@ -172,118 +175,134 @@ type PreferenceMethods<T> = [
   () => T | null
 ];
 
-const getPreferenceOrDefault = async <T>(
-  name: Preference,
-  defaultValue: T,
-  fromString: (str: string) => T
+export const getPreferenceWithDefault = async <T>(
+  preference: Preference<T>
 ): Promise<T> => {
-  const val = await AsyncStorage.getItem(`@preferences/${name}`);
+  let val = await AsyncStorage.getItem(`@preferences/${preference.name}`);
   if (val === null) {
-    return defaultValue;
+    return preference.defaultValue;
   }
 
-  return fromString(val);
+  const migrated = migratePreference(preference.name, val);
+
+  if (migrated.changed) {
+    await AsyncStorage.setItem(
+      `@preferences/${preference.name}`,
+      migrated.updated
+    );
+    val = migrated.updated;
+  }
+
+  const parsed = preference.schema.safeParse(JSON.parse(val));
+  if (!parsed.success) {
+    console.error("Failed to parse preference:", preference.name, val);
+    return preference.defaultValue;
+  }
+
+  return parsed.data;
 };
 
-const setPreference = async <T>(
-  name: Preference,
-  val: T,
-  toString: (v: T) => string = (v) => String(v)
+export const setPreference = async <T>(
+  preference: Preference<T>,
+  val: T
 ): Promise<void> => {
-  await AsyncStorage.setItem(`@preferences/${name}`, toString(val));
+  const asString = JSON.stringify(val);
+  await AsyncStorage.setItem(`@preferences/${preference.name}`, asString);
   queryClient.invalidateQueries({
-    queryKey: ["@local", "preference", name],
+    queryKey: ["@local", "preference", preference.name],
   });
+  log({
+    action: "set_preference",
+    surface: "preference-change",
+    preference_key: preference.name,
+    preference_value: asString,
+  }).then();
 };
 
-const preference = <T>(
-  name: Preference,
-  defaultValue: T,
-  fromString: (str: string) => T,
-  toString: (val: T) => string = (val) => String(val)
-): PreferenceMethods<T> => {
-  return [
-    () => getPreferenceOrDefault<T>(name, defaultValue, fromString),
-    (val: T) => setPreference<T>(name, val, toString),
-    () => {
-      return usePreference<T>(name, defaultValue, fromString);
-    },
-  ];
+// export type Preference =
+//   | "auto-delete-finished"
+//   | "stream-quality"
+//   | "download-quality"
+//   | "download-only-on-wifi"
+//   | "allow-data-collection"
+//   | "is-first-load"
+//   | "rating-button-dismissed"
+//   | "killswitch-course-version-v1";
+
+export type Preference<T> = {
+  name: string;
+  schema: z.ZodType<T>;
+  defaultValue: T;
 };
 
-// todo - replace this with runtime type stuff w/ zod
+export const PreferenceAutoDelete: Preference<boolean> = {
+  name: "auto-delete-finished",
+  schema: z.boolean(),
+  defaultValue: false,
+};
 
-export const [
-  getPreferenceAutoDeleteFinished,
-  setPreferenceAutoDeleteFinished,
-  usePreferenceAutoDeleteFinished,
-] = preference("auto-delete-finished", false, (b) => b === "true");
+const QualitySchema = z.enum(["low", "high"]);
 
-export const [
-  getPreferenceStreamQuality,
-  setPreferenceStreamQuality,
-  usePreferenceStreamQuality,
-] = preference("stream-quality", "low", (value) => value as Quality);
+export const PreferenceStreamQuality: Preference<
+  z.TypeOf<typeof QualitySchema>
+> = {
+  name: "stream-quality",
+  schema: QualitySchema,
+  defaultValue: "low",
+};
 
-export const [
-  getPreferenceDownloadQuality,
-  setPreferenceDownloadQuality,
-  usePreferenceDownloadQuality,
-] = preference("download-quality", "high", (value) => value as Quality);
+export const PreferenceDownloadQuality: Preference<
+  z.TypeOf<typeof QualitySchema>
+> = {
+  name: "download-quality",
+  schema: QualitySchema,
+  defaultValue: "high",
+};
 
-export const [
-  getPreferenceDownloadOnlyOnWifi,
-  setPreferenceDownloadOnlyOnWifi,
-  usePreferenceDownloadOnlyOnWifi,
-] = preference("download-only-on-wifi", true, (b) => b === "true");
+export const PreferenceDownloadOnlyOnWifi: Preference<boolean> = {
+  name: "download-only-on-wifi",
+  schema: z.boolean(),
+  defaultValue: true,
+};
 
-export const [
-  getPreferenceAllowDataCollection,
-  setPreferenceAllowDataCollection,
-  usePreferenceAllowDataCollection,
-] = preference("allow-data-collection", true, (b) => b === "true");
+export const PreferenceAllowDataCollection: Preference<boolean> = {
+  name: "allow-data-collection",
+  schema: z.boolean(),
+  defaultValue: true,
+};
 
-export const [
-  getPreferenceIsFirstLoad,
-  setPreferenceIsFirstLoad,
-  usePreferenceIsFirstLoad,
-] = preference("is-first-load", true, (b) => b === "true");
+export const PreferenceIsFirstLoad: Preference<boolean> = {
+  name: "is-first-load",
+  schema: z.boolean(),
+  defaultValue: true,
+};
 
-export const [
-  getPreferenceRatingButtonDismissed,
-  setPreferenceRatingButtonDismissed,
-  usePreferenceRatingButtonDismissed,
-] = preference<{
-  dismissed: boolean;
-  surface?: "LanguageHomeTopButton";
-  explicit?: boolean;
-  time?: number;
-}>(
-  "rating-button-dismissed",
-  { dismissed: false },
-  (o) => JSON.parse(o),
-  (val) => JSON.stringify(val)
-);
+const RatingButtonDismissedSchema = z.object({
+  dismissed: z.boolean(),
+  surface: z.enum(["LanguageHomeTopButton"]).optional(),
+  explicit: z.boolean().optional(),
+  time: z.number().optional(),
+});
 
-export const [
-  getPreferenceKillswitchCourseVersionV1,
-  setPreferenceKillswitchCourseVersionV1,
-  usePreferenceKillswitchCourseVersionV1,
-] = preference("killswitch-course-version-v1", false, (b) => b === "true");
+export const PreferenceRatingButtonDismissed: Preference<
+  z.TypeOf<typeof RatingButtonDismissedSchema>
+> = {
+  name: "rating-button-dismissed",
+  schema: RatingButtonDismissedSchema,
+  defaultValue: { dismissed: false },
+};
 
-export function usePreference<T>(
-  key: Preference,
-  defaultValue: T,
-  fromString: (str: string) => T
-): T | null {
+export const PreferenceKillswitchCourseVersionV1: Preference<boolean> = {
+  name: "killswitch-course-version-v1",
+  schema: z.boolean(),
+  defaultValue: false,
+};
+
+export function usePreference<T>(preference: Preference<T>): T | null {
   const query = useQuery({
-    queryKey: ["@local", "preference", key],
+    queryKey: ["@local", "preference", preference.name],
     queryFn: async () => {
-      const value = await getPreferenceOrDefault<T>(
-        key,
-        defaultValue,
-        fromString
-      );
+      const value = await getPreferenceWithDefault<T>(preference);
       return value;
     },
   });

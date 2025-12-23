@@ -11,16 +11,13 @@ import {
 
 import {
   deleteMetricsToken,
-  setPreferenceAllowDataCollection,
-  setPreferenceAutoDeleteFinished,
-  setPreferenceDownloadOnlyOnWifi,
-  setPreferenceDownloadQuality,
-  setPreferenceStreamQuality,
-  usePreferenceAllowDataCollection,
-  usePreferenceAutoDeleteFinished,
-  usePreferenceDownloadOnlyOnWifi,
-  usePreferenceDownloadQuality,
-  usePreferenceStreamQuality,
+  PreferenceAllowDataCollection,
+  PreferenceAutoDelete,
+  PreferenceDownloadOnlyOnWifi,
+  PreferenceDownloadQuality,
+  PreferenceStreamQuality,
+  setPreference,
+  usePreference,
 } from "@/src/storage/persistence";
 import { useLogger } from "@/src/utils/log";
 
@@ -47,11 +44,11 @@ const SettingsScreen = () => {
     downloadOnlyOnWifi,
     allowDataCollection,
   ] = [
-    usePreferenceAutoDeleteFinished(),
-    usePreferenceStreamQuality(),
-    usePreferenceDownloadQuality(),
-    usePreferenceDownloadOnlyOnWifi(),
-    usePreferenceAllowDataCollection(),
+    usePreference(PreferenceAutoDelete),
+    usePreference(PreferenceStreamQuality),
+    usePreference(PreferenceDownloadQuality),
+    usePreference(PreferenceDownloadOnlyOnWifi),
+    usePreference(PreferenceAllowDataCollection),
   ];
 
   const log = useLogger();
@@ -82,13 +79,10 @@ const SettingsScreen = () => {
         description="Delete downloaded lessons when you mark them finished."
         accessory={<Checkbox checked={settings.autoDeleteFinished} />}
         onPress={async () => {
-          await setPreferenceAutoDeleteFinished(!settings.autoDeleteFinished);
-
-          log({
-            action: "set_preference",
-            surface: "auto-delete-finished",
-            setting_value: !settings.autoDeleteFinished,
-          }).then();
+          await setPreference(
+            PreferenceAutoDelete,
+            !settings.autoDeleteFinished
+          );
         }}
       />
       <SettingRow
@@ -96,13 +90,10 @@ const SettingsScreen = () => {
         description="When enabled, track downloads will only start on Wi‑Fi connections."
         accessory={<Checkbox checked={settings.downloadOnlyOnWifi} />}
         onPress={async () => {
-          await setPreferenceDownloadOnlyOnWifi(!settings.downloadOnlyOnWifi);
-
-          log({
-            action: "set_preference",
-            surface: "download-only-on-wifi",
-            setting_value: !settings.downloadOnlyOnWifi,
-          }).then();
+          await setPreference(
+            PreferenceDownloadOnlyOnWifi,
+            !settings.downloadOnlyOnWifi
+          );
         }}
       />
       <SettingRow
@@ -113,13 +104,7 @@ const SettingsScreen = () => {
         }
         onPress={async () => {
           const newValue = settings.streamQuality === "high" ? "low" : "high";
-          await setPreferenceStreamQuality(newValue);
-
-          log({
-            action: "set_preference",
-            surface: "stream-quality",
-            setting_value: newValue,
-          }).then();
+          await setPreference(PreferenceStreamQuality, newValue);
         }}
       />
       <SettingRow
@@ -130,13 +115,7 @@ const SettingsScreen = () => {
         }
         onPress={async () => {
           const newValue = settings.downloadQuality === "high" ? "low" : "high";
-          await setPreferenceDownloadQuality(newValue);
-
-          log({
-            action: "set_preference",
-            surface: "download-quality",
-            setting_value: newValue,
-          }).then();
+          await setPreference(PreferenceDownloadQuality, newValue);
         }}
       />
       <SettingRow
@@ -144,14 +123,10 @@ const SettingsScreen = () => {
         description="Send anonymous usage data to help us improve the app."
         accessory={<Checkbox checked={settings.allowDataCollection} />}
         onPress={async () => {
-          await setPreferenceAllowDataCollection(!settings.allowDataCollection);
-
-          log({
-            action: "set_preference",
-            surface: "allow-data-collection",
-            setting_value: !settings.allowDataCollection,
-          }).then();
-
+          await setPreference(
+            PreferenceAllowDataCollection,
+            !settings.allowDataCollection
+          );
           await deleteMetricsToken();
         }}
       />

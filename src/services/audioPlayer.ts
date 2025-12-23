@@ -21,9 +21,10 @@ import {
   getLocalObjectPath,
 } from "@/src/services/downloadManager";
 import {
-  getPreferenceStreamQuality,
+  getPreferenceWithDefault,
   getProgressForLesson,
   markLessonFinished,
+  PreferenceStreamQuality,
   updateProgressForLesson,
 } from "@/src/storage/persistence";
 import type { CourseName, Quality } from "@/src/types";
@@ -266,7 +267,7 @@ export const useLessonAudio = (
         }
 
         const [quality, savedProgress] = await Promise.all([
-          getPreferenceStreamQuality(),
+          getPreferenceWithDefault(PreferenceStreamQuality),
           getProgressForLesson(course, lesson),
         ]);
         checkCancel();
@@ -352,9 +353,7 @@ export const useLessonAudio = (
     }
 
     lastPersistTimeRef.current = now;
-    updateProgressForLesson(course, lesson, progress.position).catch(
-      () => {}
-    );
+    updateProgressForLesson(course, lesson, progress.position).catch(() => {});
   }, [
     course,
     lesson,

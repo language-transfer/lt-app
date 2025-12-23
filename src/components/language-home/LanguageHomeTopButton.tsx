@@ -16,8 +16,9 @@ import { useCurrentCourseColors } from "@/src/hooks/useCourseLessonData";
 import {
   getMostRecentListenedLessonForCourse,
   getProgressForLesson,
-  setPreferenceRatingButtonDismissed,
-  usePreferenceRatingButtonDismissed,
+  PreferenceRatingButtonDismissed,
+  setPreference,
+  usePreference,
 } from "@/src/storage/persistence";
 import type { CourseName, Progress } from "@/src/types";
 import { useLogger } from "@/src/utils/log";
@@ -49,7 +50,7 @@ const LanguageHomeTopButton = ({ course }: Props) => {
     nextLesson: number;
     progressForThisLesson: number;
   } | null>(null);
-  const ratingPref = usePreferenceRatingButtonDismissed();
+  const ratingPref = usePreference(PreferenceRatingButtonDismissed);
   const colors = useCurrentCourseColors();
   const log = useLogger();
 
@@ -151,21 +152,11 @@ const LanguageHomeTopButton = ({ course }: Props) => {
                 action: "open_google_play",
                 surface: "rate_button",
               }).then();
-              setPreferenceRatingButtonDismissed({
+              setPreference(PreferenceRatingButtonDismissed, {
                 dismissed: true,
                 surface: "LanguageHomeTopButton",
                 explicit: false,
                 time,
-              }).then();
-              log({
-                action: "set_preference",
-                surface: "rating-button-dismissed",
-                setting_value: {
-                  dismissed: true,
-                  surface: "LanguageHomeTopButton",
-                  explicit: false,
-                  time,
-                },
               }).then();
               Linking.openURL(
                 "https://play.google.com/store/apps/details?id=org.languagetransfer"
@@ -183,22 +174,12 @@ const LanguageHomeTopButton = ({ course }: Props) => {
                 action: "dismiss_rating_button",
                 surface: "rate_button",
               }).then();
-              setPreferenceRatingButtonDismissed({
+              setPreference(PreferenceRatingButtonDismissed, {
                 dismissed: true,
                 surface: "LanguageHomeTopButton",
                 explicit: true,
                 time,
               }).then();
-              log({
-                action: "set_preference",
-                surface: "rating-button-dismissed",
-                setting_value: {
-                  dismissed: true,
-                  surface: "LanguageHomeTopButton",
-                  explicit: true,
-                  time,
-                },
-              });
             }}
           >
             <FontAwesome5 name="times" size={12} color="#fff" />
