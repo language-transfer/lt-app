@@ -17,22 +17,23 @@ import {
 
 import ListenScrubber from "@/src/components/listen/ListenScrubber";
 import CourseData from "@/src/data/courseData";
+import {
+  useCurrentCourse,
+  useCurrentCourseColors,
+  useCurrentLesson,
+} from "@/src/hooks/useCourseLessonData";
 import { stopLessonAudio, useLessonAudio } from "@/src/services/audioPlayer";
 import {
   CourseDownloadManager,
   useLessonDownloadStatus,
 } from "@/src/services/downloadManager";
 import { genMarkLessonFinished } from "@/src/storage/persistence";
-import type { CourseName } from "@/src/types";
 import { log } from "@/src/utils/log";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type Props = {
-  course: CourseName;
-  lesson: number;
-};
-
-const ListenBody = ({ course, lesson }: Props) => {
+const ListenBody = () => {
+  const course = useCurrentCourse();
+  const lesson = useCurrentLesson();
   const controls = useLessonAudio(course, lesson);
   const downloadStatus = useLessonDownloadStatus(course, lesson);
   const downloaded = downloadStatus === "downloaded";
@@ -46,7 +47,7 @@ const ListenBody = ({ course, lesson }: Props) => {
 
   const lessonTitle = CourseData.getLessonTitle(course, lesson);
   const duration = CourseData.getLessonDuration(course, lesson);
-  const colors = CourseData.getCourseUIColors(course);
+  const colors = useCurrentCourseColors();
 
   useEffect(() => {
     latestPositionRef.current = controls.position;
@@ -178,12 +179,12 @@ const ListenBody = ({ course, lesson }: Props) => {
   }
 
   return (
-    <View style={[styles.body, { backgroundColor: colors.background }]}>
+    <View style={[styles.body, { backgroundColor: colors?.background }]}>
       <View style={styles.lessonName}>
-        <Text style={[styles.courseTitle, { color: colors.text }]}>
+        <Text style={[styles.courseTitle, { color: colors?.text }]}>
           {CourseData.getCourseShortTitle(course)}
         </Text>
-        <Text style={[styles.lesson, { color: colors.text }]}>
+        <Text style={[styles.lesson, { color: colors?.text }]}>
           {lessonTitle}
         </Text>
       </View>
@@ -193,7 +194,7 @@ const ListenBody = ({ course, lesson }: Props) => {
           onPress={() => controls.skipBack()}
           android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
         >
-          <MaterialIcons name="replay-10" size={42} color={colors.text} />
+          <MaterialIcons name="replay-10" size={42} color={colors?.text} />
         </Pressable>
 
         {controls.ready ? (
@@ -208,18 +209,18 @@ const ListenBody = ({ course, lesson }: Props) => {
             <FontAwesome5
               name={controls.playing ? "pause" : "play"}
               size={64}
-              color={colors.text}
+              color={colors?.text}
             />
           </Pressable>
         ) : (
-          <ActivityIndicator size={64} color={colors.text} />
+          <ActivityIndicator size={64} color={colors?.text} />
         )}
 
         <Pressable
           onPress={openSheet}
           android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
         >
-          <MaterialIcons name="settings" size={42} color={colors.text} />
+          <MaterialIcons name="settings" size={42} color={colors?.text} />
         </Pressable>
       </View>
 

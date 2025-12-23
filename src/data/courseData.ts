@@ -45,6 +45,7 @@ import swahiliCoverWithText from "@/assets/courses/images/swahili-cover-stylized
 import swahiliCover from "@/assets/courses/images/swahili-cover-stylized.png";
 import turkishCoverWithText from "@/assets/courses/images/turkish-cover-stylized-with-text.png";
 import turkishCover from "@/assets/courses/images/turkish-cover-stylized.png";
+import { useQuery } from "@tanstack/react-query";
 
 // const spanishFirstLesson =
 //   Platform.OS === "ios"
@@ -721,6 +722,19 @@ const CourseData = {
   getAllLoadedObjectIds(): string[] {
     return Object.keys(loadedObjectMetadataLookup);
   },
+};
+
+export const useCourseMetadata = (
+  course: CourseName
+): CourseMetadata | null => {
+  return (
+    useQuery({
+      queryKey: ["@course-data", "metadata", course],
+      queryFn: async () => {
+        return await CourseData.loadCourseMetadata(course);
+      },
+    }).data ?? null
+  );
 };
 
 export default CourseData;

@@ -17,6 +17,7 @@ const LanguageButton = ({ course, width, onPress }: Props) => {
   const imageSize = width - 2 * BUTTON_IMAGE_PADDING;
 
   const info = CourseData.getCourseData(course);
+  const colors = CourseData.getCourseUIColors(course);
 
   return (
     <View style={[styles.sectionWrapper, { width, height: width + 50 }]}>
@@ -25,8 +26,7 @@ const LanguageButton = ({ course, width, onPress }: Props) => {
         style={[
           styles.imageBackground,
           {
-            backgroundColor:
-              CourseData.getCourseUIColors(course).softBackground,
+            backgroundColor: colors.softBackground,
           },
         ]}
         imageStyle={[
@@ -44,8 +44,7 @@ const LanguageButton = ({ course, width, onPress }: Props) => {
                 style={[
                   styles.courseType,
                   {
-                    color:
-                      CourseData.getCourseUIColors(course).backgroundAccent,
+                    color: colors.backgroundAccent,
                   },
                 ]}
               >

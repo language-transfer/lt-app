@@ -1,29 +1,37 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
+import formatDuration from "format-duration";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Animated, Dimensions, StyleSheet, Text, View } from "react-native";
 import {
   PanGestureHandler,
   PanGestureHandlerGestureEvent,
   PanGestureHandlerStateChangeEvent,
   State,
-} from 'react-native-gesture-handler';
-import formatDuration from 'format-duration';
+} from "react-native-gesture-handler";
 
-import CourseData from '@/src/data/courseData';
-import type { CourseName } from '@/src/types';
-import type { LessonAudioControls } from '@/src/services/audioPlayer';
+import CourseData from "@/src/data/courseData";
+import { useCurrentCourseColors } from "@/src/hooks/useCourseLessonData";
+import type { LessonAudioControls } from "@/src/services/audioPlayer";
+import type { CourseName } from "@/src/types";
 
 type Props = {
   course: CourseName;
   lesson: number;
   position: number;
   duration: number;
-  seekTo: LessonAudioControls['seekTo'];
+  seekTo: LessonAudioControls["seekTo"];
 };
 
-const ListenScrubber = ({ course, lesson, position, duration, seekTo }: Props) => {
+const ListenScrubber = ({
+  course,
+  lesson,
+  position,
+  duration,
+  seekTo,
+}: Props) => {
   const [dragging, setDragging] = useState(false);
   const [width, setWidth] = useState(0);
   const animVal = useRef(new Animated.Value(position)).current;
+  const colors = useCurrentCourseColors();
 
   React.useEffect(() => {
     if (!dragging) {
@@ -39,14 +47,14 @@ const ListenScrubber = ({ course, lesson, position, duration, seekTo }: Props) =
   }, [duration, width]);
 
   const scrubberOffset = useMemo(
-    () => (Dimensions.get('screen').width - width) / 2,
-    [width],
+    () => (Dimensions.get("screen").width - width) / 2,
+    [width]
   );
 
   const progressWidth = animVal.interpolate({
     inputRange: [0, Math.max(duration, 1)],
     outputRange: [0, width],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
 
   const onGestureEvent = useCallback(
@@ -55,7 +63,7 @@ const ListenScrubber = ({ course, lesson, position, duration, seekTo }: Props) =
       const newPosition = Math.max(0, Math.min(duration, x * secondsPerPoint));
       animVal.setValue(newPosition);
     },
-    [duration, secondsPerPoint, scrubberOffset, animVal],
+    [duration, secondsPerPoint, scrubberOffset, animVal]
   );
 
   const onHandlerStateChange = useCallback(
@@ -67,7 +75,7 @@ const ListenScrubber = ({ course, lesson, position, duration, seekTo }: Props) =
         seekTo((animVal as any)._value);
       }
     },
-    [seekTo, animVal],
+    [seekTo, animVal]
   );
 
   return (
@@ -76,7 +84,7 @@ const ListenScrubber = ({ course, lesson, position, duration, seekTo }: Props) =
         style={[
           styles.progressBar,
           {
-            backgroundColor: CourseData.getCourseUIColors(course).backgroundAccent,
+            backgroundColor: colors?.backgroundAccent,
           },
         ]}
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
@@ -85,7 +93,7 @@ const ListenScrubber = ({ course, lesson, position, duration, seekTo }: Props) =
           style={[
             styles.progressMade,
             {
-              backgroundColor: CourseData.getCourseUIColors(course).text,
+              backgroundColor: colors?.text,
               width: progressWidth,
             },
           ]}
@@ -101,7 +109,7 @@ const ListenScrubber = ({ course, lesson, position, duration, seekTo }: Props) =
             style={[
               styles.progressHandle,
               dragging && styles.progressHandleActive,
-              { backgroundColor: CourseData.getCourseUIColors(course).text },
+              { backgroundColor: colors?.text },
               { left: progressWidth },
             ]}
           />
@@ -109,10 +117,10 @@ const ListenScrubber = ({ course, lesson, position, duration, seekTo }: Props) =
       </View>
 
       <View style={styles.progressTextContainer}>
-        <Text style={{ color: CourseData.getCourseUIColors(course).text }}>
+        <Text style={{ color: colors?.text }}>
           {formatDuration(position * 1000)}
         </Text>
-        <Text style={{ color: CourseData.getCourseUIColors(course).text }}>
+        <Text style={{ color: colors?.text }}>
           {formatDuration(CourseData.getLessonDuration(course, lesson) * 1000)}
         </Text>
       </View>
@@ -122,20 +130,20 @@ const ListenScrubber = ({ course, lesson, position, duration, seekTo }: Props) =
 
 const styles = StyleSheet.create({
   scrubber: {
-    width: '100%',
+    width: "100%",
   },
   progressBar: {
     height: 4,
-    width: '100%',
+    width: "100%",
     marginBottom: 15,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   progressMade: {
     height: 4,
     width: 0,
   },
   progressHandle: {
-    position: 'absolute',
+    position: "absolute",
     top: -4,
     width: 12,
     height: 12,
@@ -148,8 +156,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   progressTextContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 });
 

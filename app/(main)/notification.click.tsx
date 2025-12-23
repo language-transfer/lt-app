@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useRouter } from 'expo-router';
-import TrackPlayer from 'react-native-track-player';
 import { CommonActions, useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
+import TrackPlayer from 'react-native-track-player';
 
 import type { CourseName } from '@/src/types';
 
@@ -17,6 +17,8 @@ const NotificationClickScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
+    console.log(1)
+
     const navigateToLesson = (course: CourseName, lesson: number) => {
       const state = navigation.getState();
       if (!state || !state.routes?.length) {
@@ -65,6 +67,7 @@ const NotificationClickScreen = () => {
       try {
         const track = (await TrackPlayer.getActiveTrack()) as LessonTrackMetadata | null;
         if (track?.course && typeof track.lesson === 'number') {
+          console.log('Navigating to lesson from notification click:', track.course, track.lesson);
           navigateToLesson(track.course, track.lesson);
           return;
         }
