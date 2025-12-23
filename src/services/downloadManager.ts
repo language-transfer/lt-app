@@ -30,24 +30,8 @@ const STAGING_DIR = `${DOCUMENT_DIRECTORY}staging`;
 // sweep: remove STAGING_DIR if saved async not found
 // remove all objects not referenced recursively by the index
 
-const resolvedDownloadPaths: Record<string, string | undefined> = {};
-
 const downloadQueue = new PQueue({ concurrency: 3 });
 const pendingSet = new Set<string>();
-
-// const resolveDownloadPath = async (
-//   downloadId: string
-// ): Promise<{ path: string; exists: boolean }> => {
-//   const primary = downloadPath(downloadId);
-//   const primaryInfo = await FileSystem.getInfoAsync(primary);
-//   if (primaryInfo.exists) {
-//     resolvedDownloadPaths[downloadId] = primary;
-//     return { path: primary, exists: true };
-//   }
-
-//   resolvedDownloadPaths[downloadId] = primary;
-//   return { path: primary, exists: false };
-// };
 
 const invalidate = (filePointer: ObjectPointer) => {
   // console.log("Invalidating:", ["@local", "downloads", filePointer.object]);
@@ -186,7 +170,7 @@ const scrubDownloads = async () => {
 // anywhere, recursively in the metadata hierarchy from all-courses.json
 // and are orphans
 // TODO also scrub intent entries that don't correspond to known objects
-const scrubObjects = async () => {};
+// const scrubObjects = async () => {};
 
 const isObjectRequested = async (filePointer: FilePointer) => {
   const intended = await downloadIntentAsyncStorage.getItem(filePointer.object);

@@ -66,7 +66,7 @@ const LanguageHomeScreen = () => {
           clearTimeout(timeout);
         }
       };
-    }, [course])
+    }, [course, log])
   );
 
   if (loadingMetadata || !metadataLoaded) {

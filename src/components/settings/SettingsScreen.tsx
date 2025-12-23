@@ -19,7 +19,6 @@ import {
   setPreference,
   usePreference,
 } from "@/src/storage/persistence";
-import { useLogger } from "@/src/utils/log";
 
 type SettingsState = {
   autoDeleteFinished: boolean;
@@ -50,8 +49,6 @@ const SettingsScreen = () => {
     usePreference(PreferenceDownloadOnlyOnWifi),
     usePreference(PreferenceAllowDataCollection),
   ];
-
-  const log = useLogger();
 
   const settings: NullableSettingsState = {
     autoDeleteFinished,

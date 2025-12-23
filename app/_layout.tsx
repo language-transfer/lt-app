@@ -32,7 +32,7 @@ export default function RootLayout() {
 
     const subscription = AppState.addEventListener("change", handleAppState);
     return () => subscription.remove();
-  }, []);
+  }, [log]);
 
   useEffect(() => {
     if (!pathname) {
@@ -58,7 +58,7 @@ export default function RootLayout() {
       course,
       lesson: normalizedLesson,
     });
-  }, [params.course, params.lesson, pathname]);
+  }, [params.course, params.lesson, pathname, log]);
 
   return (
     <QueryClientProvider client={queryClient}>

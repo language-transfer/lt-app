@@ -18,7 +18,7 @@ export const migratePreference = (
       // old versions of the app used 'low' and 'high' directly; now we want '"low"' and '"high"'
       // so that we can always parse
       JSON.parse(val);
-    } catch (e) {
+    } catch {
       returned = { changed: true, updated: JSON.stringify(val) };
     }
   }

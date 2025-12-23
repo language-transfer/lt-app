@@ -4,7 +4,7 @@ import { v4 as uuid } from "uuid";
 import { CourseDownloadManager } from "@/src/services/downloadManager";
 import type { CourseName, Progress } from "@/src/types";
 import { useQuery } from "@tanstack/react-query";
-import z from "zod";
+import { z } from "zod";
 import { queryClient } from "../data/queryClient";
 import { log } from "../utils/log";
 import { migratePreference } from "./migrations";
@@ -168,12 +168,6 @@ export const getMetricsToken = async (): Promise<string> => {
 export const deleteMetricsToken = async (): Promise<void> => {
   await AsyncStorage.removeItem("@metrics/user-token");
 };
-
-type PreferenceMethods<T> = [
-  () => Promise<T>,
-  (val: T) => Promise<void>,
-  () => T | null
-];
 
 export const getPreferenceWithDefault = async <T>(
   preference: Preference<T>
