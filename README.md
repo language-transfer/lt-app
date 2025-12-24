@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./resources/google-play-store/feature-graphic.png" alt="LT logo" width="720">
+  <img src="./legacy/resources/google-play-store/feature-graphic.png" alt="LT logo" width="720">
 </p>
 
 ## Language Transfer
@@ -22,9 +22,9 @@ You can find them on the [Language Transfer website](https://www.languagetransfe
 ## LT App
 
 <p align="center">
-  <img src="./resources/google-play-store/screenshots/Screenshot_20200520-203515.png" alt="App screenshot: home page" width="216" height="384">
-  <img src="./resources/google-play-store/screenshots/Screenshot_20200520-203610.png" alt="App screenshot: listen page" width="216" height="384">
-  <img src="./resources/google-play-store/screenshots/Screenshot_20200520-203755.png" alt="App screenshot: language home page" width="216" height="384">
+  <img src="./legacy/resources/google-play-store/screenshots/Screenshot_20200520-203515.png" alt="App screenshot: home page" width="216" height="384">
+  <img src="./legacy/resources/google-play-store/screenshots/Screenshot_20200520-203610.png" alt="App screenshot: listen page" width="216" height="384">
+  <img src="./legacy/resources/google-play-store/screenshots/Screenshot_20200520-203755.png" alt="App screenshot: language home page" width="216" height="384">
 </p>
 
 This app is developed in React Native, and is designed to work with both iOS & Android platforms.
