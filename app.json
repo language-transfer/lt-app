@@ -44,7 +44,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "./plugins/withAsyncStorageLocalRepo"
     ],
     "experiments": {
       "typedRoutes": true,
