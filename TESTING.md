@@ -1,0 +1,4 @@
+- `nix develop`
+- run emulator
+- `EXPO_PUBLIC_E2E_TEST_SUPPRESS_LOGBOX=1 npx expo run:android`
+- `maestro test maestro/`

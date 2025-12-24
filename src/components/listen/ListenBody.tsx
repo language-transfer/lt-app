@@ -194,6 +194,7 @@ const ListenBody = () => {
               borderless: true,
             }}
             style={styles.playButton}
+            aria-label={controls.playing ? "Pause" : "Play"}
           >
             <FontAwesome5
               name={controls.playing ? "pause" : "play"}

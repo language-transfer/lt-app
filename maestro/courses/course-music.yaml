@@ -1,0 +1,11 @@
+appId: org.languagetransfer
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Language courses"
+- scrollUntilVisible:
+    element:
+      text: "Music Theory"
+    direction: DOWN
+- tapOn: "Music Theory"
+- assertVisible: "Lesson 1"

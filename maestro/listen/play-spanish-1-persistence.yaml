@@ -1,0 +1,28 @@
+appId: org.languagetransfer
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Language courses"
+- scrollUntilVisible:
+    element:
+      text: "Spanish"
+    direction: DOWN
+- tapOn: "Spanish"
+- tapOn: "Lesson 1"
+- tapOn: "Pause" # might take a while to actually pause - in my first test it paused at 0:08
+- assertVisible: "Spanish"
+- assertVisible: "Lesson 1"
+- assertVisible: "5:34" # this is the duration of spanish1
+- tapOn: "Play"
+- extendedWaitUntil:
+    visible: "0:[234][0-9]" # wait until at least 20 seconds have played
+    timeout: 30000
+- tapOn: "Pause"
+- back
+- stopApp
+- launchApp:
+    clearState: false
+
+# We should launch into the course where we left off
+- assertVisible: "Complete Spanish"
+- assertVisible: "0:(1[5-9]|[2345][0-9])" # verify that progress was saved (maybe +/- a few seconds)

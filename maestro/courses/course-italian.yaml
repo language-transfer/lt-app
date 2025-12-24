@@ -1,0 +1,11 @@
+appId: org.languagetransfer
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Language courses"
+- scrollUntilVisible:
+    element:
+      text: "Italian"
+    direction: DOWN
+- tapOn: "Italian"
+- assertVisible: "Lesson 1"

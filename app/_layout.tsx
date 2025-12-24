@@ -14,6 +14,12 @@ import { useLogger } from "@/src/utils/log";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { LogBox } from "react-native";
+
+if (process.env.EXPO_PUBLIC_E2E_TEST_SUPPRESS_LOGBOX) {
+  LogBox.ignoreAllLogs();
+}
+
 export default function RootLayout() {
   // const colorScheme = useColorScheme();
   useListenNavigationSync();

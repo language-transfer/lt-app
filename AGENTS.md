@@ -24,6 +24,7 @@
 - No automated suite yet; always run `npm run typecheck` and `npm run lint` after making changes **before responding back to the user** (repair agentically and noninteractively), and again before a PR.
 - Smoke-test on at least one platform (`npm run android` or `npm run ios`): verify course list, playback, downloads, and notification clicks.
 - Note manual test devices/OS versions and any regressions avoided in the PR description.
+- Handy Maestro docs index for quick lookups (curlable): `https://docs.maestro.dev/llms.txt`.
 
 ## Commit & Pull Request Guidelines
 - Follow existing history: short, imperative commit subjects (e.g., `Fix bottom sheet`).
