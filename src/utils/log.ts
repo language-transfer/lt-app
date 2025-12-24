@@ -6,14 +6,13 @@ import {
   getPreferenceWithDefault,
   PreferenceAllowDataCollection,
 } from "@/src/storage/persistence";
+import { nativeApplicationVersion } from "expo-application";
 import { useCallback, useMemo } from "react";
 import { Platform } from "react-native";
-import DeviceInfo from "react-native-device-info";
 import {
   useCurrentCourseIfPresent,
   useCurrentLessonIfPresent,
 } from "../hooks/useCourseLessonData";
-const appVersion = DeviceInfo.getVersion();
 
 const LOG_ENDPOINT = "https://metrics.languagetransfer.org/log";
 
@@ -38,7 +37,7 @@ export const log = async (data: Record<string, any>): Promise<void> => {
     device_os: Device.osName,
     device_os_version: Device.osVersion,
     platform: Platform.OS,
-    app_version: appVersion,
+    app_version: nativeApplicationVersion,
     ...data,
   };
 

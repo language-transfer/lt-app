@@ -20,6 +20,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import PQueue from "p-queue";
 import { ObjectPointer } from "../data/courseSchemas";
 import { queryClient } from "../data/queryClient";
+import { clearOldDownloadLocations } from "../storage/migrations";
 
 const downloadIntentAsyncStorage = createAsyncStorage("@download-intent");
 
@@ -535,5 +536,7 @@ export const CourseDownloadManager = {
     }
   },
 };
+
+clearOldDownloadLocations().then();
 
 export default DownloadManager;
