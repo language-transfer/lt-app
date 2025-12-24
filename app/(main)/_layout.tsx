@@ -24,19 +24,26 @@ const StackLayout = () => {
     >
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="course/[course]/index" />
+        <Stack.Screen
+          name="course/[course]/index"
+          options={{ animation: "fade" }}
+        />
         <Stack.Screen
           name="course/[course]/listen/[lesson]"
           // Keep drawer/back gestures off; horizontal swipes here conflict with the scrubber drag.
-          options={{ headerShown: false, gestureEnabled: false }}
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+            animation: "fade",
+          }}
         />
         <Stack.Screen
           name="course/[course]/all-lessons"
-          options={{ title: "All Lessons" }}
+          options={{ title: "All Lessons", animation: "fade_from_bottom" }}
         />
         <Stack.Screen
           name="course/[course]/data"
-          options={{ title: "Data Management" }}
+          options={{ title: "Data Management", animation: "fade_from_bottom" }}
         />
         <Stack.Screen
           name="about"
