@@ -73,7 +73,11 @@ const SettingsScreen = () => {
     <ScrollView style={styles.body} contentContainerStyle={styles.container}>
       <SettingRow
         title="Automatically delete finished downloads"
-        description="Delete downloaded lessons when you mark them finished."
+        description={
+          "Automatically delete downloaded lessons when you finish listening " +
+          "to them. Checking this box will not remove any existing downloads; " +
+          "to do that, use the Data Management screen."
+        }
         accessory={<Checkbox checked={settings.autoDeleteFinished} />}
         onPress={async () => {
           await setPreference(
@@ -84,7 +88,11 @@ const SettingsScreen = () => {
       />
       <SettingRow
         title="Download only on Wi‑Fi"
-        description="When enabled, track downloads will only start on Wi‑Fi connections."
+        description={
+          "You can always stream tracks directly from the server, even if " +
+          "you're not on Wi-Fi. But if you have this option checked, tracks " +
+          "will only be saved to your device while you're connected to Wi-Fi."
+        }
         accessory={<Checkbox checked={settings.downloadOnlyOnWifi} />}
         onPress={async () => {
           await setPreference(
@@ -92,10 +100,15 @@ const SettingsScreen = () => {
             !settings.downloadOnlyOnWifi
           );
         }}
-      />
-      <SettingRow
+            />
+            <SettingRow
         title="Streaming quality"
-        description="Audio quality used when streaming lessons."
+        description={
+          "When streaming lessons directly from the server, should we use " +
+          "high- or low-quality audio? High-quality audio uses about 1 " +
+          "megabyte per minute. Low-quality audio uses about one third of a " +
+          "megabyte per minute."
+        }
         accessory={
           <Text style={styles.valueText}>{settings.streamQuality}</Text>
         }
@@ -103,10 +116,13 @@ const SettingsScreen = () => {
           const newValue = settings.streamQuality === "high" ? "low" : "high";
           await setPreference(PreferenceStreamQuality, newValue);
         }}
-      />
-      <SettingRow
+            />
+            <SettingRow
         title="Download quality"
-        description="Audio quality used for downloads."
+        description={
+          "When downloading lessons to your device, should we use high- or " +
+          "low-quality audio?"
+        }
         accessory={
           <Text style={styles.valueText}>{settings.downloadQuality}</Text>
         }
@@ -114,10 +130,17 @@ const SettingsScreen = () => {
           const newValue = settings.downloadQuality === "high" ? "low" : "high";
           await setPreference(PreferenceDownloadQuality, newValue);
         }}
-      />
-      <SettingRow
+            />
+            <SettingRow
         title="Allow data collection"
-        description="Send anonymous usage data to help us improve the app."
+        description={
+          "Language Transfer records anonymous information about how people " +
+          "are using this app, which helps us understand what to prioritize " +
+          "when we're thinking about how to make the app better. We never " +
+          "store your name or any personal data about you. Still, if you'd " +
+          "like us to stop collecting information about how you use Language " +
+          "Transfer, you can turn that off here."
+        }
         accessory={<Checkbox checked={settings.allowDataCollection} />}
         onPress={async () => {
           await setPreference(

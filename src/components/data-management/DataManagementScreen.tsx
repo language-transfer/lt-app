@@ -8,7 +8,6 @@ import { deleteProgressForCourse } from "@/src/storage/persistence";
 import type { CourseName } from "@/src/types";
 import { useLogger } from "@/src/utils/log";
 import { Pressable } from "react-native-gesture-handler";
-
 const sections: {
   key: string;
   title: (courseTitle: string) => string;
@@ -26,7 +25,8 @@ const sections: {
     key: "refresh",
     title: (courseTitle: string) => `Refresh ${courseTitle} metadata`,
     description:
-      "Reload the lesson list in case new tracks have been published.",
+      "This will check to see if new lessons have been added. " +
+      "If you're having trouble downloading tracks, try this.",
     action: async (course: CourseName) => {
       await CourseData.loadCourseMetadata(course, true);
       Alert.alert("Metadata refreshed");
@@ -38,7 +38,8 @@ const sections: {
     key: "progress",
     title: (courseTitle: string) => `Clear ${courseTitle} progress`,
     description:
-      "Marks every lesson as unfinished and forgets where you left off.",
+      "If you've marked any lessons as finished, this will mark them all unfinished " +
+      "and start you back at Lesson 1. It will also forget where you left off in each track.",
     action: async (course: CourseName) => {
       await deleteProgressForCourse(course);
       Alert.alert("Progress deleted.");
@@ -51,7 +52,9 @@ const sections: {
   {
     key: "finished-downloads",
     title: (courseTitle: string) => `Delete finished ${courseTitle} downloads`,
-    description: "Removes downloaded lessons you have marked as finished.",
+    description:
+      "If you have downloaded lessons that you've finished listening to, " +
+      "this will delete those downloads.",
     action: async (course: CourseName) => {
       await CourseDownloadManager.unrequestAllFinishedDownloadsForCourse(
         course
@@ -66,7 +69,8 @@ const sections: {
   {
     key: "all-downloads",
     title: (courseTitle: string) => `Delete all ${courseTitle} downloads`,
-    description: "Removes every downloaded lesson for this course.",
+    description:
+      "This will delete all lessons you've downloaded.",
     action: async (course: CourseName) => {
       // TODO: this probably ought to cancel in-progress downloads too
       await CourseDownloadManager.unrequestAllDownloadsForCourse(course);
@@ -81,7 +85,8 @@ const sections: {
     key: "all-data",
     title: (courseTitle: string) => `Delete all ${courseTitle} data`,
     description:
-      "Deletes downloads, metadata, and progress. You will return to the course picker afterwards.",
+      "This will clear your progress, delete all downloads, " +
+      "and remove its metadata from your device.",
     action: async (
       course: CourseName,
       router: ReturnType<typeof useRouter>
