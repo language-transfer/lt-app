@@ -38,6 +38,7 @@
     "expo-system-ui": "~6.0.8",
     "expo-web-browser": "~15.0.9",
     "format-duration": "^3.0.2",
+    "jest": "^30.2.0",
     "lodash": "^4.17.21",
     "p-queue": "^9.0.1",
     "patch-package": "^8.0.1",

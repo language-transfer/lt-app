@@ -26,6 +26,7 @@
         build-tools-36-0-0
         build-tools-35-0-0
         platforms-android-36
+        system-images-android-36-google-apis-x86-64
         ndk-27-1-12297006
         cmake-3-22-1
 
@@ -57,6 +58,8 @@
           pkgs.python3
           pkgs.gnumake
           pkgs.gcc
+
+          pkgs.maestro
         ];
 
         ANDROID_HOME = androidHome;
