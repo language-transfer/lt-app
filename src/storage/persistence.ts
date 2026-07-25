@@ -200,11 +200,12 @@ export const setPreference = async <T>(
   preference: Preference<T>,
   val: T
 ): Promise<void> => {
+  // Optimistically update the query cache so the UI reflects the change instantly
+  queryClient.setQueryData(["@local", "preference", preference.name], val);
+
   const asString = JSON.stringify(val);
   await AsyncStorage.setItem(`@preferences/${preference.name}`, asString);
-  queryClient.invalidateQueries({
-    queryKey: ["@local", "preference", preference.name],
-  });
+
   log({
     action: "set_preference",
     surface: "preference-change",
