@@ -58,9 +58,6 @@ const SettingsScreen = () => {
     allowDataCollection,
   };
 
-  // TODO - this flickers the screen while reloading. consider SWR
-  // (actually, i'm not sure it really does anymore now that we've switched to the hooks --
-  //   possible that asyncstorage query refresh is essentially instant)
   if (!settingsLoaded(settings)) {
     return (
       <View style={styles.loading}>
