@@ -241,6 +241,20 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     bundledFirstLesson: null,
     bundledFirstLessonId: "ingles/ingles1",
   },
+  ingles2026: {
+    image: inglesCover,
+    imageWithText: inglesCoverWithText,
+    shortTitle: "Inglés",
+    fullTitle: "Inglés Completo",
+    courseType: "complete",
+    uiColors: {
+      background: "#7186d0",
+      softBackground: "#d5daee",
+      text: "white",
+      backgroundAccent: "#516198",
+    },
+    bundledFirstLesson: null,
+  },
   music: {
     image: musicCover,
     imageWithText: musicCoverWithText,
@@ -434,7 +448,7 @@ const CourseData = {
     return courseInfoData[course].uiColors;
   },
 
-  getFallbackLessonCount(course: CourseName): string {
+  getFallbackLessonCount(course: CourseName): string | undefined {
     return courseInfoData[course].fallbackLessonCount;
   },
 

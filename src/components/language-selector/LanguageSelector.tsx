@@ -126,9 +126,9 @@ const LanguageSelector = () => {
               </View>
               <View style={styles.courseGrid}>
                 <LanguageButton
-                  course="ingles"
+                  course="ingles2026"
                   width={buttonWidth}
-                  onPress={() => goToCourse("ingles")}
+                  onPress={() => goToCourse("ingles2026")}
                 />
               </View>
 

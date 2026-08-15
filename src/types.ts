@@ -11,6 +11,7 @@ export const CourseNameSchema = z.enum([
   "swahili",
   "french",
   "ingles",
+  "ingles2026",
   "music",
 ]);
 
@@ -33,14 +34,18 @@ export interface CourseInfo {
   shortTitle: string;
   fullTitle: string;
   courseType: CourseType;
-  fallbackLessonCount: string;
+  fallbackLessonCount?: string;
   uiColors: UIColors;
   bundledFirstLesson?: any;
   bundledFirstLessonId?: string;
 }
 
 export type {
-  CourseIndex as AllCoursesIndex, CourseIndexEntry, FilePointer, LessonData, LessonVariants
+  CourseIndex as AllCoursesIndex,
+  CourseIndexEntry,
+  FilePointer,
+  LessonData,
+  LessonVariants,
 } from "@/src/data/courseSchemas";
 
 export interface Progress {

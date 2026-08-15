@@ -18,6 +18,7 @@ const LanguageButton = ({ course, width, onPress }: Props) => {
 
   const info = CourseData.getCourseData(course);
   const colors = CourseData.getCourseUIColors(course);
+  const lessonCount = info.fallbackLessonCount;
 
   return (
     <View style={[styles.sectionWrapper, { width, height: width + 50 }]}>
@@ -38,7 +39,14 @@ const LanguageButton = ({ course, width, onPress }: Props) => {
         ]}
       >
         <View style={styles.rippleWrapper}>
-          <TouchableNativeFeedback onPress={onPress} useForeground>
+          <TouchableNativeFeedback
+            accessibilityLabel={`${info.courseType} ${info.shortTitle}${
+              lessonCount ? `, ${lessonCount} lessons` : ""
+            }`}
+            accessibilityRole="button"
+            onPress={onPress}
+            useForeground
+          >
             <View style={styles.sectionContainer}>
               <Text
                 style={[
@@ -51,9 +59,9 @@ const LanguageButton = ({ course, width, onPress }: Props) => {
                 {info.courseType}
               </Text>
               <Text style={styles.courseTitle}>{info.shortTitle}</Text>
-              <Text style={styles.courseDetails}>
-                {info.fallbackLessonCount} lessons
-              </Text>
+              {lessonCount ? (
+                <Text style={styles.courseDetails}>{lessonCount} lessons</Text>
+              ) : null}
             </View>
           </TouchableNativeFeedback>
         </View>
