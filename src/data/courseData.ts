@@ -1,17 +1,16 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Buffer } from "buffer";
 import * as FileSystem from "expo-file-system/legacy";
 
 import {
-  allCoursesSchema,
   CourseMetadata,
   courseMetaSchema,
-  storedAllCoursesSchema,
-  type CourseIndex,
   type FilePointer,
   type LessonData,
-  type StoredCourseIndex,
 } from "@/src/data/courseSchemas";
+import {
+  ensureCourseIndex,
+  refreshCourseIndex as refreshStoredCourseIndex,
+} from "@/src/data/courseIndex";
 import {
   CourseInfo,
   CourseName,
@@ -87,11 +86,6 @@ import { useQuery } from "@tanstack/react-query";
 //   Platform.OS === "ios"
 //     ? require("@/assets/courses/audio/music1-lq.mp3")
 //     : null;
-
-const COURSE_INDEX_URL =
-  "https://downloads.languagetransfer.org/all-courses.json";
-const COURSE_INDEX_STORAGE_KEY = "@course-index/all";
-const COURSE_INDEX_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 
 const courseInfoData: Record<CourseName, CourseInfo> = {
   spanish: {
@@ -281,109 +275,13 @@ const loadedObjectMetadataLookup: Record<
   }
 > = {};
 
-// best avoid reloading while the app is open -- keep things consistent
-let cachedInMemoryCourseIndex: CourseIndex | null = null;
-
-const normalizeCasBaseURL = (base: string) => base.replace(/\/$/, "");
-
-const validateIndex = (raw: any): CourseIndex | null => {
-  const parsed = allCoursesSchema.safeParse(raw);
-  if (!parsed.success) {
-    return null;
-  }
-
-  return {
-    ...parsed.data,
-    casBaseURL: normalizeCasBaseURL(parsed.data.casBaseURL),
-  };
-};
-
-type CachedCourseIndex = {
-  data: CourseIndex;
-  timestamp: number;
-};
-
-const readCachedCourseIndex = async (): Promise<CachedCourseIndex | null> => {
-  try {
-    const contents = await AsyncStorage.getItem(COURSE_INDEX_STORAGE_KEY);
-    if (!contents) {
-      return null;
-    }
-
-    const parsed = storedAllCoursesSchema.safeParse(JSON.parse(contents));
-    if (!parsed.success) {
-      return null;
-    }
-
-    const validated = validateIndex(parsed.data.data);
-    if (!validated) {
-      return null;
-    }
-
-    return {
-      data: validated,
-      timestamp: parsed.data.timestamp,
-    };
-  } catch {
-    return null;
-  }
-};
-
-const writeCachedCourseIndex = async (index: CourseIndex): Promise<void> => {
-  const payload: StoredCourseIndex = {
-    timestamp: Date.now(),
-    data: index,
-  };
-  await AsyncStorage.setItem(COURSE_INDEX_STORAGE_KEY, JSON.stringify(payload));
-};
-
-const fetchAndCacheCourseIndex = async (): Promise<CourseIndex> => {
-  const response = await fetch(COURSE_INDEX_URL);
-  if (!response.ok) {
-    throw new Error("Failed to fetch course index");
-  }
-
-  const json = (await response.json()) as CourseIndex;
-  const validated = validateIndex(json);
-  if (!validated) {
-    throw new Error("Invalid course index payload");
-  }
-
-  await writeCachedCourseIndex(validated);
-  cachedInMemoryCourseIndex = validated;
-
-  return validated;
-};
-
-const ensureCourseIndex = async (forceRemote = false): Promise<CourseIndex> => {
-  if (!forceRemote && cachedInMemoryCourseIndex) {
-    return cachedInMemoryCourseIndex;
-  }
-
-  if (!forceRemote) {
-    const cached = await readCachedCourseIndex();
-    if (cached) {
-      cachedInMemoryCourseIndex = cached.data;
-
-      const isFresh = Date.now() - cached.timestamp < COURSE_INDEX_TTL_MS;
-      if (isFresh) {
-        return cached.data;
-      }
-
-      void fetchAndCacheCourseIndex().catch((error) =>
-        console.warn("Failed to revalidate course index", error)
-      );
-      return cached.data;
-    }
-  }
-
-  const latest = await fetchAndCacheCourseIndex();
-  return latest;
-};
-
 export const getCASBaseURL = async (): Promise<string> => {
   const index = await ensureCourseIndex();
   return index.casBaseURL;
+};
+
+export const refreshCourseIndex = async (): Promise<void> => {
+  await refreshStoredCourseIndex();
 };
 
 export const getCASObjectURL = async (

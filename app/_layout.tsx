@@ -2,25 +2,33 @@ import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useGlobalSearchParams, usePathname } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useRef } from "react";
-import { AppState, AppStateStatus } from "react-native";
+import { Suspense, use, useEffect, useRef } from "react";
+import {
+  ActivityIndicator,
+  AppState,
+  AppStateStatus,
+  LogBox,
+  StyleSheet,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
 import DrawerContent from "@/src/components/navigation/DrawerContent";
 import { queryClient } from "@/src/data/queryClient";
 import useListenNavigationSync from "@/src/hooks/useListenNavigationSync";
+import { appMigrationsReady } from "@/src/storage/appMigrations";
 import { useLogger } from "@/src/utils/log";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
-import { LogBox } from "react-native";
 
 if (process.env.EXPO_PUBLIC_E2E_TEST_SUPPRESS_LOGBOX) {
   LogBox.ignoreAllLogs();
 }
 
-export default function RootLayout() {
+const RootLayoutContent = () => {
+  use(appMigrationsReady);
+
   // const colorScheme = useColorScheme();
   useListenNavigationSync();
   const pathname = usePathname();
@@ -88,4 +96,26 @@ export default function RootLayout() {
       </GestureHandlerRootView>
     </QueryClientProvider>
   );
+};
+
+const MigrationFallback = () => (
+  <View style={styles.migrationFallback}>
+    <ActivityIndicator size="large" />
+  </View>
+);
+
+export default function RootLayout() {
+  return (
+    <Suspense fallback={<MigrationFallback />}>
+      <RootLayoutContent />
+    </Suspense>
+  );
 }
+
+const styles = StyleSheet.create({
+  migrationFallback: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+  },
+});
