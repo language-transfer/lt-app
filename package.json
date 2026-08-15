@@ -62,6 +62,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@testing-library/react-native": "^13.3.3",
     "@types/format-duration": "^3.0.0",
     "@types/jest": "29.5.14",
     "@types/lodash": "^4.17.20",
@@ -71,6 +72,7 @@
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "jest-expo": "~54.0.17",
+    "react-test-renderer": "^19.1.0",
     "typescript": "~5.9.2"
   },
   "private": true,

@@ -15,6 +15,11 @@ import LanguageHomeTopButton from "@/src/components/language-home/LanguageHomeTo
 import CourseData from "@/src/data/courseData";
 import { useCurrentCourse } from "@/src/hooks/useCourseLessonData";
 import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
+import {
+  PreferenceLegacyInglesBannerDismissed,
+  setPreference,
+  usePreference,
+} from "@/src/storage/persistence";
 import { useLogger } from "@/src/utils/log";
 
 const LANGUAGE_HOME_LOG_CONTEXT = {
@@ -29,7 +34,18 @@ const LanguageHomeScreen = () => {
   const [metadataError, setMetadataError] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const metadataLoaded = CourseData.isCourseMetadataLoaded(course);
+  const legacyBannerDismissed = usePreference(
+    PreferenceLegacyInglesBannerDismissed
+  );
   const log = useLogger(LANGUAGE_HOME_LOG_CONTEXT);
+
+  const goToLegacyIngles = () => {
+    log({ action: "open_legacy_ingles" });
+    router.push({
+      pathname: "/course/[course]",
+      params: { course: "ingles" },
+    });
+  };
 
   useStatusBarStyle("white", "dark-content");
 
@@ -96,6 +112,17 @@ const LanguageHomeScreen = () => {
         >
           <Text style={styles.retryButtonText}>Try Again</Text>
         </Pressable>
+        {course === "ingles2026" ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={goToLegacyIngles}
+            style={styles.errorLegacyButton}
+          >
+            <Text style={styles.errorLegacyButtonText}>
+              Abrir el curso anterior
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
     );
   }
@@ -115,6 +142,15 @@ const LanguageHomeScreen = () => {
   }
 
   const extraButtons = [
+    ...(course === "ingles2026"
+      ? [
+          {
+            label: "Introducción a Inglés — curso anterior",
+            icon: "history",
+            action: goToLegacyIngles,
+          },
+        ]
+      : []),
     {
       label: "All Lessons",
       icon: "list-ol",
@@ -146,6 +182,39 @@ const LanguageHomeScreen = () => {
   return (
     <ScrollView style={styles.body}>
       <LanguageHomeTopButton course={course} />
+      {course === "ingles2026" && legacyBannerDismissed === false ? (
+        <View style={styles.legacyBanner}>
+          <View style={styles.legacyBannerHeader}>
+            <FontAwesome5 name="info-circle" size={18} color="#33436e" />
+            <Text style={styles.legacyBannerText}>
+              ¿Buscas el curso anterior? La Introducción a Inglés sigue
+              disponible.
+            </Text>
+            <Pressable
+              accessibilityLabel="Cerrar aviso del curso anterior"
+              accessibilityRole="button"
+              hitSlop={10}
+              onPress={() => {
+                log({ action: "dismiss_legacy_ingles_banner" });
+                void setPreference(PreferenceLegacyInglesBannerDismissed, true);
+              }}
+              style={styles.legacyBannerDismiss}
+            >
+              <FontAwesome5 name="times" size={16} color="#33436e" />
+            </Pressable>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            onPress={goToLegacyIngles}
+            style={styles.legacyBannerButton}
+          >
+            <Text style={styles.legacyBannerButtonText}>
+              Abrir curso anterior
+            </Text>
+            <FontAwesome5 name="arrow-right" size={14} color="#33436e" />
+          </Pressable>
+        </View>
+      ) : null}
       {extraButtons.map((button) => (
         <Pressable
           key={button.label}
@@ -199,6 +268,56 @@ const styles = StyleSheet.create({
   retryButtonText: {
     fontSize: 16,
     fontWeight: "600",
+  },
+  errorLegacyButton: {
+    marginTop: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  errorLegacyButtonText: {
+    color: "#33436e",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  legacyBanner: {
+    backgroundColor: "#d5daee",
+    borderRadius: 12,
+    marginBottom: 20,
+    marginHorizontal: 25,
+    padding: 18,
+  },
+  legacyBannerHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+  },
+  legacyBannerText: {
+    color: "#263556",
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 22,
+    marginHorizontal: 12,
+  },
+  legacyBannerDismiss: {
+    alignItems: "center",
+    height: 32,
+    justifyContent: "center",
+    marginRight: -8,
+    marginTop: -8,
+    width: 32,
+  },
+  legacyBannerButton: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    gap: 8,
+    marginLeft: 30,
+    marginTop: 12,
+    paddingVertical: 4,
+  },
+  legacyBannerButtonText: {
+    color: "#33436e",
+    fontSize: 16,
+    fontWeight: "700",
   },
   additionalButton: {
     marginHorizontal: 25,

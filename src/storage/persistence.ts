@@ -271,6 +271,12 @@ export const PreferenceIsFirstLoad: Preference<boolean> = {
   defaultValue: true,
 };
 
+export const PreferenceLegacyInglesBannerDismissed: Preference<boolean> = {
+  name: "legacy-ingles-banner-dismissed",
+  schema: z.boolean(),
+  defaultValue: false,
+};
+
 const RatingButtonDismissedSchema = z.object({
   dismissed: z.boolean(),
   surface: z.enum(["LanguageHomeTopButton"]).optional(),

@@ -14,7 +14,7 @@
 - Introduction to Turkish
 - Introduction to Italian
 - Introduction to French
-- Introducción a Inglés (para Hispanohablantes)
+- Inglés Completo (para hispanohablantes), with the previous introduction still available
 - Introduction to Music Theory
 
 You can find them on the [Language Transfer website](https://www.languagetransfer.org/courses).
