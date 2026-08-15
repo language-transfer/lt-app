@@ -17,15 +17,19 @@ import { useCurrentCourse } from "@/src/hooks/useCourseLessonData";
 import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
 import { useLogger } from "@/src/utils/log";
 
+const LANGUAGE_HOME_LOG_CONTEXT = {
+  surface: "language_home",
+};
+
 const LanguageHomeScreen = () => {
   const course = useCurrentCourse();
   const router = useRouter();
   const [loadingMetadata, setLoadingMetadata] = useState(true);
   const [showWarning, setShowWarning] = useState(false);
+  const [metadataError, setMetadataError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const metadataLoaded = CourseData.isCourseMetadataLoaded(course);
-  const log = useLogger({
-    surface: "language_home",
-  });
+  const log = useLogger(LANGUAGE_HOME_LOG_CONTEXT);
 
   useStatusBarStyle("white", "dark-content");
 
@@ -36,6 +40,7 @@ const LanguageHomeScreen = () => {
 
       const load = async () => {
         setLoadingMetadata(true);
+        setMetadataError(false);
         timeout = setTimeout(() => {
           if (active) {
             log({
@@ -46,7 +51,13 @@ const LanguageHomeScreen = () => {
         }, 5000);
 
         try {
-          await CourseData.loadCourseMetadata(course);
+          await CourseData.loadCourseMetadata(course, loadAttempt > 0);
+        } catch (error) {
+          console.warn(`Failed to load metadata for ${course}`, error);
+          log({ action: "load_metadata_error" });
+          if (active) {
+            setMetadataError(true);
+          }
         } finally {
           if (timeout !== null) {
             clearTimeout(timeout);
@@ -66,8 +77,28 @@ const LanguageHomeScreen = () => {
           clearTimeout(timeout);
         }
       };
-    }, [course, log])
+    }, [course, loadAttempt, log])
   );
+
+  if (metadataError) {
+    return (
+      <View style={styles.loaderContainer}>
+        <FontAwesome5 name="exclamation-circle" size={32} color="#555" />
+        <Text style={styles.errorTitle}>Unable to load this course</Text>
+        <Text style={styles.errorText}>
+          Check your Internet connection, then try again.
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          android_ripple={{ color: "rgba(0,0,0,0.08)" }}
+          onPress={() => setLoadAttempt((attempt) => attempt + 1)}
+          style={styles.retryButton}
+        >
+          <Text style={styles.retryButtonText}>Try Again</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   if (loadingMetadata || !metadataLoaded) {
     return (
@@ -75,8 +106,8 @@ const LanguageHomeScreen = () => {
         <ActivityIndicator size="large" />
         {showWarning ? (
           <Text style={styles.warningText}>
-            If this screen does not load, check your Internet connection or try
-            reinstalling the Language Transfer app.
+            This is taking longer than expected. Check your Internet connection
+            or try again in a moment.
           </Text>
         ) : null}
       </View>
@@ -144,6 +175,30 @@ const styles = StyleSheet.create({
   warningText: {
     marginTop: 16,
     textAlign: "center",
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginTop: 16,
+  },
+  errorText: {
+    color: "#555",
+    fontSize: 16,
+    marginTop: 8,
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    elevation: 2,
+    marginTop: 20,
+    overflow: "hidden",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   additionalButton: {
     marginHorizontal: 25,
