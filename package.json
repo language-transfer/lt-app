@@ -6,6 +6,9 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
@@ -60,13 +63,28 @@
   },
   "devDependencies": {
     "@types/format-duration": "^3.0.0",
+    "@types/jest": "29.5.14",
     "@types/lodash": "^4.17.20",
     "@types/pretty-bytes": "^5.1.0",
     "@types/react": "~19.1.0",
     "@types/uuid": "^10.0.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "jest-expo": "~54.0.17",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "jest": {
+    "preset": "jest-expo",
+    "watchman": false,
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "coverageDirectory": "artifacts/jest/coverage",
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.d.ts",
+      "!src/**/__tests__/**"
+    ]
+  }
 }
