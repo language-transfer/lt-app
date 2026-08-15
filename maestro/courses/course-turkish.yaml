@@ -9,3 +9,4 @@ appId: org.languagetransfer
     direction: DOWN
 - tapOn: "Turkish"
 - assertVisible: "Lesson 1"
+- takeScreenshot: course-turkish

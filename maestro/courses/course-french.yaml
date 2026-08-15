@@ -9,3 +9,4 @@ appId: org.languagetransfer
     direction: DOWN
 - tapOn: "French"
 - assertVisible: "Lesson 1"
+- takeScreenshot: course-french

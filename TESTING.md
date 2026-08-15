@@ -8,4 +8,7 @@ For native end-to-end tests:
 - `nix develop`
 - run emulator
 - `EXPO_PUBLIC_E2E_TEST_SUPPRESS_LOGBOX=1 npx expo run:android`
-- `maestro test maestro/`
+- `npm run test:maestro:report`: run Maestro and write its HTML report and
+  screenshots under `artifacts/maestro/`.
+- `npm run test:full`: run Jest with HTML coverage, then the reported Maestro
+  suite. This requires the native app and emulator to already be running.

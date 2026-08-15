@@ -8,3 +8,4 @@ appId: org.languagetransfer
       text: "Inglés"
     direction: DOWN
 - assertVisible: "complete Inglés"
+- takeScreenshot: course-ingles-complete-card
