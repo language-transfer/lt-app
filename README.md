@@ -29,6 +29,10 @@ You can find them on the [Language Transfer website](https://www.languagetransfe
 
 This app is developed in React Native, and is designed to work with both iOS & Android platforms.
 
+### iOS release policy
+
+EAS is not permitted for this project. Do not add or use EAS configuration, EAS Build, EAS Submit, EAS CLI dependencies, or EAS-managed credentials. iOS releases must be built and submitted with the native Xcode/Fastlane toolchain. The previous app's Fastlane setup remains in `legacy/ios/fastlane/` as historical reference and is not directly runnable against the current Expo rewrite.
+
 ### Goals
 
 The Language Transfer app should be:
