@@ -409,12 +409,18 @@ const CourseData = {
     return Boolean(courseInfoData[course]);
   },
 
+  isCourseVisible(course: CourseName): boolean {
+    return CourseData.courseExists(course) && course !== "ingles";
+  },
+
   getCourseData(course: CourseName): CourseInfo {
     return courseInfoData[course];
   },
 
   getCourseList(): CourseName[] {
-    return Object.keys(courseInfoData) as CourseName[];
+    return (Object.keys(courseInfoData) as CourseName[]).filter((course) =>
+      CourseData.isCourseVisible(course)
+    );
   },
 
   getCourseShortTitle(course: CourseName): string {

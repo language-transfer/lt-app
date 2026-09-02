@@ -16,7 +16,7 @@ import CourseData from "@/src/data/courseData";
 import { useCurrentCourse } from "@/src/hooks/useCourseLessonData";
 import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
 import {
-  PreferenceLegacyInglesBannerDismissed,
+  PreferenceCompleteInglesLaunchBannerDismissed,
   setPreference,
   usePreference,
 } from "@/src/storage/persistence";
@@ -34,18 +34,10 @@ const LanguageHomeScreen = () => {
   const [metadataError, setMetadataError] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const metadataLoaded = CourseData.isCourseMetadataLoaded(course);
-  const legacyBannerDismissed = usePreference(
-    PreferenceLegacyInglesBannerDismissed
+  const launchBannerDismissed = usePreference(
+    PreferenceCompleteInglesLaunchBannerDismissed
   );
   const log = useLogger(LANGUAGE_HOME_LOG_CONTEXT);
-
-  const goToLegacyIngles = () => {
-    log({ action: "open_legacy_ingles" });
-    router.push({
-      pathname: "/course/[course]",
-      params: { course: "ingles" },
-    });
-  };
 
   useStatusBarStyle("white", "dark-content");
 
@@ -112,17 +104,6 @@ const LanguageHomeScreen = () => {
         >
           <Text style={styles.retryButtonText}>Try Again</Text>
         </Pressable>
-        {course === "ingles_completo" ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={goToLegacyIngles}
-            style={styles.errorLegacyButton}
-          >
-            <Text style={styles.errorLegacyButtonText}>
-              Abrir el curso anterior
-            </Text>
-          </Pressable>
-        ) : null}
       </View>
     );
   }
@@ -142,15 +123,6 @@ const LanguageHomeScreen = () => {
   }
 
   const extraButtons = [
-    ...(course === "ingles_completo"
-      ? [
-          {
-            label: "Introducción a Inglés — curso anterior",
-            icon: "history",
-            action: goToLegacyIngles,
-          },
-        ]
-      : []),
     {
       label: "All Lessons",
       icon: "list-ol",
@@ -182,37 +154,35 @@ const LanguageHomeScreen = () => {
   return (
     <ScrollView style={styles.body}>
       <LanguageHomeTopButton course={course} />
-      {course === "ingles_completo" && legacyBannerDismissed === false ? (
-        <View style={styles.legacyBanner}>
-          <View style={styles.legacyBannerHeader}>
+      {course === "ingles_completo" && launchBannerDismissed === false ? (
+        <View style={styles.launchBanner}>
+          <View style={styles.launchBannerHeader}>
             <FontAwesome5 name="info-circle" size={18} color="#33436e" />
-            <Text style={styles.legacyBannerText}>
-              ¿Buscas el curso anterior? La Introducción a Inglés sigue
-              disponible.
-            </Text>
+            <View style={styles.launchBannerTextContainer}>
+              <Text style={styles.launchBannerTitle}>¡Nuevo curso!</Text>
+              <Text style={styles.launchBannerText}>
+                ¡&apos;Inglés Completo&apos; ya se está lanzando!
+              </Text>
+              <Text style={styles.launchBannerText}>
+                Empieza desde el principio de este nuevo curso
+              </Text>
+            </View>
             <Pressable
-              accessibilityLabel="Cerrar aviso del curso anterior"
+              accessibilityLabel="Cerrar anuncio del nuevo curso"
               accessibilityRole="button"
               hitSlop={10}
               onPress={() => {
-                log({ action: "dismiss_legacy_ingles_banner" });
-                void setPreference(PreferenceLegacyInglesBannerDismissed, true);
+                log({ action: "dismiss_complete_ingles_launch_banner" });
+                void setPreference(
+                  PreferenceCompleteInglesLaunchBannerDismissed,
+                  true
+                );
               }}
-              style={styles.legacyBannerDismiss}
+              style={styles.launchBannerDismiss}
             >
               <FontAwesome5 name="times" size={16} color="#33436e" />
             </Pressable>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            onPress={goToLegacyIngles}
-            style={styles.legacyBannerButton}
-          >
-            <Text style={styles.legacyBannerButtonText}>
-              Abrir curso anterior
-            </Text>
-            <FontAwesome5 name="arrow-right" size={14} color="#33436e" />
-          </Pressable>
         </View>
       ) : null}
       {extraButtons.map((button) => (
@@ -269,55 +239,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  errorLegacyButton: {
-    marginTop: 18,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  errorLegacyButtonText: {
-    color: "#33436e",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  legacyBanner: {
+  launchBanner: {
     backgroundColor: "#d5daee",
     borderRadius: 12,
     marginBottom: 20,
     marginHorizontal: 25,
     padding: 18,
   },
-  legacyBannerHeader: {
+  launchBannerHeader: {
     alignItems: "flex-start",
     flexDirection: "row",
   },
-  legacyBannerText: {
-    color: "#263556",
+  launchBannerTextContainer: {
     flex: 1,
-    fontSize: 16,
-    lineHeight: 22,
+    gap: 4,
     marginHorizontal: 12,
   },
-  legacyBannerDismiss: {
+  launchBannerTitle: {
+    color: "#263556",
+    fontSize: 18,
+    fontWeight: "700",
+    lineHeight: 24,
+  },
+  launchBannerText: {
+    color: "#263556",
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  launchBannerDismiss: {
     alignItems: "center",
     height: 32,
     justifyContent: "center",
     marginRight: -8,
     marginTop: -8,
     width: 32,
-  },
-  legacyBannerButton: {
-    alignItems: "center",
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    gap: 8,
-    marginLeft: 30,
-    marginTop: 12,
-    paddingVertical: 4,
-  },
-  legacyBannerButtonText: {
-    color: "#33436e",
-    fontSize: 16,
-    fontWeight: "700",
   },
   additionalButton: {
     marginHorizontal: 25,

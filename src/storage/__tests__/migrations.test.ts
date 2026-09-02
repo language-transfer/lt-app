@@ -2,6 +2,7 @@ import {
   LAST_BOOTED_APP_VERSION_KEY,
   MIGRATION_WAIT_TIMEOUT_MS,
   PRE_2025_COURSE_NAMES,
+  clearCourseObjectDownloads,
   clearOldDownloadLocations,
   migratePreference,
   migrateStoredPreferences,
@@ -92,6 +93,40 @@ describe("old download cleanup", () => {
 
     expect(checked).toHaveLength(PRE_2025_COURSE_NAMES.length * 2 * 2);
     expect(deleted).toEqual(["documents/spanish", "external/music"]);
+  });
+
+  test("removes deprecated course intents and object files idempotently", async () => {
+    const existing = new Set(["objects/old-lq", "staging/old-hq"]);
+    const removedIntents: string[] = [];
+    const deleted: string[] = [];
+    const getFiles = (objectId: string) =>
+      ["objects", "staging"].map((directory) => {
+        const path = `${directory}/${objectId}`;
+        return {
+          get exists() {
+            return existing.has(path);
+          },
+          uri: `file:///${path}`,
+          delete: () => {
+            deleted.push(path);
+            existing.delete(path);
+          },
+        };
+      });
+    const options = {
+      objectIds: ["old-lq", "old-hq", "old-lq"],
+      getFiles,
+      removeIntent: jest.fn(async (objectId: string) => {
+        removedIntents.push(objectId);
+      }),
+      warn: jest.fn(),
+    };
+
+    await clearCourseObjectDownloads(options);
+    await clearCourseObjectDownloads(options);
+
+    expect(removedIntents).toEqual(["old-lq", "old-hq", "old-lq", "old-hq"]);
+    expect(deleted).toEqual(["objects/old-lq", "staging/old-hq"]);
   });
 });
 

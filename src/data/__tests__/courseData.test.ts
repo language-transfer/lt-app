@@ -12,6 +12,10 @@ describe("Complete Inglés course registration", () => {
     expect(CourseNameSchema.safeParse("ingles_completo").success).toBe(true);
     expect(CourseData.courseExists("ingles_completo")).toBe(true);
     expect(CourseData.courseExists("ingles")).toBe(true);
+    expect(CourseData.isCourseVisible("ingles_completo")).toBe(true);
+    expect(CourseData.isCourseVisible("ingles")).toBe(false);
+    expect(CourseData.getCourseList()).toContain("ingles_completo");
+    expect(CourseData.getCourseList()).not.toContain("ingles");
     expect(CourseData.getCourseData("ingles_completo")).toMatchObject({
       shortTitle: "Inglés",
       fullTitle: "Inglés Completo",

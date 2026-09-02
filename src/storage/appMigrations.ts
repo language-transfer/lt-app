@@ -37,9 +37,28 @@ const refreshCourseIndex = async (): Promise<void> => {
   await courseData.refreshCourseIndex();
 };
 
+const clearLegacyInglesObjectDownloads = async (): Promise<void> => {
+  // Use only locally cached metadata. Anyone with old-course downloads already
+  // has this file, while fresh/offline installs should not make a network
+  // request solely to discover that there is nothing to remove.
+  const courseData = await import("@/src/data/courseData");
+  const metadata = await courseData.default.loadCourseMetadataIfDownloaded(
+    "ingles"
+  );
+  if (!metadata) {
+    return;
+  }
+
+  const { CourseDownloadManager } = await import(
+    "@/src/services/downloadManager"
+  );
+  await CourseDownloadManager.purgeAllDownloadsForCourse("ingles");
+};
+
 const appMigrationOperations: readonly AppMigrationOperation[] = [
   () => migrateStoredPreferences(AsyncStorage),
   clearLegacyDownloads,
+  clearLegacyInglesObjectDownloads,
   refreshCourseIndex,
 ];
 

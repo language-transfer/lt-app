@@ -13,6 +13,7 @@ import {
   PreferenceDownloadQuality,
   usePreference,
 } from "@/src/storage/persistence";
+import { clearCourseObjectDownloads } from "@/src/storage/migrations";
 import type { CourseName, FilePointer, Quality } from "@/src/types";
 import { log } from "@/src/utils/log";
 import { createAsyncStorage } from "@react-native-async-storage/async-storage";
@@ -330,6 +331,33 @@ const DownloadManager = {
     await syncDownloadIntent();
   },
 
+  async purgeDownloads(filePointers: FilePointer[]) {
+    const pointersById = new Map(
+      filePointers.map((pointer) => [pointer.object, pointer])
+    );
+
+    for (const objectId of pointersById.keys()) {
+      pendingSet.delete(objectId);
+    }
+
+    await clearCourseObjectDownloads({
+      objectIds: [...pointersById.keys()],
+      removeIntent: (objectId) =>
+        downloadIntentAsyncStorage.removeItem(objectId),
+      getFiles: (objectId) => {
+        const pointer = pointersById.get(objectId)!;
+        return [
+          new File(getLocalObjectPath(pointer)),
+          new File(stagingPath(pointer)),
+        ];
+      },
+    });
+
+    for (const pointer of pointersById.values()) {
+      invalidate(pointer);
+    }
+  },
+
   async getDownloadStatus(filePointer: FilePointer): Promise<DownloadStatus> {
     const isEnqueued = pendingSet.has(filePointer.object);
     const isDownloading = isObjectDownloading(filePointer);
@@ -511,6 +539,16 @@ export const CourseDownloadManager = {
     );
     if (allPointers.length > 0) {
       await DownloadManager.unrequestDownloads(allPointers);
+    }
+  },
+
+  async purgeAllDownloadsForCourse(course: CourseName) {
+    const lessonIndices = CourseData.getLessonIndices(course);
+    const allPointers = lessonIndices.flatMap((lesson) =>
+      CourseData.getLessonPointersAllVariants(course, lesson)
+    );
+    if (allPointers.length > 0) {
+      await DownloadManager.purgeDownloads(allPointers);
     }
   },
 

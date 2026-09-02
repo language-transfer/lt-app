@@ -8,7 +8,9 @@ import { getMostRecentListenedCourse } from "@/src/storage/persistence";
 let hasHandledInitialRedirect = false;
 
 export default function Index() {
-  const [checkingRecentCourse, setCheckingRecentCourse] = useState(!hasHandledInitialRedirect);
+  const [checkingRecentCourse, setCheckingRecentCourse] = useState(
+    !hasHandledInitialRedirect
+  );
   const router = useRouter();
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function Index() {
     const maybeRedirectToRecentCourse = async () => {
       try {
         const course = await getMostRecentListenedCourse();
-        if (!cancelled && course && CourseData.courseExists(course)) {
+        if (!cancelled && course && CourseData.isCourseVisible(course)) {
           hasHandledInitialRedirect = true;
           router.replace({
             pathname: "/course/[course]",

@@ -109,6 +109,40 @@ export const clearOldDownloadLocations = async <Root>({
   }
 };
 
+export type DownloadObjectFile = {
+  readonly exists: boolean;
+  readonly uri: string;
+  delete(): void;
+};
+
+export type CourseDownloadCleanupDependencies = {
+  getFiles(objectId: string): readonly DownloadObjectFile[];
+  objectIds: readonly string[];
+  removeIntent(objectId: string): Promise<void>;
+  warn?: (message: string) => void;
+};
+
+export const clearCourseObjectDownloads = async ({
+  getFiles,
+  objectIds,
+  removeIntent,
+  warn = console.warn,
+}: CourseDownloadCleanupDependencies): Promise<void> => {
+  for (const objectId of new Set(objectIds)) {
+    // Remove intent first so an interrupted cleanup cannot restart this
+    // download on the next launch.
+    await removeIntent(objectId);
+
+    for (const file of getFiles(objectId)) {
+      if (!file.exists) {
+        continue;
+      }
+      warn(`Deleting deprecated course download at ${file.uri}`);
+      file.delete();
+    }
+  }
+};
+
 export type RunAppMigrationsOptions = {
   currentVersion: string;
   operations: readonly AppMigrationOperation[];

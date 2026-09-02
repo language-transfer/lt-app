@@ -10,6 +10,18 @@ appId: org.languagetransfer
 - assertVisible: "complete Inglés, 51 lessons"
 - tapOn: "Inglés"
 - assertVisible: "Introducción"
-- assertVisible: "¿Buscas el curso anterior? La Introducción a Inglés sigue disponible."
-- assertVisible: "Introducción a Inglés — curso anterior"
+- assertVisible: "¡Nuevo curso!"
+- assertVisible: "¡'Inglés Completo' ya se está lanzando!"
+- assertVisible: "Empieza desde el principio de este nuevo curso"
+- assertNotVisible: "Abrir curso anterior"
+- assertNotVisible: "Introducción a Inglés — curso anterior"
 - takeScreenshot: course-ingles-complete
+- tapOn: "All Lessons"
+- scrollUntilVisible:
+    element:
+      text: "El curso antiguo se encuentra en el canal de YouTube de Language Transfer."
+    direction: DOWN
+    timeout: 60000
+    visibilityPercentage: 100
+- assertVisible: "El curso antiguo se encuentra en el canal de YouTube de Language Transfer."
+- takeScreenshot: course-ingles-lessons-footer

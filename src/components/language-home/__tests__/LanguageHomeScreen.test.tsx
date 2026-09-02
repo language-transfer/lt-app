@@ -55,8 +55,8 @@ jest.mock("@/src/hooks/useCourseLessonData", () => ({
 jest.mock("@/src/hooks/useStatusBarStyle", () => jest.fn());
 
 jest.mock("@/src/storage/persistence", () => ({
-  PreferenceLegacyInglesBannerDismissed: {
-    name: "legacy-ingles-banner-dismissed",
+  PreferenceCompleteInglesLaunchBannerDismissed: {
+    name: "complete-ingles-launch-banner-dismissed",
   },
   setPreference: (...args: unknown[]) => mockSetPreference(...args),
   usePreference: () => mockBannerDismissed,
@@ -66,7 +66,7 @@ jest.mock("@/src/utils/log", () => ({
   useLogger: () => mockLog,
 }));
 
-describe("previous Inglés course access", () => {
+describe("Complete Inglés launch banner", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockBannerDismissed = false;
@@ -74,44 +74,41 @@ describe("previous Inglés course access", () => {
     mockLoadCourseMetadata.mockResolvedValue(undefined);
   });
 
-  test("shows both the dismissible banner and persistent course button", async () => {
+  test("shows the dismissible new-course announcement without old-course access", async () => {
     render(<LanguageHomeScreen />);
 
+    expect(await screen.findByText("¡Nuevo curso!")).toBeVisible();
     expect(
-      await screen.findByText(/¿Buscas el curso anterior\?/)
+      screen.getByText("¡'Inglés Completo' ya se está lanzando!")
     ).toBeVisible();
     expect(
-      screen.getByText("Introducción a Inglés — curso anterior")
+      screen.getByText("Empieza desde el principio de este nuevo curso")
     ).toBeVisible();
-
-    fireEvent.press(screen.getByText("Abrir curso anterior"));
-    expect(mockPush).toHaveBeenCalledWith({
-      pathname: "/course/[course]",
-      params: { course: "ingles" },
-    });
+    expect(screen.queryByText(/curso anterior/i)).toBeNull();
 
     fireEvent.press(
       screen.getByRole("button", {
-        name: "Cerrar aviso del curso anterior",
+        name: "Cerrar anuncio del nuevo curso",
       })
     );
     expect(mockSetPreference).toHaveBeenCalledWith(
-      expect.objectContaining({ name: "legacy-ingles-banner-dismissed" }),
+      expect.objectContaining({
+        name: "complete-ingles-launch-banner-dismissed",
+      }),
       true
     );
   });
 
-  test("keeps the persistent button after the banner is dismissed", async () => {
+  test("hides the announcement after it is dismissed", async () => {
     mockBannerDismissed = true;
     render(<LanguageHomeScreen />);
 
-    expect(
-      await screen.findByText("Introducción a Inglés — curso anterior")
-    ).toBeVisible();
-    expect(screen.queryByText(/¿Buscas el curso anterior\?/)).toBeNull();
+    expect(await screen.findByText("All Lessons")).toBeVisible();
+    expect(screen.queryByText("¡Nuevo curso!")).toBeNull();
+    expect(screen.queryByText(/curso anterior/i)).toBeNull();
   });
 
-  test("offers the old course when new-course metadata cannot load", async () => {
+  test("retries new-course metadata without offering the old course", async () => {
     mockIsCourseMetadataLoaded.mockReturnValue(false);
     mockLoadCourseMetadata.mockRejectedValue(new Error("offline"));
     const warn = jest
@@ -119,7 +116,7 @@ describe("previous Inglés course access", () => {
       .mockImplementation(() => undefined);
     render(<LanguageHomeScreen />);
 
-    await screen.findByText("Abrir el curso anterior");
+    await screen.findByText("Unable to load this course");
     expect(mockLoadCourseMetadata).toHaveBeenCalledWith(
       "ingles_completo",
       false
@@ -133,11 +130,7 @@ describe("previous Inglés course access", () => {
       )
     );
 
-    fireEvent.press(await screen.findByText("Abrir el curso anterior"));
-    expect(mockPush).toHaveBeenCalledWith({
-      pathname: "/course/[course]",
-      params: { course: "ingles" },
-    });
+    expect(screen.queryByText(/curso anterior/i)).toBeNull();
     warn.mockRestore();
   });
 });

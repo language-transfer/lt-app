@@ -1,6 +1,11 @@
 import { useCurrentCourseColorsIfPresent } from "@/src/hooks/useCourseLessonData";
 import { DrawerToggleButton } from "@react-navigation/drawer";
-import { Stack, useSegments } from "expo-router";
+import {
+  Redirect,
+  Stack,
+  useGlobalSearchParams,
+  useSegments,
+} from "expo-router";
 import "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -10,6 +15,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const StackLayout = () => {
   const courseColors = useCurrentCourseColorsIfPresent();
   const segments = useSegments();
+  const { course } = useGlobalSearchParams<{ course?: string }>();
+
+  if (course === "ingles") {
+    return (
+      <Redirect
+        href={{
+          pathname: "/course/[course]",
+          params: { course: "ingles_completo" },
+        }}
+      />
+    );
+  }
 
   return (
     <SafeAreaView

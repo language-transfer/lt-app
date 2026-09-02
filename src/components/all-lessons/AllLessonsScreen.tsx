@@ -118,6 +118,14 @@ const AllLessonsScreen = () => {
         <FlatList
           data={indices}
           keyExtractor={(lesson) => String(lesson)}
+          ListFooterComponent={
+            course === "ingles_completo" ? (
+              <Text style={styles.legacyCourseNotice}>
+                El curso antiguo se encuentra en el canal de YouTube de Language
+                Transfer.
+              </Text>
+            ) : null
+          }
           renderItem={({ item }) => <LessonRow lesson={item} />}
         />
       </View>
@@ -157,6 +165,14 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
+  },
+  legacyCourseNotice: {
+    color: "#666",
+    fontSize: 13,
+    lineHeight: 18,
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    textAlign: "center",
   },
   bottomBar: {
     flexDirection: "row",
