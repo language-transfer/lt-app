@@ -14,7 +14,7 @@
 - Introduction to Turkish
 - Introduction to Italian
 - Introduction to French
-- Inglés Completo (para hispanohablantes), with the previous introduction still available
+- Inglés Completo (para hispanohablantes); the previous introduction is available on Language Transfer's YouTube channel
 - Introduction to Music Theory
 
 You can find them on the [Language Transfer website](https://www.languagetransfer.org/courses).
@@ -32,6 +32,8 @@ This app is developed in React Native, and is designed to work with both iOS & A
 ### iOS release policy
 
 EAS is not permitted for this project. Do not add or use EAS configuration, EAS Build, EAS Submit, EAS CLI dependencies, or EAS-managed credentials. iOS releases must be built and submitted with the native Xcode/Fastlane toolchain. The previous app's Fastlane setup remains in `legacy/ios/fastlane/` as historical reference and is not directly runnable against the current Expo rewrite.
+
+The Expo rewrite's iOS build and release workflow are not ready yet. Before shipping it on iOS, restore the platform-specific preloaded tracks required for App Store review. Those bundled tracks are an iOS-only requirement and must not be added to the Android build.
 
 ### Goals
 
