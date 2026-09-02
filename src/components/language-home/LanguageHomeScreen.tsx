@@ -163,7 +163,7 @@ const LanguageHomeScreen = () => {
                 ¡&apos;Inglés Completo&apos; ya se está lanzando!
               </Text>
               <Text style={styles.launchBannerText}>
-                Empieza desde el principio de este nuevo curso
+                Empieza desde el principio de este nuevo curso.
               </Text>
             </View>
             <Pressable

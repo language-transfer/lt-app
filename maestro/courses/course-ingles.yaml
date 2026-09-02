@@ -12,7 +12,7 @@ appId: org.languagetransfer
 - assertVisible: "Introducción"
 - assertVisible: "¡Nuevo curso!"
 - assertVisible: "¡'Inglés Completo' ya se está lanzando!"
-- assertVisible: "Empieza desde el principio de este nuevo curso"
+- assertVisible: "Empieza desde el principio de este nuevo curso."
 - assertNotVisible: "Abrir curso anterior"
 - assertNotVisible: "Introducción a Inglés — curso anterior"
 - takeScreenshot: course-ingles-complete

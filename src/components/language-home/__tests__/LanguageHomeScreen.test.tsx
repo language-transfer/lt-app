@@ -82,7 +82,7 @@ describe("Complete Inglés launch banner", () => {
       screen.getByText("¡'Inglés Completo' ya se está lanzando!")
     ).toBeVisible();
     expect(
-      screen.getByText("Empieza desde el principio de este nuevo curso")
+      screen.getByText("Empieza desde el principio de este nuevo curso.")
     ).toBeVisible();
     expect(screen.queryByText(/curso anterior/i)).toBeNull();
 
