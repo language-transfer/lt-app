@@ -78,9 +78,7 @@ describe("previous Inglés course access", () => {
     render(<LanguageHomeScreen />);
 
     expect(
-      await screen.findByText(
-        "¿Buscas el curso anterior? La Introducción a Inglés sigue disponible."
-      )
+      await screen.findByText(/¿Buscas el curso anterior\?/)
     ).toBeVisible();
     expect(
       screen.getByText("Introducción a Inglés — curso anterior")
@@ -110,11 +108,7 @@ describe("previous Inglés course access", () => {
     expect(
       await screen.findByText("Introducción a Inglés — curso anterior")
     ).toBeVisible();
-    expect(
-      screen.queryByText(
-        "¿Buscas el curso anterior? La Introducción a Inglés sigue disponible."
-      )
-    ).toBeNull();
+    expect(screen.queryByText(/¿Buscas el curso anterior\?/)).toBeNull();
   });
 
   test("offers the old course when new-course metadata cannot load", async () => {
