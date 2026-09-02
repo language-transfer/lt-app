@@ -35,6 +35,24 @@ EAS is not permitted for this project. Do not add or use EAS configuration, EAS 
 
 The Expo rewrite's iOS build and release workflow are not ready yet. Before shipping it on iOS, restore the platform-specific preloaded tracks required for App Store review. Those bundled tracks are an iOS-only requirement and must not be added to the Android build.
 
+### Android release builds
+
+Android release builds use the upload-key settings `MYAPP_UPLOAD_STORE_FILE`, `MYAPP_UPLOAD_KEY_ALIAS`, `MYAPP_UPLOAD_STORE_PASSWORD`, and `MYAPP_UPLOAD_KEY_PASSWORD` from the developer's Gradle properties (normally `~/.gradle/gradle.properties`). Keep the credentials and keystore out of Git.
+
+The tracked `withAndroidReleaseSigning` Expo config plugin restores the release signing configuration whenever the ignored native Android project is generated. It first looks for the configured keystore filename in `android/app/`, then falls back to `legacy/android/app/` for the existing local setup. Generate and build the Play Store bundle locally with:
+
+```sh
+npx expo prebuild --platform android
+cd android
+./gradlew bundleRelease
+```
+
+The bundle is written to `android/app/build/outputs/bundle/release/app-release.aab`. Verify its signing certificate before uploading it to Google Play:
+
+```sh
+keytool -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab
+```
+
 ### Goals
 
 The Language Transfer app should be:
