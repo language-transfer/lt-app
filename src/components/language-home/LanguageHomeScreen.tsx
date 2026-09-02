@@ -153,7 +153,6 @@ const LanguageHomeScreen = () => {
 
   return (
     <ScrollView style={styles.body}>
-      <LanguageHomeTopButton course={course} />
       {course === "ingles_completo" && launchBannerDismissed === false ? (
         <View style={styles.launchBanner}>
           <View style={styles.launchBannerHeader}>
@@ -185,6 +184,7 @@ const LanguageHomeScreen = () => {
           </View>
         </View>
       ) : null}
+      <LanguageHomeTopButton course={course} />
       {extraButtons.map((button) => (
         <Pressable
           key={button.label}
@@ -242,8 +242,8 @@ const styles = StyleSheet.create({
   launchBanner: {
     backgroundColor: "#d5daee",
     borderRadius: 12,
-    marginBottom: 20,
     marginHorizontal: 25,
+    marginTop: 25,
     padding: 18,
   },
   launchBannerHeader: {

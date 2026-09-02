@@ -19,9 +19,9 @@ appId: org.languagetransfer
 - tapOn: "All Lessons"
 - scrollUntilVisible:
     element:
-      text: "El curso antiguo se encuentra en el canal de YouTube de Language Transfer."
+      text: "El curso antiguo, «Introducción a Inglés», se encuentra en el canal de YouTube de Language Transfer."
     direction: DOWN
     timeout: 60000
     visibilityPercentage: 100
-- assertVisible: "El curso antiguo se encuentra en el canal de YouTube de Language Transfer."
+- assertVisible: "El curso antiguo, «Introducción a Inglés», se encuentra en el canal de YouTube de Language Transfer."
 - takeScreenshot: course-ingles-lessons-footer

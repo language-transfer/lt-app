@@ -121,8 +121,8 @@ const AllLessonsScreen = () => {
           ListFooterComponent={
             course === "ingles_completo" ? (
               <Text style={styles.legacyCourseNotice}>
-                El curso antiguo se encuentra en el canal de YouTube de Language
-                Transfer.
+                El curso antiguo, «Introducción a Inglés», se encuentra en el
+                canal de YouTube de Language Transfer.
               </Text>
             ) : null
           }
@@ -172,7 +172,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     paddingHorizontal: 24,
     paddingVertical: 20,
-    textAlign: "center",
   },
   bottomBar: {
     flexDirection: "row",
