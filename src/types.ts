@@ -11,7 +11,7 @@ export const CourseNameSchema = z.enum([
   "swahili",
   "french",
   "ingles",
-  "ingles2026",
+  "ingles_completo",
   "music",
 ]);
 

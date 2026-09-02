@@ -112,7 +112,7 @@ const LanguageHomeScreen = () => {
         >
           <Text style={styles.retryButtonText}>Try Again</Text>
         </Pressable>
-        {course === "ingles2026" ? (
+        {course === "ingles_completo" ? (
           <Pressable
             accessibilityRole="button"
             onPress={goToLegacyIngles}
@@ -142,7 +142,7 @@ const LanguageHomeScreen = () => {
   }
 
   const extraButtons = [
-    ...(course === "ingles2026"
+    ...(course === "ingles_completo"
       ? [
           {
             label: "Introducción a Inglés — curso anterior",
@@ -182,7 +182,7 @@ const LanguageHomeScreen = () => {
   return (
     <ScrollView style={styles.body}>
       <LanguageHomeTopButton course={course} />
-      {course === "ingles2026" && legacyBannerDismissed === false ? (
+      {course === "ingles_completo" && legacyBannerDismissed === false ? (
         <View style={styles.legacyBanner}>
           <View style={styles.legacyBannerHeader}>
             <FontAwesome5 name="info-circle" size={18} color="#33436e" />

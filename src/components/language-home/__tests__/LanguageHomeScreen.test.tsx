@@ -49,7 +49,7 @@ jest.mock("@/src/data/courseData", () => ({
 }));
 
 jest.mock("@/src/hooks/useCourseLessonData", () => ({
-  useCurrentCourse: () => "ingles2026",
+  useCurrentCourse: () => "ingles_completo",
 }));
 
 jest.mock("@/src/hooks/useStatusBarStyle", () => jest.fn());
@@ -126,11 +126,17 @@ describe("previous Inglés course access", () => {
     render(<LanguageHomeScreen />);
 
     await screen.findByText("Abrir el curso anterior");
-    expect(mockLoadCourseMetadata).toHaveBeenCalledWith("ingles2026", false);
+    expect(mockLoadCourseMetadata).toHaveBeenCalledWith(
+      "ingles_completo",
+      false
+    );
 
     fireEvent.press(screen.getByText("Try Again"));
     await waitFor(() =>
-      expect(mockLoadCourseMetadata).toHaveBeenCalledWith("ingles2026", true)
+      expect(mockLoadCourseMetadata).toHaveBeenCalledWith(
+        "ingles_completo",
+        true
+      )
     );
 
     fireEvent.press(await screen.findByText("Abrir el curso anterior"));

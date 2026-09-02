@@ -9,22 +9,22 @@ jest.mock("@/src/services/downloadManager", () => ({
 
 describe("Complete Inglés course registration", () => {
   test("registers the new course without replacing the previous introduction", () => {
-    expect(CourseNameSchema.safeParse("ingles2026").success).toBe(true);
-    expect(CourseData.courseExists("ingles2026")).toBe(true);
+    expect(CourseNameSchema.safeParse("ingles_completo").success).toBe(true);
+    expect(CourseData.courseExists("ingles_completo")).toBe(true);
     expect(CourseData.courseExists("ingles")).toBe(true);
-    expect(CourseData.getCourseData("ingles2026")).toMatchObject({
+    expect(CourseData.getCourseData("ingles_completo")).toMatchObject({
       shortTitle: "Inglés",
       fullTitle: "Inglés Completo",
       courseType: "complete",
     });
-    expect(CourseData.getFallbackLessonCount("ingles2026")).toBeUndefined();
+    expect(CourseData.getFallbackLessonCount("ingles_completo")).toBe("51");
   });
 
   test("reuses the existing Inglés artwork", () => {
-    expect(CourseData.getCourseImage("ingles2026")).toBe(
+    expect(CourseData.getCourseImage("ingles_completo")).toBe(
       CourseData.getCourseImage("ingles")
     );
-    expect(CourseData.getCourseImageWithText("ingles2026")).toBe(
+    expect(CourseData.getCourseImageWithText("ingles_completo")).toBe(
       CourseData.getCourseImageWithText("ingles")
     );
   });

@@ -241,12 +241,13 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     bundledFirstLesson: null,
     bundledFirstLessonId: "ingles/ingles1",
   },
-  ingles2026: {
+  ingles_completo: {
     image: inglesCover,
     imageWithText: inglesCoverWithText,
     shortTitle: "Inglés",
     fullTitle: "Inglés Completo",
     courseType: "complete",
+    fallbackLessonCount: "51",
     uiColors: {
       background: "#7186d0",
       softBackground: "#d5daee",

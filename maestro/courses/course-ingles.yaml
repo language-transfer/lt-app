@@ -7,5 +7,9 @@ appId: org.languagetransfer
     element:
       text: "Inglés"
     direction: DOWN
-- assertVisible: "complete Inglés"
-- takeScreenshot: course-ingles-complete-card
+- assertVisible: "complete Inglés, 51 lessons"
+- tapOn: "Inglés"
+- assertVisible: "Lesson 1"
+- assertVisible: "¿Buscas el curso anterior? La Introducción a Inglés sigue disponible."
+- assertVisible: "Introducción a Inglés — curso anterior"
+- takeScreenshot: course-ingles-complete
