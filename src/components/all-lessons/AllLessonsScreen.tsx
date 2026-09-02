@@ -121,7 +121,7 @@ const AllLessonsScreen = () => {
           ListFooterComponent={
             course === "ingles_completo" ? (
               <Text style={styles.legacyCourseNotice}>
-                El curso antiguo, «Introducción a Inglés», se encuentra en el
+                El curso antiguo, «Introducción al inglés», se encuentra en el
                 canal de YouTube de Language Transfer.
               </Text>
             ) : null
