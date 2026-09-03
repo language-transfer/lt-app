@@ -29,6 +29,30 @@ You can find them on the [Language Transfer website](https://www.languagetransfe
 
 This app is developed in React Native, and is designed to work with both iOS & Android platforms.
 
+### Development environment
+
+The Nix flake provides development shells for Linux, Apple Silicon macOS, and Intel macOS. On a Mac, install Xcode from Apple first, launch it once to finish installing its components, and select it for command-line builds:
+
+```sh
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+sudo xcodebuild -license accept
+```
+
+Then enter the default shell and install the JavaScript dependencies:
+
+```sh
+nix develop
+npm ci
+```
+
+On macOS the default shell includes Node.js, Watchman, CocoaPods, and Maestro; Xcode and the iOS SDK continue to come from the host system. Generate the ignored native iOS project and launch it in the simulator with:
+
+```sh
+npm run ios
+```
+
+Use `npm run ios -- --device` to select a connected iPhone. The named `nix develop .#ios` shell is equivalent to the default shell on macOS. Android build tooling remains available separately on both Linux and macOS with `nix develop .#android`; the Linux default shell remains the Android shell.
+
 ### iOS release policy
 
 The Expo rewrite's iOS build and release workflow are not ready yet. Before shipping it on iOS, restore the platform-specific preloaded tracks required for App Store review. Those bundled tracks are an iOS-only requirement and must not be added to the Android build.
