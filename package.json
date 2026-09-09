@@ -10,6 +10,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:maestro:report": "maestro test --format html --output artifacts/maestro/report.html --test-output-dir artifacts/maestro/results maestro/",
+    "test:android:rapid-back": "bash scripts/test-android-rapid-back.sh",
     "test:full": "npm run test:coverage -- --runInBand && npm run test:maestro:report",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",

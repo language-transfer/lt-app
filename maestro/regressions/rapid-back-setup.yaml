@@ -1,0 +1,14 @@
+appId: org.languagetransfer
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Language courses"
+- scrollUntilVisible:
+    element:
+      text: "Inglés"
+    direction: DOWN
+- assertVisible: "Inglés completo, 51 lessons"
+- tapOn: "Inglés"
+- assertVisible: "Track 0"
+- tapOn: "All Lessons"
+- assertVisible: "All Lessons"

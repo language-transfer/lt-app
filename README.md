@@ -53,6 +53,12 @@ The bundle is written to `android/app/build/outputs/bundle/release/app-release.a
 keytool -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab
 ```
 
+### Android rapid-Back regression
+
+`npm run test:android:rapid-back` is disabled pending an upstream
+react-native-screens update. The known crash, upstream commits, and upgrade /
+re-enable checklist are in [Android rapid-Back regression](./docs/android-rapid-back.md).
+
 ### Goals
 
 The Language Transfer app should be:

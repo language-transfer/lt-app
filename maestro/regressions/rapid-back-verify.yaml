@@ -1,0 +1,10 @@
+appId: org.languagetransfer
+---
+- assertVisible: "Inglés completo, 51 lessons"
+- takeScreenshot: rapid-back-course-list
+# Reopen a course to check that its native header and drawer still work.
+- tapOn: "Inglés"
+- assertVisible: "Inglés Completo"
+- tapOn: "Show navigation menu"
+- tapOn: "All Languages"
+- assertVisible: "Language courses"
