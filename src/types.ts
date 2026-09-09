@@ -17,6 +17,11 @@ export const CourseNameSchema = z.enum([
 
 export type CourseName = z.infer<typeof CourseNameSchema>;
 
+export enum SourceLanguage {
+  ENGLISH = "english",
+  SPANISH = "spanish",
+}
+
 export type CourseType = "intro" | "complete";
 
 export type Quality = "high" | "low";
@@ -34,6 +39,7 @@ export interface CourseInfo {
   shortTitle: string;
   fullTitle: string;
   courseType: CourseType;
+  sourceLanguage: SourceLanguage;
   fallbackLessonCount?: string;
   uiColors: UIColors;
   bundledFirstLesson?: any;

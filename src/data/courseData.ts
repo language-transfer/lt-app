@@ -16,6 +16,7 @@ import {
   CourseName,
   CourseNameSchema,
   Quality,
+  SourceLanguage,
   UIColors,
 } from "@/src/types";
 import {
@@ -94,6 +95,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "Spanish",
     fullTitle: "Complete Spanish",
     courseType: "complete",
+    sourceLanguage: SourceLanguage.ENGLISH,
     fallbackLessonCount: "90",
     uiColors: {
       background: "#7186d0",
@@ -111,6 +113,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "Arabic",
     fullTitle: "Introduction to Arabic",
     courseType: "intro",
+    sourceLanguage: SourceLanguage.ENGLISH,
     fallbackLessonCount: "38",
     uiColors: {
       background: "#c2930f",
@@ -128,6 +131,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "Turkish",
     fullTitle: "Introduction to Turkish",
     courseType: "intro",
+    sourceLanguage: SourceLanguage.ENGLISH,
     fallbackLessonCount: "44",
     uiColors: {
       background: "#a20b3b",
@@ -145,6 +149,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "German",
     fullTitle: "Complete German",
     courseType: "complete",
+    sourceLanguage: SourceLanguage.ENGLISH,
     fallbackLessonCount: "50",
     uiColors: {
       background: "#009900",
@@ -162,6 +167,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "Greek",
     fullTitle: "Complete Greek",
     courseType: "complete",
+    sourceLanguage: SourceLanguage.ENGLISH,
     fallbackLessonCount: "120",
     uiColors: {
       background: "#d57d2f",
@@ -179,6 +185,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "Italian",
     fullTitle: "Introduction to Italian",
     courseType: "intro",
+    sourceLanguage: SourceLanguage.ENGLISH,
     fallbackLessonCount: "45",
     uiColors: {
       background: "#e423ae",
@@ -196,6 +203,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "Swahili",
     fullTitle: "Complete Swahili",
     courseType: "complete",
+    sourceLanguage: SourceLanguage.ENGLISH,
     fallbackLessonCount: "110",
     uiColors: {
       background: "#12eddd",
@@ -213,6 +221,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "French",
     fullTitle: "Introduction to French",
     courseType: "intro",
+    sourceLanguage: SourceLanguage.ENGLISH,
     fallbackLessonCount: "40",
     uiColors: {
       background: "#10bdff",
@@ -230,6 +239,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "Inglés",
     fullTitle: "Introducción a Inglés",
     courseType: "intro",
+    sourceLanguage: SourceLanguage.SPANISH,
     fallbackLessonCount: "40",
     uiColors: {
       background: "#7186d0",
@@ -247,6 +257,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "Inglés",
     fullTitle: "Inglés Completo",
     courseType: "complete",
+    sourceLanguage: SourceLanguage.SPANISH,
     fallbackLessonCount: "51",
     uiColors: {
       background: "#7186d0",
@@ -262,6 +273,7 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
     shortTitle: "Music Theory",
     fullTitle: "Introduction to Music Theory",
     courseType: "intro",
+    sourceLanguage: SourceLanguage.ENGLISH,
     fallbackLessonCount: "30",
     uiColors: {
       background: "#f8eebc",
