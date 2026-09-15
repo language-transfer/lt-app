@@ -1,0 +1,37 @@
+appId: org.languagetransfer
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Language courses"
+- tapOn: "Spanish"
+- tapOn: "Data Management"
+- tapOn: "Refresh Spanish metadata"
+- assertVisible: "Metadata refreshed"
+- tapOn: "OK"
+- scrollUntilVisible:
+    element: "Delete all Spanish data"
+    direction: DOWN
+- tapOn: "Delete all Spanish data"
+- tapOn: "Yes"
+- assertVisible: "All course data deleted."
+- tapOn: "OK"
+- assertVisible: "Language courses"
+- tapOn: "Spanish"
+- tapOn: "All Lessons"
+- assertVisible: "0 / 90 downloaded"
+- tapOn:
+    text: ".* MB"
+    index: 0
+- extendedWaitUntil:
+    visible: "1 / 90 downloaded"
+    timeout: 60000
+- tapOn: "Lesson 1"
+- assertVisible: "Pause"
+- pressKey: Home
+- swipe:
+    start: "50%,1%"
+    end: "50%,85%"
+    duration: 800
+- tapOn: "Lesson 1"
+- assertVisible: "Pause"
+- tapOn: "Pause"

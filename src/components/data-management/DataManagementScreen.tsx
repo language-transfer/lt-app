@@ -69,8 +69,7 @@ const sections: {
   {
     key: "all-downloads",
     title: (courseTitle: string) => `Delete all ${courseTitle} downloads`,
-    description:
-      "This will delete all lessons you've downloaded.",
+    description: "This will delete all lessons you've downloaded.",
     action: async (course: CourseName) => {
       // TODO: this probably ought to cancel in-progress downloads too
       await CourseDownloadManager.unrequestAllDownloadsForCourse(course);
@@ -97,7 +96,7 @@ const sections: {
         deleteProgressForCourse(course),
         CourseDownloadManager.unrequestAllDownloadsForCourse(course),
       ]);
-      await CourseData.loadCourseMetadata(course, true);
+      await CourseData.deleteCourseMetadata(course);
       router.replace("/");
       Alert.alert("All course data deleted.");
     },
@@ -161,7 +160,14 @@ const DataManagementScreen = () => {
                   }).then();
                 }
               }
-              await section.action(course, router);
+              try {
+                await section.action(course, router);
+              } catch (error) {
+                Alert.alert(
+                  "Unable to complete action",
+                  error instanceof Error ? error.message : "Please try again."
+                );
+              }
             }}
           >
             <Text style={styles.cardTitle}>{section.title(title)}</Text>

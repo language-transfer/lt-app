@@ -1,4 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/src/data/queryClient";
 
 import {
   allCoursesSchema,
@@ -11,6 +13,16 @@ export const COURSE_INDEX_URL =
   "https://downloads.languagetransfer.org/all-courses.json";
 export const COURSE_INDEX_STORAGE_KEY = "@course-index/all";
 export const COURSE_INDEX_TTL_MS = 1000 * 60 * 60 * 24 * 7;
+export const COURSE_INDEX_QUERY_KEY = ["course-index"];
+const listeners = new Set<(index: CourseIndex) => void>();
+export const subscribeCourseIndex = (
+  listener: (index: CourseIndex) => void
+) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+};
 
 export type CourseIndexStorage = {
   getItem(key: string): Promise<string | null>;
@@ -23,6 +35,7 @@ export type CourseIndexRepositoryDependencies = {
   storage: CourseIndexStorage;
   ttlMs?: number;
   warn?: (message: string, error: unknown) => void;
+  onUpdate?: (index: CourseIndex) => void;
 };
 
 const normalizeCASBaseURL = (base: string) => base.replace(/\/$/, "");
@@ -45,8 +58,11 @@ export const createCourseIndexRepository = ({
   storage,
   ttlMs = COURSE_INDEX_TTL_MS,
   warn = console.warn,
+  onUpdate,
 }: CourseIndexRepositoryDependencies) => {
   let inMemoryIndex: CourseIndex | null = null;
+  let updatedAt = 0;
+  let pending: Promise<CourseIndex> | null = null;
 
   const readCached = async (): Promise<StoredCourseIndex | null> => {
     try {
@@ -90,11 +106,20 @@ export const createCourseIndexRepository = ({
 
     await writeCached(validated);
     inMemoryIndex = validated;
+    updatedAt = now();
+    onUpdate?.(validated);
     return validated;
   };
 
+  const refresh = () => {
+    pending ??= fetchAndCache().finally(() => {
+      pending = null;
+    });
+    return pending;
+  };
+
   const ensure = async (forceRemote = false): Promise<CourseIndex> => {
-    if (!forceRemote && inMemoryIndex) {
+    if (!forceRemote && inMemoryIndex && now() - updatedAt < ttlMs) {
       return inMemoryIndex;
     }
 
@@ -102,29 +127,37 @@ export const createCourseIndexRepository = ({
       const cached = await readCached();
       if (cached) {
         inMemoryIndex = cached.data;
+        updatedAt = cached.timestamp;
 
         if (now() - cached.timestamp < ttlMs) {
           return cached.data;
         }
 
-        void fetchAndCache().catch((error) =>
-          warn("Failed to revalidate course index", error)
-        );
-        return cached.data;
+        try {
+          return await refresh();
+        } catch (error) {
+          warn("Failed to revalidate course index", error);
+          return cached.data;
+        }
       }
     }
 
-    return await fetchAndCache();
+    return await refresh();
   };
 
   return {
     ensure,
     refresh: () => ensure(true),
+    timeUntilRefresh: () => Math.max(0, updatedAt + ttlMs - now()),
   };
 };
 
 const courseIndexRepository = createCourseIndexRepository({
   storage: AsyncStorage,
+  onUpdate: (index) => {
+    for (const listener of listeners) listener(index);
+    queryClient.setQueryData(COURSE_INDEX_QUERY_KEY, index);
+  },
   fetchRemote: async () => {
     const response = await fetch(COURSE_INDEX_URL);
     if (!response.ok) {
@@ -138,3 +171,15 @@ export const ensureCourseIndex = (forceRemote = false) =>
   courseIndexRepository.ensure(forceRemote);
 
 export const refreshCourseIndex = () => courseIndexRepository.refresh();
+
+export const useCourseIndex = () =>
+  useQuery({
+    queryKey: COURSE_INDEX_QUERY_KEY,
+    queryFn: () => ensureCourseIndex(),
+    // The repository owns the persisted seven-day TTL. Check it on mount
+    // instead of starting a second seven-day window when a query reads it.
+    staleTime: 0,
+    refetchInterval: () =>
+      Math.max(60_000, courseIndexRepository.timeUntilRefresh()),
+    retry: false,
+  });

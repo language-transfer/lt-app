@@ -10,7 +10,9 @@ import {
 import {
   ensureCourseIndex,
   refreshCourseIndex as refreshStoredCourseIndex,
+  subscribeCourseIndex,
 } from "@/src/data/courseIndex";
+import { queryClient } from "@/src/data/queryClient";
 import {
   CourseInfo,
   CourseName,
@@ -289,6 +291,31 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
 
 const loadedInMemoryCourseMeta: Partial<Record<CourseName, CourseMetadata>> =
   {};
+const metadataPointers: Partial<Record<CourseName, FilePointer>> = {};
+const metadataQueryKey = (course: CourseName) => [
+  "@local",
+  "course-data",
+  "metadata",
+  course,
+];
+
+const clearMemoryMetadata = (course: CourseName) => {
+  delete loadedInMemoryCourseMeta[course];
+  for (const [object, metadata] of Object.entries(loadedObjectMetadataLookup)) {
+    if (metadata.course === course) delete loadedObjectMetadataLookup[object];
+  }
+};
+
+subscribeCourseIndex((index) => {
+  for (const course of Object.keys(metadataPointers) as CourseName[]) {
+    const pointer = index.courses.find((entry) => entry.id === course)?.meta;
+    if (pointer?.object !== metadataPointers[course]?.object) {
+      void queryClient.invalidateQueries({
+        queryKey: metadataQueryKey(course),
+      });
+    }
+  }
+});
 
 const loadedObjectMetadataLookup: Record<
   string,
@@ -483,10 +510,6 @@ const CourseData = {
     course: CourseName,
     forceRemote: boolean = false
   ): Promise<CourseMetadata | null> {
-    if (CourseData.isCourseMetadataLoaded(course)) {
-      return loadedInMemoryCourseMeta[course]!;
-    }
-
     const courseIndex = await ensureCourseIndex(forceRemote);
     const courseIndexEntry = courseIndex.courses.find(
       (entry) => entry.id === course
@@ -494,6 +517,13 @@ const CourseData = {
 
     if (!courseIndexEntry) {
       throw new Error(`Course ${course} not found in index`);
+    }
+    if (
+      !forceRemote &&
+      CourseData.isCourseMetadataLoaded(course) &&
+      metadataPointers[course]?.object === courseIndexEntry.meta.object
+    ) {
+      return loadedInMemoryCourseMeta[course]!;
     }
 
     await ensureRootObjectDir();
@@ -515,8 +545,10 @@ const CourseData = {
       throw new Error(`Invalid metadata for course ${course}`);
     }
 
+    clearMemoryMetadata(course);
     indexObjects(course, parsedMeta);
 
+    metadataPointers[course] = metadataFilePointer;
     loadedInMemoryCourseMeta[course] = parsedMeta;
 
     return parsedMeta;
@@ -526,16 +558,17 @@ const CourseData = {
     course: CourseName,
     forceRemote: boolean = false
   ): Promise<CourseMetadata | null> {
-    const meta = await CourseData.loadCourseMetadataIfDownloaded(
-      course,
-      forceRemote
-    );
+    if (forceRemote) {
+      await ensureCourseIndex(true);
+    }
+    const meta = await CourseData.loadCourseMetadataIfDownloaded(course, false);
 
     if (meta) {
+      if (forceRemote) queryClient.setQueryData(metadataQueryKey(course), meta);
       return meta;
     }
 
-    const courseIndex = await ensureCourseIndex(forceRemote);
+    const courseIndex = await ensureCourseIndex();
     const courseIndexEntry = courseIndex.courses.find(
       (entry) => entry.id === course
     );
@@ -545,11 +578,36 @@ const CourseData = {
     }
 
     const metadataFilePointer = courseIndexEntry.meta;
-    await readObject(metadataFilePointer, {
+    const downloaded = await readObject(metadataFilePointer, {
       save: true,
     });
+    if (!downloaded)
+      throw new Error(`Failed to fetch metadata for course ${course}`);
 
-    return await CourseData.loadCourseMetadataIfDownloaded(course, false);
+    const loaded = await CourseData.loadCourseMetadataIfDownloaded(
+      course,
+      false
+    );
+    if (forceRemote) queryClient.setQueryData(metadataQueryKey(course), loaded);
+    return loaded;
+  },
+
+  async deleteCourseMetadata(course: CourseName): Promise<void> {
+    await queryClient.cancelQueries({ queryKey: metadataQueryKey(course) });
+    const index = await ensureCourseIndex();
+    const pointers = [
+      metadataPointers[course],
+      index.courses.find((entry) => entry.id === course)?.meta,
+    ];
+    for (const pointer of pointers) {
+      if (pointer)
+        await FileSystem.deleteAsync(getLocalObjectPath(pointer), {
+          idempotent: true,
+        });
+    }
+    clearMemoryMetadata(course);
+    delete metadataPointers[course];
+    queryClient.removeQueries({ queryKey: metadataQueryKey(course) });
   },
 
   async loadAllLocallyDownloadedCourseMetadata(): Promise<void> {
@@ -660,7 +718,7 @@ export const useCourseMetadata = (
 ): CourseMetadata | null => {
   return (
     useQuery({
-      queryKey: ["@local", "course-data", "metadata", course],
+      queryKey: metadataQueryKey(course),
       queryFn: async () => {
         return await CourseData.loadCourseMetadata(course);
       },

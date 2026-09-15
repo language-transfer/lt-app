@@ -7,7 +7,7 @@ appId: org.languagetransfer
     element:
       text: "Inglés"
     direction: DOWN
-- assertVisible: "Inglés completo, 51 lessons"
+- assertVisible: "Inglés completo, [0-9]+ lessons"
 - tapOn: "Inglés"
 - assertVisible: "Track 0"
 - assertVisible: "¡Nuevo curso!"

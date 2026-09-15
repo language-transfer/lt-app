@@ -45,6 +45,40 @@ const createStorage = (cached?: StoredCourseIndex) => {
 };
 
 describe("course index repository", () => {
+  test("expires an index already in memory and publishes the replacement", async () => {
+    let now = 100;
+    const onUpdate = jest.fn();
+    const { storage } = createStorage({ data: oldIndex, timestamp: now });
+    const fetchRemote = jest.fn().mockResolvedValue(refreshedIndex);
+    const repository = createCourseIndexRepository({
+      storage,
+      fetchRemote,
+      now: () => now,
+      ttlMs: 10,
+      onUpdate,
+    });
+    await repository.ensure();
+    expect(repository.timeUntilRefresh()).toBe(10);
+    now += 11;
+    expect(repository.timeUntilRefresh()).toBe(0);
+    const result = await repository.ensure();
+    expect(result.courses).toEqual(refreshedIndex.courses);
+    expect(onUpdate).toHaveBeenCalledWith(result);
+    expect(fetchRemote).toHaveBeenCalledTimes(1);
+  });
+
+  test("keeps cached data offline but rejects an explicit failed refresh", async () => {
+    const { storage } = createStorage({ data: oldIndex, timestamp: 0 });
+    const repository = createCourseIndexRepository({
+      storage,
+      now: () => 100,
+      ttlMs: 10,
+      warn: jest.fn(),
+      fetchRemote: jest.fn().mockRejectedValue(new Error("offline")),
+    });
+    await expect(repository.ensure()).resolves.toEqual(oldIndex);
+    await expect(repository.refresh()).rejects.toThrow("offline");
+  });
   test("uses a fresh cached all-courses index without fetching", async () => {
     const now = 1_000_000;
     const { storage } = createStorage({ data: oldIndex, timestamp: now });

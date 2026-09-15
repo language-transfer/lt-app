@@ -1,7 +1,7 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import prettyBytes from "pretty-bytes";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,7 +13,7 @@ import {
 } from "react-native";
 
 import LessonRow from "@/src/components/all-lessons/LessonRow";
-import CourseData from "@/src/data/courseData";
+import CourseData, { useCourseMetadata } from "@/src/data/courseData";
 import useStatusBarStyle from "@/src/hooks/useStatusBarStyle";
 import {
   CourseDownloadManager,
@@ -29,34 +29,15 @@ const AllLessonsScreen = () => {
   const params = useLocalSearchParams<{ course: string }>();
   const course = (params.course ?? "spanish") as CourseName;
   useStatusBarStyle("white", "dark-content");
-  const [metadataReady, setMetadataReady] = useState(() =>
-    CourseData.isCourseMetadataLoaded(course)
-  );
+  const metadata = useCourseMetadata(course);
+  const metadataReady = metadata !== null;
   const indices = useMemo(
-    () => (metadataReady ? CourseData.getLessonIndices(course) : []),
-    [course, metadataReady]
+    () => metadata?.lessons.map((_, index) => index) ?? [],
+    [metadata]
   );
   const downloadedCount = useDownloadCount(course);
   const [downloadAllLoading, setDownloadAllLoading] = useState(false);
   const downloadQuality = usePreference(PreferenceDownloadQuality);
-
-  useEffect(() => {
-    let active = true;
-    const ensureMetadata = async () => {
-      if (!CourseData.isCourseMetadataLoaded(course)) {
-        setMetadataReady(false);
-        await CourseData.loadCourseMetadata(course);
-      }
-      if (active) {
-        setMetadataReady(true);
-      }
-    };
-
-    ensureMetadata();
-    return () => {
-      active = false;
-    };
-  }, [course]);
 
   const handleDownloadAll = async () => {
     if (!downloadQuality || !metadataReady) {

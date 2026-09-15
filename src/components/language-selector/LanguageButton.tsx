@@ -3,6 +3,7 @@ import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import { TouchableNativeFeedback } from "react-native-gesture-handler";
 
 import CourseData from "@/src/data/courseData";
+import { useCourseIndex } from "@/src/data/courseIndex";
 import { SourceLanguage, type CourseName, type CourseType } from "@/src/types";
 
 type Props = {
@@ -32,7 +33,10 @@ const LanguageButton = ({ course, width, onPress }: Props) => {
 
   const info = CourseData.getCourseData(course);
   const colors = CourseData.getCourseUIColors(course);
-  const lessonCount = info.fallbackLessonCount;
+  const { data: index } = useCourseIndex();
+  const lessonCount =
+    index?.courses.find((entry) => entry.id === course)?.lessons ??
+    info.fallbackLessonCount;
   const badge = COURSE_BADGES[info.sourceLanguage][info.courseType];
   const title = <Text style={styles.courseTitle}>{info.shortTitle}</Text>;
   const accessibleTitle = badge.afterTitle
