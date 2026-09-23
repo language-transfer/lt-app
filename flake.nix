@@ -36,7 +36,7 @@
         pkgs.maestro
       ];
 
-      mkIosShell = pkgs: pkgs.mkShell {
+      mkIosShell = pkgs: pkgs.mkShellNoCC {
         packages = commonPackages pkgs ++ [
           pkgs.cocoapods
         ];
@@ -46,6 +46,14 @@
         shellHook = ''
           if ! /usr/bin/xcode-select -p >/dev/null 2>&1; then
             echo "Xcode is not selected. Run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer" >&2
+          else
+            # Xcode's indexing flags require Apple Clang, not Nix's compiler.
+            if appleCC=$(/usr/bin/xcrun --find clang) && appleCXX=$(/usr/bin/xcrun --find clang++); then
+              export CC="$appleCC"
+              export CXX="$appleCXX"
+              export CPP="$CC -E"
+            fi
+            unset appleCC appleCXX
           fi
         '';
       };
