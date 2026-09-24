@@ -10,7 +10,7 @@ import React, { useCallback } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-import logo from "../../../legacy/resources/LT-logo-text.png";
+import logo from "@/assets/resources/LT-logo-text.png";
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
   const router = useRouter();

@@ -28,7 +28,8 @@ describe("Android release signing config plugin", () => {
     const result = applyAndroidReleaseSigning(expoBuildGradle);
 
     expect(result).toContain("Language Transfer upload-key signing");
-    expect(result).toContain("rootProject.file(\"../legacy/android/app/${MYAPP_UPLOAD_STORE_FILE}\")");
+    expect(result).toContain("file(MYAPP_UPLOAD_STORE_FILE)");
+    expect(result).not.toContain("legacy/android/app");
     expect(result).toMatch(
       /buildTypes \{[\s\S]*?debug \{[\s\S]*?signingConfig signingConfigs\.debug/
     );

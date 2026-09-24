@@ -15,12 +15,10 @@ function applyAndroidReleaseSigning(contents) {
         // ${RELEASE_SIGNING_MARKER}. Do not put credential values in this file.
         release {
             if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
-                def configuredStoreFile = file(MYAPP_UPLOAD_STORE_FILE)
-                def legacyStoreFile = rootProject.file("../legacy/android/app/\${MYAPP_UPLOAD_STORE_FILE}")
-                def uploadStoreFile = configuredStoreFile.exists() ? configuredStoreFile : legacyStoreFile
+                def uploadStoreFile = file(MYAPP_UPLOAD_STORE_FILE)
 
                 if (!uploadStoreFile.exists()) {
-                    throw new GradleException("Android upload keystore not found at \${configuredStoreFile} or \${legacyStoreFile}")
+                    throw new GradleException("Android upload keystore not found at \${uploadStoreFile}")
                 }
 
                 storeFile uploadStoreFile
