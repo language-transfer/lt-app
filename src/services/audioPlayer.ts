@@ -108,11 +108,8 @@ const ensurePlayer = async () => {
       await TrackPlayer.setupPlayer({
         iosCategory: IOSCategory.Playback,
         iosCategoryMode: IOSCategoryMode.Default,
-        iosCategoryOptions: [
-          IOSCategoryOptions.AllowBluetooth,
-          IOSCategoryOptions.AllowBluetoothA2DP,
-          IOSCategoryOptions.DuckOthers,
-        ],
+        // Playback routes to Bluetooth automatically; input routing flags are invalid here.
+        iosCategoryOptions: [IOSCategoryOptions.DuckOthers],
         // let TrackPlayer handle interruptions from GPS or whatever. the default behavior is good
         autoHandleInterruptions: true,
         androidAudioContentType: AndroidAudioContentType.Speech,
@@ -172,6 +169,7 @@ const buildLessonQueue = async (
   const tracks = await Promise.all(
     lessons.map(async (lessonNumber, index) => {
       let uri: string | number;
+      let contentType: string | undefined;
       const downloadStatus = await CourseDownloadManager.getDownloadStatus(
         course,
         lessonNumber
@@ -179,9 +177,12 @@ const buildLessonQueue = async (
       const isDownloaded = downloadStatus === "downloaded";
 
       if (isDownloaded) {
-        uri = getLocalObjectPath(
-          await CourseDownloadManager.getLessonPointer(course, lessonNumber)
+        const pointer = await CourseDownloadManager.getLessonPointer(
+          course,
+          lessonNumber
         );
+        uri = getLocalObjectPath(pointer);
+        contentType = pointer.mimeType;
       } else {
         const bundled =
           lessonNumber === 0 && Platform.OS === "ios"
@@ -190,16 +191,16 @@ const buildLessonQueue = async (
         uri =
           bundled ??
           (await CourseData.getLessonUrl(course, lessonNumber, quality));
+        // Bundled assets can use a different format from the streaming variant.
+        if (bundled == null) {
+          contentType = CourseData.getLessonMimeType(course, lessonNumber, quality);
+        }
       }
 
       return {
         id: CourseData.getLessonId(course, lessonNumber),
         url: uri as LessonTrack["url"],
-        contentType: CourseData.getLessonMimeType(
-          course,
-          lessonNumber,
-          quality
-        ),
+        contentType,
         title: CourseData.getLessonTitle(course, lessonNumber),
         artist: "Language Transfer",
         artwork,
@@ -316,13 +317,14 @@ export const useLessonAudio = (
 
         setPlayerReady(true);
 
-        await TrackPlayer.play().catch(() => {});
+        await TrackPlayer.play();
         checkCancel();
       } catch (err) {
         if (err === LESSON_AUDIO_CANCELLED) {
           return;
         }
         if (!cancelled && err) {
+          console.warn("Unable to load lesson audio", { course, lesson }, err);
           setLoadError({
             message:
               err instanceof Error ? err.message : "Unable to load audio",

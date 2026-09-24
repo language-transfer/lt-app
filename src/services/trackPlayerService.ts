@@ -88,6 +88,10 @@ const runSafe = <Args extends any[]>(fn: (...args: Args) => Promise<void>) => {
 };
 
 const trackPlayerService = async (): Promise<void> => {
+  TrackPlayer.addEventListener(Event.PlaybackError, (error) => {
+    console.warn("Audio playback failed", error);
+  });
+
   TrackPlayer.addEventListener(
     Event.RemotePlay,
     runSafe(async () => {

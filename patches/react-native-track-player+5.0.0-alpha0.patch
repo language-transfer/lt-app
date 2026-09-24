@@ -1,0 +1,30 @@
+diff --git a/node_modules/react-native-track-player/ios/Models/Track.swift b/node_modules/react-native-track-player/ios/Models/Track.swift
+--- a/node_modules/react-native-track-player/ios/Models/Track.swift
++++ b/node_modules/react-native-track-player/ios/Models/Track.swift
+@@ -23,6 +23,7 @@
+     var duration: Double?
+     var artworkURL: MediaURL?
+     let headers: [String: Any]?
++    let contentType: String?
+     var userAgent: String?
+     let pitchAlgorithm: String?
+     var isLiveStream: Bool?
+@@ -36,6 +37,7 @@
+         guard let url = MediaURL(object: dictionary["url"]) else { return nil }
+         self.url = url
+         self.headers = dictionary["headers"] as? [String: Any]
++        self.contentType = dictionary["contentType"] as? String
+         self.userAgent = dictionary["userAgent"] as? String
+         self.pitchAlgorithm = dictionary["pitchAlgorithm"] as? String
+ 
+@@ -125,6 +127,10 @@
+ 
+     func getAssetOptions() -> [String: Any] {
+         var options: [String: Any] = [:]
++        // CAS resources have no extension and may be served as application/octet-stream.
++        if #available(iOS 17.0, *), let contentType = contentType, !contentType.isEmpty {
++            options[AVURLAssetOverrideMIMETypeKey] = contentType
++        }
+         if let headers = headers {
+             options["AVURLAssetHTTPHeaderFieldsKey"] = headers
+         }
