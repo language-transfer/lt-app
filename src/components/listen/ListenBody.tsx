@@ -1,13 +1,11 @@
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import formatDuration from "format-duration";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Animated,
   Easing,
-  Linking,
   Modal,
   Pressable,
   StyleSheet,
@@ -55,22 +53,6 @@ const ListenBody = () => {
   useEffect(() => {
     latestPositionRef.current = controls.position;
   }, [controls.position]);
-
-  const reportMailto = useMemo(() => {
-    return (
-      "mailto:info@languagetransfer.org" +
-      `?subject=${encodeURIComponent(
-        `Feedback about ${CourseData.getCourseFullTitle(course)}`
-      )}` +
-      `&body=${encodeURIComponent(
-        `Hi! I found a problem with the ${CourseData.getCourseFullTitle(
-          course
-        )} course:\n\nLesson: ${lessonTitle}\nPosition: ${formatDuration(
-          controls.position * 1000
-        )}`
-      )}`
-    );
-  }, [controls.position, course, lessonTitle]);
 
   const openSheet = () => {
     if (sheetOpen) {
@@ -286,20 +268,6 @@ const ListenBody = () => {
                   disabled={busyAction !== null || downloaded === null}
                   onPress={async () => {
                     await handleDownloadToggle();
-                    closeSheet();
-                  }}
-                />
-                <SheetRow
-                  label="Report a problem"
-                  icon={
-                    <FontAwesome5
-                      name="exclamation-triangle"
-                      size={18}
-                      color="#222"
-                    />
-                  }
-                  onPress={() => {
-                    Linking.openURL(reportMailto);
                     closeSheet();
                   }}
                 />

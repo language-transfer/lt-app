@@ -152,6 +152,25 @@ const AboutScreen = () => {
             <TouchableNativeFeedback
               onPress={() => {
                 log({
+                  action: "visit_faq",
+                });
+                Linking.openURL("https://www.languagetransfer.org/faq");
+              }}
+              useForeground={true}
+            >
+              <View style={styles.additionalButtonInner}>
+                <Text style={styles.additionalButtonText}>
+                  Frequently asked questions
+                </Text>
+                <Icon name="question-circle" />
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+
+          <View style={styles.additionalButton}>
+            <TouchableNativeFeedback
+              onPress={() => {
+                log({
                   action: "open_substack",
                 });
                 Linking.openURL("https://languagetransfer.substack.com/");
@@ -199,9 +218,9 @@ const AboutScreen = () => {
           </Text>
 
           <Text style={styles.bodyText}>
-            If you choose to contact us or report a problem from within the app,
-            we may retain any information you send to us indefinitely so that we
-            can take action on your feedback.
+            If you choose to contact us from within the app, we may retain any
+            information you send to us indefinitely so that we can take action
+            on your feedback.
           </Text>
         </SectionCard>
 
