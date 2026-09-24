@@ -21,7 +21,7 @@
 ## iOS Release Policy
 
 - EAS is prohibited in this repository. Do not add or use EAS configuration, EAS CLI dependencies, EAS Build, EAS Submit, or EAS-managed credentials.
-- Build and submit iOS releases through the native Xcode/Fastlane toolchain. The previous app's Fastlane configuration is available in Git history for reference, but must be adapted to the current Expo app before use.
+- Build and submit iOS releases through the native Xcode/Fastlane toolchain.
 
 ## Coding Style & Naming Conventions
 

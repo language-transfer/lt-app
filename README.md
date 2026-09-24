@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/resources/LT-logo-text.png" alt="LT logo" width="300">
+  <img src="./assets/readme/feature-graphic.png" alt="LT logo" width="720">
 </p>
 
 ## Language Transfer
@@ -21,11 +21,15 @@ You can find them on the [Language Transfer website](https://www.languagetransfe
 
 ## LT App
 
+<p align="center">
+  <img src="./assets/readme/screenshots/Screenshot_20200520-203515.png" alt="Previous app screenshot: home page" width="216" height="384">
+  <img src="./assets/readme/screenshots/Screenshot_20200520-203610.png" alt="Previous app screenshot: listen page" width="216" height="384">
+  <img src="./assets/readme/screenshots/Screenshot_20200520-203755.png" alt="Previous app screenshot: language home page" width="216" height="384">
+</p>
+
 This app is developed in React Native, and is designed to work with both iOS & Android platforms.
 
 ### iOS release policy
-
-EAS is not permitted for this project. Do not add or use EAS configuration, EAS Build, EAS Submit, EAS CLI dependencies, or EAS-managed credentials. iOS releases must be built and submitted with the native Xcode/Fastlane toolchain. The previous app's Fastlane setup is available in Git history as a reference and is not directly runnable against the current Expo app.
 
 The Expo rewrite's iOS build and release workflow are not ready yet. Before shipping it on iOS, restore the platform-specific preloaded tracks required for App Store review. Those bundled tracks are an iOS-only requirement and must not be added to the Android build.
 
