@@ -3,9 +3,9 @@
 ## Project Structure & Module Organization
 
 - Expo Router app; entry `index.js` registers the track player service from `src/services/trackPlayerService`.
-- Screens live in `app/` (stack in `app/_layout.tsx`, course flows under `app/course/[course]/...`).
+- Screens live in `app/` (stack in `app/_layout.tsx`, course flows under `app/(main)/course/[course]/...`).
 - UI in `src/components/`, data in `src/data/`, logic in `src/hooks`, `src/services`, `src/storage`, `src/utils`, and shared typing in `src/types`.
-- `assets/` holds icons/splash art; `legacy/` keeps bundled first-lesson audio and legacy artwork—treat as read-only. The `legacy/` folder currently houses an older version of the app that works well; the root project is a rewrite and we often port or re-implement legacy behaviors into the new skeleton.
+- `assets/` holds icons, splash art, course artwork, and bundled first-lesson audio. The previous app was removed after the migration; its files remain available in Git history (`git log -- legacy/` and `git show <commit>:legacy/<path>`).
 
 ## Build, Test, and Development Commands
 
@@ -21,7 +21,7 @@
 ## iOS Release Policy
 
 - EAS is prohibited in this repository. Do not add or use EAS configuration, EAS CLI dependencies, EAS Build, EAS Submit, or EAS-managed credentials.
-- Build and submit iOS releases through the native Xcode/Fastlane toolchain. Historical Fastlane configuration is available under `legacy/ios/fastlane/` for reference, but must be adapted to the current Expo rewrite before use.
+- Build and submit iOS releases through the native Xcode/Fastlane toolchain.
 
 ## Coding Style & Naming Conventions
 
@@ -47,4 +47,4 @@
 ## Security & Configuration Tips
 
 - Do not commit secrets or large media; course metadata/download URLs already live in `src/data/courseData.ts`.
-- Avoid changing `app.json` identifiers or `legacy/` assets without aligning on release implications.
+- Avoid changing `app.json` identifiers without aligning on release implications.

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./legacy/resources/google-play-store/feature-graphic.png" alt="LT logo" width="720">
+  <img src="./assets/readme/feature-graphic.png" alt="LT logo" width="720">
 </p>
 
 ## Language Transfer
@@ -22,16 +22,14 @@ You can find them on the [Language Transfer website](https://www.languagetransfe
 ## LT App
 
 <p align="center">
-  <img src="./legacy/resources/google-play-store/screenshots/Screenshot_20200520-203515.png" alt="App screenshot: home page" width="216" height="384">
-  <img src="./legacy/resources/google-play-store/screenshots/Screenshot_20200520-203610.png" alt="App screenshot: listen page" width="216" height="384">
-  <img src="./legacy/resources/google-play-store/screenshots/Screenshot_20200520-203755.png" alt="App screenshot: language home page" width="216" height="384">
+  <img src="./assets/readme/screenshots/Screenshot_20200520-203515.png" alt="App screenshot: home page" width="216" height="384">
+  <img src="./assets/readme/screenshots/Screenshot_20200520-203610.png" alt="App screenshot: listen page" width="216" height="384">
+  <img src="./assets/readme/screenshots/Screenshot_20200520-203755.png" alt="App screenshot: language home page" width="216" height="384">
 </p>
 
 This app is developed in React Native, and is designed to work with both iOS & Android platforms.
 
 ### iOS release policy
-
-EAS is not permitted for this project. Do not add or use EAS configuration, EAS Build, EAS Submit, EAS CLI dependencies, or EAS-managed credentials. iOS releases must be built and submitted with the native Xcode/Fastlane toolchain. The previous app's Fastlane setup remains in `legacy/ios/fastlane/` as historical reference and is not directly runnable against the current Expo rewrite.
 
 The Expo rewrite's iOS build and release workflow are not ready yet. Before shipping it on iOS, restore the platform-specific preloaded tracks required for App Store review. Those bundled tracks are an iOS-only requirement and must not be added to the Android build.
 
@@ -39,7 +37,7 @@ The Expo rewrite's iOS build and release workflow are not ready yet. Before ship
 
 Android release builds use the upload-key settings `MYAPP_UPLOAD_STORE_FILE`, `MYAPP_UPLOAD_KEY_ALIAS`, `MYAPP_UPLOAD_STORE_PASSWORD`, and `MYAPP_UPLOAD_KEY_PASSWORD` from the developer's Gradle properties (normally `~/.gradle/gradle.properties`). Keep the credentials and keystore out of Git.
 
-The tracked `withAndroidReleaseSigning` Expo config plugin restores the release signing configuration whenever the ignored native Android project is generated. It first looks for the configured keystore filename in `android/app/`, then falls back to `legacy/android/app/` for the existing local setup. Generate and build the Play Store bundle locally with:
+The tracked `withAndroidReleaseSigning` Expo config plugin restores the release signing configuration whenever the ignored native Android project is generated. Place the keystore named by `MYAPP_UPLOAD_STORE_FILE` in `android/app/`; this file is ignored by Git. Generate and build the Play Store bundle locally with:
 
 ```sh
 npx expo prebuild --platform android
