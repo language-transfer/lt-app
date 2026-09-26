@@ -428,6 +428,7 @@ const useLessonObjectPointer = (course: CourseName, lesson: number) => {
       "lesson-pointer",
       downloadQuality,
     ],
+    enabled: lesson >= 0,
     queryFn: async () => {
       if (!downloadQuality) {
         return null;
@@ -449,6 +450,7 @@ export function useLessonDownloadStatus(course: CourseName, lesson: number) {
   // ]);
   const query = useQuery({
     queryKey: ["@local", "downloads", objectPointer?.object, "status"],
+    enabled: lesson >= 0,
     queryFn: async () => {
       // console.log("Fetching download status for", course, lesson);
       if (!objectPointer) {

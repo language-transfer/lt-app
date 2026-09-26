@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/src/data/queryClient";
+import { getPreloadedCourseIndex } from "@/src/data/preloadedContent";
 
 import {
   allCoursesSchema,
@@ -36,6 +37,7 @@ export type CourseIndexRepositoryDependencies = {
   ttlMs?: number;
   warn?: (message: string, error: unknown) => void;
   onUpdate?: (index: CourseIndex) => void;
+  preloadedIndex?: CourseIndex | null | (() => CourseIndex | null);
 };
 
 const normalizeCASBaseURL = (base: string) => base.replace(/\/$/, "");
@@ -59,6 +61,7 @@ export const createCourseIndexRepository = ({
   ttlMs = COURSE_INDEX_TTL_MS,
   warn = console.warn,
   onUpdate,
+  preloadedIndex,
 }: CourseIndexRepositoryDependencies) => {
   let inMemoryIndex: CourseIndex | null = null;
   let updatedAt = 0;
@@ -142,7 +145,20 @@ export const createCourseIndexRepository = ({
       }
     }
 
-    return await refresh();
+    try {
+      return await refresh();
+    } catch (error) {
+      const snapshot =
+        typeof preloadedIndex === "function" ? preloadedIndex() : preloadedIndex;
+      const fallback = snapshot && validateIndex(snapshot);
+      if (!fallback) throw error;
+      warn("Failed to load course index; using preloaded snapshot", error);
+      inMemoryIndex = fallback;
+      // Retry the network soon if the app comes online during this session.
+      updatedAt = now() - ttlMs + Math.min(ttlMs, 60_000);
+      onUpdate?.(fallback);
+      return fallback;
+    }
   };
 
   return {
@@ -154,6 +170,7 @@ export const createCourseIndexRepository = ({
 
 const courseIndexRepository = createCourseIndexRepository({
   storage: AsyncStorage,
+  preloadedIndex: getPreloadedCourseIndex,
   onUpdate: (index) => {
     for (const listener of listeners) listener(index);
     queryClient.setQueryData(COURSE_INDEX_QUERY_KEY, index);

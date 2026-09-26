@@ -26,6 +26,7 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 artifacts/
+generated/
 
 # macOS
 .DS_Store

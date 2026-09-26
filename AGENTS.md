@@ -22,6 +22,7 @@
 
 - EAS is prohibited in this repository. Do not add or use EAS configuration, EAS CLI dependencies, EAS Build, EAS Submit, or EAS-managed credentials.
 - Build and submit iOS releases through the native Xcode/Fastlane toolchain.
+- GitHub Actions are prohibited. Do not add workflows under `.github/workflows/`; run automated checks through local scripts and native build steps.
 
 ## Coding Style & Naming Conventions
 

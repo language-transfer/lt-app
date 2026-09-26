@@ -43,8 +43,12 @@ const ListenBody = () => {
   const latestPositionRef = useRef(0);
   const sheetAnim = useRef(new Animated.Value(0)).current;
 
-  const lessonTitle = CourseData.getLessonTitle(course, lesson);
-  const duration = CourseData.getLessonDuration(course, lesson);
+  const lessonTitle =
+    controls.title ??
+    CourseData.getLessonDisplayData(course, lesson, downloaded).title;
+  const lessonDuration =
+    controls.duration ||
+    CourseData.getLessonDisplayData(course, lesson, downloaded).duration;
   const colors = useCurrentCourseColors();
   const log = useLogger({
     surface: "listen_screen",
@@ -197,10 +201,8 @@ const ListenBody = () => {
       </View>
 
       <ListenScrubber
-        course={course}
-        lesson={lesson}
         position={controls.position}
-        duration={duration}
+        duration={lessonDuration}
         seekTo={controls.seekTo}
       />
 

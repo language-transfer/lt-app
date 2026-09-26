@@ -13,6 +13,7 @@ import {
 
 import CourseData from "@/src/data/courseData";
 import { useCurrentCourseColors } from "@/src/hooks/useCourseLessonData";
+import { useLessonDownloadStatus } from "@/src/services/downloadManager";
 import {
   getMostRecentListenedLessonForCourse,
   getProgressForLesson,
@@ -53,6 +54,7 @@ const LanguageHomeTopButton = ({ course }: Props) => {
   const ratingPref = usePreference(PreferenceRatingButtonDismissed);
   const colors = useCurrentCourseColors();
   const log = useLogger();
+  const downloadStatus = useLessonDownloadStatus(course, state?.nextLesson ?? -1);
 
   useFocusEffect(
     useCallback(() => {
@@ -87,8 +89,13 @@ const LanguageHomeTopButton = ({ course }: Props) => {
     return <View style={[styles.lessonPlayBox, styles.invisible]} />;
   }
 
-  const nextLessonTitle = CourseData.getLessonTitle(course, state.nextLesson);
-  const lessonDuration = CourseData.getLessonDuration(course, state.nextLesson);
+  const displayData = CourseData.getLessonDisplayData(
+    course,
+    state.nextLesson,
+    downloadStatus === "downloaded"
+  );
+  const nextLessonTitle = displayData.title;
+  const lessonDuration = displayData.duration;
   const hasPrompt =
     Platform.OS === "android" &&
     state.nextLesson + 1 >= 10 &&
