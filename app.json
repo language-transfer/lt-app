@@ -2,7 +2,7 @@
   "expo": {
     "name": "Language Transfer",
     "slug": "language-transfer",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "languagetransfer",
@@ -16,7 +16,7 @@
       "bundleIdentifier": "org.languagetransfer"
     },
     "android": {
-      "versionCode": 16,
+      "versionCode": 17,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
