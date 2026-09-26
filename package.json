@@ -1,7 +1,7 @@
 {
   "name": "language-transfer",
   "main": "./index.js",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
