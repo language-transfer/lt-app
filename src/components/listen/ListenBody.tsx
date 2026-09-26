@@ -147,8 +147,12 @@ const ListenBody = () => {
 
   if (controls.error) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{controls.error.message}</Text>
+      <View
+        style={[styles.errorContainer, { backgroundColor: colors?.background }]}
+      >
+        <Text style={[styles.errorText, { color: colors?.text }]}>
+          {controls.error.message}
+        </Text>
       </View>
     );
   }
@@ -336,9 +340,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 24,
   },
   errorText: {
-    color: "#fff",
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: "center",
   },
   sheetOverlay: {
     flex: 1,
