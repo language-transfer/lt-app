@@ -1,7 +1,7 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import formatDuration from "format-duration";
 import prettyBytes from "pretty-bytes";
-import React, { useMemo } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -35,10 +35,7 @@ const LessonRow = ({ lesson }: Props) => {
   const downloadStatus = useLessonDownloadStatus(course, lesson);
   const downloadQuality = usePreference(PreferenceDownloadQuality);
   const router = useRouter();
-  const bundled = useMemo(
-    () => lesson === 0 && Boolean(CourseData.getBundledFirstLesson(course)),
-    [course, lesson]
-  );
+  const bundled = CourseData.getPreloadedLesson(course, lesson) != null;
   const log = useLogger({
     surface: "all_lessons",
     lesson,
@@ -47,9 +44,10 @@ const LessonRow = ({ lesson }: Props) => {
   const downloaded = downloadStatus === "downloaded";
   const downloading =
     downloadStatus === "downloading" || downloadStatus === "enqueued";
+  const displayData = CourseData.getLessonDisplayData(course, lesson, downloaded);
 
   const handleDownloadClick = async () => {
-    if (bundled || downloadStatus === undefined) {
+    if (downloadStatus === undefined) {
       return;
     }
 
@@ -89,15 +87,6 @@ const LessonRow = ({ lesson }: Props) => {
   };
 
   const renderDownloadAccessory = () => {
-    if (bundled) {
-      return (
-        <>
-          <FontAwesome5 name="lock" size={16} color="#999" />
-          <Text style={styles.lessonSizeText}>Included</Text>
-        </>
-      );
-    }
-
     if (downloaded) {
       return <FontAwesome5 name="trash" size={18} color="#555" />;
     }
@@ -145,27 +134,23 @@ const LessonRow = ({ lesson }: Props) => {
           />
           <View>
             <Text style={styles.lessonTitleText}>
-              {CourseData.getLessonTitle(course, lesson)}
+              {displayData.title}
             </Text>
             <Text style={styles.lessonDurationText}>
-              {formatDuration(
-                CourseData.getLessonDuration(course, lesson) * 1000
-              )}
+              {formatDuration(displayData.duration * 1000)}
             </Text>
           </View>
         </View>
       </Pressable>
-      <Pressable
-        style={[styles.downloadBox, bundled && styles.downloadBoxDisabled]}
-        onPress={handleDownloadClick}
-        disabled={bundled}
-      >
+      <Pressable style={styles.downloadBox} onPress={handleDownloadClick}>
         {downloadQuality === null || !ready ? (
           <ActivityIndicator size="small" color="#888" />
         ) : (
           <>
             {renderDownloadAccessory()}
-            {!bundled ? (
+            {bundled && !downloaded ? (
+              <Text style={styles.lessonSizeText}>Included</Text>
+            ) : (
               <Text style={styles.lessonSizeText}>
                 {prettyBytes(
                   CourseData.getLessonSizeInBytes(
@@ -175,7 +160,7 @@ const LessonRow = ({ lesson }: Props) => {
                   )
                 )}
               </Text>
-            ) : null}
+            )}
           </>
         )}
       </Pressable>
@@ -204,9 +189,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingVertical: 8,
     gap: 4,
-  },
-  downloadBoxDisabled: {
-    opacity: 0.5,
   },
   text: {
     flexDirection: "row",

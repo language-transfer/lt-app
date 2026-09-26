@@ -46,7 +46,8 @@
         }
       ],
       "./plugins/withAsyncStorageLocalRepo",
-      "./plugins/withAndroidReleaseSigning"
+      "./plugins/withAndroidReleaseSigning",
+      "./plugins/withPreloadedContent"
     ],
     "experiments": {
       "typedRoutes": true,

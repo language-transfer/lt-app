@@ -14,6 +14,11 @@ import {
 } from "@/src/data/courseIndex";
 import { queryClient } from "@/src/data/queryClient";
 import {
+  getPreloadedCourseIndex,
+  getPreloadedCourseMetadata,
+  getPreloadedLesson,
+} from "@/src/data/preloadedContent";
+import {
   CourseInfo,
   CourseName,
   CourseNameSchema,
@@ -49,47 +54,6 @@ import turkishCoverWithText from "@/assets/courses/images/turkish-cover-stylized
 import turkishCover from "@/assets/courses/images/turkish-cover-stylized.png";
 import { useQuery } from "@tanstack/react-query";
 
-// const spanishFirstLesson =
-//   Platform.OS === "ios"
-//     ? require("@/assets/courses/audio/spanish1-lq.mp3")
-//     : null;
-// const arabicFirstLesson =
-//   Platform.OS === "ios"
-//     ? require("@/assets/courses/audio/arabic1-lq.mp3")
-//     : null;
-// const turkishFirstLesson =
-//   Platform.OS === "ios"
-//     ? require("@/assets/courses/audio/turkish1-lq.mp3")
-//     : null;
-// const germanFirstLesson =
-//   Platform.OS === "ios"
-//     ? require("@/assets/courses/audio/german1-lq.mp3")
-//     : null;
-// const greekFirstLesson =
-//   Platform.OS === "ios"
-//     ? require("@/assets/courses/audio/greek1-lq.mp3")
-//     : null;
-// const italianFirstLesson =
-//   Platform.OS === "ios"
-//     ? require("@/assets/courses/audio/italian1-lq.mp3")
-//     : null;
-// const swahiliFirstLesson =
-//   Platform.OS === "ios"
-//     ? require("@/assets/courses/audio/swahili1-lq.mp3")
-//     : null;
-// const frenchFirstLesson =
-//   Platform.OS === "ios"
-//     ? require("@/assets/courses/audio/french1-lq.mp3")
-//     : null;
-// const inglesFirstLesson =
-//   Platform.OS === "ios"
-//     ? require("@/assets/courses/audio/ingles1-lq.mp3")
-//     : null;
-// const musicFirstLesson =
-//   Platform.OS === "ios"
-//     ? require("@/assets/courses/audio/music1-lq.mp3")
-//     : null;
-
 const courseInfoData: Record<CourseName, CourseInfo> = {
   spanish: {
     image: spanishCover,
@@ -105,9 +69,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#516198",
     },
-    // bundledFirstLesson: spanishFirstLesson,
-    bundledFirstLesson: null,
-    bundledFirstLessonId: "spanish/spanish1",
   },
   arabic: {
     image: arabicCover,
@@ -123,9 +84,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "black",
       backgroundAccent: "#806006",
     },
-    // bundledFirstLesson:arabicFirstLesson,
-    // bundledFirstLesson: null,
-    bundledFirstLessonId: "arabic/arabic1",
   },
   turkish: {
     image: turkishCover,
@@ -141,9 +99,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#760629",
     },
-    // bundledFirstLesson: turkishFirstLesson,
-    bundledFirstLesson: null,
-    bundledFirstLessonId: "turkish/turkish1",
   },
   german: {
     image: germanCover,
@@ -159,9 +114,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#006400",
     },
-    // bundledFirstLesson: germanFirstLesson,
-    bundledFirstLesson: null,
-    bundledFirstLessonId: "german/german1",
   },
   greek: {
     image: greekCover,
@@ -177,9 +129,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#9c5a20",
     },
-    // bundledFirstLesson: greekFirstLesson,
-    bundledFirstLesson: null,
-    bundledFirstLessonId: "greek/greek1",
   },
   italian: {
     image: italianCover,
@@ -195,9 +144,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#a7177f",
     },
-    // bundledFirstLesson: italianFirstLesson,
-    bundledFirstLesson: null,
-    bundledFirstLessonId: "italian/italian1",
   },
   swahili: {
     image: swahiliCover,
@@ -213,9 +159,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "black",
       backgroundAccent: "#0aaea2",
     },
-    // bundledFirstLesson: swahiliFirstLesson,
-    bundledFirstLesson: null,
-    bundledFirstLessonId: "swahili/swahili1",
   },
   french: {
     image: frenchCover,
@@ -231,9 +174,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#098abc",
     },
-    // bundledFirstLesson: frenchFirstLesson,
-    bundledFirstLesson: null,
-    bundledFirstLessonId: "french/french1",
   },
   ingles: {
     image: inglesCover,
@@ -249,9 +189,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#516198",
     },
-    // bundledFirstLesson: inglesFirstLesson,
-    bundledFirstLesson: null,
-    bundledFirstLessonId: "ingles/ingles1",
   },
   ingles_completo: {
     image: inglesCover,
@@ -267,7 +204,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "white",
       backgroundAccent: "#516198",
     },
-    bundledFirstLesson: null,
   },
   music: {
     image: musicCover,
@@ -283,9 +219,6 @@ const courseInfoData: Record<CourseName, CourseInfo> = {
       text: "black",
       backgroundAccent: "#786951",
     },
-    // bundledFirstLesson: musicFirstLesson,
-    bundledFirstLesson: null,
-    bundledFirstLessonId: "music/music1",
   },
 };
 
@@ -436,6 +369,22 @@ const indexObjects = (course: CourseName, meta: CourseMetadata): void => {
   }
 };
 
+const loadPreloadedMetadata = (course: CourseName): CourseMetadata | null => {
+  const preloaded = getPreloadedCourseMetadata(course);
+  const pointer = getPreloadedCourseIndex()?.courses.find(
+    (entry) => entry.id === course
+  )?.meta;
+  if (!preloaded || !pointer) return null;
+
+  const meta = parseCourseMeta(preloaded);
+  if (!meta) throw new Error(`Invalid preloaded metadata for ${course}`);
+  clearMemoryMetadata(course);
+  indexObjects(course, meta);
+  metadataPointers[course] = pointer;
+  loadedInMemoryCourseMeta[course] = meta;
+  return meta;
+};
+
 export type LoadedObjectMetadata = {
   pointer: FilePointer;
   course: CourseName;
@@ -482,12 +431,8 @@ const CourseData = {
     return courseInfoData[course].imageWithText;
   },
 
-  getBundledFirstLesson(course: CourseName) {
-    return courseInfoData[course].bundledFirstLesson ?? null;
-  },
-
-  getBundledFirstLessonId(course: CourseName) {
-    return courseInfoData[course].bundledFirstLessonId ?? null;
+  getPreloadedLesson(course: CourseName, index: number) {
+    return getPreloadedLesson(course, index);
   },
 
   getCourseUIColors(course: CourseName): UIColors {
@@ -529,8 +474,6 @@ const CourseData = {
     await ensureRootObjectDir();
 
     const metadataFilePointer = courseIndexEntry.meta;
-    // if the index changes and THEN we lose internet access, this fails, without the fallback we used to have
-    // but I can live with this
     const metadataFile = await readLocalObjectOrNull(metadataFilePointer);
 
     if (!metadataFile) {
@@ -558,38 +501,46 @@ const CourseData = {
     course: CourseName,
     forceRemote: boolean = false
   ): Promise<CourseMetadata | null> {
-    if (forceRemote) {
-      await ensureCourseIndex(true);
+    try {
+      if (forceRemote) {
+        await ensureCourseIndex(true);
+      }
+      const meta = await CourseData.loadCourseMetadataIfDownloaded(course, false);
+
+      if (meta) {
+        if (forceRemote) queryClient.setQueryData(metadataQueryKey(course), meta);
+        return meta;
+      }
+
+      const courseIndex = await ensureCourseIndex();
+      const courseIndexEntry = courseIndex.courses.find(
+        (entry) => entry.id === course
+      );
+
+      if (!courseIndexEntry) {
+        throw new Error(`Course ${course} not found in index`);
+      }
+
+      const metadataFilePointer = courseIndexEntry.meta;
+      const downloaded = await readObject(metadataFilePointer, {
+        save: true,
+      });
+      if (!downloaded)
+        throw new Error(`Failed to fetch metadata for course ${course}`);
+
+      const loaded = await CourseData.loadCourseMetadataIfDownloaded(
+        course,
+        false
+      );
+      if (forceRemote) queryClient.setQueryData(metadataQueryKey(course), loaded);
+      return loaded;
+    } catch (error) {
+      if (!forceRemote) {
+        const preloaded = loadPreloadedMetadata(course);
+        if (preloaded) return preloaded;
+      }
+      throw error;
     }
-    const meta = await CourseData.loadCourseMetadataIfDownloaded(course, false);
-
-    if (meta) {
-      if (forceRemote) queryClient.setQueryData(metadataQueryKey(course), meta);
-      return meta;
-    }
-
-    const courseIndex = await ensureCourseIndex();
-    const courseIndexEntry = courseIndex.courses.find(
-      (entry) => entry.id === course
-    );
-
-    if (!courseIndexEntry) {
-      throw new Error(`Course ${course} not found in index`);
-    }
-
-    const metadataFilePointer = courseIndexEntry.meta;
-    const downloaded = await readObject(metadataFilePointer, {
-      save: true,
-    });
-    if (!downloaded)
-      throw new Error(`Failed to fetch metadata for course ${course}`);
-
-    const loaded = await CourseData.loadCourseMetadataIfDownloaded(
-      course,
-      false
-    );
-    if (forceRemote) queryClient.setQueryData(metadataQueryKey(course), loaded);
-    return loaded;
   },
 
   async deleteCourseMetadata(course: CourseName): Promise<void> {
@@ -627,6 +578,17 @@ const CourseData = {
 
   getLessonData(course: CourseName, lesson: number): LessonData {
     return requireMeta(course).lessons[lesson];
+  },
+
+  getLessonDisplayData(
+    course: CourseName,
+    lesson: number,
+    downloaded: boolean
+  ): LessonData {
+    return (
+      (!downloaded && getPreloadedLesson(course, lesson)?.data) ||
+      CourseData.getLessonData(course, lesson)
+    );
   },
 
   getLessonId(course: CourseName, lesson: number): string {

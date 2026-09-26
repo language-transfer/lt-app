@@ -14,6 +14,7 @@ jest.mock("react-native-track-player", () => ({
     getActiveTrack: jest.fn().mockResolvedValue(undefined),
     reset: jest.fn().mockResolvedValue(undefined),
     add: jest.fn().mockResolvedValue(undefined),
+    skip: jest.fn().mockResolvedValue(undefined),
     play: jest.fn().mockResolvedValue(undefined),
   },
   AndroidAudioContentType: { Speech: "speech" },
@@ -32,9 +33,14 @@ jest.mock("@/src/data/courseData", () => ({
   __esModule: true,
   default: {
     loadCourseMetadata: jest.fn().mockResolvedValue(undefined),
-    getLessonIndices: () => [0],
+    getLessonIndices: jest.fn().mockReturnValue([0]),
     getCourseImageWithText: () => 1,
-    getBundledFirstLesson: jest.fn().mockReturnValue(null),
+    getPreloadedLesson: jest.fn().mockReturnValue(null),
+    getLessonData: jest.fn((_: string, index: number) => ({
+      id: `remote-${index}`,
+      title: `Remote ${index}`,
+      duration: 60,
+    })),
     getLessonUrl: jest.fn().mockResolvedValue("https://example.test/cas/stream"),
     getLessonId: () => "spanish1",
     getLessonMimeType: () => "video/mp4",
@@ -63,7 +69,12 @@ jest.mock("@/src/services/trackPlayerService", () => ({
 }));
 
 describe("lesson audio sources", () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(CourseData.getLessonIndices).mockReturnValue([0]);
+    jest.mocked(CourseData.getPreloadedLesson).mockReturnValue(null);
+    jest.mocked(CourseDownloadManager.getDownloadStatus).mockResolvedValue("not-downloaded");
+  });
   afterEach(() => jest.restoreAllMocks());
 
   test("includes the media type for an extensionless stream", async () => {
@@ -101,17 +112,55 @@ describe("lesson audio sources", () => {
   test("does not force the streaming format onto an iOS bundled asset", async () => {
     const originalOS = Platform.OS;
     Platform.OS = "ios";
-    jest.mocked(CourseData.getBundledFirstLesson).mockReturnValueOnce(123);
+    jest.mocked(CourseData.getPreloadedLesson).mockReturnValueOnce({
+      asset: 123,
+      data: { id: "shipped", title: "Shipped", duration: 45, variants: {} as never },
+    });
     try {
       renderHook(() => useLessonAudio("spanish", 0));
 
       await waitFor(() => expect(TrackPlayer.play).toHaveBeenCalled());
       expect(TrackPlayer.add).toHaveBeenCalledWith([
-        expect.objectContaining({ url: 123, contentType: undefined }),
+        expect.objectContaining({ url: 123, contentType: undefined, id: "shipped", title: "Shipped", duration: 45 }),
       ]);
     } finally {
       Platform.OS = originalOS;
     }
+  });
+
+  test("selects a preloaded lesson at an arbitrary index with its own metadata", async () => {
+    jest.mocked(CourseData.getLessonIndices).mockReturnValue([0, 1]);
+    jest.mocked(CourseData.getPreloadedLesson).mockImplementation((_, index) =>
+      index === 1
+        ? { asset: 456, data: { id: "shipped-1", title: "Shipped 1", duration: 35, variants: {} as never } }
+        : null
+    );
+    renderHook(() => useLessonAudio("spanish", 1));
+
+    await waitFor(() => expect(TrackPlayer.play).toHaveBeenCalled());
+    expect(TrackPlayer.add).toHaveBeenCalledWith([
+      expect.objectContaining({ url: "https://example.test/cas/stream" }),
+      expect.objectContaining({ url: 456, id: "shipped-1", title: "Shipped 1", duration: 35 }),
+    ]);
+    expect(TrackPlayer.skip).toHaveBeenCalledWith(1);
+  });
+
+  test("a downloaded copy overrides a preloaded lesson and uses online metadata", async () => {
+    jest.mocked(CourseData.getPreloadedLesson).mockReturnValue({
+      asset: 123,
+      data: { id: "shipped", title: "Shipped", duration: 45, variants: {} as never },
+    });
+    jest.mocked(CourseDownloadManager.getDownloadStatus).mockResolvedValue("downloaded");
+    jest.mocked(CourseDownloadManager.getLessonPointer).mockResolvedValue({
+      _type: "file", object: "remote-file", mimeType: "audio/mpeg", filesize: 100,
+    });
+    renderHook(() => useLessonAudio("spanish", 0));
+
+    await waitFor(() => expect(TrackPlayer.play).toHaveBeenCalled());
+    expect(TrackPlayer.add).toHaveBeenCalledWith([
+      expect.objectContaining({ url: "file:///objects/remote-file", id: "remote-0", title: "Remote 0", duration: 60 }),
+    ]);
+    expect(CourseData.getPreloadedLesson).not.toHaveBeenCalled();
   });
 
   test("surfaces an autoplay rejection instead of silently swallowing it", async () => {

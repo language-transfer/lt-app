@@ -138,4 +138,32 @@ describe("course index repository", () => {
     );
     expect(JSON.parse(values.get(COURSE_INDEX_STORAGE_KEY)!)).toEqual(cached);
   });
+
+  test("uses the preloaded index on a fresh offline install, then retries the network", async () => {
+    let now = 1_000_000;
+    const { storage, values } = createStorage();
+    const fetchRemote = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(refreshedIndex);
+    const repository = createCourseIndexRepository({
+      storage,
+      fetchRemote,
+      preloadedIndex: oldIndex,
+      now: () => now,
+      warn: jest.fn(),
+    });
+
+    await expect(repository.ensure()).resolves.toEqual(oldIndex);
+    expect(values.has(COURSE_INDEX_STORAGE_KEY)).toBe(false);
+    expect(repository.timeUntilRefresh()).toBe(60_000);
+
+    now += 60_001;
+    await expect(repository.ensure()).resolves.toEqual({
+      ...refreshedIndex,
+      casBaseURL: "https://downloads.example/new-cas",
+    });
+    expect(fetchRemote).toHaveBeenCalledTimes(2);
+    expect(values.has(COURSE_INDEX_STORAGE_KEY)).toBe(true);
+  });
 });

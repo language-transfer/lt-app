@@ -10,8 +10,8 @@ The patch in `patches/react-native-track-player+5.0.0-alpha0.patch` forwards
 `contentType` to Apple's public
 [`AVURLAssetOverrideMIMETypeKey`](https://developer.apple.com/documentation/avfoundation/avurlassetoverridemimetypekey)
 on iOS 17 and later. Streaming tracks use the streaming variant's type; downloaded
-tracks use the downloaded file's type. Bundled assets retain automatic detection
-because their format may differ from the remote variant.
+tracks use the downloaded file's type. Preloaded first lessons use local `.m4a`
+assets, which Apple can identify by their extension.
 
 `npm ci` / `npm install` applies the patch through the existing `patch-package`
 postinstall script. Run `npm run ios` afterward to rebuild the native player;

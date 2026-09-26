@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Platform } from "react-native";
 import TrackPlayer, {
   AndroidAudioContentType,
   AppKilledPlaybackBehavior,
@@ -39,6 +38,7 @@ export type LessonAudioControls = {
   ready: boolean;
   playing: boolean;
   buffering: boolean;
+  title: string | null;
   duration: number;
   position: number;
   error: AudioError | null;
@@ -175,6 +175,11 @@ const buildLessonQueue = async (
         lessonNumber
       );
       const isDownloaded = downloadStatus === "downloaded";
+      const bundled = !isDownloaded
+        ? CourseData.getPreloadedLesson(course, lessonNumber)
+        : null;
+      const lessonData =
+        bundled?.data ?? CourseData.getLessonData(course, lessonNumber);
 
       if (isDownloaded) {
         const pointer = await CourseDownloadManager.getLessonPointer(
@@ -184,27 +189,23 @@ const buildLessonQueue = async (
         uri = getLocalObjectPath(pointer);
         contentType = pointer.mimeType;
       } else {
-        const bundled =
-          lessonNumber === 0 && Platform.OS === "ios"
-            ? CourseData.getBundledFirstLesson(course)
-            : null;
         uri =
-          bundled ??
+          bundled?.asset ??
           (await CourseData.getLessonUrl(course, lessonNumber, quality));
         // Bundled assets can use a different format from the streaming variant.
-        if (bundled == null) {
+        if (!bundled) {
           contentType = CourseData.getLessonMimeType(course, lessonNumber, quality);
         }
       }
 
       return {
-        id: CourseData.getLessonId(course, lessonNumber),
+        id: lessonData.id,
         url: uri as LessonTrack["url"],
         contentType,
-        title: CourseData.getLessonTitle(course, lessonNumber),
+        title: lessonData.title,
         artist: "Language Transfer",
         artwork,
-        duration: CourseData.getLessonDuration(course, lessonNumber),
+        duration: lessonData.duration,
         course,
         lesson: lessonNumber,
       };
@@ -241,6 +242,7 @@ export const useLessonAudio = (
       }
     };
     setPlayerReady(false);
+    setDuration(0);
     setLoadError(null);
     lastPersistTimeRef.current = 0;
 
@@ -248,9 +250,6 @@ export const useLessonAudio = (
       try {
         await CourseData.loadCourseMetadata(course);
         checkCancel();
-        const lessonDuration = CourseData.getLessonDuration(course, lesson);
-        setDuration(lessonDuration);
-
         await ensurePlayer();
         checkCancel();
 
@@ -263,6 +262,7 @@ export const useLessonAudio = (
           existingTrack &&
           trackMatchesLesson(existingTrack, course, lesson)
         ) {
+          setDuration(existingTrack.duration ?? 0);
           setPlayerReady(true);
           return;
         }
@@ -279,6 +279,8 @@ export const useLessonAudio = (
           quality
         );
         checkCancel();
+        const lessonDuration = tracks[targetIndex].duration ?? 0;
+        setDuration(lessonDuration);
 
         await TrackPlayer.reset();
         checkCancel();
@@ -472,6 +474,7 @@ export const useLessonAudio = (
       isCurrentLessonActive &&
         (playbackStatus === State.Buffering || playbackStatus === State.Loading)
     ),
+    title: isCurrentLessonActive ? activeTrack?.title ?? null : null,
     duration: resolvedDuration,
     position,
     error,

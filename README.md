@@ -57,9 +57,13 @@ The native player has a persistent patch for extensionless lesson files; see
 [iOS audio format handling](./docs/ios-audio.md) for rebuild instructions and the
 iOS 17 requirement for the MIME-type override.
 
+iOS builds also [prepare selected offline lessons and course metadata](./docs/preloaded-content.md)
+from the public CAS. The preparation fails if a required object is unavailable;
+Android builds do not include that content.
+
 ### iOS release policy
 
-The Expo rewrite's iOS build and release workflow are not ready yet. Before shipping it on iOS, restore the platform-specific preloaded tracks required for App Store review. Those bundled tracks are an iOS-only requirement and must not be added to the Android build.
+The Expo rewrite's iOS release workflow still needs validation on a Mac. Before archiving, regenerate the native project so the preloaded-content Xcode phase is present, then verify first-lesson playback on a fresh install with networking disabled. The [bundle check](./docs/preloaded-content.md) guards against including that content on Android.
 
 ### Android release builds
 

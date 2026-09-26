@@ -42,8 +42,6 @@ export interface CourseInfo {
   sourceLanguage: SourceLanguage;
   fallbackLessonCount?: string;
   uiColors: UIColors;
-  bundledFirstLesson?: any;
-  bundledFirstLessonId?: string;
 }
 
 export type {

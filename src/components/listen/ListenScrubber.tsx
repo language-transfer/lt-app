@@ -8,22 +8,16 @@ import {
   State,
 } from "react-native-gesture-handler";
 
-import CourseData from "@/src/data/courseData";
 import { useCurrentCourseColors } from "@/src/hooks/useCourseLessonData";
 import type { LessonAudioControls } from "@/src/services/audioPlayer";
-import type { CourseName } from "@/src/types";
 
 type Props = {
-  course: CourseName;
-  lesson: number;
   position: number;
   duration: number;
   seekTo: LessonAudioControls["seekTo"];
 };
 
 const ListenScrubber = ({
-  course,
-  lesson,
   position,
   duration,
   seekTo,
@@ -121,7 +115,7 @@ const ListenScrubber = ({
           {formatDuration(position * 1000)}
         </Text>
         <Text style={{ color: colors?.text }}>
-          {formatDuration(CourseData.getLessonDuration(course, lesson) * 1000)}
+          {formatDuration(duration * 1000)}
         </Text>
       </View>
     </View>

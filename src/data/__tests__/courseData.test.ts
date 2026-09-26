@@ -7,6 +7,11 @@ import {
 } from "@/src/data/courseIndex";
 import { queryClient } from "@/src/data/queryClient";
 import { Buffer } from "buffer";
+import {
+  getPreloadedCourseIndex,
+  getPreloadedCourseMetadata,
+  getPreloadedLesson,
+} from "@/src/data/preloadedContent";
 
 jest.mock("@/src/data/courseIndex", () => ({
   ensureCourseIndex: jest.fn(),
@@ -27,6 +32,12 @@ jest.mock("@/src/services/downloadManager", () => ({
   getLocalObjectPath: jest.fn((pointer) => `/objects/${pointer.object}`),
 }));
 
+jest.mock("@/src/data/preloadedContent", () => ({
+  getPreloadedCourseIndex: jest.fn().mockReturnValue(null),
+  getPreloadedCourseMetadata: jest.fn().mockReturnValue(null),
+  getPreloadedLesson: jest.fn().mockReturnValue(null),
+}));
+
 describe("metadata refresh and deletion", () => {
   const pointer = (object: string) => ({
     _type: "file" as const,
@@ -40,7 +51,7 @@ describe("metadata refresh and deletion", () => {
     courses: [{ id: "spanish", lessons: 1, meta: pointer(object) }],
   });
   const metadata = (title: string) => ({
-    buildVersion: 2,
+    buildVersion: 2 as const,
     lessons: [
       {
         id: "lesson1",
@@ -65,6 +76,9 @@ describe("metadata refresh and deletion", () => {
         ).toString("base64")
       );
     jest.clearAllMocks();
+    jest.mocked(getPreloadedCourseIndex).mockReturnValue(null);
+    jest.mocked(getPreloadedCourseMetadata).mockReturnValue(null);
+    jest.mocked(getPreloadedLesson).mockReturnValue(null);
   });
 
   afterEach(() => queryClient.clear());
@@ -144,6 +158,42 @@ describe("metadata refresh and deletion", () => {
       CourseData.loadCourseMetadata("spanish", true)
     ).rejects.toThrow("offline");
     expect(CourseData.getLessonData("spanish", 0).title).toBe("old");
+  });
+
+  test("opens a course from preloaded metadata when a fresh install is offline", async () => {
+    const preloaded = metadata("offline");
+    jest.mocked(getPreloadedCourseIndex).mockReturnValue(index("preloaded"));
+    jest.mocked(getPreloadedCourseMetadata).mockReturnValue(preloaded);
+    jest.mocked(FileSystem.getInfoAsync).mockResolvedValue({
+      exists: false,
+    } as FileSystem.FileInfo);
+    const originalFetch = global.fetch;
+    global.fetch = jest.fn().mockRejectedValue(new Error("offline"));
+    try {
+      await expect(CourseData.loadCourseMetadata("spanish")).resolves.toEqual(
+        preloaded
+      );
+      expect(CourseData.getLessonTitle("spanish", 0)).toBe("offline");
+      expect(CourseData.getLessonPointer("spanish", 0, "low").object).toBe(
+        "offline-lq"
+      );
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
+  test("displays snapshot metadata only while a preloaded lesson is the source", async () => {
+    await CourseData.loadCourseMetadata("spanish");
+    const shipped = metadata("shipped").lessons[0];
+    shipped.duration = 45;
+    jest.mocked(getPreloadedLesson).mockReturnValue({ asset: 123, data: shipped });
+    jest.mocked(ensureCourseIndex).mockResolvedValue(index("new"));
+    await CourseData.loadCourseMetadata("spanish", true);
+    expect(CourseData.getLessonPointer("spanish", 0, "low").object).toBe("new-lq");
+    expect(CourseData.getLessonDisplayData("spanish", 0, false)).toEqual(shipped);
+    expect(CourseData.getLessonDisplayData("spanish", 0, true)).toEqual(
+      metadata("new").lessons[0]
+    );
   });
 });
 

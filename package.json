@@ -6,6 +6,9 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "preios": "npm run prepare:preloaded-content",
+    "prepare:preloaded-content": "node scripts/prepare-preloaded-content.mjs",
+    "test:preloaded-content": "npm run prepare:preloaded-content && node scripts/check-preloaded-content.mjs",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -82,6 +85,10 @@
   "jest": {
     "preset": "jest-expo",
     "watchman": false,
+    "moduleNameMapper": {
+      "^@/generated/preloaded-content/assets\\.js$": "<rootDir>/src/testFixtures/preloadedAssets.js",
+      "^@/(.*)$": "<rootDir>/$1"
+    },
     "roots": [
       "<rootDir>/src"
     ],
