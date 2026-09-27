@@ -15,9 +15,9 @@ on iOS 17 and later. Streaming tracks use the streaming variant's type. Local
 downloads use their file extension as well as the downloaded file's type.
 Preloaded first lessons use local `.m4a` assets.
 
-Existing extensionless downloads move to the extensioned path when first played;
-they do not need to be downloaded again. Download status, cleanup, and purge
-recognize both paths. Android continues to use extensionless CAS files.
+Download status, cleanup, and purge use the same MIME-derived path as playback.
+Android continues to use extensionless CAS files. Development builds with older
+extensionless iOS downloads must download those tracks again.
 
 `npm ci` / `npm install` applies the patch through the existing `patch-package`
 postinstall script. Run `npm run ios` afterward to rebuild the native player;

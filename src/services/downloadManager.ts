@@ -21,11 +21,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import PQueue from "p-queue";
 import { ObjectPointer } from "../data/courseSchemas";
 import { queryClient } from "../data/queryClient";
-import {
-  ensurePlayableDownloadedAudio,
-  getDownloadedAudioPath,
-  getStoredObjectPaths,
-} from "./downloadedAudioFile";
+import { getDownloadedAudioPath } from "./downloadedAudioFile";
 
 const downloadIntentAsyncStorage = createAsyncStorage("@download-intent");
 
@@ -75,9 +71,8 @@ const isObjectDownloading = (filePointer: ObjectPointer): boolean => {
   return inMemoryInProgressDownloads.has(filePointer.object);
 };
 
-const hasObject = (filePointer: ObjectPointer): boolean => {
-  const localPath = getLocalObjectPath(filePointer);
-  return getStoredObjectPaths(localPath).some((path) => new File(path).exists);
+const hasObject = (filePointer: FilePointer): boolean => {
+  return new File(getLocalPlaybackPath(filePointer)).exists;
 };
 
 // this has to happen after we've filtered down to loaded objects
@@ -102,13 +97,6 @@ const syncDownloadIntent = async () => {
   const allObjectIds = await downloadIntentAsyncStorage.getAllKeys();
 
   const needsStart = allObjectIds
-    .filter((objectId) => {
-      // hm, possible race condition here? not async though. mv should be atomic
-      return (
-        !hasObject({ object: objectId }) &&
-        !isObjectDownloading({ object: objectId })
-      );
-    })
     .map((objectId) => {
       try {
         return CourseData.getLoadedObjectMetadata(objectId);
@@ -117,7 +105,12 @@ const syncDownloadIntent = async () => {
         return null;
       }
     })
-    .filter((object) => object !== null);
+    .filter(
+      (object): object is LoadedObjectMetadata =>
+        object !== null &&
+        !hasObject(object.pointer) &&
+        !isObjectDownloading(object.pointer)
+    );
 
   sortFilteredIntents(needsStart);
 
@@ -156,15 +149,11 @@ const scrubDownloads = async () => {
         const intended = await downloadIntentAsyncStorage.getItem(objectId);
         if (intended) return;
 
-        const pointer: ObjectPointer = { object: objectId };
+        const pointer = CourseData.getLoadedObjectMetadata(objectId).pointer;
         const has = hasObject(pointer);
         if (!has) return;
 
-        const localPath = getLocalObjectPath(pointer);
-        for (const path of getStoredObjectPaths(localPath)) {
-          const file = new File(path);
-          if (file.exists) file.delete();
-        }
+        new File(getLocalPlaybackPath(pointer)).delete();
         invalidate(pointer);
       } catch (e) {
         console.warn("Error scrubbing download for object", objectId, e);
@@ -238,14 +227,7 @@ const _download = async (filePointer: FilePointer) => {
       // console.log("Download complete for", filePointer.object);
 
       destinationDir.create({ intermediates: true, idempotent: true });
-      stagingFile.move(
-        new File(
-          getDownloadedAudioPath(
-            getLocalObjectPath(filePointer),
-            filePointer.mimeType
-          )
-        )
-      );
+      stagingFile.move(new File(getLocalPlaybackPath(filePointer)));
       inMemoryInProgressDownloads.delete(filePointer.object);
       invalidate(filePointer);
 
@@ -284,7 +266,7 @@ export const getLocalObjectPath = (pointer: ObjectPointer): string => {
 };
 
 export const getLocalPlaybackPath = (pointer: FilePointer): string =>
-  ensurePlayableDownloadedAudio(getLocalObjectPath(pointer), pointer.mimeType);
+  getDownloadedAudioPath(getLocalObjectPath(pointer), pointer.mimeType);
 
 export const ensureRootObjectDir = async () => {
   const dir = new Directory(OBJECT_STORAGE_DIR);
@@ -363,9 +345,7 @@ const DownloadManager = {
       getFiles: (objectId) => {
         const pointer = pointersById.get(objectId)!;
         return [
-          ...getStoredObjectPaths(getLocalObjectPath(pointer)).map(
-            (path) => new File(path)
-          ),
+          new File(getLocalPlaybackPath(pointer)),
           new File(stagingPath(pointer)),
         ];
       },
