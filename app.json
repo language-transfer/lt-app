@@ -10,6 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "buildNumber": "26",
+      "appleTeamId": "XZUB4ADZC3",
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": ["audio", "audio"]
