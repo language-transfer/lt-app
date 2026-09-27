@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "buildNumber": "26",
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": ["audio", "audio"]
