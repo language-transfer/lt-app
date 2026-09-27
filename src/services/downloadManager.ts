@@ -21,6 +21,11 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import PQueue from "p-queue";
 import { ObjectPointer } from "../data/courseSchemas";
 import { queryClient } from "../data/queryClient";
+import {
+  ensurePlayableDownloadedAudio,
+  getDownloadedAudioPath,
+  getStoredObjectPaths,
+} from "./downloadedAudioFile";
 
 const downloadIntentAsyncStorage = createAsyncStorage("@download-intent");
 
@@ -72,8 +77,7 @@ const isObjectDownloading = (filePointer: ObjectPointer): boolean => {
 
 const hasObject = (filePointer: ObjectPointer): boolean => {
   const localPath = getLocalObjectPath(filePointer);
-  const file = new File(localPath);
-  return file.exists;
+  return getStoredObjectPaths(localPath).some((path) => new File(path).exists);
 };
 
 // this has to happen after we've filtered down to loaded objects
@@ -157,8 +161,10 @@ const scrubDownloads = async () => {
         if (!has) return;
 
         const localPath = getLocalObjectPath(pointer);
-        const file = new File(localPath);
-        file.delete();
+        for (const path of getStoredObjectPaths(localPath)) {
+          const file = new File(path);
+          if (file.exists) file.delete();
+        }
         invalidate(pointer);
       } catch (e) {
         console.warn("Error scrubbing download for object", objectId, e);
@@ -232,7 +238,14 @@ const _download = async (filePointer: FilePointer) => {
       // console.log("Download complete for", filePointer.object);
 
       destinationDir.create({ intermediates: true, idempotent: true });
-      stagingFile.move(new File(getLocalObjectPath(filePointer)));
+      stagingFile.move(
+        new File(
+          getDownloadedAudioPath(
+            getLocalObjectPath(filePointer),
+            filePointer.mimeType
+          )
+        )
+      );
       inMemoryInProgressDownloads.delete(filePointer.object);
       invalidate(filePointer);
 
@@ -269,6 +282,9 @@ export const getLocalObjectPath = (pointer: ObjectPointer): string => {
 
   return `${containingDir}/${rest}`;
 };
+
+export const getLocalPlaybackPath = (pointer: FilePointer): string =>
+  ensurePlayableDownloadedAudio(getLocalObjectPath(pointer), pointer.mimeType);
 
 export const ensureRootObjectDir = async () => {
   const dir = new Directory(OBJECT_STORAGE_DIR);
@@ -347,7 +363,9 @@ const DownloadManager = {
       getFiles: (objectId) => {
         const pointer = pointersById.get(objectId)!;
         return [
-          new File(getLocalObjectPath(pointer)),
+          ...getStoredObjectPaths(getLocalObjectPath(pointer)).map(
+            (path) => new File(path)
+          ),
           new File(stagingPath(pointer)),
         ];
       },

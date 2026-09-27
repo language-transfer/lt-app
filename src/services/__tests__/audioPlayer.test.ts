@@ -55,8 +55,8 @@ jest.mock("@/src/services/downloadManager", () => ({
     getDownloadStatus: jest.fn().mockResolvedValue("not-downloaded"),
     getLessonPointer: jest.fn(),
   },
-  getLocalObjectPath: (pointer: { object: string }) =>
-    `file:///objects/${pointer.object}`,
+  getLocalPlaybackPath: (pointer: { object: string; mimeType: string }) =>
+    `file:///objects/${pointer.object}${pointer.mimeType === "audio/mpeg" ? ".mp3" : ".m4a"}`,
 }));
 
 jest.mock("@/src/storage/persistence", () => ({
@@ -102,7 +102,7 @@ describe("lesson audio sources", () => {
     await waitFor(() => expect(TrackPlayer.play).toHaveBeenCalled());
     expect(TrackPlayer.add).toHaveBeenCalledWith([
       expect.objectContaining({
-        url: "file:///objects/download",
+        url: "file:///objects/download.mp3",
         contentType: "audio/mpeg",
       }),
     ]);
@@ -158,7 +158,7 @@ describe("lesson audio sources", () => {
 
     await waitFor(() => expect(TrackPlayer.play).toHaveBeenCalled());
     expect(TrackPlayer.add).toHaveBeenCalledWith([
-      expect.objectContaining({ url: "file:///objects/remote-file", id: "remote-0", title: "Remote 0", duration: 60 }),
+      expect.objectContaining({ url: "file:///objects/remote-file.mp3", id: "remote-0", title: "Remote 0", duration: 60 }),
     ]);
     expect(CourseData.getPreloadedLesson).not.toHaveBeenCalled();
   });

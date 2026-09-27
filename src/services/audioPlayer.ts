@@ -17,7 +17,7 @@ import TrackPlayer, {
 import CourseData from "@/src/data/courseData";
 import {
   CourseDownloadManager,
-  getLocalObjectPath,
+  getLocalPlaybackPath,
 } from "@/src/services/downloadManager";
 import {
   getPreferenceWithDefault,
@@ -186,7 +186,7 @@ const buildLessonQueue = async (
           course,
           lessonNumber
         );
-        uri = getLocalObjectPath(pointer);
+        uri = getLocalPlaybackPath(pointer);
         contentType = pointer.mimeType;
       } else {
         uri =

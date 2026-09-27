@@ -1,6 +1,8 @@
 # iOS audio format handling
 
-Lesson URLs and local downloads use extensionless content-addressed filenames.
+Lesson URLs use extensionless content-addressed filenames. The CAS identity of
+local downloads is also extensionless, but iOS saves playable audio with an
+extension derived from the lesson MIME type (`.m4a`, `.mp4`, or `.mp3`).
 The media server currently responds with `application/octet-stream`, even for
 AAC audio in MP4 containers. Apple’s player can fail to identify these resources.
 The lesson metadata contains the MIME type, but Track Player 5.0.0-alpha0 ignores
@@ -9,17 +11,21 @@ the track's `contentType` on iOS.
 The patch in `patches/react-native-track-player+5.0.0-alpha0.patch` forwards
 `contentType` to Apple's public
 [`AVURLAssetOverrideMIMETypeKey`](https://developer.apple.com/documentation/avfoundation/avurlassetoverridemimetypekey)
-on iOS 17 and later. Streaming tracks use the streaming variant's type; downloaded
-tracks use the downloaded file's type. Preloaded first lessons use local `.m4a`
-assets, which Apple can identify by their extension.
+on iOS 17 and later. Streaming tracks use the streaming variant's type. Local
+downloads use their file extension as well as the downloaded file's type.
+Preloaded first lessons use local `.m4a` assets.
+
+Existing extensionless downloads move to the extensioned path when first played;
+they do not need to be downloaded again. Download status, cleanup, and purge
+recognize both paths. Android continues to use extensionless CAS files.
 
 `npm ci` / `npm install` applies the patch through the existing `patch-package`
 postinstall script. Run `npm run ios` afterward to rebuild the native player;
 Metro reload alone cannot apply Swift changes.
 
 The override is unavailable before iOS 17. Those versions still need correct
-server response types for streaming and a separate solution for extensionless
-local downloads. This patch does not raise the app's minimum iOS version. When
+server response types for streaming; local downloads have a playable extension.
+This patch does not raise the app's minimum iOS version. When
 upgrading Track Player, check whether it forwards `contentType` before removing
 the patch.
 
