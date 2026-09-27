@@ -8,10 +8,8 @@ function addPreloadedContentPhase(project) {
   const phases = project.pbxNativeTargetSection()[target].buildPhases;
   const script = [
     "set -e",
-    'cd "$PROJECT_DIR/.."',
     'source "$PROJECT_DIR/.xcode.env"',
-    'node scripts/prepare-preloaded-content.mjs',
-    'node scripts/check-preloaded-content.mjs',
+    'lt_run_in_nix bash -c \'set -e; cd "$PROJECT_DIR/.."; node scripts/prepare-preloaded-content.mjs; node scripts/check-preloaded-content.mjs\'',
   ].join("\n");
   const existing = phases.find((phase) => phase.comment === PHASE_NAME);
   if (existing) {

@@ -63,7 +63,7 @@ Android builds do not include that content.
 
 ### iOS release policy
 
-The Expo rewrite's iOS release workflow still needs validation on a Mac. Before archiving, regenerate the native project so the preloaded-content Xcode phase is present. The tracked `withNixXcodeEnvironment` plugin writes the ignored `ios/.xcode.env` during prebuild; Xcode's script phases source it at build time to load the current `.#ios` flake environment. Nix must be installed on the Mac, but Xcode does not need to be launched from `nix develop`. To supply Node and CocoaPods during prebuild itself, run `nix develop .#ios -c npx expo prebuild --platform ios`. Then verify first-lesson playback on a fresh install with networking disabled. The [bundle check](./docs/preloaded-content.md) guards against including that content on Android.
+The Expo rewrite's iOS release workflow still needs validation on a Mac. Before archiving, regenerate the native project so the preloaded-content Xcode phase is present. The tracked `withNixXcodeEnvironment` plugin writes the ignored `ios/.xcode.env` during prebuild; Xcode's script phases source it and run under the current `.#ios` flake environment at build time. Nix supplies a compatible Bash as well as Node and CocoaPods. Xcode does not need to be launched from `nix develop`. To supply Node and CocoaPods during prebuild itself, run `nix develop .#ios -c npx expo prebuild --platform ios`. Then verify first-lesson playback on a fresh install with networking disabled. The [bundle check](./docs/preloaded-content.md) guards against including that content on Android.
 
 ### Android release builds
 
