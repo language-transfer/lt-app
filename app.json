@@ -49,6 +49,7 @@
       ],
       "./plugins/withAsyncStorageLocalRepo",
       "./plugins/withAndroidReleaseSigning",
+      "./plugins/withNixXcodeEnvironment",
       "./plugins/withPreloadedContent"
     ],
     "experiments": {

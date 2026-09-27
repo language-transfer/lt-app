@@ -11,9 +11,11 @@ describe("iOS preloaded-content build phase", () => {
     const addBuildPhase = jest.fn(
       (_files, _type, comment, _target, options) => {
         phases.push({ value: "prepare", comment });
-        shellPhases.prepare = { shellScript: options.shellScript };
+        shellPhases.prepare = { shellScript: options.shellScript, shellPath: options.shellPath };
         expect(options.shellScript).toContain("prepare-preloaded-content.mjs");
         expect(options.shellScript).toContain("check-preloaded-content.mjs");
+        expect(options.shellScript).toContain('source "$PROJECT_DIR/.xcode.env"');
+        expect(options.shellPath).toBe("/bin/bash");
         return { uuid: "prepare" };
       }
     );
@@ -32,6 +34,7 @@ describe("iOS preloaded-content build phase", () => {
       "Bundle React Native code and images",
     ]);
     expect(addBuildPhase).toHaveBeenCalledTimes(1);
+    expect(shellPhases.prepare.shellPath).toBe("/bin/bash");
   });
 
   test("updates the script in an existing native project", () => {
@@ -47,6 +50,7 @@ describe("iOS preloaded-content build phase", () => {
 
     addPreloadedContentPhase(project);
     expect(shellPhases.prepare.shellScript).toContain("check-preloaded-content.mjs");
+    expect(shellPhases.prepare.shellPath).toBe("/bin/bash");
     expect(project.addBuildPhase).not.toHaveBeenCalled();
   });
 });

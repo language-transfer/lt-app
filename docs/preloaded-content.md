@@ -18,7 +18,7 @@ checks, so a failed check fails the local build.
 
 After adding or changing the config plugin in an existing ignored `ios/`
 project, run `npx expo prebuild --platform ios --no-install` so Xcode receives
-the latest build phase. The generated content is never committed. Before an Xcode archive,
+the latest build phase and generated `.xcode.env`. The generated content is never committed. Before an Xcode archive,
 confirm that its target has a **Prepare Preloaded Content** phase immediately
 before **Bundle React Native code and images**.
 

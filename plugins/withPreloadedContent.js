@@ -9,11 +9,9 @@ function addPreloadedContentPhase(project) {
   const script = [
     "set -e",
     'cd "$PROJECT_DIR/.."',
-    'if [ -f "$PROJECT_DIR/../ios/.xcode.env" ]; then',
-    '  . "$PROJECT_DIR/../ios/.xcode.env"',
-    "fi",
-    '"${NODE_BINARY:-node}" scripts/prepare-preloaded-content.mjs',
-    '"${NODE_BINARY:-node}" scripts/check-preloaded-content.mjs',
+    'source "$PROJECT_DIR/.xcode.env"',
+    'node scripts/prepare-preloaded-content.mjs',
+    'node scripts/check-preloaded-content.mjs',
   ].join("\n");
   const existing = phases.find((phase) => phase.comment === PHASE_NAME);
   if (existing) {
@@ -21,6 +19,7 @@ function addPreloadedContentPhase(project) {
       project.hash.project.objects.PBXShellScriptBuildPhase?.[existing.value];
     if (!buildPhase) throw new Error(`Could not find ${PHASE_NAME} build phase`);
     buildPhase.shellScript = '"' + script.replace(/"/g, '\\"') + '"';
+    buildPhase.shellPath = "/bin/bash";
     return project;
   }
 
@@ -35,7 +34,7 @@ function addPreloadedContentPhase(project) {
     "PBXShellScriptBuildPhase",
     PHASE_NAME,
     target,
-    { shellPath: "/bin/sh", shellScript: script }
+    { shellPath: "/bin/bash", shellScript: script }
   );
   const newIndex = phases.findIndex((phase) => phase.value === result.uuid);
   const [newPhase] = phases.splice(newIndex, 1);
