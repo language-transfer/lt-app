@@ -1,5 +1,6 @@
 import { Buffer } from "buffer";
 import * as FileSystem from "expo-file-system/legacy";
+import { Platform } from "react-native";
 
 import {
   CourseMetadata,
@@ -366,6 +367,13 @@ const indexObjects = (course: CourseName, meta: CourseMetadata): void => {
       lessonIndex,
       quality: "high",
     };
+    const hqMov = lesson.variants["hq-mov"];
+    loadedObjectMetadataLookup[hqMov.object] = {
+      pointer: hqMov,
+      course,
+      lessonIndex,
+      quality: "high",
+    };
   }
 };
 
@@ -607,7 +615,9 @@ const CourseData = {
     quality: Quality
   ): FilePointer {
     const variants = CourseData.getLessonData(course, lesson).variants;
-    return quality === "high" ? variants.hq : variants.lq;
+    if (quality === "low") return variants.lq;
+    // Apple's player rejects MP3-in-MP4. Use the lossless MOV remux on iOS.
+    return Platform.OS === "ios" ? variants["hq-mov"] : variants.hq;
   },
 
   getLessonPointersAllVariants(

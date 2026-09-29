@@ -1,5 +1,13 @@
 # iOS audio format handling
 
+The "High" preference selects `hq-mov` on iOS for both streaming and downloads.
+This variant contains the same compressed audio as `hq`, losslessly remuxed into
+MOV by lt-tools: Apple's player rejects the MP3-in-MP4 format used by some HQ
+lessons. Android and web select `hq`. "Low" selects `lq` on every platform.
+Course metadata must include `hq-mov`; missing variants fail schema validation.
+The schema still accepts buildVersion 2; adding a variant does not change
+existing Android audio hashes or download paths.
+
 Lesson URLs and local downloads use extensionless content-addressed filenames.
 The media server currently responds with `application/octet-stream`, even for
 AAC audio in MP4 containers. Apple’s player can fail to identify these resources.

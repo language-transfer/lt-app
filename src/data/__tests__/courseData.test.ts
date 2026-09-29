@@ -7,6 +7,7 @@ import {
 } from "@/src/data/courseIndex";
 import { queryClient } from "@/src/data/queryClient";
 import { Buffer } from "buffer";
+import { Platform } from "react-native";
 import {
   getPreloadedCourseIndex,
   getPreloadedCourseMetadata,
@@ -39,6 +40,7 @@ jest.mock("@/src/data/preloadedContent", () => ({
 }));
 
 describe("metadata refresh and deletion", () => {
+  const originalOS = Platform.OS;
   const pointer = (object: string) => ({
     _type: "file" as const,
     object,
@@ -57,7 +59,11 @@ describe("metadata refresh and deletion", () => {
         id: "lesson1",
         title,
         duration: 60,
-        variants: { hq: pointer(`${title}-hq`), lq: pointer(`${title}-lq`) },
+        variants: {
+          hq: pointer(`${title}-hq`),
+          lq: pointer(`${title}-lq`),
+          "hq-mov": { ...pointer(`${title}-hq-mov`), mimeType: "video/quicktime" },
+        },
       },
     ],
   });
@@ -81,7 +87,46 @@ describe("metadata refresh and deletion", () => {
     jest.mocked(getPreloadedLesson).mockReturnValue(null);
   });
 
-  afterEach(() => queryClient.clear());
+  afterEach(() => {
+    Platform.OS = originalOS;
+    queryClient.clear();
+  });
+
+  test.each(["ios", "android", "web"] as const)(
+    "%s selects the appropriate High variant for playback and downloads",
+    async (platform) => {
+      Platform.OS = platform;
+      const mov = {
+        ...pointer("high-mov"),
+        mimeType: "video/quicktime",
+        filesize: 456,
+      };
+      const meta = metadata("old");
+      const variants = { ...meta.lessons[0].variants, "hq-mov": mov };
+      const updated = { ...meta, lessons: [{ ...meta.lessons[0], variants }] };
+      jest.mocked(FileSystem.readAsStringAsync).mockResolvedValue(
+        Buffer.from(JSON.stringify(updated)).toString("base64")
+      );
+      await CourseData.loadCourseMetadata("spanish");
+
+      const expected = platform === "ios" ? mov : variants.hq;
+      expect(CourseData.getLessonPointer("spanish", 0, "high")).toEqual(expected);
+      expect(await CourseData.getLessonUrl("spanish", 0, "high")).toBe(
+        `https://example.test/${expected.object}`
+      );
+      expect(CourseData.getLessonMimeType("spanish", 0, "high")).toBe(expected.mimeType);
+      expect(CourseData.getLessonSizeInBytes("spanish", 0, "high")).toBe(expected.filesize);
+      expect(CourseData.getLessonPointer("spanish", 0, "low")).toEqual(variants.lq);
+      expect(CourseData.getLessonPointersAllVariants("spanish", 0)).toEqual(
+        expect.arrayContaining([variants.hq, variants.lq, mov])
+      );
+      expect(CourseData.getLoadedObjectMetadata(mov.object)).toEqual({
+        pointer: mov, course: "spanish", lessonIndex: 0, quality: "high",
+      });
+      await CourseData.deleteCourseMetadata("spanish");
+      expect(CourseData.getAllLoadedObjectIds()).not.toContain(mov.object);
+    }
+  );
 
   test("downloads newly referenced metadata and only refreshes the index once", async () => {
     await CourseData.loadCourseMetadata("spanish");

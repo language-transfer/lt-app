@@ -14,6 +14,7 @@ export const lessonSchema = z.object({
   variants: z.object({
     hq: filePointerSchema,
     lq: filePointerSchema,
+    "hq-mov": filePointerSchema,
   }),
 });
 
