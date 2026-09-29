@@ -1,51 +1,56 @@
-# Repository Guidelines
+# Repository guidelines
 
-## Project Structure & Module Organization
+## Project structure
 
-- Expo Router app; entry `index.js` registers the track player service from `src/services/trackPlayerService`.
-- Screens live in `app/` (stack in `app/_layout.tsx`, course flows under `app/(main)/course/[course]/...`).
-- UI in `src/components/`, data in `src/data/`, logic in `src/hooks`, `src/services`, `src/storage`, `src/utils`, and shared typing in `src/types`.
-- `assets/` holds icons, splash art, course artwork, and bundled first-lesson audio. The previous app was removed after the migration; its files remain available in Git history (`git log -- legacy/` and `git show <commit>:legacy/<path>`).
+- Flutter app for iOS and Android. Entry point `lib/main.dart`, app widget in
+  `lib/src/app.dart`.
+- `lib/src/core/` holds cross-cutting code (network, storage, routing, theme).
+- `lib/src/features/<feature>/` holds one feature each, split into `data/`
+  (repositories, API access), `domain/` (models and rules), `application/`
+  (Riverpod providers and controllers) and `presentation/` (widgets).
+- Objects that the player or the downloads share with the screens are
+  created once in `lib/main.dart` and handed to Riverpod as overrides; the
+  widget test harness does the same.
+- Tests mirror `lib/src/` under `test/`. Small JSON fixtures in the real
+  backend format live in `test/fixtures/`.
+- `test/app/` renders the whole app with fixture data
+  (`test/helpers/app_harness.dart`): every screen at several sizes and text
+  scales, and against the accessibility guidelines. Add new screens there.
 
-## Build, Test, and Development Commands
+## Commands
 
-- `npm install`: install dependencies (runs `patch-package`).
-- `npm run start`: Expo dev server for devices, simulators, or web.
-- `npm run android` / `npm run ios`: build and launch native shells through Expo Run (platform toolchains required).
-- `npm run web`: quick web preview.
-- `npm test`: run Jest unit and integration tests.
-- `npm run test:full`: generate Jest coverage and a Maestro HTML report locally (running native app/emulator required for Maestro).
-- `npm run typecheck`: strict TypeScript compilation.
-- `npm run lint`: ESLint using `eslint-config-expo`.
+The Flutter version is pinned in `.fvmrc`; run Flutter through FVM.
 
-## iOS Release Policy
+- `fvm flutter pub get`: install dependencies.
+- `fvm flutter run`: run on a device or simulator.
+- `fvm dart run build_runner build`: regenerate drift code after changing
+  tables. Generated `*.g.dart` files are committed, so a fresh clone builds
+  without running the generator.
+- `fvm flutter analyze`: lints (`very_good_analysis`).
+- `fvm flutter test`: unit and widget tests.
+- `fvm flutter test --tags live --run-skipped`: contract tests against the
+  real backend (skipped in the regular run).
+- `fvm flutter test integration_test/<file> -d <device>`: on-device tests of
+  audio playback, the playback rules and downloads (real backend, real
+  player, the platform's background downloads).
+- `fvm flutter drive --driver=test_driver/screenshots.dart
+  --target=integration_test/screenshot_tour_test.dart -d <device>`:
+  screenshots of every screen in light mode and of the course list, course
+  page and player in dark mode, written to
+  `build/screenshots/<platform>/`. Attach them to pull requests with UI
+  changes. Do not touch the device while it runs.
 
-- EAS is prohibited in this repository. Do not add or use EAS configuration, EAS CLI dependencies, EAS Build, EAS Submit, or EAS-managed credentials.
-- Build and submit iOS releases through the native Xcode/Fastlane toolchain.
-- GitHub Actions are prohibited. Do not add workflows under `.github/workflows/`; run automated checks through local scripts and native build steps.
+## Rules
 
-## Coding Style & Naming Conventions
-
-- TypeScript first: type props/state; strict mode is on.
-- Match surrounding file style; rely on `npm run lint` for fixes.
-- Components/files use `PascalCase` (e.g., `LanguageHomeScreen.tsx`); hooks use `useX` naming.
-- Use the `@/` path alias for absolute imports; keep styles in nearby `StyleSheet.create` blocks.
-
-## Testing Guidelines
-
-- Run `npm test`, `npm run typecheck`, and `npm run lint` after making changes **before responding back to the user** (repair agentically and noninteractively), and again before a PR.
-- Use `npm run test:coverage` for the local Jest HTML coverage report. Use `npm run test:maestro:report` for the Maestro HTML report and screenshots under ignored `artifacts/`.
-- Smoke-test on at least one platform (`npm run android` or `npm run ios`): verify course list, playback, downloads, and notification clicks.
-- Note manual test devices/OS versions and any regressions avoided in the PR description.
-- Handy Maestro docs index for quick lookups (curlable): `https://docs.maestro.dev/llms.txt`.
-
-## Commit & Pull Request Guidelines
-
-- Follow existing history: short, imperative commit subjects (e.g., `Fix bottom sheet`).
-- PRs should include a concise summary, linked issues, verification steps, and screenshots for UI changes (Android and iOS when possible).
-- Call out migrations or asset changes and confirm background playback still registers through `index.js`.
-
-## Security & Configuration Tips
-
-- Do not commit secrets or large media; course metadata/download URLs already live in `src/data/courseData.ts`.
-- Avoid changing `app.json` identifiers without aligning on release implications.
+- Run `fvm flutter analyze` and `fvm flutter test` after making changes,
+  **before responding back to the user**, and again before a pull request.
+- GitHub Actions are prohibited. Do not add workflows under
+  `.github/workflows/`.
+- Commit messages follow Conventional Commits: an imperative subject of at
+  most 72 characters (e.g. `fix(player): keep the position after a call`)
+  and a body that explains why.
+- Do not commit secrets or large media. Course audio is never bundled.
+- Behaviour copied from the Expo app keeps a comment naming the upstream file
+  it comes from, so it stays traceable.
+- Keep the application id `org.languagetransfer` for release builds; debug and
+  profile builds use `org.languagetransfer.dev`.

@@ -1,0 +1,24 @@
+# Launcher icons from Language Transfer's own artwork, as in the Expo app
+# (upstream app.json). Regenerate with: fvm dart run flutter_launcher_icons
+#
+# Afterwards, revert ios/Runner.xcodeproj/project.pbxproj
+# (git checkout -- ios/Runner.xcodeproj/project.pbxproj): version 0.14.4
+# writes "= AppIcon" into every build setting containing ASSETCATALOG,
+# including ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS,
+# which must stay YES. The icon name (ASSETCATALOG_COMPILER_APPICON_NAME) is
+# already AppIcon.
+flutter_launcher_icons:
+  image_path: "assets/launcher/icon.png"
+  android: true
+  ios: true
+  # The App Store rejects icons with an alpha channel.
+  remove_alpha_ios: true
+  min_sdk_android: 24
+  adaptive_icon_background: "assets/launcher/android-icon-background.png"
+  adaptive_icon_foreground: "assets/launcher/android-icon-foreground.png"
+  # The artwork already has its own padding; the default 16 % inset would
+  # shrink the logo to about 40 % of the icon.
+  adaptive_icon_foreground_inset: 0
+  # Line art rather than upstream's solid silhouette, so themed icons keep the
+  # gears.
+  adaptive_icon_monochrome: "assets/launcher/android-icon-monochrome.png"

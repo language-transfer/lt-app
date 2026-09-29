@@ -1,4 +1,0 @@
-flows:
-  - launch.yaml
-  - courses/*
-  - listen/*

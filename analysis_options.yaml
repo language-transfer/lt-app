@@ -1,0 +1,21 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  # Generated *.g.dart files are analysed on purpose: drift marks them with
+  # `ignore_for_file: type=lint`, which silences style lints but still reports
+  # real errors. Excluding them once hid a compile error.
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+
+linter:
+  rules:
+    # Meant for published packages; in an app it asks for a comment on every
+    # public member. Non-obvious code is still documented where it is written.
+    public_member_api_docs: false
+    # Asks for the `new()` constructor syntax from Dart 3.13. Flutter's own
+    # templates and nearly all Flutter documentation still use the class name,
+    # so the familiar form keeps the code easier to pick up. Revisit once the
+    # new syntax is common.
+    unnecessary_type_name_in_constructor: false

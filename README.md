@@ -1,116 +1,84 @@
-<p align="center">
-  <img src="./assets/readme/feature-graphic.png" alt="LT logo" width="720">
-</p>
+# Language Transfer
 
-## Language Transfer
+[Language Transfer](https://www.languagetransfer.org/) is a project by Mihalis
+Eleftheriou: free audio courses for learning languages with the Thinking
+Method. This branch rebuilds the Language Transfer app in Flutter for iOS and
+Android. The current Expo app lives on the `master` branch.
 
-[Language Transfer](https://www.languagetransfer.org/) is a project by Mihalis Eleftheriou, building audio courses for learning languages, completely free. At the moment, the following courses are available:
+## Goals
 
-- Complete Spanish
-- Complete Greek
-- Complete Swahili
-- Complete German (unfinished)
-- Introduction to Arabic
-- Introduction to Turkish
-- Introduction to Italian
-- Introduction to French
-- Inglés Completo (para hispanohablantes); the previous introduction is available on Language Transfer's YouTube channel
-- Introduction to Music Theory
-
-You can find them on the [Language Transfer website](https://www.languagetransfer.org/courses).
-
-## LT App
-
-<p align="center">
-  <img src="./assets/readme/screenshots/Screenshot_20200520-203515.png" alt="App screenshot: home page" width="216" height="384">
-  <img src="./assets/readme/screenshots/Screenshot_20200520-203610.png" alt="App screenshot: listen page" width="216" height="384">
-  <img src="./assets/readme/screenshots/Screenshot_20200520-203755.png" alt="App screenshot: language home page" width="216" height="384">
-</p>
-
-This app is developed in React Native, and is designed to work with both iOS & Android platforms.
-
-### Development environment
-
-The Nix flake provides development shells for Linux, Apple Silicon macOS, and Intel macOS. On a Mac, install Xcode from Apple first, launch it once to finish installing its components, and select it for command-line builds:
-
-```sh
-sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-sudo xcodebuild -license accept
-```
-
-Then enter the default shell and install the JavaScript dependencies:
-
-```sh
-nix develop
-npm ci
-```
-
-On macOS the default shell includes Node.js, Watchman, CocoaPods, and Maestro; Xcode and the iOS SDK continue to come from the host system. Generate the ignored native iOS project and launch it in the simulator with:
-
-```sh
-npm run ios
-```
-
-Use `npm run ios -- --device` to select a connected iPhone. The named `nix develop .#ios` shell is equivalent to the default shell on macOS. Android build tooling remains available separately on both Linux and macOS with `nix develop .#android`; the Linux default shell remains the Android shell.
-
-The native player has a persistent patch for extensionless lesson files; see
-[iOS audio format handling](./docs/ios-audio.md) for rebuild instructions and the
-iOS 17 requirement for the MIME-type override.
-
-iOS builds also [prepare selected offline lessons and course metadata](./docs/preloaded-content.md)
-from the public CAS. The preparation fails if a required object is unavailable;
-Android builds do not include that content.
-
-### iOS release policy
-
-The Expo rewrite's iOS release workflow still needs validation on a Mac. Before archiving, regenerate the native project so the preloaded-content Xcode phase is present. The tracked `withNixXcodeEnvironment` plugin writes the ignored `ios/.xcode.env` during prebuild; Xcode's script phases source it and run under the current `.#ios` flake environment at build time. Nix supplies a compatible Bash as well as Node and CocoaPods. Xcode does not need to be launched from `nix develop`. To supply Node and CocoaPods during prebuild itself, run `nix develop .#ios -c npx expo prebuild --platform ios`. Then verify first-lesson playback on a fresh install with networking disabled. The [bundle check](./docs/preloaded-content.md) guards against including that content on Android.
-
-### Android release builds
-
-Android release builds use the upload-key settings `MYAPP_UPLOAD_STORE_FILE`, `MYAPP_UPLOAD_KEY_ALIAS`, `MYAPP_UPLOAD_STORE_PASSWORD`, and `MYAPP_UPLOAD_KEY_PASSWORD` from the developer's Gradle properties (normally `~/.gradle/gradle.properties`). Keep the credentials and keystore out of Git.
-
-The tracked `withAndroidReleaseSigning` Expo config plugin restores the release signing configuration whenever the ignored native Android project is generated. Place the keystore named by `MYAPP_UPLOAD_STORE_FILE` in `android/app/`; this file is ignored by Git. Generate and build the Play Store bundle locally with:
-
-```sh
-npx expo prebuild --platform android
-cd android
-./gradlew bundleRelease
-```
-
-The bundle is written to `android/app/build/outputs/bundle/release/app-release.aab`. Verify its signing certificate before uploading it to Google Play:
-
-```sh
-keytool -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab
-```
-
-### Android rapid-Back regression
-
-`npm run test:android:rapid-back` is disabled pending an upstream
-react-native-screens update. The known crash, upstream commits, and upgrade /
-re-enable checklist are in [Android rapid-Back regression](./docs/android-rapid-back.md).
-
-### Goals
-
-The Language Transfer app should be:
+The app should be:
 
 - 100% free, like the Language Transfer courses
 - Accessible and easy to use for the visually impaired
-- Considerate of users in areas with poor network quality, expensive Internet access, or low-end devices
-- Free of distractions and annoyances, like advertisements or superfluous notifications
-- Self-sustaining: maintainable and easy to build even in the absence of the original maintainers
-- Private by design, sharing only anonymous usage statistics
+- Considerate of users in areas with poor network quality, expensive Internet
+  access, or low-end devices
+- Free of distractions and annoyances, like advertisements or superfluous
+  notifications
+- Self-sustaining: maintainable and easy to build even in the absence of the
+  original maintainers
+- Private by design
 
-## Contributions
+## Development
 
-This app is largely in maintenance mode, so contributions are welcome but may not be addressed quickly by the maintainers.
-If you want to contribute, be sure to read the [contributing guidelines](./CONTRIBUTING.md) and the [code of conduct](./CODE_OF_CONDUCT.md) before engaging with the project.
+The Flutter version is pinned in `.fvmrc`. With [FVM](https://fvm.app):
+
+```sh
+fvm install          # installs the pinned Flutter version
+fvm flutter pub get
+fvm flutter run      # on a connected device or simulator
+```
+
+Without FVM, install the Flutter version named in `.fvmrc` and use `flutter`
+directly.
+
+Checks to run before every commit:
+
+```sh
+fvm flutter analyze
+fvm flutter test
+```
+
+Debug and profile builds use the id `org.languagetransfer.dev` and the name
+"LT Dev", so they install next to the store app. Release builds use
+`org.languagetransfer`.
+
+### iOS signing
+
+iOS builds are signed with Language Transfer's Apple team (`XZUB4ADZC3`, as
+in the Expo app), set in `ios/Flutter/Debug.xcconfig` and `Release.xcconfig`.
+To run on your own iPhone with your own team, create
+`ios/Flutter/Signing.xcconfig` (git-ignored) containing:
+
+```
+DEVELOPMENT_TEAM = <your team id>
+```
+
+Set the team there rather than in Xcode's Signing settings: Xcode writes it
+into `project.pbxproj`, which is committed. Simulator builds need no team.
+
+### Android release builds
+
+Release builds are signed with the upload key named by the Gradle properties
+`MYAPP_UPLOAD_STORE_FILE`, `MYAPP_UPLOAD_KEY_ALIAS`,
+`MYAPP_UPLOAD_STORE_PASSWORD` and `MYAPP_UPLOAD_KEY_PASSWORD` (normally in
+`~/.gradle/gradle.properties`), the same as the Expo app. Place the keystore
+in `android/app/`; it is git-ignored.
+
+```sh
+fvm flutter build appbundle
+```
+
+Without these properties, release builds are signed with the debug key, which
+Google Play does not accept.
 
 ## License
 
-The code for the Language Transfer app is provided under the [GPLv2 license](./LICENSE).
+The code is provided under the [GPLv2 license](./LICENSE), version 2 or (at
+your option) any later version.
 
 ## Support
 
-Please consider supporting Language Transfer's Patreon campaign. This money directly funds Mihalis and the development of future language courses as well as other materials.
-
-<a href="https://www.patreon.com/languagetransfer"><img alt="Become a Patron" src="https://c5.patreon.com/external/logo/become_a_patron_button.png"></a>
+Please consider supporting Language Transfer's
+[Patreon campaign](https://www.patreon.com/languagetransfer). This money
+directly funds Mihalis and the development of future courses.

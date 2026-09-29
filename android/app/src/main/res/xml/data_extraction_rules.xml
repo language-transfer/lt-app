@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12 and later. Cloud backups leave out downloaded lessons (see
+     backup_rules.xml); a device-to-device transfer, which has no quota,
+     keeps them so they need not be downloaded again. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="objects/" />
+    </cloud-backup>
+</data-extraction-rules>

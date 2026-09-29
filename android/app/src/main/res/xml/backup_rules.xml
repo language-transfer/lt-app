@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Auto Backup up to Android 11. Downloaded lessons (objects/ in the app's
+     files) can be downloaded again and would soon exceed the 25 MB backup
+     quota, which stops backups of the progress database altogether. -->
+<full-backup-content>
+    <exclude domain="file" path="objects/" />
+</full-backup-content>

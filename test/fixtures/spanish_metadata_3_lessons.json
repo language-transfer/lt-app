@@ -1,0 +1,62 @@
+{
+  "buildVersion": 2,
+  "lessons": [
+    {
+      "id": "spanish1",
+      "title": "Lesson 1",
+      "variants": {
+        "lq": {
+          "_type": "file",
+          "object": "8c2585105418e41c23e9eac78ac96d22195d87a7cedad9a655e64dec5dce00ca",
+          "filesize": 2784246,
+          "mimeType": "video/mp4"
+        },
+        "hq": {
+          "_type": "file",
+          "object": "23f776f891833565496ef88774fa97857d5a1205e2cbae2190eeb8ead2f2b59a",
+          "filesize": 5397643,
+          "mimeType": "video/mp4"
+        }
+      },
+      "duration": 334.080998
+    },
+    {
+      "id": "spanish2",
+      "title": "Lesson 2",
+      "variants": {
+        "lq": {
+          "_type": "file",
+          "object": "30956e65eff0986c008543115ae7d8931267a3092038e8d7848ed8cdc24861e8",
+          "filesize": 3977931,
+          "mimeType": "video/mp4"
+        },
+        "hq": {
+          "_type": "file",
+          "object": "b199f1c5f8cdd793d870e0269b16cf7557b6e00ec39957e05ac03a7eddb51a1b",
+          "filesize": 7734461,
+          "mimeType": "video/mp4"
+        }
+      },
+      "duration": 478.747007
+    },
+    {
+      "id": "spanish3",
+      "title": "Lesson 3",
+      "variants": {
+        "lq": {
+          "_type": "file",
+          "object": "5ae481370f7b05def8ff8083d933e318462c07c3a0f0217f3e62c178917c4f61",
+          "filesize": 3115459,
+          "mimeType": "video/mp4"
+        },
+        "hq": {
+          "_type": "file",
+          "object": "d64ddf323a760b71561f995194f44ff252644903cf6b463b02daba9c07c15b6e",
+          "filesize": 6056322,
+          "mimeType": "video/mp4"
+        }
+      },
+      "duration": 374.858005
+    }
+  ]
+}

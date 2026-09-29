@@ -1,0 +1,67 @@
+name: languagetransfer
+description: "Language Transfer: free audio courses built on the Thinking Method."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.4
+
+dependencies:
+  audio_service: ^0.18.19
+  audio_session: ^0.2.4
+  background_downloader: ^9.6.3
+  connectivity_plus: ^7.3.1
+  crypto: ^3.0.7
+  drift: ^2.35.0
+  drift_flutter: ^0.3.1
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.0.2
+  http: ^1.6.0
+  intl: ^0.20.3
+  just_audio: ^0.10.6
+  package_info_plus: ^10.2.1
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  url_launcher: ^6.3.2
+
+dev_dependencies:
+  build_runner: ^2.16.1
+  drift_dev: ^2.35.0
+  flutter_driver:
+    sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  very_good_analysis: ^11.0.0
+flutter:
+  uses-material-design: true
+  # Generates AppLocalizations from lib/src/l10n (see l10n.yaml).
+  generate: true
+
+  fonts:
+    # Latin and Greek, with tabular figures so the player's clock does not
+    # jitter. Variable weight axis 1-1000.
+    - family: YsabeauOffice
+      fonts:
+        - asset: assets/fonts/YsabeauOffice-Variable.ttf
+    # Arabic script; variable weight axis 400-700.
+    - family: NotoNaskhArabic
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic-Variable.ttf
+
+  assets:
+    # Language Transfer's logo as line art, tinted with the theme's ink.
+    - assets/images/lt-logo-mark.png
+    - assets/images/lt-logo-wordmark.png
+    # Course covers from the Expo app, shown on the lock screen and in the
+    # media notification.
+    - assets/courses/images/
+    # Font licenses, shown on the licenses page.
+    - assets/fonts/YsabeauOffice-OFL.txt
+    - assets/fonts/NotoNaskhArabic-OFL.txt

@@ -1,0 +1,116 @@
+{
+  "buildVersion": 2,
+  "casBaseURL": "https://downloads.languagetransfer.org/cas",
+  "courses": [
+    {
+      "id": "spanish",
+      "meta": {
+        "_type": "file",
+        "object": "9773c7bf7e7648c77ab7b13a8d31642985c57c5f1a0c55756b12834642ed9ee5",
+        "filesize": 48359,
+        "mimeType": "application/json"
+      },
+      "lessons": 90
+    },
+    {
+      "id": "arabic",
+      "meta": {
+        "_type": "file",
+        "object": "a08f9d3c701e8b384c54d5b701da294f1f3bb289bce6d63220910dd0449a8c02",
+        "filesize": 20381,
+        "mimeType": "application/json"
+      },
+      "lessons": 38
+    },
+    {
+      "id": "turkish",
+      "meta": {
+        "_type": "file",
+        "object": "e26317888c3af5064f71ca548f2626926af512d16cd9e3aaec195d45c49da9d9",
+        "filesize": 23646,
+        "mimeType": "application/json"
+      },
+      "lessons": 44
+    },
+    {
+      "id": "german",
+      "meta": {
+        "_type": "file",
+        "object": "28f4ea5251ed25b9e37e06920bc82915353a6f1d55330d0fcf32d928bf78da84",
+        "filesize": 26805,
+        "mimeType": "application/json"
+      },
+      "lessons": 50
+    },
+    {
+      "id": "greek",
+      "meta": {
+        "_type": "file",
+        "object": "8d1a754373470321cdc9dd9657932369eeac3d240d48116358ced7056fc9f256",
+        "filesize": 64258,
+        "mimeType": "application/json"
+      },
+      "lessons": 120
+    },
+    {
+      "id": "italian",
+      "meta": {
+        "_type": "file",
+        "object": "080ae20a5ccf555e2ae1b261e824669720728a6073cb199797b709a705530ef5",
+        "filesize": 24187,
+        "mimeType": "application/json"
+      },
+      "lessons": 45
+    },
+    {
+      "id": "swahili",
+      "meta": {
+        "_type": "file",
+        "object": "560deb3d5a13ee6a03217229c702590e7005ef4b39c6add243d95a662b79b84b",
+        "filesize": 59081,
+        "mimeType": "application/json"
+      },
+      "lessons": 110
+    },
+    {
+      "id": "french",
+      "meta": {
+        "_type": "file",
+        "object": "b1378b17fc4ba565d90c121a1dfebf525bc7ad17912299030f407b71b70fd74f",
+        "filesize": 21438,
+        "mimeType": "application/json"
+      },
+      "lessons": 40
+    },
+    {
+      "id": "ingles",
+      "meta": {
+        "_type": "file",
+        "object": "7c6295b6606424c3d9f5ffaa8414bc6c2e2b8165eff838bc08ef3c2f3e50cc69",
+        "filesize": 21443,
+        "mimeType": "application/json"
+      },
+      "lessons": 40
+    },
+    {
+      "id": "music",
+      "meta": {
+        "_type": "file",
+        "object": "d1c3476d2882000c774e9a27c947f84fcfb5a2cc91bf46a0ef10a69121546226",
+        "filesize": 16082,
+        "mimeType": "application/json"
+      },
+      "lessons": 30
+    },
+    {
+      "id": "ingles_completo",
+      "meta": {
+        "_type": "file",
+        "object": "64e0b6ac4503a702a86933e06ea19b6db732b00fcce318ededc63fb4cc371877",
+        "filesize": 38564,
+        "mimeType": "application/json"
+      },
+      "lessons": 71
+    }
+  ]
+}

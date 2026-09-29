@@ -1,0 +1,4 @@
+tags:
+  live:
+    # Uses the real backend, so it is not part of the regular run.
+    skip: "Uses the real backend. Run with: fvm flutter test --tags live --run-skipped"
