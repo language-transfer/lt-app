@@ -12,6 +12,29 @@ const filePointer = {
 };
 
 describe("course schemas", () => {
+  test("requires the MOV high-quality variant", () => {
+    const lesson = {
+      id: "spanish1",
+      title: "Lesson 1",
+      duration: 60,
+      variants: { hq: filePointer, lq: filePointer },
+    };
+    expect(courseMetaSchema.safeParse({
+      buildVersion: 2, lessons: [lesson],
+    }).success).toBe(false);
+    const complete = {
+      buildVersion: 2,
+      lessons: [{
+        ...lesson,
+        variants: {
+          ...lesson.variants,
+          "hq-mov": { ...filePointer, mimeType: "video/quicktime" },
+        },
+      }],
+    };
+    expect(courseMetaSchema.parse(complete)).toEqual(complete);
+  });
+
   test("accepts a valid course index", () => {
     const index = {
       buildVersion: 2,

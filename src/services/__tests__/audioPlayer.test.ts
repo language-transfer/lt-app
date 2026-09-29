@@ -43,7 +43,7 @@ jest.mock("@/src/data/courseData", () => ({
     })),
     getLessonUrl: jest.fn().mockResolvedValue("https://example.test/cas/stream"),
     getLessonId: () => "spanish1",
-    getLessonMimeType: () => "video/mp4",
+    getLessonMimeType: jest.fn().mockReturnValue("video/mp4"),
     getLessonTitle: () => "Lesson 1",
     getLessonDuration: () => 60,
     getCourseUIColors: () => ({ background: "#ffffff" }),
@@ -73,28 +73,30 @@ describe("lesson audio sources", () => {
     jest.clearAllMocks();
     jest.mocked(CourseData.getLessonIndices).mockReturnValue([0]);
     jest.mocked(CourseData.getPreloadedLesson).mockReturnValue(null);
+    jest.mocked(CourseData.getLessonMimeType).mockReturnValue("video/mp4");
     jest.mocked(CourseDownloadManager.getDownloadStatus).mockResolvedValue("not-downloaded");
   });
   afterEach(() => jest.restoreAllMocks());
 
-  test("includes the media type for an extensionless stream", async () => {
+  test.each(["video/mp4", "video/quicktime"])("includes %s for an extensionless stream", async (mimeType) => {
+    jest.mocked(CourseData.getLessonMimeType).mockReturnValue(mimeType);
     renderHook(() => useLessonAudio("spanish", 0));
 
     await waitFor(() => expect(TrackPlayer.play).toHaveBeenCalled());
     expect(TrackPlayer.add).toHaveBeenCalledWith([
       expect.objectContaining({
         url: "https://example.test/cas/stream",
-        contentType: "video/mp4",
+        contentType: mimeType,
       }),
     ]);
   });
 
-  test("uses the downloaded file's type when it differs from the streaming variant", async () => {
+  test.each(["audio/mpeg", "video/quicktime"])("uses downloaded %s when it differs from the streaming variant", async (mimeType) => {
     jest.mocked(CourseDownloadManager.getDownloadStatus).mockResolvedValueOnce("downloaded");
     jest.mocked(CourseDownloadManager.getLessonPointer).mockResolvedValueOnce({
       _type: "file",
       object: "download",
-      mimeType: "audio/mpeg",
+      mimeType,
       filesize: 100,
     });
     renderHook(() => useLessonAudio("spanish", 0));
@@ -103,7 +105,7 @@ describe("lesson audio sources", () => {
     expect(TrackPlayer.add).toHaveBeenCalledWith([
       expect.objectContaining({
         url: "file:///objects/download",
-        contentType: "audio/mpeg",
+        contentType: mimeType,
       }),
     ]);
     expect(CourseData.getLessonUrl).not.toHaveBeenCalled();
