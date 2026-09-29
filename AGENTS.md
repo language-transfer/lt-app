@@ -17,6 +17,22 @@
   (`test/helpers/app_harness.dart`): every screen at several sizes and text
   scales, and against the accessibility guidelines. Add new screens there.
 
+## UI conventions
+
+- One column per screen with 20 dp margins; text is left-aligned on that
+  edge, and icon buttons sit so their glyphs line up with it.
+- Colour comes from `LtColors` (ink on paper) and `CourseColors`, and course
+  colour only fills what belongs to a course.
+- Lines with square nodes (`core/widgets/construction.dart`) mean a sequence
+  or a position, nothing else.
+- Secondary screens use `TitledPage`; menus and choices use
+  `showActionSheet`; confirmations use `showConfirmDialog`.
+- Animations take their durations and curves from `Motion`, whose
+  `Motion.of` and `Motion.reduced` honour both Android's "Remove
+  animations" and iOS's "Reduce Motion".
+- Sentence case everywhere, no all-caps labels; every user-facing string,
+  including semantics labels and tooltips, is in `lib/src/l10n/app_en.arb`.
+
 ## Commands
 
 The Flutter version is pinned in `.fvmrc`; run Flutter through FVM.

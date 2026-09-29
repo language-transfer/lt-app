@@ -2,7 +2,7 @@
 // the real backend. Run on a simulator, emulator or device:
 //   fvm flutter test integration_test/lesson_audio_handler_test.dart -d <device>
 
-import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
@@ -13,30 +13,17 @@ import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:languagetransfer/src/core/storage/database.dart';
-import 'package:languagetransfer/src/features/catalog/data/catalog_api.dart';
+import 'package:languagetransfer/src/core/storage/object_store.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course_index.dart';
-import 'package:languagetransfer/src/features/catalog/domain/course_metadata.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 import 'package:languagetransfer/src/features/player/data/lesson_audio_handler.dart';
 import 'package:languagetransfer/src/features/player/data/lesson_sources.dart';
+import 'package:languagetransfer/src/features/player/domain/sleep_timer.dart';
 import 'package:languagetransfer/src/features/progress/application/lesson_completion.dart';
 import 'package:languagetransfer/src/features/progress/data/progress_repository.dart';
 import 'package:languagetransfer/src/features/settings/data/settings_repository.dart';
 
-/// Waits until [condition] holds, checking every 100 ms.
-Future<void> eventually(
-  bool Function() condition, {
-  Duration timeout = const Duration(seconds: 30),
-  String? reason,
-}) async {
-  final deadline = DateTime.now().add(timeout);
-  while (!condition()) {
-    if (DateTime.now().isAfter(deadline)) {
-      fail('Timed out waiting: ${reason ?? 'condition'}');
-    }
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-  }
-}
+import 'support.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -48,15 +35,12 @@ void main() {
   late AppDatabase database;
   late ProgressRepository progress;
   late SettingsRepository settings;
-  late AudioPlayer player;
   late LessonAudioHandler handler;
 
   setUpAll(() async {
-    final api = CatalogApi(client, userAgent: 'LanguageTransfer-Flutter/test');
-    index = CourseIndex.parse(await api.fetchIndexJson());
-    final entry = index.entryFor('spanish')!;
-    final bytes = await api.fetchObject(index, entry.metadata);
-    lessons = CourseMetadata.parse(utf8.decode(bytes)).lessons.sublist(0, 3);
+    final spanish = await fetchSpanish(client);
+    index = spanish.index;
+    lessons = spanish.lessons.sublist(0, 3);
   });
 
   // The client is not closed: streams of the last test may still have
@@ -67,15 +51,14 @@ void main() {
     database = AppDatabase(NativeDatabase.memory());
     progress = ProgressRepository(database: database);
     settings = SettingsRepository(database: database);
-    player = AudioPlayer();
     handler = LessonAudioHandler(
-      player: player,
+      player: AudioPlayer.new,
       progress: progress,
-      completion: LessonCompletion(
+      playedThrough: LessonCompletion(
         progress: progress,
         settings: settings,
         deleteDownload: (_, _) async {},
-      ),
+      ).playedThrough,
       settings: settings,
       sources: LessonSources(
         applePlayer: defaultTargetPlatform == TargetPlatform.iOS,
@@ -110,11 +93,13 @@ void main() {
     );
 
     await playSpanish(0);
-    await eventually(() => player.playing && player.position > Duration.zero);
+    await eventually(
+      () => handler.player.playing && handler.player.position > Duration.zero,
+    );
 
-    expect(player.currentIndex, 0);
+    expect(handler.player.currentIndex, 0);
     expect(
-      player.position.inSeconds,
+      handler.player.position.inSeconds,
       inInclusiveRange(119, 125),
       reason: 'started at 2:00',
     );
@@ -130,7 +115,7 @@ void main() {
 
     await playSpanish(0);
     await eventually(
-      () => player.currentIndex == 1 && player.playing,
+      () => handler.player.currentIndex == 1 && handler.player.playing,
       reason: 'advanced to lesson 2',
     );
 
@@ -145,11 +130,14 @@ void main() {
     await settings.update((s) => s.copyWith(playbackSpeed: 2, autoplay: false));
 
     await playSpanish(0);
-    await eventually(() => player.currentIndex == 1, reason: 'advanced');
-    await eventually(() => !player.playing, reason: 'paused');
+    await eventually(
+      () => handler.player.currentIndex == 1,
+      reason: 'advanced',
+    );
+    await eventually(() => !handler.player.playing, reason: 'paused');
     await Future<void>.delayed(const Duration(seconds: 1));
 
-    expect(player.position, lessThan(const Duration(seconds: 1)));
+    expect(handler.player.position, lessThan(const Duration(seconds: 1)));
     expect(await finished('spanish1'), isTrue);
     // Waits at the very start, so it reads as not started.
     final next = (await progress.loadCourse('spanish'))['spanish2']!;
@@ -162,36 +150,42 @@ void main() {
     await settings.update((s) => s.copyWith(playbackSpeed: 2));
 
     await playSpanish(2);
-    await eventually(() => player.playing, reason: 'playing');
+    await eventually(() => handler.player.playing, reason: 'playing');
     await eventually(
-      () => !player.playing && player.position < const Duration(seconds: 1),
+      () =>
+          !handler.player.playing &&
+          handler.player.position < const Duration(seconds: 1),
       reason: 'stopped at the start',
     );
 
     expect(await finished('spanish3'), isTrue);
-    expect(player.currentIndex, 2);
+    expect(handler.player.currentIndex, 2);
   });
 
   testWidgets('skipping within the last seconds counts as finishing', (
     _,
   ) async {
     await playSpanish(0);
-    await eventually(() => player.playing && player.position > Duration.zero);
+    await eventually(
+      () => handler.player.playing && handler.player.position > Duration.zero,
+    );
     await handler.seek(lessons[0].duration - const Duration(seconds: 3));
 
     await handler.skipToNext();
 
-    expect(player.currentIndex, 1);
+    expect(handler.player.currentIndex, 1);
     expect(await finished('spanish1'), isTrue);
   });
 
   testWidgets('skipping earlier does not', (_) async {
     await playSpanish(0);
-    await eventually(() => player.playing && player.position > Duration.zero);
+    await eventually(
+      () => handler.player.playing && handler.player.position > Duration.zero,
+    );
 
     await handler.skipToNext();
 
-    expect(player.currentIndex, 1);
+    expect(handler.player.currentIndex, 1);
     expect(await finished('spanish1'), isNot(isTrue));
   });
 
@@ -205,13 +199,15 @@ void main() {
     );
     await playSpanish(1);
     await eventually(
-      () => player.position > const Duration(seconds: 61),
+      () => handler.player.position > const Duration(seconds: 61),
       reason: 'playing past the resume position',
     );
 
     await playSpanish(2);
     await eventually(
-      () => player.playing && handler.mediaItem.value?.lessonId == 'spanish3',
+      () =>
+          handler.player.playing &&
+          handler.mediaItem.value?.lessonId == 'spanish3',
       reason: 'playing lesson 3',
     );
 
@@ -229,7 +225,9 @@ void main() {
     _,
   ) async {
     await playSpanish(0);
-    await eventually(() => player.playing && player.position > Duration.zero);
+    await eventually(
+      () => handler.player.playing && handler.player.position > Duration.zero,
+    );
     await handler.seek(lessons[0].duration - const Duration(seconds: 3));
     await handler.pause();
 
@@ -250,16 +248,20 @@ void main() {
   testWidgets('with autoplay off, a newly started lesson plays on', (_) async {
     await settings.update((s) => s.copyWith(autoplay: false));
     await playSpanish(0);
-    await eventually(() => player.playing && player.position > Duration.zero);
+    await eventually(
+      () => handler.player.playing && handler.player.position > Duration.zero,
+    );
 
     await playSpanish(2);
     await eventually(
-      () => player.playing && handler.mediaItem.value?.lessonId == 'spanish3',
+      () =>
+          handler.player.playing &&
+          handler.mediaItem.value?.lessonId == 'spanish3',
       reason: 'playing lesson 3',
     );
     await Future<void>.delayed(const Duration(seconds: 2));
 
-    expect(player.playing, isTrue);
+    expect(handler.player.playing, isTrue);
   });
 
   testWidgets('stopping while a lesson loads keeps it stopped', (_) async {
@@ -268,18 +270,18 @@ void main() {
     await starting;
     await Future<void>.delayed(const Duration(seconds: 2));
 
-    expect(player.playing, isFalse);
+    expect(handler.player.playing, isFalse);
   });
 
   testWidgets('a lesson requested while another loads wins', (_) async {
     final first = playSpanish(0);
     final second = playSpanish(2);
     await (first, second).wait;
-    await eventually(() => player.playing, reason: 'playing');
+    await eventually(() => handler.player.playing, reason: 'playing');
     await Future<void>.delayed(const Duration(seconds: 1));
 
     expect(handler.mediaItem.value?.lessonId, 'spanish3');
-    expect(player.currentIndex, 2);
+    expect(handler.player.currentIndex, 2);
   });
 
   testWidgets('a pause by the player itself saves the position', (_) async {
@@ -290,19 +292,224 @@ void main() {
     );
     await playSpanish(1);
     await eventually(
-      () => player.position > const Duration(seconds: 65),
+      () => handler.player.position > const Duration(seconds: 65),
       reason: 'playing on',
     );
 
     // As for unplugged headphones or a call: not through the handler.
-    await player.pause();
+    await handler.player.pause();
     await Future<void>.delayed(const Duration(milliseconds: 500));
 
     final saved = (await progress.loadCourse('spanish'))['spanish2']!.position!;
     expect(
-      (saved - player.position).abs(),
+      (saved - handler.player.position).abs(),
       lessThan(const Duration(milliseconds: 300)),
     );
+  });
+
+  testWidgets('a sleep timer set to the end of the lesson stops there, even '
+      'with autoplay on', (_) async {
+    await progress.savePosition('spanish', 'spanish1', lessons[0].duration);
+    await settings.update((s) => s.copyWith(playbackSpeed: 2));
+    handler.setSleepTimer(const SleepAtLessonEnd());
+
+    await playSpanish(0);
+    await eventually(
+      () => handler.player.currentIndex == 1,
+      reason: 'advanced',
+    );
+    await eventually(() => !handler.player.playing, reason: 'stopped');
+    await Future<void>.delayed(const Duration(seconds: 1));
+
+    expect(handler.player.position, lessThan(const Duration(seconds: 1)));
+    expect(await handler.sleepTimerStream.first, isNull);
+    expect(await finished('spanish1'), isTrue);
+  });
+
+  testWidgets('a sleep timer that runs out fades out, pauses and leaves the '
+      'volume as it was', (_) async {
+    await playSpanish(0);
+    await eventually(
+      () => handler.player.playing && handler.player.position > Duration.zero,
+    );
+    handler.setSleepTimer(const SleepAfter(Duration(seconds: 7)));
+
+    await Future<void>.delayed(const Duration(seconds: 4));
+    expect(handler.player.volume, lessThan(1), reason: 'fading out');
+    await eventually(() => !handler.player.playing, reason: 'paused');
+    await eventually(() => handler.player.volume == 1, reason: 'volume back');
+    expect(await handler.sleepTimerStream.first, isNull);
+  });
+
+  testWidgets('turning the sleep timer off while it fades brings the volume '
+      'back', (_) async {
+    await playSpanish(0);
+    await eventually(
+      () => handler.player.playing && handler.player.position > Duration.zero,
+    );
+    handler.setSleepTimer(const SleepAfter(Duration(seconds: 4)));
+    await Future<void>.delayed(const Duration(seconds: 2));
+    expect(handler.player.volume, lessThan(1), reason: 'fading out');
+
+    handler.setSleepTimer(null);
+    await eventually(() => handler.player.volume == 1, reason: 'volume back');
+    await Future<void>.delayed(const Duration(seconds: 3));
+    expect(handler.player.playing, isTrue);
+  });
+
+  testWidgets('a paused lesson does not use up the sleep timer', (_) async {
+    await playSpanish(0);
+    await eventually(
+      () => handler.player.playing && handler.player.position > Duration.zero,
+    );
+    handler.setSleepTimer(const SleepAfter(Duration(minutes: 1)));
+    await handler.pause();
+
+    await Future<void>.delayed(const Duration(seconds: 3));
+    final timer = await handler.sleepTimerStream.first;
+    expect(
+      (timer! as SleepAfter).left,
+      greaterThan(const Duration(seconds: 59)),
+    );
+  });
+
+  testWidgets('stopping turns the sleep timer off', (_) async {
+    await playSpanish(0);
+    await eventually(() => handler.player.playing);
+    handler.setSleepTimer(const SleepAfter(Duration(minutes: 5)));
+
+    await handler.stop();
+
+    expect(await handler.sleepTimerStream.first, isNull);
+  });
+
+  group('a deleted download', () {
+    late Directory temp;
+    late File file;
+    late _TestDownloads downloads;
+    late LessonAudioHandler withDownload;
+
+    bool playsFile(int index) => switch (withDownload.player.sequence[index]) {
+      UriAudioSource(:final uri) => uri.isScheme('file'),
+      _ => false,
+    };
+
+    Future<void> play(int startIndex) => withDownload.playCourse(
+      courseId: 'spanish',
+      courseTitle: 'Complete Spanish',
+      index: index,
+      lessons: lessons,
+      startIndex: startIndex,
+    );
+
+    setUp(() async {
+      temp = Directory.systemTemp.createTempSync('lesson_audio_handler_test');
+      // Lesson 2 is downloaded, stored as the app stores it.
+      final audio = lessons[1].variants.low;
+      file = ObjectStore(temp)
+          .fileFor(audio, extension: AudioVariant.low.fileExtension);
+      await file.parent.create(recursive: true);
+      await file.writeAsBytes(
+        (await client.get(index.urlFor(audio))).bodyBytes,
+      );
+      downloads = _TestDownloads({lessons[1].id: file});
+      withDownload = LessonAudioHandler(
+        player: AudioPlayer.new,
+        progress: progress,
+        playedThrough: (_, _) async {},
+        settings: settings,
+        sources: LessonSources(
+          applePlayer: defaultTargetPlatform == TargetPlatform.iOS,
+          client: client,
+          downloads: downloads,
+        ),
+      );
+      await withDownload.init();
+    });
+
+    tearDown(() async {
+      await withDownload.dispose();
+      await downloads.close();
+      temp.deleteSync(recursive: true);
+    });
+
+    testWidgets('is streamed from then on, and its file let go', (_) async {
+      await play(0);
+      await eventually(() => withDownload.player.playing, reason: 'playing');
+      expect(playsFile(1), isTrue);
+
+      downloads.release({file.path});
+      await eventually(
+        () => downloads.used.lastOrNull?.isEmpty ?? false,
+        reason: 'file let go',
+      );
+      expect(playsFile(1), isFalse);
+      expect(withDownload.player.currentIndex, 0);
+
+      await withDownload.skipToNext();
+      await eventually(
+        () =>
+            withDownload.player.currentIndex == 1 &&
+            withDownload.player.playing &&
+            withDownload.player.position > Duration.zero,
+        reason: 'lesson 2 streams',
+      );
+    });
+
+    testWidgets('that is playing keeps its file until the player moves on', (
+      _,
+    ) async {
+      await play(1);
+      await eventually(
+        () =>
+            withDownload.player.playing &&
+            withDownload.player.position > Duration.zero,
+        reason: 'playing lesson 2',
+      );
+
+      downloads.release({file.path});
+      await Future<void>.delayed(const Duration(seconds: 2));
+      expect(downloads.used, isEmpty, reason: 'still played from its file');
+      expect(playsFile(1), isTrue);
+
+      await withDownload.skipToNext();
+      await eventually(
+        () => downloads.used.lastOrNull?.isEmpty ?? false,
+        reason: 'file let go',
+      );
+      expect(playsFile(1), isFalse);
+    });
+
+    testWidgets('that is playing is let go when playback stops', (_) async {
+      await play(1);
+      await eventually(
+        () =>
+            withDownload.player.playing &&
+            withDownload.player.position > Duration.zero,
+        reason: 'playing lesson 2',
+      );
+      downloads.release({file.path});
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      expect(downloads.used, isEmpty, reason: 'still played from its file');
+
+      await withDownload.stop();
+      await eventually(
+        () => downloads.used.lastOrNull?.isEmpty ?? false,
+        reason: 'file let go',
+      );
+      expect(playsFile(1), isFalse);
+      expect(withDownload.player.currentIndex, 1, reason: 'still lesson 2');
+
+      // Played again, as with a headset's button: lesson 2 streams.
+      unawaited(withDownload.play());
+      await eventually(
+        () =>
+            withDownload.player.currentIndex == 1 &&
+            withDownload.player.playing &&
+            withDownload.player.position > Duration.zero,
+        reason: 'lesson 2 streams',
+      );
+    });
   });
 
   testWidgets('back and forward skip ten seconds', (_) async {
@@ -312,22 +519,30 @@ void main() {
       const Duration(minutes: 1),
     );
     await playSpanish(1);
-    await eventually(() => player.playing && player.position > Duration.zero);
+    await eventually(
+      () => handler.player.playing && handler.player.position > Duration.zero,
+    );
     await handler.pause();
 
-    final start = player.position;
+    final start = handler.player.position;
     await handler.rewind();
-    expect((start - player.position).inMilliseconds, closeTo(10000, 300));
+    expect(
+      (start - handler.player.position).inMilliseconds,
+      closeTo(10000, 300),
+    );
     await handler.fastForward();
     await handler.fastForward();
-    expect((player.position - start).inMilliseconds, closeTo(10000, 300));
+    expect(
+      (handler.player.position - start).inMilliseconds,
+      closeTo(10000, 300),
+    );
   });
 
   testWidgets('speed is applied and remembered', (_) async {
     await playSpanish(0);
     await handler.setSpeed(1.5);
 
-    expect(player.speed, 1.5);
+    expect(handler.player.speed, 1.5);
     expect((await settings.load()).playbackSpeed, 1.5);
   });
 
@@ -341,7 +556,7 @@ void main() {
     // Resuming puts the position at 30 s before anything plays, so wait
     // until playback really moves on; streaming may buffer a while first.
     await eventually(
-      () => player.position > const Duration(seconds: 31),
+      () => handler.player.position > const Duration(seconds: 31),
       reason: 'playing past the resume position',
     );
 
@@ -383,9 +598,61 @@ void main() {
 
     // A new attempt clears it.
     await playSpanish(0);
-    await eventually(() => player.playing, reason: 'playing again');
+    await eventually(() => handler.player.playing, reason: 'playing again');
     expect(handler.playbackState.value.errorMessage, isNull);
   });
+
+  testWidgets(
+    'a lesson that could not load plays when tried again online',
+    // Only Apple's player reads the streams through the app's client.
+    skip: defaultTargetPlatform != TargetPlatform.iOS,
+    (_) async {
+      final connection = _Connection(client)..offline = true;
+      final offlineHandler = LessonAudioHandler(
+        player: AudioPlayer.new,
+        progress: progress,
+        playedThrough: LessonCompletion(
+          progress: progress,
+          settings: settings,
+          deleteDownload: (_, _) async {},
+        ).playedThrough,
+        settings: settings,
+        sources: LessonSources(
+          applePlayer: true,
+          client: connection,
+          downloads: const _NoDownloads(),
+        ),
+      );
+      await offlineHandler.init();
+      Future<void> play() => offlineHandler.playCourse(
+        courseId: 'spanish',
+        courseTitle: 'Complete Spanish',
+        index: index,
+        lessons: lessons,
+        startIndex: 0,
+      );
+
+      await play();
+      await eventually(
+        () =>
+            offlineHandler.playbackState.value.processingState ==
+            AudioProcessingState.error,
+        reason: 'failure shown',
+      );
+
+      // The same lesson and address again, as "Try again" does.
+      connection.offline = false;
+      await play();
+      await eventually(
+        () =>
+            offlineHandler.playbackState.value.playing &&
+            offlineHandler.playbackState.value.processingState ==
+                AudioProcessingState.ready,
+        reason: 'playing again',
+      );
+      await offlineHandler.dispose();
+    },
+  );
 
   testWidgets('a lesson that failed to load keeps its saved position', (
     _,
@@ -419,9 +686,56 @@ void main() {
   });
 }
 
+/// A network connection that can be cut, for the streams Apple's player
+/// reads through the app.
+class _Connection extends http.BaseClient {
+  _Connection(this._inner);
+
+  final http.Client _inner;
+  bool offline = false;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    if (offline) throw http.ClientException('offline', request.url);
+    return _inner.send(request);
+  }
+}
+
+/// Lessons downloaded as the test says, and what the handler tells about
+/// their files.
+class _TestDownloads implements DownloadedLessons {
+  _TestDownloads(this.files);
+
+  final Map<String, File> files;
+  final _released = StreamController<Set<String>>.broadcast();
+
+  /// The paths the handler said its queue plays, call by call.
+  final used = <Set<String>>[];
+
+  /// Deletes the downloads of [paths], which the queue plays.
+  void release(Set<String> paths) => _released.add(paths);
+
+  Future<void> close() => _released.close();
+
+  @override
+  Future<Map<String, File>> filesForQueue(String courseId) async => files;
+
+  @override
+  Stream<Set<String>> get released => _released.stream;
+
+  @override
+  Future<void> useFiles(Set<String> paths) async => used.add(paths);
+}
+
 class _NoDownloads implements DownloadedLessons {
   const _NoDownloads();
 
   @override
   Future<Map<String, File>> filesForQueue(String courseId) async => const {};
+
+  @override
+  Stream<Set<String>> get released => const Stream.empty();
+
+  @override
+  Future<void> useFiles(Set<String> paths) async {}
 }

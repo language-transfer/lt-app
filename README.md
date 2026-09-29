@@ -2,8 +2,8 @@
 
 [Language Transfer](https://www.languagetransfer.org/) is a project by Mihalis
 Eleftheriou: free audio courses for learning languages with the Thinking
-Method. This branch rebuilds the Language Transfer app in Flutter for iOS and
-Android. The current Expo app lives on the `master` branch.
+Method. This is the Language Transfer app for iOS and Android, built with
+Flutter. It replaces the earlier Expo app.
 
 ## Goals
 
@@ -18,6 +18,14 @@ The app should be:
 - Self-sustaining: maintainable and easy to build even in the absence of the
   original maintainers
 - Private by design
+
+## Before a release
+
+- The version in `pubspec.yaml` must be above the Expo app's (2.3.1, Android
+  version code 17, iOS build 26), or the stores do not accept it as an
+  update.
+- The Expo app's listening progress, settings and downloads are not carried
+  over yet: installed over it, this app starts without them.
 
 ## Development
 

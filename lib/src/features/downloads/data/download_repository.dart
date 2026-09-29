@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:languagetransfer/src/core/logging.dart';
 import 'package:languagetransfer/src/core/storage/database.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
@@ -6,7 +7,8 @@ import 'package:languagetransfer/src/features/downloads/domain/lesson_download.d
 
 /// Stores which lessons should be kept on the device and how far each
 /// download is. Reads are streams, so lesson lists update as downloads
-/// progress.
+/// progress; they emit only when their result changes, not after every
+/// write to the table.
 class DownloadRepository {
   DownloadRepository({required this._database});
 
@@ -18,7 +20,8 @@ class DownloadRepository {
   Stream<Map<String, LessonDownload>> watchCourse(String courseId) =>
       (_database.select(_table)..where((row) => row.courseId.equals(courseId)))
           .watch()
-          .map(_byLessonId);
+          .map(_byLessonId)
+          .distinct(mapEquals);
 
   Future<Map<String, LessonDownload>> loadCourse(String courseId) async =>
       _byLessonId(

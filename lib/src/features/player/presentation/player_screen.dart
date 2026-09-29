@@ -1,74 +1,166 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:languagetransfer/src/core/errors/error_kind.dart';
 import 'package:languagetransfer/src/core/network/connectivity.dart';
-import 'package:languagetransfer/src/core/providers.dart';
 import 'package:languagetransfer/src/core/routing/app_routes.dart';
 import 'package:languagetransfer/src/core/theme/course_colors.dart';
+import 'package:languagetransfer/src/core/theme/lt_colors.dart';
+import 'package:languagetransfer/src/core/theme/motion.dart';
+import 'package:languagetransfer/src/core/widgets/action_sheet.dart';
 import 'package:languagetransfer/src/core/widgets/error_view.dart';
 import 'package:languagetransfer/src/features/catalog/application/catalog_providers.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course.dart';
+import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
+import 'package:languagetransfer/src/features/catalog/presentation/course_cover.dart';
+import 'package:languagetransfer/src/features/course_home/presentation/lesson_options.dart';
 import 'package:languagetransfer/src/features/downloads/application/download_providers.dart';
-import 'package:languagetransfer/src/features/downloads/presentation/lesson_download_tile.dart';
 import 'package:languagetransfer/src/features/player/application/player_providers.dart';
 import 'package:languagetransfer/src/features/player/data/lesson_audio_handler.dart';
 import 'package:languagetransfer/src/features/player/presentation/play_pause_button.dart';
+import 'package:languagetransfer/src/features/player/presentation/player_extras.dart';
 import 'package:languagetransfer/src/features/player/presentation/seek_line.dart';
 import 'package:languagetransfer/src/features/progress/application/progress_providers.dart';
-import 'package:languagetransfer/src/features/settings/domain/app_settings.dart';
 import 'package:languagetransfer/src/l10n/app_localizations.dart';
 
-/// The lesson being played, filling the screen in the course's tint.
+/// The lesson being played, filling the screen in the course's tint: the
+/// lesson just asked for from the first frame, before the player has it.
 class PlayerScreen extends ConsumerWidget {
   const PlayerScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final item = ref.watch(nowPlayingProvider).value;
+    if (ref.watch(requestedLessonProvider) case final request?) {
+      final lesson = ref
+          .watch(courseMetadataProvider(request.courseId))
+          .value
+          ?.lessons
+          .elementAtOrNull(request.lessonIndex);
+      final inPlayer =
+          item != null &&
+          item.courseId == request.courseId &&
+          item.lessonId == lesson?.id;
+      if (!inPlayer) {
+        return _RequestedLesson(
+          courseId: request.courseId,
+          lessonIndex: request.lessonIndex,
+          lesson: lesson,
+        );
+      }
+    }
+    if (item == null) return const _NoLesson();
+    return _LessonInPlayer(item: item);
+  }
+}
+
+/// Nothing asked for and nothing in the player: the first lesson is on its
+/// way, or could not even be started.
+class _NoLesson extends ConsumerWidget {
+  const _NoLesson();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final start = ref.watch(playerControllerProvider);
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            const _Grabber(),
+            Expanded(
+              child: Center(
+                child: start.hasError
+                    ? Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: ErrorView(
+                          title: AppLocalizations.of(context)
+                              .playbackFailedTitle,
+                          error: start.error!,
+                          onRetry: () => ref
+                              .read(playerControllerProvider.notifier)
+                              .retry(),
+                        ),
+                      )
+                    : const CircularProgressIndicator(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The lesson just asked for, while it is on its way to the player or if it
+/// could not be started: the same screen as when it plays, with the controls
+/// waiting.
+class _RequestedLesson extends ConsumerWidget {
+  const _RequestedLesson({
+    required this.courseId,
+    required this.lessonIndex,
+    required this.lesson,
+  });
+
+  final String courseId;
+  final int lessonIndex;
+
+  /// `null` while the course's lessons are loading.
+  final Lesson? lesson;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final start = ref.watch(playerControllerProvider);
+    final speed = ref.watch(playerStatusProvider).speed;
+    final colors = CourseColors.resolve(context, courseId);
+    final course = Courses.byId(courseId);
+    final PlayerStatus waiting = (
+      playing: false,
+      processing: AudioProcessingState.loading,
+      queueIndex: null,
+      speed: speed,
+      error: null,
+    );
+
+    return _PlayerLayout(
+      colors: colors,
+      cover: course?.cover,
+      title: lesson?.title ?? '',
+      course: course?.fullTitle ?? '',
+      order: lesson == null ? null : lessonIndex,
+      seekLine: SeekLine(
+        position: Duration.zero,
+        duration: lesson?.duration ?? Duration.zero,
+        color: colors.ink,
+      ),
+      controls: (width) =>
+          _ControlsAndExtras(width: width, status: waiting, colors: colors),
+      error: start.hasError
+          ? ErrorView(
+              title: AppLocalizations.of(context).playbackFailedTitle,
+              error: start.error!,
+              color: colors.ink,
+              onRetry: () =>
+                  ref.read(playerControllerProvider.notifier).retry(),
+            )
+          : null,
+    );
+  }
+}
+
+/// The lesson in the player.
+class _LessonInPlayer extends ConsumerWidget {
+  const _LessonInPlayer({required this.item});
+
+  final MediaItem item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final status = ref.watch(playerStatusProvider);
     final handler = ref.watch(audioHandlerProvider);
-
-    if (item == null) {
-      // The first lesson is on its way, or could not even be started.
-      final start = ref.watch(playerControllerProvider);
-      return Scaffold(
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(8, 4, 8, 0),
-                child: _CloseButton(),
-              ),
-              Expanded(
-                child: Center(
-                  child: start.hasError
-                      ? Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: ErrorView(
-                            title: l10n.playbackFailedTitle,
-                            error: start.error!,
-                            onRetry: () => ref
-                                .read(playerControllerProvider.notifier)
-                                .retry(),
-                          ),
-                        )
-                      : const CircularProgressIndicator(),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
     final colors = CourseColors.resolve(context, item.courseId);
     final duration = item.duration ?? Duration.zero;
     final queueIndex = status.queueIndex ?? 0;
@@ -76,59 +168,162 @@ class PlayerScreen extends ConsumerWidget {
     final failed = status.processing == AudioProcessingState.error;
     // The player's message does not say why loading failed. With no
     // connection and no download of the lesson, that is the reason.
-    final downloaded =
-        ref
-            .watch(courseDownloadsProvider(item.courseId))
-            .value?[item.lessonId]
-            ?.isComplete ??
-        false;
+    final downloaded = ref.watch(
+      courseDownloadsProvider(item.courseId).select(
+        (downloads) => downloads.value?[item.lessonId]?.isComplete ?? false,
+      ),
+    );
     final offline = ref.watch(onlineProvider) == false && !downloaded;
+    // Watched for the lesson options.
+    final finished = ref.watch(
+      courseProgressProvider(
+        item.courseId,
+      ).select((progress) => progress.value?[item.lessonId]?.finished ?? false),
+    );
+    // In the course's metadata, which starting the lesson loaded.
+    final lesson = ref.watch(
+      courseMetadataProvider(item.courseId).select((metadata) {
+        final index = metadata.value?.indexOf(item.lessonId);
+        return index == null ? null : metadata.value!.lessons[index];
+      }),
+    );
 
-    final title = Semantics(
-      header: true,
-      child: Text(
-        item.title,
-        style: text.displayMedium?.copyWith(color: colors.ink),
+    return _PlayerLayout(
+      colors: colors,
+      cover: Courses.byId(item.courseId)?.cover,
+      title: item.title,
+      course: item.artist ?? '',
+      order: status.queueIndex,
+      options: lesson == null
+          ? null
+          : IconButton(
+              tooltip: l10n.lessonOptions,
+              color: colors.ink,
+              // The dots line up with the end of the seek line below.
+              alignment: AlignmentDirectional.centerEnd,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+              icon: const Icon(Icons.more_horiz),
+              onPressed: () => _showOptions(
+                context,
+                ref,
+                lesson: lesson,
+                finished: finished,
+              ),
+            ),
+      // Watches the position itself, so only the line follows playback.
+      seekLine: Consumer(
+        builder: (context, ref, _) => SeekLine(
+          position: ref.watch(playbackPositionProvider).value ?? Duration.zero,
+          duration: duration,
+          color: colors.ink,
+          onSeek: handler.seek,
+        ),
       ),
-    );
-    final course = Text(
-      item.artist ?? '',
-      style: text.titleMedium?.copyWith(color: colors.ink),
-    );
-    final error = ErrorView(
-      title: l10n.playbackFailedTitle,
-      error: status.error ?? '',
-      kind: offline ? ErrorKind.offline : null,
-      color: colors.ink,
-      onRetry: () => ref.read(playerControllerProvider.notifier).retry(),
-    );
-    // Watches the position itself, so only the line follows playback.
-    final seekLine = Consumer(
-      builder: (context, ref, _) => SeekLine(
-        position: ref.watch(playbackPositionProvider).value ?? Duration.zero,
-        duration: duration,
-        color: colors.ink,
-        onSeek: handler.seek,
+      controls: (width) => _ControlsAndExtras(
+        width: width,
+        status: status,
+        colors: colors,
+        handler: handler,
+        hasPrevious: queueIndex > 0,
+        hasNext: queueIndex < queueLength - 1,
       ),
+      error: failed
+          ? ErrorView(
+              title: l10n.playbackFailedTitle,
+              error: status.error ?? '',
+              kind: offline ? ErrorKind.offline : null,
+              color: colors.ink,
+              onRetry: () =>
+                  ref.read(playerControllerProvider.notifier).retry(),
+            )
+          : null,
     );
-    Widget controls(double width) => Column(
-      mainAxisSize: MainAxisSize.min,
+  }
+
+  void _showOptions(
+    BuildContext context,
+    WidgetRef ref, {
+    required Lesson lesson,
+    required bool finished,
+  }) => showLessonOptions(
+    context,
+    ref,
+    courseId: item.courseId,
+    lesson: lesson,
+    finished: finished,
+    more: [
+      SheetAction(
+        icon: Icons.list,
+        label: Courses.byId(item.courseId)?.fullTitle ?? '',
+        onSelected: () {
+          final router = GoRouter.of(context);
+          Navigator.of(context).pop();
+          router.go(AppRoutes.course(item.courseId));
+        },
+      ),
+    ],
+  );
+}
+
+/// The player's screen: the grabber, the course cover, the lesson with
+/// [options], and the seek line and [controls], or [error] in their place.
+class _PlayerLayout extends StatelessWidget {
+  const _PlayerLayout({
+    required this.colors,
+    required this.cover,
+    required this.title,
+    required this.course,
+    required this.seekLine,
+    required this.controls,
+    this.order,
+    this.options,
+    this.error,
+  });
+
+  final CourseColors colors;
+
+  /// The course cover's asset; `null` for a course this version does not
+  /// know.
+  final String? cover;
+
+  final String title;
+  final String course;
+
+  /// Where the lesson is in its course, so a change of lesson moves the
+  /// right way.
+  final int? order;
+
+  final Widget seekLine;
+
+  /// The controls, fitted to the width they get.
+  final Widget Function(double width) controls;
+
+  final Widget? options;
+  final Widget? error;
+
+  /// Horizontal inset of the lesson and controls, inside the screen padding.
+  static const _inset = 12.0;
+
+  /// Widest the single column gets.
+  static const _maxColumnWidth = 560.0;
+
+  /// Below this height, a landscape screen uses two columns.
+  static const _sidewaysMaxHeight = 480.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final lesson = Row(
       children: [
-        _Controls(
-          width: width,
-          status: status,
-          color: colors.ink,
-          background: colors.tint,
-          handler: handler,
-          hasPrevious: queueIndex > 0,
-          hasNext: queueIndex < queueLength - 1,
+        Expanded(
+          child: _LessonTitle(
+            title: title,
+            course: course,
+            order: order,
+            color: colors.ink,
+          ),
         ),
-        const SizedBox(height: 20),
-        _SpeedButton(
-          speed: status.speed,
-          color: colors.ink,
-          onSelected: handler.setSpeed,
-        ),
+        ?options,
       ],
     );
 
@@ -136,21 +331,10 @@ class PlayerScreen extends ConsumerWidget {
       backgroundColor: colors.tint,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 4, 8, 16),
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
           child: Column(
             children: [
-              Row(
-                children: [
-                  _CloseButton(color: colors.ink),
-                  const Spacer(),
-                  IconButton(
-                    tooltip: l10n.courseOptions,
-                    color: colors.ink,
-                    icon: const Icon(Icons.more_horiz),
-                    onPressed: () => _showOptions(context, ref, item),
-                  ),
-                ],
-              ),
+              _Grabber(color: colors.ink),
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
@@ -173,12 +357,9 @@ class PlayerScreen extends ConsumerWidget {
                           Expanded(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                title,
-                                const SizedBox(height: 4),
-                                course,
-                                if (!failed) ...[
+                                lesson,
+                                if (error == null) ...[
                                   const SizedBox(height: 20),
                                   seekLine,
                                 ],
@@ -188,34 +369,34 @@ class PlayerScreen extends ConsumerWidget {
                           const SizedBox(width: 32),
                           SizedBox(
                             width: side,
-                            child: Center(
-                              child: failed ? error : controls(side),
-                            ),
+                            child: Center(child: error ?? controls(side)),
                           ),
                         ],
                       );
                     } else {
+                      final cover = this.cover;
                       body = Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Spacer(flex: 2),
-                          title,
-                          const SizedBox(height: 4),
-                          course,
-                          const Spacer(flex: 3),
-                          if (failed)
+                          // The cover takes the room the rest leaves, or
+                          // the room stays empty above the lesson.
+                          if (cover == null)
+                            const Spacer()
+                          else
+                            Expanded(child: _Cover(asset: cover)),
+                          lesson,
+                          const SizedBox(height: 16),
+                          if (error case final error?)
                             error
                           else ...[
                             seekLine,
-                            const SizedBox(height: 28),
+                            const SizedBox(height: 16),
                             controls(inner),
                           ],
-                          const Spacer(),
                         ],
                       );
                     }
-                    // At least as tall as the space, so the spacers can
-                    // spread the content; with very large text it scrolls
+                    // At least as tall as the space, so the cover can fill
+                    // what is left; with very large text it scrolls
                     // instead of overflowing.
                     return SingleChildScrollView(
                       child: ConstrainedBox(
@@ -246,63 +427,169 @@ class PlayerScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  /// Horizontal inset of the lesson and controls, inside the screen padding.
-  static const _inset = 12.0;
+/// The lesson's title and course. When the lesson changes, the new one
+/// slides in from the side it comes from: from the end for the next lesson,
+/// from the start for an earlier one.
+class _LessonTitle extends StatefulWidget {
+  const _LessonTitle({
+    required this.title,
+    required this.course,
+    required this.order,
+    required this.color,
+  });
 
-  /// Widest the single column gets.
-  static const _maxColumnWidth = 560.0;
+  final String title;
+  final String course;
+  final int? order;
+  final Color color;
 
-  /// Below this height, a landscape screen uses two columns.
-  static const _sidewaysMaxHeight = 480.0;
+  @override
+  State<_LessonTitle> createState() => _LessonTitleState();
+}
 
-  void _showOptions(BuildContext context, WidgetRef ref, MediaItem item) {
-    final l10n = AppLocalizations.of(context);
-    final progress = ref.read(courseProgressProvider(item.courseId)).value;
-    final finished = progress?[item.lessonId]?.finished ?? false;
-    final metadata = ref.read(courseMetadataProvider(item.courseId)).value;
-    final lessonIndex = metadata?.indexOf(item.lessonId);
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        builder: (sheetContext) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(finished ? Icons.remove_done : Icons.done),
-                title: Text(
-                  finished ? l10n.markNotFinished : l10n.markFinished,
+class _LessonTitleState extends State<_LessonTitle> {
+  bool _forward = true;
+
+  /// How far a title moves, as a share of its width.
+  static const _shift = 0.12;
+
+  @override
+  void didUpdateWidget(_LessonTitle oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final (before, now) = (oldWidget.order, widget.order);
+    if (before != null && now != null && before != now) {
+      _forward = now > before;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final key = ValueKey('${widget.course}/${widget.title}');
+    final towardsEnd =
+        _forward == (Directionality.of(context) == TextDirection.ltr);
+    return AnimatedSwitcher(
+      duration: Motion.of(context, Motion.standard),
+      switchInCurve: Motion.enter,
+      switchOutCurve: Motion.exit,
+      layoutBuilder: (current, previous) => Stack(
+        alignment: AlignmentDirectional.centerStart,
+        children: [...previous, ?current],
+      ),
+      transitionBuilder: (child, animation) {
+        // The new title comes in from one side, the old one leaves to the
+        // other.
+        final incoming = child.key == key;
+        final from = (incoming == towardsEnd) ? _shift : -_shift;
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: animation.drive(
+              Tween(begin: Offset(from, 0), end: Offset.zero),
+            ),
+            child: child,
+          ),
+        );
+      },
+      child: Column(
+        key: key,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              widget.title,
+              style: text.titleLarge?.copyWith(color: widget.color),
+            ),
+          ),
+          Text(
+            widget.course,
+            style: text.bodyLarge?.copyWith(color: widget.color),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The course cover, as on the lock screen, centred in the room the column
+/// leaves above the lesson: as wide as the column where the height allows,
+/// smaller where it does not, and left out when too little is left, so it
+/// never pushes the controls off the screen.
+class _Cover extends StatelessWidget {
+  const _Cover({required this.asset});
+
+  final String asset;
+
+  static const _gap = 24.0;
+  static const _minSize = 120.0;
+
+  @override
+  Widget build(BuildContext context) => CustomSingleChildLayout(
+    delegate: const _LeftoverRoom(),
+    child: LayoutBuilder(
+      builder: (context, room) {
+        final size = math.min(room.maxWidth, room.maxHeight - _gap);
+        if (size < _minSize) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(bottom: _gap),
+          child: Center(
+            child: CourseCover(asset: asset, size: size, radius: 8),
+          ),
+        );
+      },
+    ),
+  );
+}
+
+/// Takes the room the column gives it without asking for any: its intrinsic
+/// height is zero, so it never makes the player scroll.
+class _LeftoverRoom extends SingleChildLayoutDelegate {
+  const _LeftoverRoom();
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      BoxConstraints.loose(constraints.biggest);
+
+  @override
+  bool shouldRelayout(_LeftoverRoom oldDelegate) => false;
+}
+
+/// The handle along the top: the player is a sheet that is swiped down to
+/// close. Tapping the handle closes it too, which is how screen readers
+/// close it.
+class _Grabber extends StatelessWidget {
+  const _Grabber({this.color});
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = color ?? LtColors.of(context).ink;
+    return Tooltip(
+      message: AppLocalizations.of(context).closePlayer,
+      child: Semantics(
+        button: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.of(context).pop(),
+          child: SizedBox(
+            width: 96,
+            height: 48,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                margin: const EdgeInsets.only(top: 10),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: ink.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  unawaited(
-                    ref
-                        .read(lessonCompletionProvider)
-                        .setFinished(
-                          item.courseId,
-                          item.lessonId,
-                          finished: !finished,
-                        ),
-                  );
-                },
               ),
-              if (lessonIndex != null)
-                LessonDownloadTile(
-                  courseId: item.courseId,
-                  lesson: metadata!.lessons[lessonIndex],
-                  onDone: () => Navigator.of(sheetContext).pop(),
-                ),
-              ListTile(
-                leading: const Icon(Icons.list),
-                title: Text(Courses.byId(item.courseId)?.fullTitle ?? ''),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  // Replaces the stack, which also closes the player.
-                  context.go(AppRoutes.course(item.courseId));
-                },
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -310,18 +597,54 @@ class PlayerScreen extends ConsumerWidget {
   }
 }
 
-class _CloseButton extends StatelessWidget {
-  const _CloseButton({this.color});
+/// The transport controls, and [PlayerExtras] below them. Without a
+/// [handler] they wait for the lesson: disabled, with play/pause showing
+/// [status].
+class _ControlsAndExtras extends StatelessWidget {
+  const _ControlsAndExtras({
+    required this.width,
+    required this.status,
+    required this.colors,
+    this.handler,
+    this.hasPrevious = false,
+    this.hasNext = false,
+  });
 
-  final Color? color;
+  final double width;
+  final PlayerStatus status;
+  final CourseColors colors;
+  final LessonAudioHandler? handler;
+  final bool hasPrevious;
+  final bool hasNext;
 
   @override
-  Widget build(BuildContext context) => IconButton(
-    tooltip: AppLocalizations.of(context).closePlayer,
-    color: color,
-    icon: const Icon(Icons.keyboard_arrow_down, size: 32),
-    onPressed: () => context.pop(),
-  );
+  Widget build(BuildContext context) {
+    final handler = this.handler;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _Controls(
+          width: width,
+          status: status,
+          color: colors.ink,
+          background: colors.tint,
+          handler: handler,
+          hasPrevious: hasPrevious,
+          hasNext: hasNext,
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: width,
+          child: PlayerExtras(
+            speed: status.speed,
+            color: colors.ink,
+            onSpeed: handler?.setSpeed,
+            onSleepTimer: handler?.setSleepTimer,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 /// Previous, back 10 s, play/pause, forward 10 s, next, fitted to [width]:
@@ -343,20 +666,24 @@ class _Controls extends StatelessWidget {
 
   static const _sideFull = 56.0;
   static const _sideMin = 48.0;
-  static const _playFull = 120.0;
+  static const _playFull = 96.0;
   static const _playMin = 80.0;
 
   final double width;
   final PlayerStatus status;
   final Color color;
   final Color background;
-  final LessonAudioHandler handler;
+
+  /// `null` while the lesson is not in the player yet.
+  final LessonAudioHandler? handler;
+
   final bool hasPrevious;
   final bool hasNext;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final handler = this.handler;
     final side = width >= fullWidth ? _sideFull : _sideMin;
     final play = (width - 4 * side).clamp(_playMin, _playFull);
     return SizedBox(
@@ -369,7 +696,7 @@ class _Controls extends StatelessWidget {
             label: l10n.previousLesson,
             color: color,
             extent: side,
-            onPressed: hasPrevious ? handler.skipToPrevious : null,
+            onPressed: hasPrevious ? handler?.skipToPrevious : null,
           ),
           _ControlButton(
             icon: Icons.replay_10_rounded,
@@ -377,14 +704,14 @@ class _Controls extends StatelessWidget {
             color: color,
             extent: side,
             iconSize: 40,
-            onPressed: handler.rewind,
+            onPressed: handler?.rewind,
           ),
           PlayPauseButton(
             status: status,
             background: color,
             foreground: background,
-            onPlay: handler.play,
-            onPause: handler.pause,
+            onPlay: handler?.play,
+            onPause: handler?.pause,
             size: play,
           ),
           _ControlButton(
@@ -393,14 +720,14 @@ class _Controls extends StatelessWidget {
             color: color,
             extent: side,
             iconSize: 40,
-            onPressed: handler.fastForward,
+            onPressed: handler?.fastForward,
           ),
           _ControlButton(
             icon: Icons.skip_next_rounded,
             label: l10n.nextLesson,
             color: color,
             extent: side,
-            onPressed: hasNext ? handler.skipToNext : null,
+            onPressed: hasNext ? handler?.skipToNext : null,
           ),
         ],
       ),
@@ -439,70 +766,4 @@ class _ControlButton extends StatelessWidget {
     icon: Icon(icon),
     onPressed: onPressed,
   );
-}
-
-class _SpeedButton extends StatelessWidget {
-  const _SpeedButton({
-    required this.speed,
-    required this.color,
-    required this.onSelected,
-  });
-
-  final double speed;
-  final Color color;
-  final ValueChanged<double> onSelected;
-
-  /// "1", "1.25", or "1,25" where the comma is the decimal separator.
-  static String _format(double speed, String locale) =>
-      NumberFormat.decimalPattern(locale).format(speed);
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final value = l10n.speedValue(_format(speed, l10n.localeName));
-    // Outlined, so it reads as a control rather than a label.
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(color: color.withValues(alpha: 0.5)),
-        minimumSize: const Size(72, 44),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      ),
-      onPressed: () => showModalBottomSheet<void>(
-        context: context,
-        builder: (sheetContext) => SafeArea(
-          child: RadioGroup<double>(
-            groupValue: speed,
-            onChanged: (selected) {
-              Navigator.of(sheetContext).pop();
-              if (selected != null) onSelected(selected);
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  title: Text(
-                    l10n.speed,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                for (final option in AppSettings.speeds)
-                  RadioListTile<double>(
-                    value: option,
-                    title: Text(
-                      l10n.speedValue(_format(option, l10n.localeName)),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      child: Semantics(
-        label: '${l10n.speed}, $value',
-        excludeSemantics: true,
-        child: Text(value),
-      ),
-    );
-  }
 }

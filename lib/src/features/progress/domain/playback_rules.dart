@@ -14,7 +14,7 @@ abstract final class PlaybackRules {
   static const finishThreshold = Duration(seconds: 5);
 
   /// How often the position is saved while playing (upstream
-  /// `PROGRESS_PERSIST_INTERVAL_MS`).
+  /// `src/services/trackPlayerService.ts`, `PROGRESS_PERSIST_INTERVAL_MS`).
   static const saveInterval = Duration(seconds: 3);
 
   /// How far back and forward skip, also for screen readers adjusting the

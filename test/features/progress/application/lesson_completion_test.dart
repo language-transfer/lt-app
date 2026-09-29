@@ -45,13 +45,16 @@ void main() {
     expect((await progress.loadCourse('greek'))['greek1']!.finished, isFalse);
   });
 
-  test('deletes the download when "delete finished downloads" is on', () async {
-    await settings.update((s) => s.copyWith(autoDeleteFinished: true));
+  test(
+    'deletes the download when "Delete lessons after finishing" is on',
+    () async {
+      await settings.update((s) => s.copyWith(autoDeleteFinished: true));
 
-    await completion.playedThrough('greek', 'greek1');
-    await completion.setFinished('greek', 'greek2', finished: true);
-    await completion.setFinished('greek', 'greek3', finished: false);
+      await completion.playedThrough('greek', 'greek1');
+      await completion.setFinished('greek', 'greek2', finished: true);
+      await completion.setFinished('greek', 'greek3', finished: false);
 
-    expect(deleted, ['greek/greek1', 'greek/greek2']);
-  });
+      expect(deleted, ['greek/greek1', 'greek/greek2']);
+    },
+  );
 }

@@ -15,21 +15,38 @@ import 'package:languagetransfer/src/core/routing/app_routes.dart';
 
 import '../helpers/app_fonts.dart';
 import '../helpers/app_harness.dart';
+import '../helpers/app_states.dart';
 
-/// Screens, and whether something is playing.
-final Map<String, (String, bool)> _screens = {
-  'course list': (AppRoutes.courses, false),
-  'course page': (AppRoutes.course('greek'), false),
-  'player': (AppRoutes.player, true),
-  'settings': (AppRoutes.settings, true),
-  'manage course': (AppRoutes.manageCourse('greek'), true),
-  'about': (AppRoutes.about, true),
+/// Screens, whether something is playing, whether the player is open over
+/// the screen, and the state it is in beyond the everyday one.
+final Map<String, (String, bool, bool, AppState?)> _screens = {
+  'course list': (AppRoutes.courses, false, false, null),
+  'course list, courses cannot be loaded': (
+    AppRoutes.courses,
+    false,
+    false,
+    noCourses,
+  ),
+  'course page': (AppRoutes.course('greek'), false, false, null),
+  'course page, lessons cannot be loaded': (
+    AppRoutes.course('greek'),
+    false,
+    false,
+    noLessons,
+  ),
+  'player': (AppRoutes.courses, true, true, null),
+  'player, lesson failed': (AppRoutes.courses, true, true, failedLesson),
+  'player, lesson loading': (AppRoutes.courses, true, true, loadingLesson),
+  'player, sleep timer set': (AppRoutes.courses, true, true, sleepTimerSet),
+  'settings': (AppRoutes.settings, true, false, null),
+  'manage course': (AppRoutes.manageCourse('greek'), true, false, null),
+  'about': (AppRoutes.about, true, false, null),
 };
 
 void main() {
   setUpAll(loadAppFonts);
 
-  for (final MapEntry(key: screen, value: (location, playing))
+  for (final MapEntry(key: screen, value: (location, playing, player, state))
       in _screens.entries) {
     for (final brightness in Brightness.values) {
       testWidgets('$screen meets the guidelines in ${brightness.name} mode', (
@@ -38,11 +55,14 @@ void main() {
         final semantics = tester.ensureSemantics();
         final app = TestApp.create();
         await app.seedListening(tester, playing: playing);
+        state?.call(app);
         await app.pump(
           tester,
           location: location,
           size: const Size(411, 2400),
           brightness: brightness,
+          openPlayer: player,
+          settle: state != loadingLesson,
         );
 
         await expectLater(tester, meetsGuideline(androidTapTargetGuideline));

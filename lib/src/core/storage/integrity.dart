@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 
 /// Thrown when downloaded or stored bytes do not match their [FilePointer].
 class CorruptObjectException implements Exception {

@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:languagetransfer/src/core/storage/database.dart';
 import 'package:languagetransfer/src/features/progress/data/progress_repository.dart';
+import 'package:languagetransfer/src/features/progress/domain/lesson_progress.dart';
 
 void main() {
   late AppDatabase database;
@@ -104,6 +105,34 @@ void main() {
     await repo.markFinished('greek', 'greek1');
 
     await expectation;
+  });
+
+  test('watches emit only when their result changes', () async {
+    await repo.markFinished('greek', 'greek1');
+    final counts = <Map<String, int>>[];
+    final spanish = <Map<String, LessonProgress>>[];
+    final subscriptions = [
+      repo.watchFinishedCounts().listen(counts.add),
+      repo.watchCourse('spanish').listen(spanish.add),
+    ];
+    await pumpEventQueue();
+
+    // The player saves the position of a Greek lesson every few seconds.
+    for (var seconds = 3; seconds <= 9; seconds += 3) {
+      await repo.savePosition('greek', 'greek2', Duration(seconds: seconds));
+      await pumpEventQueue();
+    }
+    await repo.markFinished('greek', 'greek2');
+    await pumpEventQueue();
+
+    expect(counts, [
+      {'greek': 1},
+      {'greek': 2},
+    ]);
+    expect(spanish, [isEmpty]);
+    for (final subscription in subscriptions) {
+      await subscription.cancel();
+    }
   });
 
   test('clears one course only', () async {

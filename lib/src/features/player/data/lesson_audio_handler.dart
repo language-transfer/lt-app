@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:languagetransfer/src/core/logging.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course_index.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 import 'package:languagetransfer/src/features/player/data/lesson_sources.dart';
-import 'package:languagetransfer/src/features/progress/application/lesson_completion.dart';
+import 'package:languagetransfer/src/features/player/domain/sleep_timer.dart';
 import 'package:languagetransfer/src/features/progress/data/progress_repository.dart';
 import 'package:languagetransfer/src/features/progress/domain/playback_rules.dart';
 import 'package:languagetransfer/src/features/settings/data/settings_repository.dart';
@@ -19,6 +20,9 @@ extension LessonMediaItem on MediaItem {
   String get lessonId => extras!['lessonId']! as String;
 }
 
+/// Records that a lesson was played to its end.
+typedef PlayedThrough = Future<void> Function(String courseId, String lessonId);
+
 /// Plays lessons in the background and keeps the lock screen, notification,
 /// headset buttons and the app's UI in sync.
 ///
@@ -28,22 +32,67 @@ extension LessonMediaItem on MediaItem {
 /// so it is kept even when the app is in the background.
 class LessonAudioHandler extends BaseAudioHandler {
   LessonAudioHandler({
-    required this._player,
+    required AudioPlayer Function() player,
     required this._progress,
-    required this._completion,
+    required this._playedThrough,
     required this._settings,
     required this._sources,
-  });
+  }) : _newPlayer = player;
 
-  final AudioPlayer _player;
+  /// Makes a player: one at the start, and a new one for a lesson started
+  /// again after a failure (see [playCourse]).
+  final AudioPlayer Function() _newPlayer;
+
   final ProgressRepository _progress;
-  final LessonCompletion _completion;
+
+  /// `LessonCompletion.playedThrough`, which also applies the settings
+  /// that go with finishing a lesson.
+  final PlayedThrough _playedThrough;
+
   final SettingsRepository _settings;
   final LessonSources _sources;
 
+  late AudioPlayer _player;
+  final _playerSubscriptions = <StreamSubscription<Object?>>[];
   final _subscriptions = <StreamSubscription<Object?>>[];
   Timer? _saveTimer;
   AppSettings _currentSettings = const AppSettings();
+
+  /// The position of whichever player plays, for the screens.
+  late final _positions = StreamController<Duration>.broadcast(
+    onListen: _followPosition,
+    onCancel: () => _positionFollower?.cancel(),
+  );
+  StreamSubscription<Duration>? _positionFollower;
+
+  final _sleepTimers = StreamController<SleepTimer?>.broadcast();
+  late final _sleep = SleepCountdown(
+    onChanged: _sleepTimers.add,
+    onVolume: (volume) =>
+        _run('set the volume', () => _player.setVolume(volume)),
+    onRunOut: () => _run('stop for the sleep timer', () async {
+      await _player.pause();
+      await _player.setVolume(1);
+    }),
+  );
+
+  /// What the queue plays, for streaming a lesson whose download goes.
+  ({
+    CourseIndex index,
+    List<Lesson> lessons,
+    AudioQuality quality,
+    List<MediaItem> items,
+  })?
+  _queue;
+
+  /// The downloaded files the queue plays, by queue index.
+  Map<int, String> _files = {};
+
+  /// Those of [_files] whose downloads were deleted.
+  final _released = <String>{};
+
+  /// What the last periodic save wrote: the item id and position.
+  (String, Duration)? _periodicallySaved;
 
   /// Why the lesson could not be loaded or played. After a failure the
   /// player turns idle, which must not hide it, so it is kept until the next
@@ -54,9 +103,10 @@ class LessonAudioHandler extends BaseAudioHandler {
   /// overtaken by either does not start.
   int _requests = 0;
 
-  /// How many moves to another lesson or queue are under way. Until they
-  /// are done, the player's index and position may still belong to the
-  /// lesson before, and just_audio reports the move as an automatic advance.
+  /// How many changes to the player's lesson or queue are under way. Until
+  /// they are done, the player's index and position may still belong to
+  /// the lesson before, and just_audio reports the move as an automatic
+  /// advance.
   int _switches = 0;
 
   /// Configures the audio session and starts listening to the player. Call
@@ -67,23 +117,34 @@ class LessonAudioHandler extends BaseAudioHandler {
     // ducking, since ducked speech is hard to follow.
     await session.configure(const AudioSessionConfiguration.speech());
     _currentSettings = await _settings.load();
+    _attach(_newPlayer());
     _subscriptions.addAll([
-      _player.playbackEventStream.listen(
-        _broadcastState,
-        onError: _onPlaybackError,
-      ),
-      // setSpeed reports its playback event before the new speed.
-      _player.speedStream.listen((_) => _broadcastState(_player.playbackEvent)),
-      _player.currentIndexStream.listen((_) => _publishCurrentItem()),
-      _player.positionDiscontinuityStream.listen(_onDiscontinuity),
-      _player.playingStream.listen(_onPlayingChanged),
-      _player.processingStateStream.listen(_onProcessingState),
       _settings.watch().listen((settings) => _currentSettings = settings),
+      _sources.released.listen((paths) {
+        _released.addAll(paths);
+        _run('stream deleted downloads', _streamDeletedDownloads);
+      }),
     ]);
   }
 
+  /// The player in use, for tests that check its state.
+  @visibleForTesting
+  AudioPlayer get player => _player;
+
   /// The playback position, for the player screen.
-  Stream<Duration> get positionStream => _player.positionStream;
+  Stream<Duration> get positionStream async* {
+    yield _player.position;
+    yield* _positions.stream;
+  }
+
+  /// The sleep timer now and whenever it changes; `null` when it is off.
+  Stream<SleepTimer?> get sleepTimerStream async* {
+    yield _sleep.timer;
+    yield* _sleepTimers.stream;
+  }
+
+  /// Sets the sleep timer, or turns it off with `null`.
+  void setSleepTimer(SleepTimer? timer) => _sleep.set(timer);
 
   /// Plays [lessons] of a course, starting with [startIndex] at its saved
   /// position, with [artUri] as the artwork on the lock screen. The lesson
@@ -92,8 +153,12 @@ class LessonAudioHandler extends BaseAudioHandler {
   /// If the lesson cannot be loaded, for example without a network
   /// connection, the failure is broadcast in [playbackState] (processing
   /// state `error`) instead of thrown, because that is what the player
-  /// screen shows. Throws only if the course's progress or downloads cannot
-  /// be read; the lesson played so far then plays on.
+  /// screen shows. The next attempt then starts on a new player: after a
+  /// failure the old one may not recover (for example when iOS has closed
+  /// the local server that feeds it streams while the app was suspended).
+  ///
+  /// Throws only if the course's progress or downloads cannot be read; the
+  /// lesson played so far then plays on.
   Future<void> playCourse({
     required String courseId,
     required String courseTitle,
@@ -118,15 +183,18 @@ class LessonAudioHandler extends BaseAudioHandler {
           extras: {'courseId': courseId, 'lessonId': lesson.id},
         ),
     ];
+    // Read while the settings and sources are prepared; its error, if any,
+    // surfaces where it is awaited.
+    final progressLoad = _progress.loadCourse(courseId)..ignore();
     final settings = await _settings.load();
-    final progress = await _progress.loadCourse(courseId);
-    final sources = await _sources.forQueue(
+    final audio = await _sources.forQueue(
       courseId: courseId,
       index: index,
       lessons: lessons,
       streamQuality: settings.streamQuality,
       tags: items,
     );
+    final progress = await progressLoad;
     final start = lessons[startIndex];
     if (request != _requests) return;
 
@@ -135,12 +203,21 @@ class LessonAudioHandler extends BaseAudioHandler {
     if (request != _requests) return;
     var loaded = false;
     await _switch(() async {
+      if (_failure != null) await _replacePlayer();
       _failure = null;
+      _queue = (
+        index: index,
+        lessons: lessons,
+        quality: settings.streamQuality,
+        items: items,
+      );
+      _files = Map.of(audio.files);
+      _released.clear();
       queue.add(items);
       mediaItem.add(items[startIndex]);
       try {
         await _player.setAudioSources(
-          sources,
+          audio.sources,
           initialIndex: startIndex,
           initialPosition: PlaybackRules.resumePosition(
             progress[start.id]?.position,
@@ -211,23 +288,66 @@ class LessonAudioHandler extends BaseAudioHandler {
   @override
   Future<void> stop() async {
     _requests++;
+    _sleep.set(null);
     await _leaveLesson();
     await _player.stop();
     await super.stop();
+    // Stopped, the player reads no file: its lesson can let go of a deleted
+    // download too.
+    if (_released.isNotEmpty) {
+      _run('stream deleted downloads', _streamDeletedDownloads);
+    }
   }
 
   /// Swiping the app away stops playback and removes the notification, like
-  /// the Expo app (`AppKilledPlaybackBehavior`,
-  /// `StopPlaybackAndRemoveNotification`).
+  /// the Expo app (upstream `src/services/audioPlayer.ts`,
+  /// `AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification`).
   @override
   Future<void> onTaskRemoved() => stop();
 
   Future<void> dispose() async {
     _saveTimer?.cancel();
-    for (final subscription in _subscriptions) {
+    _sleep.dispose();
+    await _sleepTimers.close();
+    for (final subscription in [..._subscriptions, ..._playerSubscriptions]) {
       await subscription.cancel();
     }
+    await _positionFollower?.cancel();
+    await _positions.close();
     await _player.dispose();
+  }
+
+  void _attach(AudioPlayer player) {
+    _player = player;
+    _playerSubscriptions.addAll([
+      player.playbackEventStream.listen(
+        _broadcastState,
+        onError: _onPlaybackError,
+      ),
+      // setSpeed reports its playback event before the new speed.
+      player.speedStream.listen((_) => _broadcastState(player.playbackEvent)),
+      player.currentIndexStream.listen((_) => _onCurrentIndex()),
+      player.positionDiscontinuityStream.listen(_onDiscontinuity),
+      player.playingStream.listen(_onPlayingChanged),
+      player.processingStateStream.listen(_onProcessingState),
+    ]);
+  }
+
+  /// Puts a new player in place of the current one, which is released.
+  Future<void> _replacePlayer() async {
+    for (final subscription in _playerSubscriptions) {
+      await subscription.cancel();
+    }
+    _playerSubscriptions.clear();
+    final old = _player;
+    _attach(_newPlayer());
+    if (_positions.hasListener) _followPosition();
+    await old.dispose();
+  }
+
+  void _followPosition() {
+    unawaited(_positionFollower?.cancel());
+    _positionFollower = _player.positionStream.listen(_positions.add);
   }
 
   /// The queue item the player is on; `null` while it moves to another.
@@ -258,21 +378,64 @@ class LessonAudioHandler extends BaseAudioHandler {
     if (item != null && item != mediaItem.value) mediaItem.add(item);
   }
 
+  void _onCurrentIndex() {
+    _publishCurrentItem();
+    // The lesson left may have lost its download while it played.
+    if (_released.isNotEmpty) {
+      _run('stream deleted downloads', _streamDeletedDownloads);
+    }
+  }
+
   /// Plays lesson [index] of the queue from its start.
   Future<void> _moveTo(int index) async {
     await _leaveLesson();
     await _switch(() => _player.seek(Duration.zero, index: index));
-    _publishCurrentItem();
+    _onCurrentIndex();
   }
 
-  /// Runs [move], which takes the player to another lesson or queue.
-  Future<void> _switch(Future<void> Function() move) async {
+  /// Runs [change], which changes the player's lesson or queue.
+  Future<void> _switch(Future<void> Function() change) async {
     _switches++;
     try {
-      await move();
+      await change();
     } finally {
       _switches--;
     }
+  }
+
+  /// Streams the lessons in the queue whose downloads were deleted, then
+  /// lets go of their files. The lesson playing keeps its file until the
+  /// player moves on or stops, since the player may still read it.
+  Future<void> _streamDeletedDownloads() async {
+    final playing = _queue;
+    if (playing == null || _switches > 0) return;
+    // Stopped or failed, just_audio has let go of the platform's player.
+    final stopped = _player.processingState == ProcessingState.idle;
+    final current = _player.currentIndex;
+    final deleted = [
+      for (final MapEntry(key: index, value: path) in _files.entries)
+        if ((stopped || index != current) && _released.contains(path)) index,
+    ];
+    if (deleted.isEmpty) return;
+    await _switch(() async {
+      for (final index in deleted) {
+        // The stream goes in after the file before the file goes: the other
+        // way round, a stopped player would move on to the next lesson
+        // (verified in just_audio 0.10's idle player).
+        await _player.insertAudioSource(
+          index + 1,
+          _sources.streamFor(
+            playing.index,
+            playing.lessons[index],
+            playing.quality,
+            playing.items[index],
+          ),
+        );
+        await _player.removeAudioSourceAt(index);
+        _released.remove(_files.remove(index));
+      }
+    });
+    await _sources.useFiles(_files.values.toSet());
   }
 
   /// Before the player leaves a lesson on request: one left within its last
@@ -284,7 +447,7 @@ class LessonAudioHandler extends BaseAudioHandler {
     if (item == null) return;
     try {
       if (_isAtEnd(item)) {
-        await _completion.playedThrough(item.courseId, item.lessonId);
+        await _playedThrough(item.courseId, item.lessonId);
       } else {
         await _progress.savePosition(
           item.courseId,
@@ -319,11 +482,13 @@ class LessonAudioHandler extends BaseAudioHandler {
       if (duration != null && PlaybackRules.isAtEnd(position, duration)) {
         _run(
           'finish the lesson',
-          () => _completion.playedThrough(item.courseId, item.lessonId),
+          () => _playedThrough(item.courseId, item.lessonId),
         );
       }
     }
-    if (!_currentSettings.autoplay) {
+    // A sleep timer set to the end of the lesson stops here too.
+    final sleeps = _sleep.lessonEnded();
+    if (!_currentSettings.autoplay || sleeps) {
       _run('stop after the lesson', () async {
         await _player.pause();
         await _player.seek(Duration.zero);
@@ -344,11 +509,13 @@ class LessonAudioHandler extends BaseAudioHandler {
   /// The last lesson of the course ended.
   void _onProcessingState(ProcessingState state) {
     if (state != ProcessingState.completed) return;
+    // Playback stops anyway; a timer waiting for the lesson's end is done.
+    _sleep.lessonEnded();
     final item = _loadedItem;
     if (item == null) return;
     _run('finish the course', () async {
       if (_isAtEnd(item)) {
-        await _completion.playedThrough(item.courseId, item.lessonId);
+        await _playedThrough(item.courseId, item.lessonId);
       }
       await _player.pause();
       await _player.seek(Duration.zero);
@@ -358,27 +525,32 @@ class LessonAudioHandler extends BaseAudioHandler {
   /// Saves the position while playing and whenever playback stops, also
   /// when the player pauses by itself (headphones unplugged, a call).
   void _onPlayingChanged(bool playing) {
+    _sleep.playing = playing;
     _saveTimer?.cancel();
     if (playing) {
       _saveTimer = Timer.periodic(
         PlaybackRules.saveInterval,
-        (_) => _run('save the position', _savePosition),
+        (_) =>
+            _run('save the position', () => _savePosition(periodically: true)),
       );
     } else {
       _run('save the position', _savePosition);
     }
   }
 
-  Future<void> _savePosition() async {
+  /// Saves the position of the lesson loaded. A periodic save is skipped
+  /// while the position has not moved since the last one, as while the
+  /// stream buffers.
+  Future<void> _savePosition({bool periodically = false}) async {
     final item = _loadedItem;
     // Within the last seconds the lesson is about to be finished, which
     // resets its position.
     if (item == null || _isAtEnd(item)) return;
-    await _progress.savePosition(
-      item.courseId,
-      item.lessonId,
-      _player.position,
-    );
+    final position = _player.position;
+    final saved = (item.id, position);
+    if (periodically && saved == _periodicallySaved) return;
+    _periodicallySaved = periodically ? saved : null;
+    await _progress.savePosition(item.courseId, item.lessonId, position);
   }
 
   void _broadcastState(PlaybackEvent event) {

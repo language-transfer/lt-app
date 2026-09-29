@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course_metadata.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 
 import '../../../helpers/fixtures.dart';

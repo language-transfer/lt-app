@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:languagetransfer/src/core/format/duration_text.dart';
+import 'package:languagetransfer/src/core/theme/motion.dart';
 import 'package:languagetransfer/src/features/progress/domain/playback_rules.dart';
 import 'package:languagetransfer/src/l10n/app_localizations.dart';
 
@@ -13,18 +14,25 @@ class SeekLine extends StatefulWidget {
     required this.position,
     required this.duration,
     required this.color,
-    required this.onSeek,
+    this.onSeek,
     super.key,
   });
 
   final Duration position;
   final Duration duration;
   final Color color;
-  final ValueChanged<Duration> onSeek;
+
+  /// `null` while there is nothing to seek in, such as before the lesson is
+  /// in the player.
+  final ValueChanged<Duration>? onSeek;
+
+  /// The handle's side, and while it is held.
+  static const _handle = 18.0;
+  static const _heldHandle = 24.0;
 
   /// Space at both ends of the line: half the largest handle, so the handle
   /// stays inside and a tap maps to the point the handle is drawn at.
-  static const _trackInset = 12.0;
+  static const double _trackInset = _heldHandle / 2;
 
   @override
   State<SeekLine> createState() => _SeekLineState();
@@ -56,12 +64,13 @@ class _SeekLineState extends State<SeekLine> {
       : target;
 
   void _seekBy(Duration delta) =>
-      widget.onSeek(_clamped(widget.position + delta));
+      widget.onSeek?.call(_clamped(widget.position + delta));
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
+    final onSeek = widget.onSeek;
     final shown = _dragFraction == null ? widget.position : _at(_fraction);
     final remaining = DurationText.remaining(shown, widget.duration);
     String spoken(Duration value) => l10n.positionOf(
@@ -75,40 +84,61 @@ class _SeekLineState extends State<SeekLine> {
           slider: true,
           label: l10n.positionInLesson,
           value: spoken(widget.position),
-          increasedValue: spoken(
-            _clamped(widget.position + PlaybackRules.skipInterval),
-          ),
-          decreasedValue: spoken(
-            _clamped(widget.position - PlaybackRules.skipInterval),
-          ),
-          onIncrease: () => _seekBy(PlaybackRules.skipInterval),
-          onDecrease: () => _seekBy(-PlaybackRules.skipInterval),
+          increasedValue: onSeek == null
+              ? null
+              : spoken(_clamped(widget.position + PlaybackRules.skipInterval)),
+          decreasedValue: onSeek == null
+              ? null
+              : spoken(_clamped(widget.position - PlaybackRules.skipInterval)),
+          onIncrease: onSeek == null
+              ? null
+              : () => _seekBy(PlaybackRules.skipInterval),
+          onDecrease: onSeek == null
+              ? null
+              : () => _seekBy(-PlaybackRules.skipInterval),
           // No LayoutBuilder: the player measures its content's intrinsic
           // height, which LayoutBuilder does not support. The line is as
           // wide as this widget, so gestures use its size.
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTapUp: (details) =>
-                widget.onSeek(_at(_fractionAt(details.localPosition))),
-            onHorizontalDragStart: (details) => setState(
-              () => _dragFraction = _fractionAt(details.localPosition),
-            ),
-            onHorizontalDragUpdate: (details) => setState(
-              () => _dragFraction = _fractionAt(details.localPosition),
-            ),
-            onHorizontalDragEnd: (_) {
-              widget.onSeek(_at(_fraction));
-              setState(() => _dragFraction = null);
-            },
+            onTapUp: onSeek == null
+                ? null
+                : (details) => onSeek(_at(_fractionAt(details.localPosition))),
+            onHorizontalDragStart: onSeek == null
+                ? null
+                : (details) => setState(
+                    () => _dragFraction = _fractionAt(details.localPosition),
+                  ),
+            onHorizontalDragUpdate: onSeek == null
+                ? null
+                : (details) => setState(
+                    () => _dragFraction = _fractionAt(details.localPosition),
+                  ),
+            onHorizontalDragEnd: onSeek == null
+                ? null
+                : (_) {
+                    onSeek(_at(_fraction));
+                    setState(() => _dragFraction = null);
+                  },
             onHorizontalDragCancel: () => setState(() => _dragFraction = null),
             child: SizedBox(
               height: 48,
               width: double.infinity,
-              child: CustomPaint(
-                painter: _SeekLinePainter(
-                  fraction: _fraction,
-                  color: widget.color,
-                  dragging: _dragFraction != null,
+              // The handle grows under the finger while it is held.
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(
+                  end: _dragFraction == null
+                      ? SeekLine._handle
+                      : SeekLine._heldHandle,
+                ),
+                duration: Motion.of(context, Motion.quick),
+                curve: Motion.change,
+                builder: (context, handle, _) => CustomPaint(
+                  painter: _SeekLinePainter(
+                    fraction: _fraction,
+                    color: widget.color,
+                    handle: handle,
+                  ),
                 ),
               ),
             ),
@@ -138,17 +168,18 @@ class _SeekLinePainter extends CustomPainter {
   _SeekLinePainter({
     required this.fraction,
     required this.color,
-    required this.dragging,
+    required this.handle,
   });
 
   final double fraction;
   final Color color;
-  final bool dragging;
+
+  /// The handle's side.
+  final double handle;
 
   @override
   void paint(Canvas canvas, Size size) {
     final y = size.height / 2;
-    final handle = dragging ? 24.0 : 18.0;
     const inset = SeekLine._trackInset;
     final x = inset + (size.width - 2 * inset) * fraction;
     canvas
@@ -174,7 +205,5 @@ class _SeekLinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SeekLinePainter old) =>
-      old.fraction != fraction ||
-      old.color != color ||
-      old.dragging != dragging;
+      old.fraction != fraction || old.color != color || old.handle != handle;
 }

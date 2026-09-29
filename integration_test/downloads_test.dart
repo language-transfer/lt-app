@@ -10,7 +10,6 @@
 @Timeout(Duration(minutes: 5))
 library;
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
@@ -24,9 +23,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:languagetransfer/src/core/storage/database.dart';
 import 'package:languagetransfer/src/core/storage/integrity.dart';
 import 'package:languagetransfer/src/core/storage/object_store.dart';
-import 'package:languagetransfer/src/features/catalog/data/catalog_api.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course_index.dart';
-import 'package:languagetransfer/src/features/catalog/domain/course_metadata.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 import 'package:languagetransfer/src/features/downloads/data/background_downloader_backend.dart';
 import 'package:languagetransfer/src/features/downloads/data/download_manager.dart';
@@ -37,20 +34,10 @@ import 'package:languagetransfer/src/features/settings/data/settings_repository.
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-const userAgent = 'LanguageTransfer-Flutter/test';
+import 'support.dart';
 
-/// Waits until [condition] holds, checking every 250 ms.
-Future<void> eventually(
-  Future<bool> Function() condition, {
-  required String reason,
-  Duration timeout = const Duration(minutes: 2),
-}) async {
-  final deadline = DateTime.now().add(timeout);
-  while (!await condition()) {
-    if (DateTime.now().isAfter(deadline)) fail('Timed out waiting: $reason');
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-  }
-}
+/// How long a real download of a lesson may take.
+const downloading = Duration(minutes: 2);
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -67,11 +54,9 @@ void main() {
   late DownloadManager manager;
 
   setUpAll(() async {
-    final api = CatalogApi(client, userAgent: userAgent);
-    index = CourseIndex.parse(await api.fetchIndexJson());
-    final entry = index.entryFor('spanish')!;
-    final bytes = await api.fetchObject(index, entry.metadata);
-    lessons = CourseMetadata.parse(utf8.decode(bytes)).lessons.sublist(0, 3);
+    final spanish = await fetchSpanish(client);
+    index = spanish.index;
+    lessons = spanish.lessons.sublist(0, 3);
   });
 
   tearDownAll(client.close);
@@ -118,7 +103,8 @@ void main() {
     for (final lesson in lessons.sublist(0, 2)) {
       await eventually(
         () async => await statusOf(lesson) == DownloadStatus.complete,
-        reason: '${lesson.id} complete (now ${await statusOf(lesson)})',
+        reason: '${lesson.id} complete',
+        timeout: downloading,
       );
       final pointer = lesson.variants.low;
       final file = store.fileFor(pointer, extension: 'm4a');
@@ -134,6 +120,7 @@ void main() {
     await eventually(
       () async => await statusOf(lessons[0]) == DownloadStatus.complete,
       reason: 'download complete',
+      timeout: downloading,
     );
     final file = store.fileFor(lessons[0].variants.low, extension: 'm4a');
     expect(file.existsSync(), isTrue);
@@ -168,6 +155,7 @@ void main() {
     await eventually(
       () async => await statusOf(lessons[0]) == DownloadStatus.complete,
       reason: 'download complete',
+      timeout: downloading,
     );
 
     final sources =
@@ -186,12 +174,16 @@ void main() {
         );
     bool isFile(AudioSource source) =>
         source is UriAudioSource && source.uri.scheme == 'file';
-    expect(isFile(sources[0]), isTrue);
-    expect(isFile(sources[1]), isFalse, reason: 'not downloaded, streams');
+    expect(isFile(sources.sources[0]), isTrue);
+    expect(
+      isFile(sources.sources[1]),
+      isFalse,
+      reason: 'not downloaded, streams',
+    );
 
     final player = AudioPlayer();
     addTearDown(player.dispose);
-    final duration = await player.setAudioSource(sources[0]);
+    final duration = await player.setAudioSource(sources.sources[0]);
     expect(duration, isNotNull);
     await player.play().timeout(const Duration(seconds: 3), onTimeout: () {});
     expect(player.position, greaterThan(Duration.zero));

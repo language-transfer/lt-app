@@ -1,9 +1,12 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:languagetransfer/src/core/storage/database.dart';
 import 'package:languagetransfer/src/features/progress/domain/lesson_progress.dart';
 
 /// Stores listening progress. Reads are streams, so every screen showing
-/// progress updates when the player saves.
+/// progress updates when the player saves. They emit only when their result
+/// changes: drift runs a query again after every write to its table, and
+/// the player saves the position every few seconds.
 class ProgressRepository {
   ProgressRepository({required this._database, this._now = DateTime.now});
 
@@ -16,7 +19,8 @@ class ProgressRepository {
   Stream<Map<String, LessonProgress>> watchCourse(String courseId) =>
       (_database.select(_table)..where((row) => row.courseId.equals(courseId)))
           .watch()
-          .map(_byLessonId);
+          .map(_byLessonId)
+          .distinct(mapEquals);
 
   Future<Map<String, LessonProgress>> loadCourse(String courseId) async =>
       _byLessonId(
@@ -32,11 +36,15 @@ class ProgressRepository {
       ..addColumns([_table.courseId, count])
       ..where(_table.finished.equals(true))
       ..groupBy([_table.courseId]);
-    return query.watch().map(
-      (rows) => {
-        for (final row in rows) row.read(_table.courseId)!: row.read(count)!,
-      },
-    );
+    return query
+        .watch()
+        .map(
+          (rows) => {
+            for (final row in rows)
+              row.read(_table.courseId)!: row.read(count)!,
+          },
+        )
+        .distinct(mapEquals);
   }
 
   /// The course listened to most recently, if any.

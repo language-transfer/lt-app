@@ -5,8 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course_index.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 import 'package:languagetransfer/src/features/player/data/lesson_sources.dart';
 import 'package:languagetransfer/src/features/player/data/typed_remote_audio_source.dart';
@@ -20,6 +20,12 @@ class _Downloads implements DownloadedLessons {
 
   @override
   Future<Map<String, File>> filesForQueue(String courseId) async => files;
+
+  @override
+  Stream<Set<String>> get released => const Stream.empty();
+
+  @override
+  Future<void> useFiles(Set<String> paths) async {}
 }
 
 void main() {
@@ -45,7 +51,7 @@ void main() {
     for (final lesson in lessons) MediaItem(id: lesson.id, title: lesson.title),
   ];
 
-  Future<List<AudioSource>> sources({
+  Future<QueueSources> queue({
     required bool applePlayer,
     AudioQuality quality = AudioQuality.high,
     Map<String, File> downloaded = const {},
@@ -62,17 +68,24 @@ void main() {
         tags: tags,
       );
 
+  Future<List<AudioSource>> sources({
+    required bool applePlayer,
+    AudioQuality quality = AudioQuality.high,
+  }) async => (await queue(applePlayer: applePlayer, quality: quality)).sources;
+
   test('plays a downloaded lesson from its file', () async {
     final file = File('/data/objects/ab/cd.m4a');
 
-    final result = await sources(
+    final result = await queue(
       applePlayer: true,
       downloaded: {withApple.id: file},
     );
 
-    final source = result.first as UriAudioSource;
+    final source = result.sources.first as UriAudioSource;
     expect(source.uri, Uri.file(file.path));
-    expect(result[1], isA<TypedRemoteAudioSource>());
+    expect(result.sources[1], isA<TypedRemoteAudioSource>());
+    // The player is told which lessons play a file.
+    expect(result.files, {0: file.path});
   });
 
   test('streams directly on Android', () async {

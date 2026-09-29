@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 
 enum DownloadStatus {

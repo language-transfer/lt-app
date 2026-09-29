@@ -5,9 +5,9 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:languagetransfer/src/core/network/network_exception.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 import 'package:languagetransfer/src/core/storage/integrity.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course_index.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
 
 /// Read-only access to Language Transfer's public course backend.
 class CatalogApi {
@@ -48,18 +48,11 @@ class CatalogApi {
   }
 
   Future<Uint8List> _get(Uri url) async {
-    final http.Response response;
-    try {
-      response = await _client
-          .get(url, headers: {HttpHeaders.userAgentHeader: userAgent})
-          .timeout(timeout);
-    } on TimeoutException {
-      throw NetworkException(url, 'timed out after ${timeout.inSeconds} s');
-    } on http.ClientException catch (error) {
-      throw NetworkException(url, error.message);
-    } on IOException catch (error) {
-      throw NetworkException(url, error.toString());
-    }
+    final response = await guardNetwork(
+      url,
+      timeout,
+      () => _client.get(url, headers: {HttpHeaders.userAgentHeader: userAgent}),
+    );
     if (response.statusCode != HttpStatus.ok) {
       throw NetworkException(
         url,

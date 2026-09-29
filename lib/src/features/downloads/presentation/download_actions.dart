@@ -9,39 +9,28 @@ import 'package:languagetransfer/src/core/providers.dart';
 import 'package:languagetransfer/src/core/widgets/confirm_dialog.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 import 'package:languagetransfer/src/features/downloads/application/download_controller.dart';
+import 'package:languagetransfer/src/features/downloads/domain/download_rules.dart';
 import 'package:languagetransfer/src/features/downloads/domain/lesson_download.dart';
 import 'package:languagetransfer/src/features/settings/application/settings_providers.dart';
-import 'package:languagetransfer/src/features/settings/domain/app_settings.dart';
 import 'package:languagetransfer/src/l10n/app_localizations.dart';
 
 /// The size of [lesson]'s download: of the existing [download], or what it
 /// would be in the download quality setting. For build methods.
 int downloadSize(WidgetRef ref, Lesson lesson, LessonDownload? download) =>
     download?.size ??
-    _plannedSize(
-      ref.watch(settingsProvider).value,
-      ref.watch(downloadManagerProvider).applePlayer,
+    DownloadRules.plannedSize(
       lesson,
+      ref.watch(settingsProvider).value,
+      applePlayer: ref.watch(applePlayerProvider),
     );
 
-int _plannedSize(AppSettings? settings, bool applePlayer, Lesson lesson) =>
-    lesson.variants
-        .select(
-          (settings ?? const AppSettings()).downloadQuality,
-          applePlayer: applePlayer,
-        )
-        .pointer
-        .size;
-
-/// True if new downloads would not start now because they wait for Wi-Fi.
-/// For build methods; rebuilds when either changes.
-bool downloadsWaitForWifi(WidgetRef ref) =>
-    _waitForWifi(ref.watch(settingsProvider).value, ref.watch(onWifiProvider));
-
-bool _waitForWifi(AppSettings? settings, bool? onWifi) =>
-    (settings ?? const AppSettings()).downloadOnlyOnWifi &&
-    // While the network state is unknown, assume the best rather than warn.
-    !(onWifi ?? true);
+/// True if new downloads would not start now because they wait for Wi-Fi
+/// ([DownloadRules.waitForWifi]). For build methods; rebuilds when either
+/// changes.
+bool downloadsWaitForWifi(WidgetRef ref) => DownloadRules.waitForWifi(
+  ref.watch(settingsProvider).value,
+  onWifi: ref.watch(onWifiProvider),
+);
 
 /// Starts downloading one lesson, and says so if it has to wait for Wi-Fi,
 /// since otherwise nothing seems to happen.
@@ -51,9 +40,9 @@ void startLessonDownload(
   String courseId,
   Lesson lesson,
 ) {
-  final waits = _waitForWifi(
+  final waits = DownloadRules.waitForWifi(
     ref.read(settingsProvider).value,
-    ref.read(onWifiProvider),
+    onWifi: ref.read(onWifiProvider),
   );
   runDownloadAction(
     ref.read(downloadControllerProvider).download(courseId, [lesson]),
@@ -77,23 +66,6 @@ void runDownloadAction(Future<void> action) {
   );
 }
 
-/// The lessons "Download all" still has to fetch: neither downloaded nor on
-/// their way. Starts at [continueIndex], so the lessons the listener hears
-/// next arrive first, then wraps around to the earlier ones.
-List<Lesson> lessonsToDownload(
-  List<Lesson> lessons,
-  Map<String, LessonDownload> downloads,
-  int? continueIndex,
-) {
-  final start = continueIndex ?? 0;
-  return [
-    for (final lesson in [...lessons.skip(start), ...lessons.take(start)])
-      if (downloads[lesson.id]
-          case null || LessonDownload(status: DownloadStatus.failed))
-        lesson,
-  ];
-}
-
 /// Asks before downloading [lessons] (upstream "Download All" confirms
 /// with the total size too), then starts.
 Future<void> confirmDownloadAll(
@@ -104,12 +76,17 @@ Future<void> confirmDownloadAll(
 }) async {
   final l10n = AppLocalizations.of(context);
   final settings = ref.read(settingsProvider).value;
-  final applePlayer = ref.read(downloadManagerProvider).applePlayer;
+  final applePlayer = ref.read(applePlayerProvider);
   final bytes = lessons.fold(
     0,
-    (sum, lesson) => sum + _plannedSize(settings, applePlayer, lesson),
+    (sum, lesson) =>
+        sum +
+        DownloadRules.plannedSize(lesson, settings, applePlayer: applePlayer),
   );
-  final waits = _waitForWifi(settings, ref.read(onWifiProvider));
+  final waits = DownloadRules.waitForWifi(
+    settings,
+    onWifi: ref.read(onWifiProvider),
+  );
   final confirmed = await showConfirmDialog(
     context,
     title: l10n.downloadAllQuestion(lessons.length),

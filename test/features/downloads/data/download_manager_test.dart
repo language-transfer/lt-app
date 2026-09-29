@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:languagetransfer/src/core/storage/database.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 import 'package:languagetransfer/src/core/storage/object_store.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course_index.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 import 'package:languagetransfer/src/features/downloads/data/download_backend.dart';
 import 'package:languagetransfer/src/features/downloads/data/download_manager.dart';
@@ -62,6 +62,8 @@ void main() {
   Future<void> settle() async {
     await pumpEventQueue();
     await manager.idle;
+    // Events sent by the last of that work reach their listeners.
+    await pumpEventQueue();
   }
 
   Future<DownloadFailure?> failureOf(String lessonId) async =>
@@ -269,6 +271,27 @@ void main() {
       expect(updates.last, {taskId(): 0.4});
     });
 
+    test('shows a finished download as done while it is checked', () async {
+      final updates = <Map<String, double>>[];
+      manager.progress.listen(updates.add);
+      backend
+        ..emit(DownloadStateChanged(taskId(), DownloadTaskState.running))
+        ..emit(DownloadProgressed(taskId(), 0.4));
+      await settle();
+
+      await backend.finish(taskId(), one.high);
+      await settle();
+
+      // Never back to nothing (0 %) before the check is recorded.
+      final shown = <double?>[];
+      for (final update in updates) {
+        final fraction = update[taskId()];
+        if (shown.isEmpty || shown.last != fraction) shown.add(fraction);
+      }
+      expect(shown, [0.4, 1.0, null]);
+      expect(await statuses('greek'), {'greek1': DownloadStatus.complete});
+    });
+
     test('marks a verified file complete', () async {
       await backend.finish(taskId(), one.high);
       await settle();
@@ -404,6 +427,56 @@ void main() {
       expect(file.existsSync(), isTrue);
       expect(await manager.filesForQueue('greek'), isEmpty);
       expect(file.existsSync(), isFalse);
+    });
+
+    test('says which deleted files the queue still plays, and deletes each '
+        'once it lets go', () async {
+      await download([one.lesson, two.lesson]);
+      await backend.finish(one.lesson.variants.high.object, one.high);
+      await backend.finish(two.lesson.variants.high.object, two.high);
+      await settle();
+      await manager.filesForQueue('greek');
+      final released = <Set<String>>[];
+      final subscription = manager.released.listen(released.add);
+      addTearDown(subscription.cancel);
+      final first = fileOf(one.lesson.variants.high, AudioVariant.high);
+      final second = fileOf(two.lesson.variants.high, AudioVariant.high);
+
+      await manager.delete('greek', ['greek1', 'greek2']);
+      await pumpEventQueue();
+      expect(released, [
+        {first.path, second.path},
+      ]);
+      expect(first.existsSync(), isTrue);
+      expect(second.existsSync(), isTrue);
+
+      // The player streams lesson 2 now; lesson 1 still plays from its file.
+      await manager.useFiles({first.path});
+      expect(second.existsSync(), isFalse);
+      expect(first.existsSync(), isTrue);
+
+      await manager.useFiles({});
+      expect(first.existsSync(), isFalse);
+    });
+
+    test('deletes at once a file the queue no longer plays', () async {
+      await download([one.lesson]);
+      await backend.finish(one.lesson.variants.high.object, one.high);
+      await settle();
+      await manager.filesForQueue('greek');
+      await manager.useFiles({});
+      final released = <Set<String>>[];
+      final subscription = manager.released.listen(released.add);
+      addTearDown(subscription.cancel);
+
+      await manager.delete('greek', ['greek1']);
+      await pumpEventQueue();
+
+      expect(
+        fileOf(one.lesson.variants.high, AudioVariant.high).existsSync(),
+        isFalse,
+      );
+      expect(released, isEmpty);
     });
 
     test('keeps a file the player used if it is requested again', () async {

@@ -1,4 +1,7 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
+import 'package:languagetransfer/src/core/theme/motion.dart';
 
 /// Drawing pieces from Language Transfer's course covers: thin lines joined
 /// by small square nodes. Used only for sequences and positions, so they
@@ -66,6 +69,7 @@ class _ProgressLinePainter extends CustomPainter {
 }
 
 /// One lesson's node on the vertical line that joins a course's lessons.
+/// A change of state fills or empties it, rather than swapping it.
 class LessonNode extends StatelessWidget {
   const LessonNode({
     required this.state,
@@ -86,38 +90,64 @@ class LessonNode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
-    child: CustomPaint(
-      painter: _LessonNodePainter(
-        state: state,
-        color: color,
-        isFirst: isFirst,
-        isLast: isLast,
-        emphasised: emphasised,
+    child: TweenAnimationBuilder<({double fill, double side})>(
+      tween: _NodeTween(
+        end: (
+          fill: switch (state) {
+            NodeState.notStarted => 0,
+            NodeState.inProgress => 0.5,
+            NodeState.finished => 1,
+          },
+          side: emphasised ? 16 : 12,
+        ),
       ),
-      size: Size.infinite,
+      duration: Motion.of(context, Motion.quick),
+      curve: Motion.change,
+      builder: (context, node, _) => CustomPaint(
+        painter: _LessonNodePainter(
+          fill: node.fill,
+          side: node.side,
+          color: color,
+          isFirst: isFirst,
+          isLast: isLast,
+        ),
+        size: Size.infinite,
+      ),
     ),
+  );
+}
+
+class _NodeTween extends Tween<({double fill, double side})> {
+  _NodeTween({super.end});
+
+  @override
+  ({double fill, double side}) lerp(double t) => (
+    fill: lerpDouble(begin!.fill, end!.fill, t)!,
+    side: lerpDouble(begin!.side, end!.side, t)!,
   );
 }
 
 class _LessonNodePainter extends CustomPainter {
   _LessonNodePainter({
-    required this.state,
+    required this.fill,
+    required this.side,
     required this.color,
     required this.isFirst,
     required this.isLast,
-    required this.emphasised,
   });
 
-  final NodeState state;
+  /// How much of the square is filled, from the bottom: nothing when not
+  /// started, half in progress, all when finished.
+  final double fill;
+
+  final double side;
   final Color color;
   final bool isFirst;
   final bool isLast;
-  final bool emphasised;
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
-    final side = emphasised ? 16.0 : 12.0;
     final line = Paint()
       ..color = color
       ..strokeWidth = 2;
@@ -136,29 +166,29 @@ class _LessonNodePainter extends CustomPainter {
       );
     }
     final square = Rect.fromCenter(center: center, width: side, height: side);
-    final fill = Paint()..color = color;
-    switch (state) {
-      case NodeState.finished:
-        canvas.drawRect(square, fill);
-      case NodeState.inProgress:
-        canvas
-          ..drawRect(
-            Rect.fromLTRB(square.left, center.dy, square.right, square.bottom),
-            fill,
-          )
-          ..drawRect(square.deflate(1), line..style = PaintingStyle.stroke);
-      case NodeState.notStarted:
-        canvas.drawRect(square.deflate(1), line..style = PaintingStyle.stroke);
+    if (fill > 0) {
+      canvas.drawRect(
+        Rect.fromLTRB(
+          square.left,
+          square.bottom - side * fill,
+          square.right,
+          square.bottom,
+        ),
+        Paint()..color = color,
+      );
+    }
+    if (fill < 1) {
+      canvas.drawRect(square.deflate(1), line..style = PaintingStyle.stroke);
     }
   }
 
   @override
   bool shouldRepaint(_LessonNodePainter old) =>
-      old.state != state ||
+      old.fill != fill ||
+      old.side != side ||
       old.color != color ||
       old.isFirst != isFirst ||
-      old.isLast != isLast ||
-      old.emphasised != emphasised;
+      old.isLast != isLast;
 }
 
 /// The music course's mark in place of a language name: a staff of five

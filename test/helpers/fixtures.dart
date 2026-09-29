@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 
 /// Reads a file from `test/fixtures/`.
 String fixture(String name) => File('test/fixtures/$name').readAsStringSync();

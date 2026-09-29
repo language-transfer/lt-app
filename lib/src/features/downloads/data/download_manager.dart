@@ -52,13 +52,16 @@ class DownloadManager implements DownloadedLessons {
   final _progressController = StreamController<Map<String, double>>.broadcast();
   final _progress = <String, double>{};
 
-  /// Paths of files the player's queue refers to.
+  /// Paths of files the player's queue refers to, as it last said
+  /// ([filesForQueue], [useFiles]).
   Set<String> _filesInQueue = const {};
 
-  /// Files of deleted downloads that the player's queue referred to, by
+  /// Files of deleted downloads that the player's queue refers to, by
   /// object id; deleted once it no longer does, unless they were requested
   /// again meanwhile.
   final _deleteWhenReleased = <String, File>{};
+
+  final _released = StreamController<Set<String>>.broadcast();
 
   /// The Wi-Fi rule last handed to the backend.
   bool? _wifiOnly;
@@ -120,6 +123,7 @@ class DownloadManager implements DownloadedLessons {
     }
     await idle;
     await _progressController.close();
+    await _released.close();
   }
 
   /// How far each running download is, by object id (0 to 1). Only
@@ -215,20 +219,32 @@ class DownloadManager implements DownloadedLessons {
           for (final download in downloads.values)
             if (download.isComplete) download.lessonId: _fileOf(download),
         }..removeWhere((_, file) => !file.existsSync());
-        _filesInQueue = {for (final file in files.values) file.path};
-
-        final released = {
-          for (final MapEntry(key: objectId, value: file)
-              in _deleteWhenReleased.entries)
-            if (!_filesInQueue.contains(file.path)) objectId: file,
-        };
-        final wanted = await _repository.referenced(released.keys);
-        for (final MapEntry(key: objectId, value: file) in released.entries) {
-          _deleteWhenReleased.remove(objectId);
-          if (!wanted.contains(objectId)) await _store.deleteFile(file);
-        }
+        await _useFiles({for (final file in files.values) file.path});
         return files;
       });
+
+  @override
+  Stream<Set<String>> get released => _released.stream;
+
+  @override
+  Future<void> useFiles(Set<String> paths) =>
+      _serially('release queue files', () => _useFiles(paths));
+
+  /// Records the files the queue refers to, and deletes those of deleted
+  /// downloads it no longer refers to.
+  Future<void> _useFiles(Set<String> paths) async {
+    _filesInQueue = paths;
+    final released = {
+      for (final MapEntry(key: objectId, value: file)
+          in _deleteWhenReleased.entries)
+        if (!paths.contains(file.path)) objectId: file,
+    };
+    final wanted = await _repository.referenced(released.keys);
+    for (final MapEntry(key: objectId, value: file) in released.entries) {
+      _deleteWhenReleased.remove(objectId);
+      if (!wanted.contains(objectId)) await _store.deleteFile(file);
+    }
+  }
 
   Future<void> _onStateChanged(
     String objectId,
@@ -360,13 +376,17 @@ class DownloadManager implements DownloadedLessons {
     // Cancel first, so a download cannot finish after its file was deleted.
     // One that finishes in between is caught in [_onStateChanged].
     if (toCancel.isNotEmpty) await _backend.cancel(toCancel);
+    final kept = <String>{};
     for (final (objectId, file) in toDelete) {
       if (_filesInQueue.contains(file.path)) {
         _deleteWhenReleased[objectId] = file;
+        kept.add(file.path);
       } else {
         await _store.deleteFile(file);
       }
     }
+    // The player streams these lessons from now on, then lets go of them.
+    if (kept.isNotEmpty && !_released.isClosed) _released.add(kept);
     _emitProgress();
   }
 
@@ -427,13 +447,19 @@ class DownloadManager implements DownloadedLessons {
     final found = file.statSync();
     final key = (download.objectId, found.modified, found.size);
     if (!_checking.add(key)) return;
+    // All there, and being checked: shown as done rather than back at 0 %.
+    _progress[download.objectId] = 1;
+    _emitProgress();
     _checks = _checks.then((_) async {
       try {
         final intact = await _matches(download, file);
         _serially('record the check of ${download.objectId}', () async {
           final rows = await _repository.loadByObject(download.objectId);
           // Deleted meanwhile, which took care of the file, or recorded.
-          if (rows.isEmpty || rows.every((row) => row.isComplete)) return;
+          if (rows.isEmpty || rows.every((row) => row.isComplete)) {
+            _forgetProgress(download.objectId);
+            return;
+          }
           final current = file.statSync();
           // Replaced meanwhile by a later download, which is checked itself.
           if (current.modified != found.modified ||
@@ -453,6 +479,8 @@ class DownloadManager implements DownloadedLessons {
               failure: DownloadFailure.damaged,
             );
           }
+          // After the status, so the lesson never shows 0 % in between.
+          _forgetProgress(download.objectId);
         }).ignore(); // Logged in [_serially].
       } on Object catch (error, stackTrace) {
         logRecoverable(
@@ -502,6 +530,10 @@ class DownloadManager implements DownloadedLessons {
     return _lastRequestedAt = last == null || now.isAfter(last)
         ? now
         : last.add(const Duration(milliseconds: 1));
+  }
+
+  void _forgetProgress(String objectId) {
+    if (_progress.remove(objectId) != null) _emitProgress();
   }
 
   void _emitProgress() {

@@ -8,6 +8,7 @@ import 'package:languagetransfer/src/core/routing/app_routes.dart';
 
 import '../helpers/app_fonts.dart';
 import '../helpers/app_harness.dart';
+import '../helpers/app_states.dart';
 
 const _sizes = {
   'small phone 320x568': Size(320, 568),
@@ -20,21 +21,37 @@ const _sizes = {
 
 const _textScales = [1.0, 1.5, 2.0];
 
-final Map<String, String> _screens = {
-  'course list': AppRoutes.courses,
-  'course page': AppRoutes.course('greek'),
-  'course page, right-to-left name': AppRoutes.course('arabic'),
-  'course page, music': AppRoutes.course('music'),
-  'player': AppRoutes.player,
-  'settings': AppRoutes.settings,
-  'manage course': AppRoutes.manageCourse('greek'),
-  'about': AppRoutes.about,
+/// Screens, whether the player is open over them, and the state they are
+/// in beyond the everyday one.
+final Map<String, (String, bool, AppState?)> _screens = {
+  'course list': (AppRoutes.courses, false, null),
+  'course list, courses cannot be loaded': (
+    AppRoutes.courses,
+    false,
+    noCourses,
+  ),
+  'course page': (AppRoutes.course('greek'), false, null),
+  'course page, right-to-left name': (AppRoutes.course('arabic'), false, null),
+  'course page, music': (AppRoutes.course('music'), false, null),
+  'course page, lessons cannot be loaded': (
+    AppRoutes.course('greek'),
+    false,
+    noLessons,
+  ),
+  'player': (AppRoutes.courses, true, null),
+  'player, lesson failed': (AppRoutes.courses, true, failedLesson),
+  'player, lesson loading': (AppRoutes.courses, true, loadingLesson),
+  'player, sleep timer set': (AppRoutes.courses, true, sleepTimerSet),
+  'settings': (AppRoutes.settings, false, null),
+  'manage course': (AppRoutes.manageCourse('greek'), false, null),
+  'about': (AppRoutes.about, false, null),
 };
 
 void main() {
   setUpAll(loadAppFonts);
 
-  for (final MapEntry(key: screen, value: location) in _screens.entries) {
+  for (final MapEntry(key: screen, value: (location, player, state))
+      in _screens.entries) {
     group(screen, () {
       for (final MapEntry(key: sizeName, value: size) in _sizes.entries) {
         for (final textScale in _textScales) {
@@ -43,11 +60,14 @@ void main() {
           ) async {
             final app = TestApp.create();
             await app.seedListening(tester);
+            state?.call(app);
             await app.pump(
               tester,
               location: location,
               size: size,
               textScale: textScale,
+              openPlayer: player,
+              settle: state != loadingLesson,
             );
             // Overflows are reported as exceptions and fail the test.
             await app.dispose(tester);

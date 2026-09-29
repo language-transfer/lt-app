@@ -52,14 +52,11 @@ class TypedRemoteAudioSource extends StreamAudioSource {
     final request = http.Request('GET', url)
       ..headers[HttpHeaders.rangeHeader] = 'bytes=$from-${to - 1}';
 
-    final http.StreamedResponse response;
-    try {
-      response = await _client.send(request).timeout(timeout);
-    } on TimeoutException {
-      throw NetworkException(url, 'timed out after ${timeout.inSeconds} s');
-    } on http.ClientException catch (error) {
-      throw NetworkException(url, error.message);
-    }
+    final response = await guardNetwork(
+      url,
+      timeout,
+      () => _client.send(request),
+    );
     if (response.statusCode != HttpStatus.partialContent) {
       await response.stream.drain<void>();
       throw NetworkException(

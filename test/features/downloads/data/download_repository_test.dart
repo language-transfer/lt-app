@@ -150,6 +150,18 @@ void main() {
     await expectation;
   });
 
+  test('does not emit a course again for changes to another', () async {
+    final updates = <Map<String, LessonDownload>>[];
+    final subscription = repository.watchCourse('greek').listen(updates.add);
+    await pumpEventQueue();
+
+    await repository.putAll([download('spanish', 'spanish1', fakeObjectId(2))]);
+    await pumpEventQueue();
+
+    expect(updates, [isEmpty]);
+    await subscription.cancel();
+  });
+
   test('skips rows it cannot read instead of failing', () async {
     await repository.putAll([download('greek', 'greek1', fakeObjectId(1))]);
     await database

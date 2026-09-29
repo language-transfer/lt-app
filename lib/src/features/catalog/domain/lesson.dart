@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:languagetransfer/src/core/json/json_reader.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 
 /// Audio quality the listener can choose for streaming and for downloads.
 enum AudioQuality { low, high }

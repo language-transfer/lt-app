@@ -19,6 +19,7 @@ import 'package:languagetransfer/src/features/downloads/application/download_pro
 import 'package:languagetransfer/src/features/downloads/data/background_downloader_backend.dart';
 import 'package:languagetransfer/src/features/downloads/data/download_manager.dart';
 import 'package:languagetransfer/src/features/downloads/data/download_repository.dart';
+import 'package:languagetransfer/src/features/player/application/player_providers.dart';
 import 'package:languagetransfer/src/features/player/data/artwork_files.dart';
 import 'package:languagetransfer/src/features/player/data/lesson_audio_handler.dart';
 import 'package:languagetransfer/src/features/player/data/lesson_sources.dart';
@@ -82,9 +83,9 @@ Future<void> main() async {
   Future<LessonAudioHandler> startPlayer() async {
     final handler = await AudioService.init(
       builder: () => LessonAudioHandler(
-        player: AudioPlayer(),
+        player: AudioPlayer.new,
         progress: progress,
-        completion: completion,
+        playedThrough: completion.playedThrough,
         settings: settings,
         sources: LessonSources(
           applePlayer: applePlayer,
@@ -127,6 +128,8 @@ Future<void> main() async {
         objectStoreProvider.overrideWithValue(objectStore),
         httpClientProvider.overrideWithValue(client),
         userAgentProvider.overrideWithValue(userAgent),
+        packageInfoProvider.overrideWithValue(info),
+        applePlayerProvider.overrideWithValue(applePlayer),
         audioHandlerProvider.overrideWithValue(handler),
         downloadManagerProvider.overrideWithValue(downloads),
         artworkFilesProvider.overrideWithValue(artwork),

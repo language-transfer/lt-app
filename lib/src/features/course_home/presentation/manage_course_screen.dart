@@ -7,10 +7,13 @@ import 'package:languagetransfer/src/core/routing/app_routes.dart';
 import 'package:languagetransfer/src/core/theme/lt_colors.dart';
 import 'package:languagetransfer/src/core/widgets/confirm_dialog.dart';
 import 'package:languagetransfer/src/core/widgets/section_heading.dart';
+import 'package:languagetransfer/src/core/widgets/titled_page.dart';
 import 'package:languagetransfer/src/features/catalog/application/catalog_providers.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course.dart';
+import 'package:languagetransfer/src/features/course_home/application/course_data_controller.dart';
 import 'package:languagetransfer/src/features/downloads/application/download_controller.dart';
 import 'package:languagetransfer/src/features/downloads/application/download_providers.dart';
+import 'package:languagetransfer/src/features/downloads/domain/download_rules.dart';
 import 'package:languagetransfer/src/features/downloads/domain/lesson_download.dart';
 import 'package:languagetransfer/src/features/downloads/presentation/download_actions.dart';
 import 'package:languagetransfer/src/features/progress/application/progress_providers.dart';
@@ -39,7 +42,7 @@ class ManageCourseScreen extends ConsumerWidget {
     final downloadedBytes = downloaded.fold(0, (sum, d) => sum + d.size);
     final remaining = lessons == null
         ? null
-        : lessonsToDownload(
+        : DownloadRules.lessonsToDownload(
             lessons,
             downloads,
             PlaybackRules.continueIndex(lessons, progress.values),
@@ -82,7 +85,7 @@ class ManageCourseScreen extends ConsumerWidget {
     }
 
     Future<void> clearProgress() async {
-      final progressRepository = ref.read(progressRepositoryProvider);
+      final courseData = ref.read(courseDataControllerProvider);
       if (!await confirm(
         l10n.clearProgressQuestion(course.fullTitle),
         l10n.clearProgressBody,
@@ -90,20 +93,13 @@ class ManageCourseScreen extends ConsumerWidget {
       )) {
         return;
       }
-      await progressRepository.clearCourse(course.id);
+      await courseData.clearProgress(course.id);
       say(l10n.progressCleared);
     }
 
     Future<void> deleteCourseData() async {
       // Read before the first gap, in case the screen closes meanwhile.
-      final progressRepository = ref.read(progressRepositoryProvider);
-      final downloadController = ref.read(downloadControllerProvider);
-      final metadataRepository = ref.read(courseMetadataRepositoryProvider);
-      final entry = ref
-          .read(courseIndexProvider)
-          .value
-          ?.index
-          .entryFor(course.id);
+      final courseData = ref.read(courseDataControllerProvider);
       if (!await confirm(
         l10n.deleteCourseDataQuestion(course.fullTitle),
         l10n.deleteCourseDataBody,
@@ -111,24 +107,20 @@ class ManageCourseScreen extends ConsumerWidget {
       )) {
         return;
       }
-      await progressRepository.clearCourse(course.id);
-      await downloadController.deleteAll(course.id);
-      if (entry != null) await metadataRepository.deleteLocalCopy(entry);
+      await courseData.deleteAll(course.id);
       if (!context.mounted) return;
       say(l10n.courseDataDeleted);
       // Back to the course list, as upstream.
       context.go(AppRoutes.courses);
     }
 
+    // Text only, on the same edge as the headings.
     ListTile action({
-      required IconData icon,
       required String title,
       required String body,
       required VoidCallback onTap,
       Color? color,
     }) => ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-      leading: Icon(icon, color: color),
       title: Text(
         title,
         style: color == null ? null : text.titleSmall?.copyWith(color: color),
@@ -137,79 +129,71 @@ class ManageCourseScreen extends ConsumerWidget {
       onTap: onTap,
     );
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.manageCourse)),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 24),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-            child: Text(course.fullTitle, style: text.bodyMedium),
-          ),
-          action(
-            icon: Icons.refresh,
-            title: l10n.refreshCourse,
-            body: l10n.refreshCourseBody,
-            onTap: refresh,
-          ),
-          SectionHeading(l10n.downloads),
-          if (lessons != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: Text(
-                downloaded.isEmpty
-                    ? l10n.noneDownloaded
-                    : l10n.downloadedSummary(
-                        downloaded.length,
-                        lessons.length,
-                        ByteText.size(l10n, downloadedBytes),
-                      ),
-                style: text.bodyLarge,
+    return TitledPage(
+      title: l10n.manageCourse,
+      subtitle: course.fullTitle,
+      slivers: [
+        SliverList.list(
+          children: [
+            action(
+              title: l10n.refreshCourse,
+              body: l10n.refreshCourseBody,
+              onTap: refresh,
+            ),
+            SectionHeading(l10n.downloads),
+            if (lessons != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Text(
+                  downloaded.isEmpty
+                      ? l10n.noneDownloaded
+                      : l10n.downloadedSummary(
+                          downloaded.length,
+                          lessons.length,
+                          ByteText.size(l10n, downloadedBytes),
+                        ),
+                  style: text.bodyLarge,
+                ),
               ),
-            ),
-          if (remaining != null && remaining.isNotEmpty)
-            action(
-              icon: Icons.download,
-              title: l10n.downloadAllLessons,
-              body: l10n.downloadAllLessonsBody,
-              onTap: () => confirmDownloadAll(
-                context,
-                ref,
-                courseId: course.id,
-                lessons: remaining,
+            if (remaining != null && remaining.isNotEmpty)
+              action(
+                title: l10n.downloadAllLessons,
+                body: l10n.downloadAllLessonsBody,
+                onTap: () => confirmDownloadAll(
+                  context,
+                  ref,
+                  courseId: course.id,
+                  lessons: remaining,
+                ),
               ),
-            ),
-          if (downloads.isNotEmpty) ...[
+            if (downloads.isNotEmpty) ...[
+              action(
+                title: l10n.deleteFinishedDownloads,
+                body: l10n.deleteFinishedDownloadsBody,
+                onTap: deleteFinished,
+              ),
+              action(
+                title: l10n.deleteAllDownloads,
+                body: l10n.deleteAllDownloadsBody,
+                onTap: deleteAllDownloads,
+              ),
+            ],
+            SectionHeading(l10n.progress),
             action(
-              icon: Icons.delete_sweep_outlined,
-              title: l10n.deleteFinishedDownloads,
-              body: l10n.deleteFinishedDownloadsBody,
-              onTap: deleteFinished,
+              title: l10n.clearProgress,
+              body: l10n.clearProgressBody,
+              onTap: clearProgress,
             ),
+            const Divider(indent: 20, endIndent: 20),
             action(
-              icon: Icons.delete_outline,
-              title: l10n.deleteAllDownloads,
-              body: l10n.deleteAllDownloadsBody,
-              onTap: deleteAllDownloads,
+              title: l10n.deleteCourseData,
+              body: l10n.deleteCourseDataBody,
+              color: LtColors.of(context).alert,
+              onTap: deleteCourseData,
             ),
           ],
-          SectionHeading(l10n.progress),
-          action(
-            icon: Icons.restart_alt,
-            title: l10n.clearProgress,
-            body: l10n.clearProgressBody,
-            onTap: clearProgress,
-          ),
-          const Divider(indent: 20, endIndent: 20),
-          action(
-            icon: Icons.delete_forever_outlined,
-            title: l10n.deleteCourseData,
-            body: l10n.deleteCourseDataBody,
-            color: LtColors.of(context).alert,
-            onTap: deleteCourseData,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

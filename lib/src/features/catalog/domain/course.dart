@@ -27,9 +27,10 @@ class Course {
 
   final CourseSection section;
 
-  /// The course's cover with its name (an asset), shown on the lock screen
-  /// and in the media notification like in the Expo app
-  /// (`getCourseImageWithText`).
+  /// The course's cover with its name (an asset): on the lock screen and in
+  /// the media notification, as in the Expo app (upstream
+  /// `src/data/courseData.ts`, `getCourseImageWithText`), and in the player
+  /// and mini-player.
   final String cover;
 
   /// The taught language's name in its own script, such as "Ελληνικά".

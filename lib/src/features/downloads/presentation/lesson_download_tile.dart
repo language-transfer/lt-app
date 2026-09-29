@@ -9,20 +9,16 @@ import 'package:languagetransfer/src/features/downloads/presentation/download_ac
 import 'package:languagetransfer/src/l10n/app_localizations.dart';
 
 /// The download entry of a lesson's options sheet. Follows the download
-/// while the sheet is open.
+/// while the sheet is open, and closes the sheet before its action runs.
 class LessonDownloadTile extends ConsumerWidget {
   const LessonDownloadTile({
     required this.courseId,
     required this.lesson,
-    required this.onDone,
     super.key,
   });
 
   final String courseId;
   final Lesson lesson;
-
-  /// Called before the action runs, to close the sheet.
-  final VoidCallback onDone;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,18 +27,18 @@ class LessonDownloadTile extends ConsumerWidget {
         .watch(courseDownloadsProvider(courseId))
         .value?[lesson.id];
     final size = ByteText.size(l10n, downloadSize(ref, lesson, download));
-    // The sheet closes before the snack bar shows, so use the page's
-    // messenger.
-    final messengerContext = Navigator.of(context).context;
+    final navigator = Navigator.of(context);
 
     void startDownload() {
-      onDone();
-      if (!messengerContext.mounted) return;
-      startLessonDownload(messengerContext, ref, courseId, lesson);
+      navigator.pop();
+      // The sheet is closing, so a snack bar goes through the navigator's
+      // context, which stays.
+      if (!navigator.context.mounted) return;
+      startLessonDownload(navigator.context, ref, courseId, lesson);
     }
 
     void deleteDownload() {
-      onDone();
+      navigator.pop();
       runDownloadAction(
         ref.read(downloadControllerProvider).delete(courseId, [lesson.id]),
       );

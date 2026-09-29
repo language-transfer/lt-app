@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:languagetransfer/src/core/storage/atomic_write.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 import 'package:languagetransfer/src/core/storage/integrity.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
 import 'package:path/path.dart' as p;
 
 /// A file found in the [ObjectStore]; `partial` marks an unfinished write.
@@ -25,7 +26,6 @@ class ObjectStore {
 
   static final _prefix = RegExp(r'^[0-9a-f]{2}$');
   static final _name = RegExp(r'^([0-9a-f]{62})(?:\.([a-z0-9]+))?$');
-  static const _partialSuffix = '.part';
 
   File fileFor(FilePointer pointer, {String? extension}) =>
       fileForId(pointer.object, extension: extension);
@@ -49,9 +49,9 @@ class ObjectStore {
       await for (final entry in directory.list()) {
         if (entry is! File) continue;
         var name = p.basename(entry.path);
-        final partial = name.endsWith(_partialSuffix);
+        final partial = name.endsWith(partialFileSuffix);
         if (partial) {
-          name = name.substring(0, name.length - _partialSuffix.length);
+          name = name.substring(0, name.length - partialFileSuffix.length);
         }
         final match = _name.firstMatch(name);
         if (match == null) continue;
@@ -100,16 +100,7 @@ class ObjectStore {
     verifyBytes(pointer, bytes);
     final file = fileFor(pointer, extension: extension);
     await file.parent.create(recursive: true);
-    // Write next to the target and rename, so a crash never leaves a
-    // half-written file under the final name.
-    final partial = File('${file.path}$_partialSuffix');
-    try {
-      await partial.writeAsBytes(bytes, flush: true);
-      return await partial.rename(file.path);
-    } on FileSystemException {
-      await deleteFile(partial);
-      rethrow;
-    }
+    return await writeAtomically(file, bytes);
   }
 
   Future<void> delete(FilePointer pointer, {String? extension}) =>

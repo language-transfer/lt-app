@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:languagetransfer/src/core/theme/lt_colors.dart';
 import 'package:languagetransfer/src/core/widgets/section_heading.dart';
+import 'package:languagetransfer/src/core/widgets/titled_page.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 import 'package:languagetransfer/src/features/settings/application/settings_providers.dart';
 import 'package:languagetransfer/src/features/settings/domain/app_settings.dart';
@@ -19,54 +20,52 @@ class SettingsScreen extends ConsumerWidget {
     Future<void> update(AppSettings Function(AppSettings) change) =>
         repository.update(change);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.settings)),
-      body: settings == null
-          ? const SizedBox.shrink()
-          : ListView(
-              padding: const EdgeInsets.only(bottom: 24),
-              children: [
-                SectionHeading(l10n.playback),
-                SwitchListTile(
-                  title: Text(l10n.autoplayTitle),
-                  subtitle: Text(l10n.autoplayBody),
-                  value: settings.autoplay,
-                  onChanged: (value) =>
-                      update((s) => s.copyWith(autoplay: value)),
-                ),
-                const Divider(indent: 20, endIndent: 20),
-                _QualitySetting(
-                  title: l10n.streamingQuality,
-                  body: l10n.streamingQualityBody,
-                  value: settings.streamQuality,
-                  onChanged: (quality) =>
-                      update((s) => s.copyWith(streamQuality: quality)),
-                ),
-                SectionHeading(l10n.downloads),
-                SwitchListTile(
-                  title: Text(l10n.downloadOnlyOnWifi),
-                  subtitle: Text(l10n.downloadOnlyOnWifiBody),
-                  value: settings.downloadOnlyOnWifi,
-                  onChanged: (value) =>
-                      update((s) => s.copyWith(downloadOnlyOnWifi: value)),
-                ),
-                SwitchListTile(
-                  title: Text(l10n.autoDeleteFinished),
-                  subtitle: Text(l10n.autoDeleteFinishedBody),
-                  value: settings.autoDeleteFinished,
-                  onChanged: (value) =>
-                      update((s) => s.copyWith(autoDeleteFinished: value)),
-                ),
-                const Divider(indent: 20, endIndent: 20),
-                _QualitySetting(
-                  title: l10n.downloadQuality,
-                  body: l10n.downloadQualityBody,
-                  value: settings.downloadQuality,
-                  onChanged: (quality) =>
-                      update((s) => s.copyWith(downloadQuality: quality)),
-                ),
-              ],
-            ),
+    return TitledPage(
+      title: l10n.settings,
+      slivers: [
+        if (settings != null)
+          SliverList.list(
+            children: [
+              SectionHeading(l10n.playback),
+              SwitchListTile(
+                title: Text(l10n.autoplayTitle),
+                subtitle: Text(l10n.autoplayBody),
+                value: settings.autoplay,
+                onChanged: (value) =>
+                    update((s) => s.copyWith(autoplay: value)),
+              ),
+              _QualitySetting(
+                title: l10n.streamingQuality,
+                body: l10n.streamingQualityBody,
+                value: settings.streamQuality,
+                onChanged: (quality) =>
+                    update((s) => s.copyWith(streamQuality: quality)),
+              ),
+              SectionHeading(l10n.downloads),
+              SwitchListTile(
+                title: Text(l10n.downloadOnlyOnWifi),
+                subtitle: Text(l10n.downloadOnlyOnWifiBody),
+                value: settings.downloadOnlyOnWifi,
+                onChanged: (value) =>
+                    update((s) => s.copyWith(downloadOnlyOnWifi: value)),
+              ),
+              SwitchListTile(
+                title: Text(l10n.autoDeleteFinished),
+                subtitle: Text(l10n.autoDeleteFinishedBody),
+                value: settings.autoDeleteFinished,
+                onChanged: (value) =>
+                    update((s) => s.copyWith(autoDeleteFinished: value)),
+              ),
+              _QualitySetting(
+                title: l10n.downloadQuality,
+                body: l10n.downloadQualityBody,
+                value: settings.downloadQuality,
+                onChanged: (quality) =>
+                    update((s) => s.copyWith(downloadQuality: quality)),
+              ),
+            ],
+          ),
+      ],
     );
   }
 }
@@ -99,6 +98,8 @@ class _QualitySetting extends StatelessWidget {
           Text(body, style: text.bodyMedium),
           const SizedBox(height: 12),
           SegmentedButton<AudioQuality>(
+            // As wide as the text above it.
+            expandedInsets: EdgeInsets.zero,
             showSelectedIcon: false,
             segments: [
               ButtonSegment(

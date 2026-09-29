@@ -190,7 +190,7 @@ abstract class AppLocalizations {
   /// **'Course options'**
   String get courseOptions;
 
-  /// Screen-reader label of a downloaded or failed lesson's download button, which opens the lesson's options.
+  /// Label of what opens a lesson's options: the download button of a downloaded or failed lesson (for screen readers), and the ⋯ button in the player.
   ///
   /// In en, this message translates to:
   /// **'Lesson options'**
@@ -339,6 +339,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{speed}×'**
   String speedValue(String speed);
+
+  /// No description provided for @sleepTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep timer'**
+  String get sleepTimer;
+
+  /// No description provided for @sleepTimerOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get sleepTimerOff;
+
+  /// No description provided for @sleepTimerEndOfLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'End of lesson'**
+  String get sleepTimerEndOfLesson;
+
+  /// A sleep timer's time in whole minutes, for example '15 min'.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String sleepTimerMinutes(int minutes);
 
   /// No description provided for @positionInLesson.
   ///

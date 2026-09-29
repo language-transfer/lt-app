@@ -3,7 +3,7 @@ import 'package:languagetransfer/src/features/settings/data/settings_repository.
 
 /// Marks lessons finished, for the player and the screens alike.
 ///
-/// With "delete finished downloads" on, the lesson's download is deleted
+/// With "Delete lessons after finishing" on, the lesson's download is deleted
 /// too (upstream `src/storage/persistence.ts`, `markLessonFinished`); one
 /// still on its way is cancelled.
 class LessonCompletion {

@@ -56,7 +56,7 @@ class CourseColors {
       CourseColors(tint: Color(0xFF022839), ink: Color(0xFF78C9F4)),
     ),
     // Both English courses for Spanish speakers share Spanish's palette, as
-    // in the Expo app.
+    // in the Expo app (upstream `src/data/courseData.ts`, `uiColors`).
     'ingles_completo': _spanish,
     'ingles': _spanish,
     'music': (

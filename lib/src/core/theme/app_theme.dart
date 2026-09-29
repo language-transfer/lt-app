@@ -39,10 +39,10 @@ abstract final class AppTheme {
     return TextTheme(
       // Language name on the course page.
       displayLarge: style(60, FontWeight.w500, height: 1.1),
-      // Lesson title in the player.
-      displayMedium: style(48, FontWeight.w500, height: 1.1),
-      // Language name on the course list.
+      // Language name on the course list, and screen titles.
       headlineLarge: style(36, FontWeight.w500, height: 1.15),
+      // The app's name on the course list, and the lesson in the player and
+      // in "continue".
       titleLarge: style(24, FontWeight.w600, height: 1.25),
       titleMedium: style(21, FontWeight.w600, height: 1.3),
       titleSmall: style(18, FontWeight.w600, height: 1.35),

@@ -1,8 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:languagetransfer/src/core/providers.dart';
+import 'package:languagetransfer/src/features/downloads/data/download_manager.dart';
 import 'package:languagetransfer/src/features/downloads/data/download_repository.dart';
 import 'package:languagetransfer/src/features/downloads/domain/lesson_download.dart';
+
+/// The instance the player uses too, created in `lib/main.dart`.
+final downloadManagerProvider = Provider<DownloadManager>(
+  (ref) => throw UnimplementedError('Provided in main()'),
+);
 
 final downloadRepositoryProvider = Provider<DownloadRepository>(
   (ref) => DownloadRepository(database: ref.watch(databaseProvider)),

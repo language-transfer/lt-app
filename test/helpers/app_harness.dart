@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
@@ -16,18 +17,21 @@ import 'package:languagetransfer/src/core/providers.dart';
 import 'package:languagetransfer/src/core/routing/app_router.dart';
 import 'package:languagetransfer/src/core/routing/app_routes.dart';
 import 'package:languagetransfer/src/core/storage/database.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 import 'package:languagetransfer/src/core/storage/object_store.dart';
-import 'package:languagetransfer/src/features/about/presentation/about_screen.dart';
 import 'package:languagetransfer/src/features/catalog/application/catalog_providers.dart';
 import 'package:languagetransfer/src/features/catalog/data/course_index_repository.dart';
+import 'package:languagetransfer/src/features/catalog/domain/course.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course_index.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course_metadata.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 import 'package:languagetransfer/src/features/downloads/application/download_providers.dart';
 import 'package:languagetransfer/src/features/downloads/data/download_manager.dart';
 import 'package:languagetransfer/src/features/downloads/data/download_repository.dart';
 import 'package:languagetransfer/src/features/downloads/domain/lesson_download.dart';
+import 'package:languagetransfer/src/features/player/application/player_providers.dart';
+import 'package:languagetransfer/src/features/player/presentation/mini_player.dart';
+import 'package:languagetransfer/src/features/player/presentation/player_sheet.dart';
 import 'package:languagetransfer/src/features/progress/application/lesson_completion.dart';
 import 'package:languagetransfer/src/features/progress/application/progress_providers.dart';
 import 'package:languagetransfer/src/features/progress/data/progress_repository.dart';
@@ -41,6 +45,27 @@ import 'fake_artwork_files.dart';
 import 'fake_audio_handler.dart';
 import 'fake_download_backend.dart';
 import 'fixtures.dart';
+
+/// The mini-player's band, which opens the player when tapped.
+final Finder miniPlayerBand = find
+    .descendant(of: find.byType(MiniPlayer), matching: find.byType(InkWell))
+    .first;
+
+/// The platform settings that ask for less motion, for tests that run once
+/// with each (see [reduceMotion]).
+const reducedMotionSettings = [
+  (
+    'Android’s "Remove animations"',
+    FakeAccessibilityFeatures(disableAnimations: true),
+  ),
+  ('iOS’s "Reduce Motion"', FakeAccessibilityFeatures(reduceMotion: true)),
+];
+
+/// Asks for less motion with [features] until the end of the test.
+void reduceMotion(WidgetTester tester, FakeAccessibilityFeatures features) {
+  tester.platformDispatcher.accessibilityFeaturesTestValue = features;
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+}
 
 /// The whole app for widget tests: the real screens, router and theme, with
 /// the course index from the fixtures, generated lessons, an in-memory
@@ -75,10 +100,12 @@ class TestApp {
     // Every test opens its own in-memory database and closes it at the end,
     // which drift would otherwise warn about as if they were shared.
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
-    return TestApp._(
-      Directory.systemTemp.createTempSync('app_harness'),
-      AppDatabase(NativeDatabase.memory()),
-    );
+    final root = Directory.systemTemp.createTempSync('app_harness');
+    // A test that fails before [dispose] leaves no files behind either.
+    addTearDown(() {
+      if (root.existsSync()) root.deleteSync(recursive: true);
+    });
+    return TestApp._(root, AppDatabase(NativeDatabase.memory()));
   }
 
   final Directory root;
@@ -97,6 +124,9 @@ class TestApp {
 
   /// If set, loading the course index fails with it.
   Object? indexError;
+
+  /// If set, loading a course's lessons fails with it.
+  Object? metadataError;
 
   /// Lessons of [courseId]: as many as the index announces, with durations
   /// and sizes in the range of the real ones.
@@ -149,17 +179,35 @@ class TestApp {
           : Stream.error(indexError!),
     ),
     courseMetadataProvider.overrideWith(
-      (ref, courseId) => metadataFor(courseId),
+      (ref, courseId) => switch (metadataError) {
+        final error? => Future.error(error),
+        null => metadataFor(courseId),
+      },
     ),
     connectivityProvider.overrideWith((ref) => Stream.value(connectivity)),
-    packageInfoProvider.overrideWith(
-      (ref) => PackageInfo(
+    packageInfoProvider.overrideWithValue(
+      PackageInfo(
         appName: 'Language Transfer',
         packageName: 'org.languagetransfer.dev',
         version: '0.1.0',
         buildNumber: '1',
       ),
     ),
+    applePlayerProvider.overrideWithValue(false),
+  ];
+
+  /// The player's queue for [courseId], as `LessonAudioHandler.playCourse`
+  /// builds it.
+  List<MediaItem> queueFor(String courseId) => [
+    for (final lesson in metadataFor(courseId).lessons)
+      MediaItem(
+        id: '$courseId/${lesson.id}',
+        title: lesson.title,
+        artist: Courses.byId(courseId)!.fullTitle,
+        album: 'Language Transfer',
+        duration: lesson.duration,
+        extras: {'courseId': courseId, 'lessonId': lesson.id},
+      ),
   ];
 
   /// Someone in the middle of Complete Greek: lessons 1 and 2 finished,
@@ -201,17 +249,7 @@ class TestApp {
       ]);
     });
     if (!playing) return;
-    final items = [
-      for (final lesson in lessons)
-        MediaItem(
-          id: 'greek/${lesson.id}',
-          title: lesson.title,
-          artist: 'Complete Greek',
-          album: 'Language Transfer',
-          duration: lesson.duration,
-          extras: {'courseId': 'greek', 'lessonId': lesson.id},
-        ),
-    ];
+    final items = queueFor('greek');
     handler.show(
       item: items[2],
       queueItems: items,
@@ -221,14 +259,28 @@ class TestApp {
   }
 
   /// Shows the app at [location] on a screen of [size] (logical pixels),
-  /// with the system text size [textScale] and [brightness].
+  /// with the system text size [textScale] and [brightness], and with
+  /// [openPlayer] the player over it. Without [settle], for screens with a
+  /// spinner, which never settles, time is moved on by a fixed amount.
   Future<void> pump(
     WidgetTester tester, {
     String location = AppRoutes.courses,
     Size size = const Size(411, 891),
     double textScale = 1,
     Brightness brightness = Brightness.light,
+    bool openPlayer = false,
+    bool settle = true,
   }) async {
+    Future<void> wait() async {
+      if (settle) {
+        await tester.pumpAndSettle();
+      } else {
+        // A frame that starts the transitions, then longer than any takes.
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+      }
+    }
+
     tester.view
       ..devicePixelRatio = 2
       ..physicalSize = size * 2;
@@ -246,7 +298,10 @@ class TestApp {
         child: const LanguageTransferApp(),
       ),
     );
-    await tester.pumpAndSettle();
+    await wait();
+    if (!openPlayer) return;
+    showPlayer(tester.element(find.byType(MiniPlayer)));
+    await wait();
   }
 
   /// Unmounts the app and releases everything [TestApp.create] set up.
@@ -255,10 +310,22 @@ class TestApp {
     // Lets drift's zero-delay timers run, which close the queries the
     // screens watched; a pump without a duration does not advance time.
     await tester.pump(Duration.zero);
-    await downloads.dispose();
+    // A started download manager finishes its work only between real-time
+    // turns, which the test's fake time does not give it by itself.
+    final disposing = downloads.dispose();
+    var disposed = false;
+    disposing.whenComplete(() => disposed = true).ignore();
+    for (var round = 0; !disposed; round++) {
+      if (round == 100) fail('The download manager did not finish its work.');
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 1)),
+      );
+      await tester.pump(Duration.zero);
+    }
+    await disposing;
     await backend.close();
     await handler.dispose();
     await database.close();
-    root.deleteSync(recursive: true);
+    if (root.existsSync()) root.deleteSync(recursive: true);
   }
 }

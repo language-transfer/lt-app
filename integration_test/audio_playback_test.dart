@@ -8,7 +8,6 @@
 // player (see the catalog domain models).
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -17,11 +16,11 @@ import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:languagetransfer/src/core/storage/integrity.dart';
-import 'package:languagetransfer/src/features/catalog/data/catalog_api.dart';
 import 'package:languagetransfer/src/features/catalog/domain/course_index.dart';
-import 'package:languagetransfer/src/features/catalog/domain/course_metadata.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 import 'package:languagetransfer/src/features/player/data/typed_remote_audio_source.dart';
+
+import 'support.dart';
 
 /// What happened when a file was loaded and played.
 class Outcome {
@@ -70,11 +69,9 @@ void main() {
   final results = <String, Outcome>{};
 
   setUpAll(() async {
-    final api = CatalogApi(client, userAgent: 'LanguageTransfer-Flutter/test');
-    index = CourseIndex.parse(await api.fetchIndexJson());
-    final entry = index.entryFor('spanish')!;
-    final bytes = await api.fetchObject(index, entry.metadata);
-    lesson = CourseMetadata.parse(utf8.decode(bytes)).lessons.first;
+    final spanish = await fetchSpanish(client);
+    index = spanish.index;
+    lesson = spanish.lessons.first;
     temp = Directory.systemTemp.createTempSync('audio_playback_test');
   });
 

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 import 'package:languagetransfer/src/features/catalog/domain/lesson.dart';
 import 'package:languagetransfer/src/features/progress/domain/lesson_progress.dart';
 import 'package:languagetransfer/src/features/progress/domain/playback_rules.dart';

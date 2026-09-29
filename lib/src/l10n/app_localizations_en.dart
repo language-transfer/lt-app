@@ -148,6 +148,20 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get sleepTimer => 'Sleep timer';
+
+  @override
+  String get sleepTimerOff => 'Off';
+
+  @override
+  String get sleepTimerEndOfLesson => 'End of lesson';
+
+  @override
+  String sleepTimerMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
   String get positionInLesson => 'Position in lesson';
 
   @override

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -74,6 +75,14 @@ void main() {
     final source = sourceWith(
       (_) => Completer<http.Response>().future,
       timeout: const Duration(milliseconds: 10),
+    );
+
+    expect(source.request(0, 4), throwsA(isA<NetworkException>()));
+  });
+
+  test('reports a secure connection that cannot be set up', () {
+    final source = sourceWith(
+      (_) async => throw const HandshakeException('bad certificate'),
     );
 
     expect(source.request(0, 4), throwsA(isA<NetworkException>()));

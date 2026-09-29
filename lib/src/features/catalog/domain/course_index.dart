@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:languagetransfer/src/core/json/json_reader.dart';
-import 'package:languagetransfer/src/features/catalog/domain/file_pointer.dart';
+import 'package:languagetransfer/src/core/storage/file_pointer.dart';
 
 /// A course was requested that is not in the server's index, or that this
 /// app does not know.

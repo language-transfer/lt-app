@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:languagetransfer/src/core/logging.dart';
+import 'package:languagetransfer/src/core/storage/atomic_write.dart';
 import 'package:path/path.dart' as p;
 
 /// Course covers as files, for the lock screen and the media notification,
@@ -35,13 +36,10 @@ class ArtworkFiles {
     final data = await _bundle.load(asset);
     final file = File(p.join(_directory.path, p.basename(asset)));
     await file.parent.create(recursive: true);
-    // Written next to the target and renamed, so the system never reads a
-    // half-written image.
-    final partial = File('${file.path}.part');
-    await partial.writeAsBytes(
+    // The system never reads a half-written image.
+    return await writeAtomically(
+      file,
       data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
-      flush: true,
     );
-    return await partial.rename(file.path);
   }
 }

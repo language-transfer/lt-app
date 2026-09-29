@@ -5,5 +5,4 @@ abstract final class AppRoutes {
   static String manageCourse(String courseId) => '/course/$courseId/manage';
   static const settings = '/settings';
   static const about = '/about';
-  static const player = '/player';
 }

@@ -12,6 +12,7 @@ import 'package:languagetransfer/main.dart' as app;
 import 'package:languagetransfer/src/features/courses/presentation/course_list_screen.dart';
 import 'package:languagetransfer/src/features/downloads/presentation/lesson_download_button.dart';
 import 'package:languagetransfer/src/features/player/presentation/mini_player.dart';
+import 'package:languagetransfer/src/features/player/presentation/player_screen.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +35,12 @@ void main() {
   }
 
   var surfaceConverted = false;
+  // Only the player's: the mini-player stays in the tree under the player.
+  final pauseInPlayer = find.descendant(
+    of: find.byType(PlayerScreen),
+    matching: find.byIcon(Icons.pause_rounded),
+  );
+
   Future<void> shot(WidgetTester tester, String name) async {
     if (Platform.isAndroid && !surfaceConverted) {
       await binding.convertFlutterSurfaceToImage();
@@ -87,7 +94,7 @@ void main() {
     await shot(tester, '03-course');
 
     await tester.tap(find.text('Lesson 1').first);
-    await waitFor(tester, find.byIcon(Icons.pause_rounded));
+    await waitFor(tester, pauseInPlayer);
     await wait(tester, 3000);
     await shot(tester, '04-player');
 
@@ -115,7 +122,7 @@ void main() {
 
     await openMenuItem(tester, 'Settings');
     await shot(tester, '09-settings');
-    await tester.drag(find.byType(ListView), const Offset(0, -2000));
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
     await wait(tester);
     await shot(tester, '10-settings-downloads');
     await tester.pageBack();
@@ -144,7 +151,7 @@ void main() {
     await wait(tester);
     await shot(tester, '14-player-dark');
 
-    await tester.tap(find.byIcon(Icons.pause_rounded));
+    await tester.tap(pauseInPlayer);
     await wait(tester, 500);
     tester.platformDispatcher.clearPlatformBrightnessTestValue();
   });

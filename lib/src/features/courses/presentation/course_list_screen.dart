@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:languagetransfer/src/core/routing/app_routes.dart';
 import 'package:languagetransfer/src/core/theme/course_colors.dart';
 import 'package:languagetransfer/src/core/theme/lt_colors.dart';
+import 'package:languagetransfer/src/core/widgets/action_sheet.dart';
 import 'package:languagetransfer/src/core/widgets/construction.dart';
 import 'package:languagetransfer/src/core/widgets/error_view.dart';
 import 'package:languagetransfer/src/core/widgets/section_heading.dart';
@@ -145,31 +146,20 @@ class _Header extends StatelessWidget {
   void _showMenu(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        builder: (sheetContext) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.tune),
-                title: Text(l10n.settings),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  unawaited(context.push<void>(AppRoutes.settings));
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: Text(l10n.about),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  unawaited(context.push<void>(AppRoutes.about));
-                },
-              ),
-            ],
+      showActionSheet(
+        context,
+        actions: [
+          SheetAction(
+            icon: Icons.tune,
+            label: l10n.settings,
+            onSelected: () => unawaited(context.push<void>(AppRoutes.settings)),
           ),
-        ),
+          SheetAction(
+            icon: Icons.info_outline,
+            label: l10n.about,
+            onSelected: () => unawaited(context.push<void>(AppRoutes.about)),
+          ),
+        ],
       ),
     );
   }
