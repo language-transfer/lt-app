@@ -2,14 +2,14 @@
   "expo": {
     "name": "Language Transfer",
     "slug": "language-transfer",
-    "version": "2.3.1",
+    "version": "2.4.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "languagetransfer",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "buildNumber": "26",
+      "buildNumber": "27",
       "appleTeamId": "XZUB4ADZC3",
       "supportsTablet": true,
       "infoPlist": {
@@ -18,7 +18,7 @@
       "bundleIdentifier": "org.languagetransfer"
     },
     "android": {
-      "versionCode": 17,
+      "versionCode": 18,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
