@@ -1,0 +1,31 @@
+{
+  "platform": "ios",
+  "size": "tablet",
+  "device": "EBB1BF49-C7FA-4FF7-8C0C-49ED727C9462",
+  "capturedAt": "2026-10-11T04:41:12.863769+00:00",
+  "sourceRevision": "b8517c22e4f259489df1f9d77d33b6f6deb60e90",
+  "workingTreeDirty": true,
+  "artifact": "LanguageTransfer.app",
+  "artifactSha256": "8af48ced0302752a179e2830101ae9c2de2a0ca3c3aa5f0cbc75f1a124a7051c",
+  "deviceName": "LT Screenshots tablet 26.5",
+  "osVersion": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+  "mode": "capture",
+  "screenshots": {
+    "01-courses.png": {
+      "width": 2064,
+      "height": 2752
+    },
+    "02-spanish.png": {
+      "width": 2064,
+      "height": 2752
+    },
+    "03-lessons.png": {
+      "width": 2064,
+      "height": 2752
+    },
+    "04-player.png": {
+      "width": 2064,
+      "height": 2752
+    }
+  }
+}
