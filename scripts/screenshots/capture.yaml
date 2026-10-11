@@ -6,17 +6,17 @@ appId: org.languagetransfer
 - takeScreenshot: "${SCREENSHOT_DIR}/01-courses"
 - scrollUntilVisible:
     element:
-      text: "Spanish"
+      text: "(?i)(complete )?Spanish(, .* lessons)?"
     direction: DOWN
-- tapOn: "Spanish"
+- tapOn: "(?i)(complete )?Spanish(, .* lessons)?"
 - extendedWaitUntil:
-    visible: "Lesson 1"
+    visible: "(?s).*\\bLesson 1\\b.*"
     timeout: 60000
 - takeScreenshot: "${SCREENSHOT_DIR}/02-spanish"
-- tapOn: "All Lessons"
-- assertVisible: "Download All"
+- tapOn: "All Lessons.*"
+- assertVisible: ".*Download All.*"
 - takeScreenshot: "${SCREENSHOT_DIR}/03-lessons"
-- tapOn: "Lesson 1"
+- tapOn: "(?s).*\\bLesson 1\\b.*"
 - extendedWaitUntil:
     visible: "Pause"
     timeout: 60000

@@ -42,8 +42,11 @@ if [[ "$platform" == android && "$(uname -sm)" != 'Linux x86_64' ]]; then
   echo 'Automated Android captures currently require x86_64 Linux.' >&2
   exit 1
 fi
-export MAESTRO_CLI_NO_ANALYTICS=1 MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
+export MAESTRO_CLI_NO_ANALYTICS=true MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
 export CI=1
+if [[ "$platform" == ios ]]; then
+  export MAESTRO_DRIVER_STARTUP_TIMEOUT="${MAESTRO_DRIVER_STARTUP_TIMEOUT:-180000}"
+fi
 build_dir="$root/artifacts/screenshots/build"
 mkdir -p "$build_dir"
 if [[ "$skip_build" == false ]]; then
