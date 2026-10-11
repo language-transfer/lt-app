@@ -2,7 +2,7 @@ appId: org.languagetransfer
 ---
 - launchApp:
     clearState: true
-- assertVisible: "Language courses"
+- assertVisible: "(?i)Language courses"
 - takeScreenshot: "${SCREENSHOT_DIR}/01-courses"
 - scrollUntilVisible:
     element:

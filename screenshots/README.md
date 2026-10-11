@@ -35,6 +35,8 @@ The normal release signing setup is unchanged. Neither command uses EAS.
 - iOS needs Xcode selected and an iOS simulator runtime installed in Xcode
   Settings > Components. Nix supplies Node, CocoaPods, and Maestro; Xcode supplies
   the SDK and simulator. A usable macOS login session may be needed by XCTest.
+  Cold iOS driver startup can take over a minute; the command allows three
+  minutes by default. Override with `MAESTRO_DRIVER_STARTUP_TIMEOUT` (milliseconds).
 
 ## Remote Mac via Git
 
