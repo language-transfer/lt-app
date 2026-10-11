@@ -1,0 +1,25 @@
+appId: org.languagetransfer
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Language courses"
+- takeScreenshot: "${SCREENSHOT_DIR}/01-courses"
+- scrollUntilVisible:
+    element:
+      text: "Spanish"
+    direction: DOWN
+- tapOn: "Spanish"
+- extendedWaitUntil:
+    visible: "Lesson 1"
+    timeout: 60000
+- takeScreenshot: "${SCREENSHOT_DIR}/02-spanish"
+- tapOn: "All Lessons"
+- assertVisible: "Download All"
+- takeScreenshot: "${SCREENSHOT_DIR}/03-lessons"
+- tapOn: "Lesson 1"
+- extendedWaitUntil:
+    visible: "Pause"
+    timeout: 60000
+- tapOn: "Pause"
+- assertVisible: "Play"
+- takeScreenshot: "${SCREENSHOT_DIR}/04-player"

@@ -61,6 +61,15 @@ iOS builds also [prepare selected offline lessons and course metadata](./docs/pr
 from the public CAS. The preparation fails if a required object is unavailable;
 Android builds do not include that content.
 
+### Native screenshots
+
+Run `nix run .#screenshots-android` on Linux or `nix run .#screenshots-ios` on
+macOS to build and capture phone and tablet screenshots. Push the working branch
+and pull it into the Mac repository before running the iOS command over SSH.
+The tracked [`screenshots/`](./screenshots/README.md) directory contains
+per-platform/size PNGs and instructions for device selection and the
+`--prepare` Xcode/manual fallback.
+
 ### iOS release policy
 
 The Expo rewrite's iOS release workflow still needs validation on a Mac. Before archiving, regenerate the native project so the preloaded-content Xcode phase is present. The tracked `withNixXcodeEnvironment` plugin writes the ignored `ios/.xcode.env` during prebuild; Xcode's script phases source it and run under the current `.#ios` flake environment at build time. Nix supplies a compatible Bash as well as Node and CocoaPods. Xcode does not need to be launched from `nix develop`. To supply Node and CocoaPods during prebuild itself, run `nix develop .#ios -c npx expo prebuild --platform ios`. Then verify first-lesson playback on a fresh install with networking disabled. The [bundle check](./docs/preloaded-content.md) guards against including that content on Android.
