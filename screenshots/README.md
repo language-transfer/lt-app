@@ -3,7 +3,8 @@
 Run these commands **from the repository root**. Maestro drives the actual native
 app, capturing courses, the Spanish course, its lesson list, and the paused player.
 The app needs Internet access for metadata/audio (iOS includes selected offline
-lessons). These are full-resolution portrait PNGs, not resized phone images.
+lessons). These are full-resolution PNGs, not resized phone images. The default
+Android tablet uses the Pixel C's natural landscape orientation.
 
 ```sh
 # Linux: API 36 Android phone + tablet, headless emulators
@@ -18,7 +19,8 @@ nix run .#screenshots-ios -- --skip-build --size tablet
 
 Files belong in `ios/phone/`, `ios/tablet/`, `android/phone/`, and
 `android/tablet/`. Each successful capture writes `capture.json` with actual PNG
-sizes, device ID, time, source revision, and artifact checksum. Review PNGs before adding them to Git.
+sizes, device ID, time, source revision, and artifact checksum. Review PNGs
+before adding them to Git.
 Failures preserve the previous screenshots; build products and automation logs
 stay under ignored `artifacts/screenshots/`. A screenshot build is local only:
 Android uses the public debug signing key; iOS disables simulator code signing.
@@ -33,10 +35,12 @@ The normal release signing setup is unchanged. Neither command uses EAS.
 - iOS needs Xcode selected and an iOS simulator runtime installed in Xcode
   Settings > Components. Nix supplies Node, CocoaPods, and Maestro; Xcode supplies
   the SDK and simulator. A usable macOS login session may be needed by XCTest.
+
 ## Remote Mac via Git
 
 Push this branch, then fetch and check it out in the repository under the Mac's
-logged-in account (`timothy@jobs.local`). Run `nix run .#screenshots-ios` there.
+logged-in account (`timothy@jobs.local`). Run `npm ci` if dependencies have
+changed, then `nix run .#screenshots-ios` there.
 Commit the reviewed PNGs on that branch, push, and pull them back on Linux.
 This uses Git for source and artifact transfer; no source directories are copied
 through SSH. Use a separate Git worktree if the Mac has other work in progress.

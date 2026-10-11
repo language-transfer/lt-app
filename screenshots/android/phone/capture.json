@@ -1,0 +1,31 @@
+{
+  "platform": "android",
+  "size": "phone",
+  "device": "emulator-5580",
+  "capturedAt": "2026-10-11T03:57:48.247358+00:00",
+  "sourceRevision": "cf91180d8344f631102592f0a162fababb2308a9",
+  "workingTreeDirty": true,
+  "artifact": "app.apk",
+  "artifactSha256": "15fe83eb0e8a49eebd3f480923520fb695bea72add3eaec25e0c43a07eb947d7",
+  "deviceName": "sdk_gphone64_x86_64",
+  "osVersion": "16",
+  "mode": "capture",
+  "screenshots": {
+    "01-courses.png": {
+      "width": 1080,
+      "height": 2400
+    },
+    "02-spanish.png": {
+      "width": 1080,
+      "height": 2400
+    },
+    "03-lessons.png": {
+      "width": 1080,
+      "height": 2400
+    },
+    "04-player.png": {
+      "width": 1080,
+      "height": 2400
+    }
+  }
+}
