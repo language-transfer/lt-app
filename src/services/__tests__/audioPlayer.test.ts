@@ -22,7 +22,6 @@ jest.mock("react-native-track-player", () => ({
   Capability: {},
   IOSCategory: { Playback: "playback" },
   IOSCategoryMode: { Default: "default" },
-  IOSCategoryOptions: { DuckOthers: "duckOthers" },
   State: { Ready: "ready", Playing: "playing", Ended: "ended", Error: "error" },
   useActiveTrack: () => undefined,
   usePlaybackState: () => ({ state: "ready" }),
@@ -77,6 +76,25 @@ describe("lesson audio sources", () => {
     jest.mocked(CourseDownloadManager.getDownloadStatus).mockResolvedValue("not-downloaded");
   });
   afterEach(() => jest.restoreAllMocks());
+
+  test("uses a nonmixing iOS playback session for system media controls", async () => {
+    const originalOS = Platform.OS;
+    Platform.OS = "ios";
+    try {
+      renderHook(() => useLessonAudio("spanish", 0));
+
+      await waitFor(() => expect(TrackPlayer.play).toHaveBeenCalled());
+      expect(TrackPlayer.setupPlayer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          iosCategory: "playback",
+          iosCategoryOptions: [],
+          autoUpdateMetadata: true,
+        })
+      );
+    } finally {
+      Platform.OS = originalOS;
+    }
+  });
 
   test.each(["video/mp4", "video/quicktime"])("includes %s for an extensionless stream", async (mimeType) => {
     jest.mocked(CourseData.getLessonMimeType).mockReturnValue(mimeType);
