@@ -31,11 +31,19 @@ local downloads. This patch does not raise the app's minimum iOS version. When
 upgrading Track Player, check whether it forwards `contentType` before removing
 the patch.
 
-The playback audio session uses `playback` with `duckOthers`. Bluetooth output
-routing is automatic for that category; Bluetooth input options are not valid.
+The playback audio session uses `playback` with no category options so lessons
+can become iOS's Now Playing audio and receive system media controls.
+`duckOthers` implicitly enables mixing, which makes the session ineligible for
+Now Playing; it is intended for brief prompts such as navigation directions.
+See Apple's [ducking documentation](https://developer.apple.com/documentation/avfaudio/avaudiosession/categoryoptions-swift.struct/duckothers)
+and [Now Playing eligibility requirements](https://developer.apple.com/videos/play/wwdc2022/110338/?time=227).
+Starting a lesson interrupts other apps' audio instead of lowering its volume.
+Bluetooth output routing is automatic for `playback`; Bluetooth input options
+are not valid.
 
-Verify on a Mac after rebuilding: stream Spanish lesson 1, play a downloaded
+Verify after rebuilding: stream Spanish lesson 1, play a downloaded
 lesson offline, pause/resume, seek, advance to the next lesson, and check
-background playback and lock-screen controls. `index.js` continues to register
-the playback service. Playback failures now appear in the Metro log as
+background playback. Verify Control Center and lock-screen controls on a physical
+iPhone: [modern iOS simulators do not provide system Now Playing controls](https://github.com/doublesymmetry/react-native-track-player/blob/v4/docs/docs/basics/background-mode.md#ios-simulator).
+`index.js` continues to register the playback service. Playback failures appear in the Metro log as
 `Audio playback failed` or `Unable to load lesson audio`.

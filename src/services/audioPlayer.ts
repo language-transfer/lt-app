@@ -5,7 +5,6 @@ import TrackPlayer, {
   Capability,
   IOSCategory,
   IOSCategoryMode,
-  IOSCategoryOptions,
   State,
   UpdateOptions,
   useActiveTrack,
@@ -108,8 +107,9 @@ const ensurePlayer = async () => {
       await TrackPlayer.setupPlayer({
         iosCategory: IOSCategory.Playback,
         iosCategoryMode: IOSCategoryMode.Default,
-        // Playback routes to Bluetooth automatically; input routing flags are invalid here.
-        iosCategoryOptions: [IOSCategoryOptions.DuckOthers],
+        // Mixing (including DuckOthers) prevents iOS Now Playing controls.
+        // Playback routes to Bluetooth automatically without category options.
+        iosCategoryOptions: [],
         // let TrackPlayer handle interruptions from GPS or whatever. the default behavior is good
         autoHandleInterruptions: true,
         androidAudioContentType: AndroidAudioContentType.Speech,
