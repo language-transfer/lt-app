@@ -109,6 +109,29 @@ EOF
         };
     in
     {
+      apps = forAllSystems (system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+          runner = platform: pkgs.writeShellApplication {
+            name = "screenshots-${platform}";
+            runtimeInputs = [ pkgs.nix pkgs.bash ];
+            text = if platform == "ios" && !pkgs.stdenv.hostPlatform.isDarwin then ''
+              exec bash "$PWD/scripts/screenshots.sh" ios "$@"
+            '' else ''
+              exec nix develop "$PWD#${platform}" -c bash "$PWD/scripts/screenshots.sh" ${platform} "$@"
+            '';
+          };
+        in {
+          screenshots-android = {
+            type = "app";
+            program = "${runner "android"}/bin/screenshots-android";
+          };
+          screenshots-ios = {
+            type = "app";
+            program = "${runner "ios"}/bin/screenshots-ios";
+          };
+        });
+
       devShells = forAllSystems (system:
         let
           pkgs = import nixpkgs { inherit system; };

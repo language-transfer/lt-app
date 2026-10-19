@@ -1,0 +1,31 @@
+{
+  "platform": "ios",
+  "size": "phone",
+  "device": "6D5C6C1B-5066-44C2-9A83-7B390530F821",
+  "capturedAt": "2026-10-11T04:30:59.928824+00:00",
+  "sourceRevision": "fd18dc9ece2f7bcad989621c243ed68a3b15c09a",
+  "workingTreeDirty": true,
+  "artifact": "LanguageTransfer.app",
+  "artifactSha256": "8af48ced0302752a179e2830101ae9c2de2a0ca3c3aa5f0cbc75f1a124a7051c",
+  "deviceName": "LT Screenshots phone 26.5",
+  "osVersion": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+  "mode": "capture",
+  "screenshots": {
+    "01-courses.png": {
+      "width": 1320,
+      "height": 2868
+    },
+    "02-spanish.png": {
+      "width": 1320,
+      "height": 2868
+    },
+    "03-lessons.png": {
+      "width": 1320,
+      "height": 2868
+    },
+    "04-player.png": {
+      "width": 1320,
+      "height": 2868
+    }
+  }
+}
