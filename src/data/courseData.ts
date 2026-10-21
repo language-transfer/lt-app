@@ -10,6 +10,7 @@ import {
 } from "@/src/data/courseSchemas";
 import {
   ensureCourseIndex,
+  invalidateCourseIndex,
   refreshCourseIndex as refreshStoredCourseIndex,
   subscribeCourseIndex,
 } from "@/src/data/courseIndex";
@@ -567,6 +568,7 @@ const CourseData = {
     clearMemoryMetadata(course);
     delete metadataPointers[course];
     queryClient.removeQueries({ queryKey: metadataQueryKey(course) });
+    await invalidateCourseIndex();
   },
 
   async loadAllLocallyDownloadedCourseMetadata(): Promise<void> {

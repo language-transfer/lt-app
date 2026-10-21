@@ -3,6 +3,7 @@ import { CourseNameSchema } from "@/src/types";
 import * as FileSystem from "expo-file-system/legacy";
 import {
   ensureCourseIndex,
+  invalidateCourseIndex,
   subscribeCourseIndex,
 } from "@/src/data/courseIndex";
 import { queryClient } from "@/src/data/queryClient";
@@ -16,6 +17,7 @@ import {
 
 jest.mock("@/src/data/courseIndex", () => ({
   ensureCourseIndex: jest.fn(),
+  invalidateCourseIndex: jest.fn(),
   subscribeCourseIndex: jest.fn(),
 }));
 
@@ -184,13 +186,14 @@ describe("metadata refresh and deletion", () => {
     expect(CourseData.getLessonData("spanish", 0).title).toBe("new");
   });
 
-  test("deletion clears disk, memory, and query metadata", async () => {
+  test("deletion clears metadata and expires the course index", async () => {
     await CourseData.loadCourseMetadata("spanish", true);
     await CourseData.deleteCourseMetadata("spanish");
     expect(FileSystem.deleteAsync).toHaveBeenCalledWith("/objects/old", {
       idempotent: true,
     });
     expect(CourseData.isCourseMetadataLoaded("spanish")).toBe(false);
+    expect(invalidateCourseIndex).toHaveBeenCalledTimes(1);
     expect(
       queryClient.getQueryData(["@local", "course-data", "metadata", "spanish"])
     ).toBeUndefined();
