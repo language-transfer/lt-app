@@ -31,7 +31,7 @@ export type CourseIndexStorage = {
 };
 
 export type CourseIndexRepositoryDependencies = {
-  fetchRemote(): Promise<unknown>;
+  fetchRemote(forceRemote: boolean): Promise<unknown>;
   now?: () => number;
   storage: CourseIndexStorage;
   ttlMs?: number;
@@ -66,6 +66,7 @@ export const createCourseIndexRepository = ({
   let inMemoryIndex: CourseIndex | null = null;
   let updatedAt = 0;
   let pending: Promise<CourseIndex> | null = null;
+  let pendingForceRemote = false;
 
   const readCached = async (): Promise<StoredCourseIndex | null> => {
     try {
@@ -93,16 +94,19 @@ export const createCourseIndexRepository = ({
     }
   };
 
-  const writeCached = async (index: CourseIndex): Promise<void> => {
+  const writeCached = async (
+    index: CourseIndex,
+    timestamp = now()
+  ): Promise<void> => {
     const payload: StoredCourseIndex = {
-      timestamp: now(),
+      timestamp,
       data: index,
     };
     await storage.setItem(COURSE_INDEX_STORAGE_KEY, JSON.stringify(payload));
   };
 
-  const fetchAndCache = async (): Promise<CourseIndex> => {
-    const validated = validateIndex(await fetchRemote());
+  const fetchAndCache = async (forceRemote: boolean): Promise<CourseIndex> => {
+    const validated = validateIndex(await fetchRemote(forceRemote));
     if (!validated) {
       throw new Error("Invalid course index payload");
     }
@@ -114,8 +118,17 @@ export const createCourseIndexRepository = ({
     return validated;
   };
 
-  const refresh = () => {
-    pending ??= fetchAndCache().finally(() => {
+  const refresh = (forceRemote = false): Promise<CourseIndex> => {
+    if (pending) {
+      // An explicit refresh must not reuse an automatic request that may be
+      // served by the HTTP cache. Finish it first, then bypass that cache.
+      if (forceRemote && !pendingForceRemote) {
+        return pending.catch(() => undefined).then(() => refresh(true));
+      }
+      return pending;
+    }
+    pendingForceRemote = forceRemote;
+    pending = fetchAndCache(forceRemote).finally(() => {
       pending = null;
     });
     return pending;
@@ -146,7 +159,7 @@ export const createCourseIndexRepository = ({
     }
 
     try {
-      return await refresh();
+      return await refresh(forceRemote);
     } catch (error) {
       const snapshot =
         typeof preloadedIndex === "function" ? preloadedIndex() : preloadedIndex;
@@ -164,6 +177,18 @@ export const createCourseIndexRepository = ({
   return {
     ensure,
     refresh: () => ensure(true),
+    invalidate: async () => {
+      const cached = await readCached();
+      const index = inMemoryIndex ?? cached?.data;
+      if (!index) return;
+
+      // Keep the index available offline, but make the next load revalidate it
+      // even if the app restarts after course data is deleted.
+      const timestamp = now() - ttlMs;
+      await writeCached(index, timestamp);
+      inMemoryIndex = index;
+      updatedAt = timestamp;
+    },
     timeUntilRefresh: () => Math.max(0, updatedAt + ttlMs - now()),
   };
 };
@@ -175,8 +200,13 @@ const courseIndexRepository = createCourseIndexRepository({
     for (const listener of listeners) listener(index);
     queryClient.setQueryData(COURSE_INDEX_QUERY_KEY, index);
   },
-  fetchRemote: async () => {
-    const response = await fetch(COURSE_INDEX_URL);
+  fetchRemote: async (forceRemote) => {
+    // Explicit refreshes bypass HTTP caching as well as the stored index.
+    // Automatic updates can use the server's normal HTTP cache policy.
+    const response = await fetch(
+      COURSE_INDEX_URL,
+      forceRemote ? { headers: { "Cache-Control": "no-cache" } } : undefined
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch course index");
     }
@@ -188,6 +218,8 @@ export const ensureCourseIndex = (forceRemote = false) =>
   courseIndexRepository.ensure(forceRemote);
 
 export const refreshCourseIndex = () => courseIndexRepository.refresh();
+
+export const invalidateCourseIndex = () => courseIndexRepository.invalidate();
 
 export const useCourseIndex = () =>
   useQuery({
